@@ -1,0 +1,2 @@
+-- Placeholder: Phase 1.3 introduces the full schema migration.
+-- Migrations must be created via `supabase migration new <name>`.

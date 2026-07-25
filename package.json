@@ -1,0 +1,37 @@
+{
+  "name": "amanah",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Amanah — Shariah-compliant digital rotating savings platform (ROSCA)",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,yml,yaml}\"",
+    "clean": "turbo run clean && rimraf node_modules",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:status": "npx supabase status",
+    "db:lint": "npx supabase db lint",
+    "gen:types": "npx supabase gen types typescript --local > packages/database/src/generated.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "rimraf": "^6.0.1",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}

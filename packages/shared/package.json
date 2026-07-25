@@ -1,0 +1,41 @@
+{
+  "name": "@jamiya/shared",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./constants": {
+      "types": "./src/constants.ts",
+      "default": "./src/constants.ts"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "default": "./src/utils/index.ts"
+    },
+    "./validators": {
+      "types": "./src/validators/index.ts",
+      "default": "./src/validators/index.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@jamiya/types": "workspace:*",
+    "zod": "^3.25.42"
+  },
+  "devDependencies": {
+    "@jamiya/eslint-config": "workspace:*",
+    "@jamiya/typescript-config": "workspace:*",
+    "eslint": "^9.27.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}

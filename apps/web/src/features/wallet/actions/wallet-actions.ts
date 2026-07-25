@@ -1,0 +1,195 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import { callRpc } from '@/lib/supabase/rpc';
+import { logger } from '@/lib/observability';
+
+export type WalletActionState = {
+  success: boolean;
+  message: string;
+  intentId?: string;
+};
+
+function paymentProvider(): 'simulated' | 'mpesa' | 'bank' {
+  const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
+  if (mode === 'mpesa') return 'mpesa';
+  if (mode === 'bank') return 'bank';
+  return 'simulated';
+}
+
+export async function topUpWalletAction(
+  _prev: WalletActionState,
+  formData: FormData,
+): Promise<WalletActionState> {
+  const amountRaw = String(formData.get('amount') ?? '');
+  const currency = String(formData.get('currency') ?? 'KES').toUpperCase();
+  const phone = String(formData.get('phone') ?? '').trim();
+  const amount = Number(amountRaw);
+  const provider = paymentProvider();
+  const requireReal = process.env.REQUIRE_REAL_PROVIDERS === 'true';
+
+  if (!Number.isFinite(amount) || amount < 100) {
+    return { success: false, message: 'Enter an amount of at least 100.' };
+  }
+
+  if (provider === 'mpesa' && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+    return {
+      success: false,
+      message: 'M-Pesa requires an E.164 phone, e.g. +254712345678.',
+    };
+  }
+
+  try {
+    const { assertProviderConfigured, shouldBlockSimulatedPayments } = await import(
+      '@/lib/production-cutover'
+    );
+    if (provider === 'simulated' && shouldBlockSimulatedPayments()) {
+      return {
+        success: false,
+        message: 'Simulated payments disabled in this environment.',
+      };
+    }
+    assertProviderConfigured(provider);
+  } catch (err) {
+    return {
+      success: false,
+      message: err instanceof Error ? err.message : 'Provider misconfigured.',
+    };
+  }
+
+  if (requireReal && provider === 'simulated') {
+    return {
+      success: false,
+      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|bank.',
+    };
+  }
+
+  const { data, error } = await callRpc('create_payment_intent', {
+    p_amount: amount,
+    p_currency: currency,
+    p_phone: phone || null,
+    p_provider: provider,
+    p_idempotency_key: `topup:${provider}:${currency}:${amount}:${Date.now()}`,
+  });
+
+  if (error) {
+    logger.error('create_payment_intent failed', { message: error.message });
+    return { success: false, message: error.message };
+  }
+
+  const created = data as {
+    ok?: boolean;
+    error?: string;
+    intent_id?: string;
+  } | null;
+
+  if (!created?.ok || !created.intent_id) {
+    const code = created?.error ?? 'CREATE_FAILED';
+    return {
+      success: false,
+      message:
+        code === 'PHONE_REQUIRED'
+          ? 'Phone number required for M-Pesa.'
+          : code === 'INVALID_AMOUNT'
+            ? 'Amount must be between 100 and 10,000,000.'
+            : 'Could not start payment.',
+    };
+  }
+
+  if (provider === 'simulated') {
+    const { data: completeData, error: completeError } = await callRpc(
+      'complete_payment_intent',
+      {
+        p_intent_id: created.intent_id,
+        p_provider_reference: `sim:${created.intent_id}`,
+        p_metadata: { source: 'simulated' },
+      },
+    );
+
+    if (completeError) {
+      return { success: false, message: completeError.message };
+    }
+
+    const completed = completeData as { ok?: boolean; error?: string } | null;
+    if (!completed?.ok) {
+      return {
+        success: false,
+        message: completed?.error ?? 'Failed to credit wallet.',
+      };
+    }
+
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
+    return {
+      success: true,
+      message: 'Wallet topped up (simulated payment).',
+      intentId: created.intent_id,
+    };
+  }
+
+  if (provider === 'bank') {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (baseUrl && serviceKey) {
+      try {
+        await fetch(`${baseUrl}/functions/v1/payments-bank`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'initiate',
+            intent_id: created.intent_id,
+            amount,
+          }),
+        });
+      } catch (err) {
+        logger.warn('bank initiate failed', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    revalidatePath('/wallet');
+    return {
+      success: true,
+      message: 'Bank top-up initiated. Funds credit after bank confirmation.',
+      intentId: created.intent_id,
+    };
+  }
+
+  // M-Pesa STK
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (baseUrl && serviceKey) {
+    try {
+      await fetch(`${baseUrl}/functions/v1/payments-mpesa`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'stk_push',
+          intent_id: created.intent_id,
+          amount,
+          phone,
+        }),
+      });
+    } catch (err) {
+      logger.warn('mpesa stk invoke failed', {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  revalidatePath('/wallet');
+  return {
+    success: true,
+    message: 'M-Pesa prompt sent. Approve on your phone to complete top-up.',
+    intentId: created.intent_id,
+  };
+}

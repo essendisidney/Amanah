@@ -1,0 +1,30 @@
+import { redirect } from 'next/navigation';
+import { formatCurrency } from '@jamiya/shared';
+import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { createClient } from '@/lib/supabase/server';
+import { repayQardFormAction, requestQardFormAction } from '@/features/finance/actions';
+
+export const dynamic = 'force-dynamic';
+type Loan = { id: string; amount: number | string; amount_repaid: number | string; currency: string; purpose: string; status: string; due_date: string | null };
+type Membership = { jamiya_id: string; jamiya: { name: string } | null };
+
+export default async function QardPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login?next=/finance/qard');
+  const [{ data: loansData }, { data: membershipsData }] = await Promise.all([
+    supabase.from('qard_loans').select('id, amount, amount_repaid, currency, purpose, status, due_date').eq('borrower_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('members').select('jamiya_id, jamiya:jamiyas(name)').eq('user_id', user.id).eq('status', 'active'),
+  ]);
+  const loans = (loansData ?? []) as unknown as Loan[];
+  const memberships = (membershipsData ?? []) as unknown as Membership[];
+  return <div className="space-y-10"><div><p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Interest-free lending</p><h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">Qard Hassan</h1></div>
+    <form action={requestQardFormAction} className="max-w-xl space-y-4 border border-border bg-card p-6"><h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Request a loan</h2>
+      <div className="space-y-2"><Label htmlFor="jamiyaId">Circle</Label><select id="jamiyaId" name="jamiyaId" required className="h-10 w-full border border-input bg-background px-3"><option value="">Choose circle</option>{memberships.map((m) => <option key={m.jamiya_id} value={m.jamiya_id}>{m.jamiya?.name ?? 'Circle'}</option>)}</select></div>
+      <div className="space-y-2"><Label htmlFor="amount">Amount (KES)</Label><Input id="amount" name="amount" type="number" min="100" required /></div>
+      <div className="space-y-2"><Label htmlFor="installments">Monthly installments</Label><Input id="installments" name="installments" type="number" min="1" max="24" defaultValue="4" required /></div>
+      <div className="space-y-2"><Label htmlFor="purpose">Purpose</Label><Textarea id="purpose" name="purpose" minLength={5} required /></div><Button type="submit">Submit request</Button>
+    </form>
+    <section><h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Your loans</h2>{loans.length ? <ul className="mt-4 divide-y divide-border border-y border-border">{loans.map((loan) => { const due = Number(loan.amount) - Number(loan.amount_repaid); return <li key={loan.id} className="flex flex-wrap items-center justify-between gap-4 py-5"><div><p className="font-medium">{loan.purpose}</p><p className="text-sm text-muted-foreground">{loan.status} · {formatCurrency(due, loan.currency)} remaining{loan.due_date ? ` · due ${loan.due_date}` : ''}</p></div>{loan.status === 'active' ? <form action={repayQardFormAction} className="flex items-center gap-2"><input type="hidden" name="loanId" value={loan.id} /><Input name="amount" type="number" min="1" max={due} placeholder="Repay" required className="w-28" /><Button type="submit" size="sm">Repay</Button></form> : null}</li>; })}</ul> : <p className="mt-3 text-muted-foreground">You have no Qard requests.</p>}</section>
+  </div>;
+}

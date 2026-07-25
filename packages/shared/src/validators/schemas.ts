@@ -1,0 +1,181 @@
+import { z } from 'zod';
+import { JAMIYA_CONSTRAINTS, SUPPORTED_CURRENCIES } from '../constants';
+
+export const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .email('Enter a valid email address')
+  .max(255);
+
+export const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(128, 'Password must be at most 128 characters')
+  .regex(/[A-Z]/, 'Include at least one uppercase letter')
+  .regex(/[a-z]/, 'Include at least one lowercase letter')
+  .regex(/[0-9]/, 'Include at least one number');
+
+export const phoneSchema = z
+  .string()
+  .trim()
+  .regex(/^\+[1-9]\d{7,14}$/, 'Use E.164 format, e.g. +254712345678');
+
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const createJamiyaSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(JAMIYA_CONSTRAINTS.nameMinLength, `Name must be at least ${JAMIYA_CONSTRAINTS.nameMinLength} characters`)
+      .max(JAMIYA_CONSTRAINTS.nameMaxLength),
+    description: z
+      .string()
+      .trim()
+      .max(JAMIYA_CONSTRAINTS.descriptionMaxLength)
+      .optional()
+      .or(z.literal('')),
+    contributionAmount: z.coerce
+      .number({ invalid_type_error: 'Enter a valid contribution amount' })
+      .min(
+        JAMIYA_CONSTRAINTS.minContributionAmount,
+        `Minimum contribution is ${JAMIYA_CONSTRAINTS.minContributionAmount}`,
+      )
+      .max(JAMIYA_CONSTRAINTS.maxContributionAmount),
+    currency: z.enum(SUPPORTED_CURRENCIES),
+    maxMembers: z.coerce
+      .number({ invalid_type_error: 'Enter a valid member count' })
+      .int()
+      .min(JAMIYA_CONSTRAINTS.minMembers)
+      .max(JAMIYA_CONSTRAINTS.maxMembers),
+    cycleCount: z.coerce
+      .number({ invalid_type_error: 'Enter a valid cycle count' })
+      .int()
+      .min(JAMIYA_CONSTRAINTS.minCycles)
+      .max(JAMIYA_CONSTRAINTS.maxCycles),
+    contributionFrequencyDays: z.coerce
+      .number({ invalid_type_error: 'Enter a valid frequency' })
+      .int()
+      .min(1)
+      .max(365),
+    startDate: z
+      .string()
+      .optional()
+      .or(z.literal(''))
+      .refine((value) => !value || /^\d{4}-\d{2}-\d{2}$/.test(value), {
+        message: 'Enter a valid start date',
+      }),
+    status: z.enum(['draft', 'open']),
+  })
+  .refine((data) => data.cycleCount >= data.maxMembers, {
+    message: 'Cycle count should be at least the maximum number of members',
+    path: ['cycleCount'],
+  });
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().trim().min(2).max(120),
+  phone: phoneSchema.optional().or(z.literal('')),
+  bio: z.string().trim().max(500).optional().or(z.literal('')),
+  countryCode: z
+    .string()
+    .trim()
+    .length(2, 'Use a 2-letter country code')
+    .toUpperCase()
+    .optional()
+    .or(z.literal('')),
+});
+
+export const createInvitationSchema = z
+  .object({
+    jamiyaId: z.string().uuid(),
+    email: emailSchema.optional().or(z.literal('')),
+    phone: phoneSchema.optional().or(z.literal('')),
+  })
+  .refine((data) => Boolean(data.email) || Boolean(data.phone), {
+    message: 'Provide an email or phone number',
+    path: ['email'],
+  });
+
+export const invitationTokenSchema = z.object({
+  token: z.string().min(20, 'Invalid invitation token'),
+});
+
+export const registerSchema = z
+  .object({
+    fullName: z.string().trim().min(2, 'Enter your full name').max(120),
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(1, 'Password is required').max(128),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+export const phoneOtpRequestSchema = z.object({
+  phone: phoneSchema,
+});
+
+export const phoneOtpVerifySchema = z.object({
+  phone: phoneSchema,
+  token: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Enter the 6-digit code'),
+});
+
+export const topUpSchema = z.object({
+  amount: z.coerce.number().min(100).max(10_000_000),
+  currency: z.enum(SUPPORTED_CURRENCIES).default('KES'),
+  phone: phoneSchema.optional().or(z.literal('')),
+  provider: z.enum(['simulated', 'mpesa']).default('simulated'),
+});
+
+export const openDisputeSchema = z.object({
+  jamiyaId: z.string().uuid(),
+  type: z.enum([
+    'missed_contribution',
+    'payout_delay',
+    'incorrect_amount',
+    'membership',
+    'other',
+  ]),
+  title: z.string().trim().min(3).max(200),
+  description: z.string().trim().min(10).max(4000),
+});
+
+export type CreateJamiyaInput = z.infer<typeof createJamiyaSchema>;
+export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
+export type InvitationTokenInput = z.infer<typeof invitationTokenSchema>;
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type PhoneOtpRequestInput = z.infer<typeof phoneOtpRequestSchema>;
+export type PhoneOtpVerifyInput = z.infer<typeof phoneOtpVerifySchema>;
+export type TopUpInput = z.infer<typeof topUpSchema>;
+export type OpenDisputeInput = z.infer<typeof openDisputeSchema>;

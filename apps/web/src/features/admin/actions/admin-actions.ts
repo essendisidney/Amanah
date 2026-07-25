@@ -1,0 +1,56 @@
+'use server';
+
+import { revalidatePath } from 'next/cache';
+import type { PlatformRole } from '@jamiya/types';
+import { createClient } from '@/lib/supabase/server';
+import { callRpc } from '@/lib/supabase/rpc';
+import { requireAdminAccess } from '../lib/require-admin';
+
+export async function updateUserRoleAction(formData: FormData): Promise<void> {
+  const { userId: actorId } = await requireAdminAccess('admin');
+  const userId = String(formData.get('userId') ?? '');
+  const role = String(formData.get('role') ?? '') as PlatformRole;
+  const allowed: PlatformRole[] = [
+    'member',
+    'compliance_officer',
+    'platform_admin',
+    'super_admin',
+  ];
+  if (!userId || !allowed.includes(role)) return;
+
+  const supabase = await createClient();
+
+  await supabase
+    .from('profiles')
+    .update({ platform_role: role } as never)
+    .eq('id', userId);
+
+  await supabase.from('audit_logs').insert({
+    actor_id: actorId,
+    action: 'role_change',
+    entity_type: 'profile',
+    entity_id: userId,
+    metadata: { platform_role: role },
+  } as never);
+
+  revalidatePath('/admin/users');
+}
+
+export async function reviewKycDocumentAction(formData: FormData): Promise<void> {
+  await requireAdminAccess('compliance');
+  const documentId = String(formData.get('documentId') ?? '');
+  const decision = String(formData.get('decision') ?? '');
+  const reason = String(formData.get('reason') ?? '');
+
+  if (!documentId || !['approved', 'rejected'].includes(decision)) return;
+
+  await callRpc('review_kyc_document', {
+    p_document_id: documentId,
+    p_decision: decision,
+    p_reason: reason || null,
+  });
+
+  revalidatePath('/admin/kyc');
+  revalidatePath('/admin');
+  revalidatePath('/profile');
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@jamiya/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf .next .turbo"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
+    "@jamiya/auth": "workspace:*",
+    "@jamiya/database": "workspace:*",
+    "@jamiya/shared": "workspace:*",
+    "@jamiya/types": "workspace:*",
+    "@jamiya/ui": "workspace:*",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.49.8",
+    "@tanstack/react-query": "^5.77.2",
+    "@tanstack/react-query-devtools": "^5.77.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
+    "next": "15.3.9",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.4",
+    "sonner": "^2.0.3",
+    "tailwind-merge": "^3.3.0",
+    "zod": "^3.25.42"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@jamiya/eslint-config": "workspace:*",
+    "@jamiya/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "15.3.9",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3"
+  }
+}

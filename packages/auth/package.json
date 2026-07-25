@@ -1,0 +1,37 @@
+{
+  "name": "@jamiya/auth",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./roles": {
+      "types": "./src/roles.ts",
+      "default": "./src/roles.ts"
+    },
+    "./guards": {
+      "types": "./src/guards.ts",
+      "default": "./src/guards.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "@jamiya/shared": "workspace:*",
+    "@jamiya/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@jamiya/eslint-config": "workspace:*",
+    "@jamiya/typescript-config": "workspace:*",
+    "eslint": "^9.27.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  }
+}

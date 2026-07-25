@@ -1,0 +1,11 @@
+{
+  "extends": "@jamiya/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "types": ["react"]
+  },
+  "include": ["App.tsx", "src/**/*.ts", "src/**/*.tsx"]
+}

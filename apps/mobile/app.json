@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Amanah",
+    "slug": "amanah",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "amanah",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.amanah.mobile"
+    },
+    "android": {
+      "package": "app.amanah.mobile"
+    },
+    "extra": {
+      "apiBaseUrl": "http://127.0.0.1:3000",
+      "supabaseUrl": "",
+      "supabaseAnonKey": ""
+    }
+  }
+}
