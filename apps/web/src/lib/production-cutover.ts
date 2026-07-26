@@ -24,17 +24,15 @@ export function assertProviderConfigured(provider: 'mpesa' | 'bank' | 'simulated
       'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank.',
     );
   }
-  if (provider === 'mpesa' && requireRealProviders()) {
-    const required = [
-      'MPESA_CONSUMER_KEY',
-      'MPESA_CONSUMER_SECRET',
-      'MPESA_SHORTCODE',
-      'MPESA_PASSKEY',
-      'MPESA_CALLBACK_URL',
-    ];
-    const missing = required.filter((key) => !process.env[key]);
-    if (missing.length > 0) {
-      throw new Error(`Missing M-Pesa env: ${missing.join(', ')}`);
+  // Daraja credentials live on Edge Function `payments-mpesa`, not Next.js.
+  // Next only needs SUPABASE URL + service role to invoke STK.
+  if (provider === 'mpesa') {
+    const base =
+      process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+    if (!base || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error(
+        'M-Pesa requires NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to call payments-mpesa.',
+      );
     }
   }
   if (provider === 'bank' && requireRealProviders()) {

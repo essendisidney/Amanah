@@ -54,6 +54,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, intent_id: created.intent_id, completed });
   }
 
+  if (provider === 'mpesa') {
+    if (!body.phone || !/^\+[1-9]\d{7,14}$/.test(body.phone)) {
+      return NextResponse.json(
+        { ok: false, error: 'PHONE_REQUIRED', intent_id: created.intent_id },
+        { status: 400 },
+      );
+    }
+    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
+    const stk = await invokeMpesaStk({
+      intentId: created.intent_id,
+      amount: body.amount,
+      phone: body.phone,
+    });
+    if (!stk.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: stk.error ?? 'STK_FAILED',
+          intent_id: created.intent_id,
+        },
+        { status: 502 },
+      );
+    }
+    return NextResponse.json({
+      ok: true,
+      intent_id: created.intent_id,
+      status: stk.fallback === 'simulated' ? 'completed' : 'processing',
+      provider,
+      fallback: stk.fallback ?? null,
+      checkout_request_id: stk.checkout_request_id ?? null,
+    });
+  }
+
   return NextResponse.json({
     ok: true,
     intent_id: created.intent_id,

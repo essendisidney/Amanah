@@ -24,20 +24,24 @@ These were shared in chat during setup — rotate in Supabase, then update Verce
 3. Update Vercel project env: `SUPABASE_SERVICE_ROLE_KEY` (and DB URL if used for CLI)  
 4. Redeploy after env changes
 
-## 3. Optional live rails
+## 3. Live M-Pesa (Phase 9)
 
-| Env | Purpose |
-|-----|---------|
-| `PAYMENT_PROVIDER=mpesa` | STK for wallet + sadaka + tips |
-| `MPESA_*` secrets on Edge Function `payments-mpesa` | Daraja |
-| `BANK_API_URL` / `BANK_API_KEY` on `payments-bank` | Live bank |
-| `REQUIRE_REAL_PROVIDERS=true` | Block simulated fallbacks |
+Full runbook: [PHASE_9.md](./PHASE_9.md).
+
+| Env | Where | Purpose |
+|-----|--------|---------|
+| `PAYMENT_PROVIDER=mpesa` | Vercel | STK for wallet + sadaka + tips |
+| `ALLOW_SIMULATED_IN_PROD=true` | Vercel | Until Daraja secrets are set |
+| `MPESA_*` | Supabase Edge secrets | Daraja consumer/passkey/callback |
+| `REQUIRE_REAL_PROVIDERS=true` | Edge + Vercel | Block simulated fallbacks |
 
 ```bash
-npx supabase functions deploy payments-mpesa
-npx supabase functions deploy payments-bank
-npx supabase functions deploy notify-dispatch
+npx supabase functions deploy payments-mpesa --project-ref vzpnixfqkvovbniaoudx
+npx supabase functions deploy payments-bank --project-ref vzpnixfqkvovbniaoudx
+npx supabase functions deploy notify-dispatch --project-ref vzpnixfqkvovbniaoudx
 ```
+
+Health: `GET /api/v1/payments/mpesa-health`
 
 ## 4. GitHub auto-deploy
 

@@ -2,9 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
-import { logger } from '@/lib/observability';
 
-export type CharityActionState = { success: boolean; message: string };
+export type CharityActionState = { success: boolean; message: string; intentId?: string };
 
 function paymentProvider(): 'simulated' | 'mpesa' | 'bank' {
   const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
@@ -95,33 +94,36 @@ async function initiateAndSettleCharityPayment(input: {
   }
 
   if (provider === 'mpesa') {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (baseUrl && serviceKey) {
-      try {
-        await fetch(`${baseUrl}/functions/v1/payments-mpesa`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${serviceKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'stk_push',
-            intent_id: created.intent_id,
-            amount: input.amount,
-            phone: input.phone,
-          }),
-        });
-      } catch (err) {
-        logger.warn('sadaka stk_push failed', {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
+    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
+    const stk = await invokeMpesaStk({
+      intentId: created.intent_id,
+      amount: input.amount,
+      phone: input.phone,
+      description:
+        input.kind === 'platform_tip' ? 'Amanah support' : 'Amanah sadaka',
+    });
+    if (!stk.ok) {
+      return {
+        success: false,
+        message: stk.error
+          ? `M-Pesa failed: ${stk.error}`
+          : 'Could not start M-Pesa prompt.',
+        intentId: created.intent_id,
+      };
+    }
+    if (stk.fallback === 'simulated') {
+      return {
+        success: true,
+        message:
+          'Payment recorded (M-Pesa not configured — simulated completion).',
+        intentId: created.intent_id,
+      };
     }
     return {
       success: true,
-      message: 'M-Pesa prompt sent. Confirm on your phone — receipt arrives when paid.',
+      message:
+        stk.customer_message ??
+        'M-Pesa prompt sent. Confirm on your phone — receipt arrives when paid.',
       intentId: created.intent_id,
     };
   }

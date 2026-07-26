@@ -160,36 +160,42 @@ export async function topUpWalletAction(
     };
   }
 
-  // M-Pesa STK
-  const baseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (baseUrl && serviceKey) {
-    try {
-      await fetch(`${baseUrl}/functions/v1/payments-mpesa`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${serviceKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'stk_push',
-          intent_id: created.intent_id,
-          amount,
-          phone,
-        }),
-      });
-    } catch (err) {
-      logger.warn('mpesa stk invoke failed', {
-        error: err instanceof Error ? err.message : String(err),
-      });
-    }
-  }
+  // M-Pesa STK via Edge Function
+  const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
+  const stk = await invokeMpesaStk({
+    intentId: created.intent_id,
+    amount,
+    phone,
+    description: 'Amanah top-up',
+  });
 
   revalidatePath('/wallet');
+  revalidatePath('/dashboard');
+
+  if (!stk.ok) {
+    return {
+      success: false,
+      message: stk.error
+        ? `M-Pesa failed: ${stk.error}`
+        : 'Could not start M-Pesa prompt. Try again.',
+      intentId: created.intent_id,
+    };
+  }
+
+  if (stk.fallback === 'simulated') {
+    return {
+      success: true,
+      message:
+        'Wallet topped up (M-Pesa sandbox not configured — simulated completion).',
+      intentId: created.intent_id,
+    };
+  }
+
   return {
     success: true,
-    message: 'M-Pesa prompt sent. Approve on your phone to complete top-up.',
+    message:
+      stk.customer_message ??
+      'M-Pesa prompt sent. Approve on your phone to complete top-up.',
     intentId: created.intent_id,
   };
 }

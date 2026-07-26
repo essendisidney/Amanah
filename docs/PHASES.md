@@ -57,8 +57,20 @@ Sadaka default = **donation_addon** (100% of gift to cause; fee disclosed on top
 
 See `docs/PHASE_8.md`, `docs/GO_LIVE.md`, `docs/SMOKE_TEST.md`.
 
-## Phase 8+ (later)
-- Live Daraja secrets on Edge + `PAYMENT_PROVIDER=mpesa` in prod
+## Phase 9 — Live M-Pesa (Daraja)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 9.1 | Harden `payments-mpesa` (Nairobi TS, intent load, health, real-mode) | Complete |
+| 9.2 | Shared STK helper + wallet/sadaka/API error surfacing | Complete |
+| 9.3 | Ops health route + Phase 9 runbook | Complete |
+| 9.4 | Edge deploy + Daraja secrets in project | Needs credentials |
+
+See `docs/PHASE_9.md`.
+
+## Phase 9+ (later)
+- Paste Daraja sandbox/live secrets → set `PAYMENT_PROVIDER=mpesa` in Vercel
 - Native KYC document picker
 - Partner bank API for Tawarruq
 - Push notifications + richer USSD
+- B2C withdrawal payouts
