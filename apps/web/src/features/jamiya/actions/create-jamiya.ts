@@ -25,6 +25,10 @@ function formDataToPayload(formData: FormData): Record<string, unknown> {
     contributionFrequencyDays: formData.get('contributionFrequencyDays'),
     startDate: formData.get('startDate') || '',
     status: formData.get('status') || 'open',
+    segment: formData.get('segment') || 'general',
+    joinFeeAmount: formData.get('joinFeeAmount') || 0,
+    transactionFeeAmount: formData.get('transactionFeeAmount') || 0,
+    gracePeriodDays: formData.get('gracePeriodDays') || 3,
   };
 }
 
@@ -83,6 +87,10 @@ export async function createJamiyaAction(
     cycle_count: input.cycleCount,
     contribution_frequency_days: input.contributionFrequencyDays,
     start_date: input.startDate || null,
+    segment: input.segment,
+    join_fee_amount: input.joinFeeAmount,
+    transaction_fee_amount: input.transactionFeeAmount,
+    grace_period_days: input.gracePeriodDays,
   };
 
   const { data: jamiya, error } = await supabase

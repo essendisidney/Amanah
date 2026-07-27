@@ -48,6 +48,10 @@ export function CreateJamiyaForm() {
       contributionFrequencyDays: 30,
       startDate: '',
       status: 'open',
+      segment: 'general',
+      joinFeeAmount: 0,
+      transactionFeeAmount: 0,
+      gracePeriodDays: 3,
     },
   });
 
@@ -81,6 +85,10 @@ export function CreateJamiyaForm() {
     fd.set('contributionFrequencyDays', String(values.contributionFrequencyDays));
     fd.set('startDate', values.startDate ?? '');
     fd.set('status', values.status);
+    fd.set('segment', values.segment);
+    fd.set('joinFeeAmount', String(values.joinFeeAmount ?? 0));
+    fd.set('transactionFeeAmount', String(values.transactionFeeAmount ?? 0));
+    fd.set('gracePeriodDays', String(values.gracePeriodDays ?? 3));
 
     startTransition(() => {
       formAction(fd);
@@ -197,6 +205,62 @@ export function CreateJamiyaForm() {
             <Label htmlFor="startDate">Start date (optional)</Label>
             <Input id="startDate" type="date" {...register('startDate')} />
             <FieldError message={fieldError('startDate')} />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="segment">Segment</Label>
+            <select
+              id="segment"
+              className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
+              {...register('segment')}
+            >
+              <option value="general">General</option>
+              <option value="womens_circle">Women&apos;s circle</option>
+              <option value="boda_stage">Boda / tuktuk stage</option>
+            </select>
+            <FieldError message={fieldError('segment')} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="gracePeriodDays">Grace period (days)</Label>
+            <Input
+              id="gracePeriodDays"
+              type="number"
+              min={0}
+              max={14}
+              {...register('gracePeriodDays')}
+            />
+            <FieldError message={fieldError('gracePeriodDays')} />
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="joinFeeAmount">Join fee (KES)</Label>
+            <Input
+              id="joinFeeAmount"
+              type="number"
+              min={0}
+              step={100}
+              {...register('joinFeeAmount')}
+            />
+            <p className="text-xs text-muted-foreground">Charged from wallet when a member joins.</p>
+            <FieldError message={fieldError('joinFeeAmount')} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="transactionFeeAmount">Per-contribution fee (KES)</Label>
+            <Input
+              id="transactionFeeAmount"
+              type="number"
+              min={0}
+              step={10}
+              {...register('transactionFeeAmount')}
+            />
+            <p className="text-xs text-muted-foreground">
+              Disclosed platform/circle fee charged after each contribution payment.
+            </p>
+            <FieldError message={fieldError('transactionFeeAmount')} />
           </div>
         </div>
 

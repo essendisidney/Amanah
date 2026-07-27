@@ -2,6 +2,7 @@ import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { revokeInvitationAction } from '../actions/invitation-actions';
+import { setMemberRoleAction, vouchMemberAction } from '../actions/member-actions';
 
 export type MemberListItem = {
   id: string;
@@ -11,6 +12,7 @@ export type MemberListItem = {
   joinedAt: string | null;
   fullName: string | null;
   email: string | null;
+  vouchStatus?: string | null;
 };
 
 export type InvitationListItem = {
@@ -22,34 +24,85 @@ export type InvitationListItem = {
   createdAt: string;
 };
 
-export function MembersList({ members }: { members: MemberListItem[] }) {
+const OFFICER_ROLES = ['member', 'secretary', 'treasurer', 'chair', 'circle_admin'] as const;
+
+export function MembersList({
+  members,
+  slug,
+  canManage,
+}: {
+  members: MemberListItem[];
+  slug: string;
+  canManage: boolean;
+}) {
   if (members.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">No members yet.</p>
-    );
+    return <p className="text-sm text-muted-foreground">No members yet.</p>;
   }
 
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
       {members.map((member) => (
-        <li
-          key={member.id}
-          className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-medium text-foreground">
-                {member.fullName ?? member.email ?? 'Member'}
+        <li key={member.id} className="flex flex-col gap-3 px-5 py-4">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-foreground">
+                  {member.fullName ?? member.email ?? 'Member'}
+                </p>
+                <StatusBadge status={member.role} />
+                <StatusBadge status={member.status} />
+                {member.vouchStatus ? <StatusBadge status={`vouch:${member.vouchStatus}`} /> : null}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {member.email ?? '—'}
+                {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
+                {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
               </p>
-              <StatusBadge status={member.role} />
-              <StatusBadge status={member.status} />
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {member.email ?? '—'}
-              {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
-              {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
-            </p>
           </div>
+
+          {canManage ? (
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+              <form action={setMemberRoleAction} className="flex flex-wrap items-end gap-2">
+                <input type="hidden" name="memberId" value={member.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <label className="text-xs text-muted-foreground">
+                  Role
+                  <select
+                    name="role"
+                    defaultValue={member.role}
+                    className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    {OFFICER_ROLES.map((role) => (
+                      <option key={role} value={role}>
+                        {role}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <Button type="submit" size="sm" variant="outline">
+                  Update role
+                </Button>
+              </form>
+
+              <form action={vouchMemberAction} className="flex flex-wrap gap-2">
+                <input type="hidden" name="memberId" value={member.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="approve" value="true" />
+                <Button type="submit" size="sm">
+                  Vouch
+                </Button>
+              </form>
+              <form action={vouchMemberAction} className="flex flex-wrap gap-2">
+                <input type="hidden" name="memberId" value={member.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="approve" value="false" />
+                <Button type="submit" size="sm" variant="outline">
+                  Reject vouch
+                </Button>
+              </form>
+            </div>
+          ) : null}
         </li>
       ))}
     </ul>

@@ -124,6 +124,9 @@ export default async function JamiyaDetailsPage({ params }: Props) {
   } | null;
   const isCircleAdmin =
     membership?.role === 'circle_admin' && membership.status === 'active';
+  const canManageMembers =
+    membership?.status === 'active' &&
+    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
   const canActivate =
     isCircleAdmin &&
     (jamiya.status === 'draft' || jamiya.status === 'open') &&
@@ -139,10 +142,19 @@ export default async function JamiyaDetailsPage({ params }: Props) {
   }>;
 
   const userIds = memberRows.map((row) => row.user_id);
-  const { data: profileRows } =
+  const memberIds = memberRows.map((row) => row.id);
+  const [{ data: profileRows }, { data: vouchRows }] = await Promise.all([
     userIds.length > 0
-      ? await supabase.from('profiles').select('id, full_name, email').in('id', userIds)
-      : { data: [] };
+      ? supabase.from('profiles').select('id, full_name, email').in('id', userIds)
+      : Promise.resolve({ data: [] }),
+    memberIds.length > 0
+      ? supabase
+          .from('member_vouches')
+          .select('member_id, status')
+          .eq('jamiya_id', jamiya.id)
+          .in('member_id', memberIds)
+      : Promise.resolve({ data: [] }),
+  ]);
 
   const profilesById = new Map(
     ((profileRows ?? []) as unknown as Array<{
@@ -150,6 +162,12 @@ export default async function JamiyaDetailsPage({ params }: Props) {
       full_name: string | null;
       email: string | null;
     }>).map((row) => [row.id, row]),
+  );
+  const vouchByMember = new Map(
+    ((vouchRows ?? []) as unknown as Array<{ member_id: string; status: string }>).map((row) => [
+      row.member_id,
+      row.status,
+    ]),
   );
 
   const members: MemberListItem[] = memberRows.map((row) => {
@@ -162,6 +180,7 @@ export default async function JamiyaDetailsPage({ params }: Props) {
       joinedAt: row.joined_at,
       fullName: profile?.full_name ?? null,
       email: profile?.email ?? null,
+      vouchStatus: vouchByMember.get(row.id) ?? null,
     };
   });
 
@@ -308,7 +327,7 @@ export default async function JamiyaDetailsPage({ params }: Props) {
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Members
         </h2>
-        <MembersList members={members} />
+        <MembersList members={members} slug={slug} canManage={canManageMembers} />
       </section>
 
       {membership?.status === 'active' ? (

@@ -5,6 +5,7 @@ import {
   activateJamiyaAction,
   payContributionAction,
   settlePayoutAction,
+  settlePayoutToMpesaAction,
 } from '../actions/ledger-actions';
 
 export type ScheduleContribution = {
@@ -135,13 +136,28 @@ export function PayoutSchedule({
           </div>
           {isCircleAdmin &&
           (item.status === 'scheduled' || item.status === 'processing') ? (
-            <form action={settlePayoutAction}>
-              <input type="hidden" name="payoutId" value={item.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm" variant="outline">
-                Settle payout
-              </Button>
-            </form>
+            <div className="flex flex-col gap-2 sm:items-end">
+              <form action={settlePayoutAction}>
+                <input type="hidden" name="payoutId" value={item.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <Button type="submit" size="sm" variant="outline">
+                  Settle to wallet
+                </Button>
+              </form>
+              <form action={settlePayoutToMpesaAction} className="flex flex-wrap gap-2">
+                <input type="hidden" name="payoutId" value={item.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input
+                  name="phone"
+                  type="tel"
+                  placeholder="+2547…"
+                  className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
+                />
+                <Button type="submit" size="sm">
+                  Settle → M-Pesa queue
+                </Button>
+              </form>
+            </div>
           ) : null}
         </li>
       ))}

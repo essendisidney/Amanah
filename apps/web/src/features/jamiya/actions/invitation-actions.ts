@@ -216,7 +216,12 @@ export async function acceptInvitationAction(token: string): Promise<ActionState
     return { success: false, message: error.message };
   }
 
-  const result = data as unknown as { ok?: boolean; error?: string; slug?: string };
+  const result = data as unknown as {
+    ok?: boolean;
+    error?: string;
+    slug?: string;
+    jamiya_id?: string;
+  };
   if (!result?.ok) {
     const messages: Record<string, string> = {
       NOT_FOUND: 'Invitation not found.',
@@ -231,8 +236,25 @@ export async function acceptInvitationAction(token: string): Promise<ActionState
     };
   }
 
+  if (result.jamiya_id) {
+    const fee = await callRpc('charge_join_fee', { p_jamiya_id: result.jamiya_id });
+    if (fee.error) {
+      // Membership already created; surface fee issue without rolling back join
+      revalidatePath('/dashboard');
+      revalidatePath('/jamiyas');
+      if (result.slug) revalidatePath(`/jamiyas/${result.slug}`);
+      return {
+        success: true,
+        message:
+          'Joined the circle, but join fee could not be charged yet — top up your wallet and retry from the circle page.',
+        inviteUrl: result.slug ? `/jamiyas/${result.slug}` : '/jamiyas',
+      };
+    }
+  }
+
   revalidatePath('/dashboard');
   revalidatePath('/jamiyas');
+  revalidatePath('/wallet');
   if (result.slug) revalidatePath(`/jamiyas/${result.slug}`);
 
   return {

@@ -16,6 +16,7 @@ export default async function FinancePage() {
     .select('jamiya_id, balance, currency, jamiya:jamiyas(name)').order('created_at');
   const funds = (data ?? []) as unknown as Fund[];
   const items = [
+    ['Welfare fund', 'Medical, funeral, and accident support for your circle.', '/finance/welfare'],
     ['Qard Hassan', 'Request and repay interest-free circle loans.', '/finance/qard'],
     ['Tawarruq', 'Apply for partner-facilitated Sharia-compliant finance.', '/finance/tawarruq'],
     ['Savings goals', 'Set a personal saving target and track progress.', '/finance/goals'],

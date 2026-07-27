@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
+import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -16,6 +17,7 @@ type ProfileRow = {
   full_name: string | null;
   email: string | null;
   phone: string | null;
+  mpesa_phone: string | null;
   bio: string | null;
   country_code: string | null;
   platform_role: string;
@@ -45,7 +47,7 @@ export default async function ProfilePage() {
     supabase
       .from('profiles')
       .select(
-        'full_name, email, phone, bio, country_code, platform_role, kyc_status, profile_completed',
+        'full_name, email, phone, mpesa_phone, bio, country_code, platform_role, kyc_status, profile_completed',
       )
       .eq('id', user.id)
       .maybeSingle(),
@@ -95,6 +97,13 @@ export default async function ProfilePage() {
               countryCode: profile?.country_code ?? '',
             }}
           />
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
+            M-Pesa linkage
+          </h2>
+          <MpesaLinkForm defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''} />
         </div>
 
         <div className="space-y-6">

@@ -70,6 +70,10 @@ export const createJamiyaSchema = z
         message: 'Enter a valid start date',
       }),
     status: z.enum(['draft', 'open']),
+    segment: z.enum(['general', 'womens_circle', 'boda_stage']).default('general'),
+    joinFeeAmount: z.coerce.number().min(0).max(1_000_000).default(0),
+    transactionFeeAmount: z.coerce.number().min(0).max(100_000).default(0),
+    gracePeriodDays: z.coerce.number().int().min(0).max(14).default(3),
   })
   .refine((data) => data.cycleCount >= data.maxMembers, {
     message: 'Cycle count should be at least the maximum number of members',

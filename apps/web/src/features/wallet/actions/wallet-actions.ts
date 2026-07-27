@@ -199,3 +199,49 @@ export async function topUpWalletAction(
     intentId: created.intent_id,
   };
 }
+
+/** Retry a failed/expired/cancelled payment intent (new intent + STK if mpesa). */
+export async function retryPaymentIntentAction(formData: FormData): Promise<void> {
+  const intentId = String(formData.get('intentId') ?? '');
+  if (!intentId) return;
+
+  const { data, error } = await callRpc('retry_payment_intent', {
+    p_intent_id: intentId,
+  });
+  if (error) {
+    logger.error('retry_payment_intent failed', { message: error.message });
+    return;
+  }
+
+  const created = data as {
+    ok?: boolean;
+    error?: string;
+    intent_id?: string;
+    provider?: string;
+    amount?: number;
+    phone?: string | null;
+  } | null;
+
+  if (!created?.ok || !created.intent_id) {
+    logger.error('retry_payment_intent', { error: created?.error });
+    return;
+  }
+
+  if (created.provider === 'mpesa' && created.phone) {
+    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
+    await invokeMpesaStk({
+      intentId: created.intent_id,
+      amount: Number(created.amount ?? 0),
+      phone: created.phone,
+    });
+  } else if (created.provider === 'simulated') {
+    await callRpc('complete_payment_intent', {
+      p_intent_id: created.intent_id,
+      p_provider_reference: `retry-sim:${created.intent_id}`,
+      p_metadata: { source: 'retry_simulated' },
+    });
+  }
+
+  revalidatePath('/wallet');
+  revalidatePath('/dashboard');
+}

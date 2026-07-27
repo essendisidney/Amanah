@@ -9,6 +9,7 @@ import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
+import { retryPaymentIntentAction } from '@/features/wallet/actions/wallet-actions';
 
 export const metadata: Metadata = {
   title: 'Wallet',
@@ -44,7 +45,7 @@ export default async function WalletPage() {
     redirect('/login?next=/wallet');
   }
 
-  const [{ data }, { data: txData }] = await Promise.all([
+  const [{ data }, { data: txData }, { data: intentData }] = await Promise.all([
     supabase
       .from('wallets')
       .select('balance, available_balance, currency, updated_at')
@@ -56,10 +57,27 @@ export default async function WalletPage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(40),
+    supabase
+      .from('payment_intents')
+      .select('id, status, amount, currency, provider, phone, error_message, created_at')
+      .eq('user_id', user.id)
+      .in('status', ['failed', 'expired', 'cancelled'])
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   const wallets = (data ?? []) as unknown as WalletRow[];
   const transactions = (txData ?? []) as unknown as TxRow[];
+  const failedIntents = (intentData ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    amount: number | string;
+    currency: string;
+    provider: string;
+    phone: string | null;
+    error_message: string | null;
+    created_at: string;
+  }>;
   const primaryCurrency = wallets[0]?.currency ?? 'KES';
 
   return (
@@ -139,6 +157,42 @@ export default async function WalletPage() {
           <WithdrawalForm currency={primaryCurrency} />
         </div>
       </section>
+
+      {failedIntents.length > 0 ? (
+        <section className="space-y-4">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Failed payments — retry
+          </h2>
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {failedIntents.map((intent) => (
+              <li
+                key={intent.id}
+                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">
+                      {formatCurrency(Number(intent.amount), intent.currency)}
+                    </p>
+                    <StatusBadge status={intent.status} />
+                    <StatusBadge status={intent.provider} />
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {formatDate(intent.created_at)}
+                    {intent.error_message ? ` · ${intent.error_message}` : ''}
+                  </p>
+                </div>
+                <form action={retryPaymentIntentAction}>
+                  <input type="hidden" name="intentId" value={intent.id} />
+                  <Button type="submit" size="sm">
+                    Retry
+                  </Button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">

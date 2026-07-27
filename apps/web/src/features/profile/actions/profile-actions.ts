@@ -66,6 +66,30 @@ export async function updateProfileAction(
   return { success: true, message: 'Profile updated.' };
 }
 
+export async function linkMpesaPhoneAction(
+  _prev: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
+  const phone = String(formData.get('mpesaPhone') ?? '').trim();
+  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+    return {
+      success: false,
+      message: 'Enter M-Pesa phone in E.164 form, e.g. +254712345678.',
+    };
+  }
+
+  const { callRpc } = await import('@/lib/supabase/rpc');
+  const { data, error } = await callRpc('link_mpesa_phone', { p_phone: phone });
+  if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    return { success: false, message: result?.error ?? 'Could not link M-Pesa phone.' };
+  }
+
+  revalidatePath('/profile');
+  return { success: true, message: 'M-Pesa number linked.' };
+}
+
 export async function uploadKycDocumentAction(
   _prev: ProfileActionState,
   formData: FormData,

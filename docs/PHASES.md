@@ -68,9 +68,19 @@ See `docs/PHASE_8.md`, `docs/GO_LIVE.md`, `docs/SMOKE_TEST.md`.
 
 See `docs/PHASE_9.md`.
 
-## Phase 9+ (later)
-- Paste Daraja sandbox/live secrets → set `PAYMENT_PROVIDER=mpesa` in Vercel
-- Native KYC document picker
-- Partner bank API for Tawarruq
-- Push notifications + richer USSD
-- B2C withdrawal payouts
+## Phase 10 — Feature-doc gap closures
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 10.1 | Live Daraja secrets + Edge redeploy | Needs credentials |
+| 10.2 | Welfare contribute / claim / decide UI | Complete |
+| 10.3 | Settle payout → M-Pesa withdrawal queue | Complete |
+| 10.4 | Vouching + officer role UI + M-Pesa link | Complete |
+| 10.5 | Circle join/tx fees + payment intent retry | Complete |
+
+See `docs/PHASE_10.md`.
+
+## Later
+- Live Daraja B2C cash-out (today queues withdrawal for admin process)
+- Push notifications, Excel/PDF reports, full USSD, Tawarruq partner API
+- Sharia board sign-off on Sadaka fee mode

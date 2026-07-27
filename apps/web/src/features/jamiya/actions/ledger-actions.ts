@@ -50,7 +50,12 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
     console.error('pay_contribution', result?.error);
+    return;
   }
+
+  await callRpc('charge_contribution_fee', {
+    p_contribution_id: contributionId,
+  });
 
   revalidateCircle(slug || undefined);
 }
@@ -75,4 +80,30 @@ export async function settlePayoutAction(formData: FormData): Promise<void> {
   }
 
   revalidateCircle(slug || undefined);
+}
+
+export async function settlePayoutToMpesaAction(formData: FormData): Promise<void> {
+  const payoutId = String(formData.get('payoutId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const phone = String(formData.get('phone') ?? '').trim();
+  if (!payoutId) return;
+
+  const { data, error } = await callRpc('settle_payout_to_mpesa', {
+    p_payout_id: payoutId,
+    p_phone: phone || null,
+  });
+
+  if (error) {
+    console.error('settle_payout_to_mpesa', error.message);
+    return;
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    console.error('settle_payout_to_mpesa', result?.error);
+  }
+
+  revalidateCircle(slug || undefined);
+  revalidatePath('/admin/withdrawals');
+  revalidatePath('/wallet');
 }
