@@ -127,6 +127,14 @@ export default function App() {
         email,
         password,
       });
+      // Optional: register Expo push token when provided by the build env
+      const pushToken = process.env.EXPO_PUBLIC_PUSH_TOKEN;
+      if (!authError && data.session?.access_token && pushToken) {
+        void apiPost('/api/v1/push-token', data.session.access_token, {
+          token: pushToken,
+          platform: 'expo',
+        }).catch(() => undefined);
+      }
       if (authError) throw authError;
       setToken(data.session?.access_token ?? null);
       setTab('home');

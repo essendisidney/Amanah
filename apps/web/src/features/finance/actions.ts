@@ -211,6 +211,29 @@ export async function repayQardFormAction(formData: FormData): Promise<void> {
 export async function submitTawarruqFormAction(formData: FormData): Promise<void> {
   await submitTawarruqAction(formData);
 }
+
+export async function submitTawarruqToPartnerAction(formData: FormData): Promise<void> {
+  const applicationId = String(formData.get('applicationId') ?? '');
+  if (!applicationId) return;
+  await callRpc('submit_tawarruq_to_partner', { p_application_id: applicationId });
+  revalidatePath('/admin/tawarruq');
+  revalidatePath('/finance/tawarruq');
+}
+
+export async function updateTawarruqPartnerStatusAction(formData: FormData): Promise<void> {
+  const applicationId = String(formData.get('applicationId') ?? '');
+  const status = String(formData.get('status') ?? '');
+  if (!applicationId || !status) return;
+  await callRpc('update_tawarruq_partner_status', {
+    p_application_id: applicationId,
+    p_status: status,
+    p_partner_reference: String(formData.get('partnerReference') ?? '') || null,
+    p_partner_status: String(formData.get('partnerStatus') ?? '') || null,
+    p_notes: String(formData.get('notes') ?? '') || null,
+  });
+  revalidatePath('/admin/tawarruq');
+  revalidatePath('/finance/tawarruq');
+}
 export async function createGoalFormAction(formData: FormData): Promise<void> {
   await createGoalAction(formData);
 }

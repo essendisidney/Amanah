@@ -10,6 +10,7 @@ const links: Array<{ href: Route; label: string }> = [
   { href: '/admin/kyc' as Route, label: 'KYC' },
   { href: '/admin/disputes' as Route, label: 'Disputes' },
   { href: '/admin/withdrawals' as Route, label: 'Withdrawals' },
+  { href: '/admin/tawarruq' as Route, label: 'Tawarruq' },
   { href: '/admin/risk' as Route, label: 'Risk' },
   { href: '/admin/collections' as Route, label: 'Collections' },
   { href: '/admin/playbooks' as Route, label: 'Playbooks' },

@@ -3,7 +3,10 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
-import { processWithdrawalAction } from '@/features/wallet/actions/withdrawal-actions';
+import {
+  processPayoutCashoutAction,
+  processWithdrawalAction,
+} from '@/features/wallet/actions/withdrawal-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Withdrawals' };
@@ -20,6 +23,7 @@ type Row = {
   bank_name: string | null;
   bank_account_number: string | null;
   created_at: string;
+  metadata: Record<string, unknown> | null;
 };
 
 export default async function AdminWithdrawalsPage() {
@@ -28,7 +32,7 @@ export default async function AdminWithdrawalsPage() {
   const { data } = await supabase
     .from('withdrawal_requests')
     .select(
-      'id, user_id, amount, currency, status, destination_type, destination_phone, bank_name, bank_account_number, created_at',
+      'id, user_id, amount, currency, status, destination_type, destination_phone, bank_name, bank_account_number, created_at, metadata',
     )
     .order('created_at', { ascending: false })
     .limit(100);
@@ -37,15 +41,23 @@ export default async function AdminWithdrawalsPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-        Withdrawals
-      </h2>
+      <div>
+        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          Withdrawals
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Payout cashouts auto-simulate until live Daraja B2C. Use Sim B2C for any remaining
+          pending payout rows.
+        </p>
+      </div>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">No withdrawal requests yet.</p>
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {rows.map((row) => {
             const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
+            const kind = typeof row.metadata?.kind === 'string' ? row.metadata.kind : null;
+            const isPayoutCashout = kind === 'payout_cashout';
             return (
               <li key={row.id} className="space-y-3 px-5 py-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -55,6 +67,7 @@ export default async function AdminWithdrawalsPage() {
                         {formatCurrency(amount, row.currency)} · {row.destination_type}
                       </p>
                       <StatusBadge status={row.status} />
+                      {isPayoutCashout ? <StatusBadge status="payout_cashout" /> : null}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}…
@@ -67,10 +80,18 @@ export default async function AdminWithdrawalsPage() {
                 </div>
                 {row.status === 'pending' || row.status === 'processing' ? (
                   <div className="flex flex-wrap gap-2">
+                    {isPayoutCashout ? (
+                      <form action={processPayoutCashoutAction}>
+                        <input type="hidden" name="withdrawalId" value={row.id} />
+                        <Button type="submit" size="sm">
+                          Sim B2C cashout
+                        </Button>
+                      </form>
+                    ) : null}
                     <form action={processWithdrawalAction}>
                       <input type="hidden" name="withdrawalId" value={row.id} />
                       <input type="hidden" name="approve" value="true" />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" size="sm" variant={isPayoutCashout ? 'outline' : 'default'}>
                         Approve &amp; debit
                       </Button>
                     </form>

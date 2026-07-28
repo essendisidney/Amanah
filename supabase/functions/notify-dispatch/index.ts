@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
- * Dispatches pending notification_outbox rows via Resend (email) / Twilio (SMS).
+ * Dispatches pending notification_outbox rows via Resend (email) / Twilio (SMS) / Expo (push).
  * Without provider credentials, marks rows as sent with metadata.skipped=true (dev).
  */
 
@@ -58,6 +58,40 @@ async function sendSms(to: string, body: string): Promise<void> {
   }
 }
 
+async function sendExpoPush(
+  to: string,
+  title: string | null,
+  body: string,
+  data: Record<string, unknown> | null,
+): Promise<void> {
+  if (!to.startsWith("ExponentPushToken") && !to.startsWith("ExpoPushToken")) {
+    console.info("push skipped (not an Expo token)", { to: to.slice(0, 24) });
+    return;
+  }
+
+  const res = await fetch("https://exp.host/--/api/v2/push/send", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      to,
+      title: title || "Amanah",
+      body,
+      data: data ?? {},
+      sound: "default",
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Expo push ${res.status}: ${await res.text()}`);
+  }
+  const json = await res.json() as { data?: { status?: string; message?: string } };
+  if (json?.data?.status === "error") {
+    throw new Error(json.data.message ?? "Expo push error");
+  }
+}
+
 Deno.serve(async (req) => {
   try {
     const auth = req.headers.get("Authorization") ?? "";
@@ -89,6 +123,13 @@ Deno.serve(async (req) => {
           await sendEmail(row.recipient, row.subject ?? "Amanah", row.body);
         } else if (row.channel === "sms") {
           await sendSms(row.recipient, row.body);
+        } else if (row.channel === "push") {
+          await sendExpoPush(
+            row.recipient,
+            row.subject,
+            row.body,
+            (row.metadata as Record<string, unknown> | null) ?? null,
+          );
         }
         await supabase.rpc("mark_outbox_sent", { p_id: row.id });
         sent += 1;

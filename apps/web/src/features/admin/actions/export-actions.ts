@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { toSpreadsheetMl } from '@/lib/export/spreadsheet';
 import { requireAdminAccess } from '../lib/require-admin';
 
 function toCsv(rows: string[][]): string {
@@ -19,10 +20,28 @@ function toCsv(rows: string[][]): string {
     .join('\n');
 }
 
-export async function exportAuditLogsCsvAction(): Promise<{
+export type ExportPayload = {
   filename: string;
   csv: string;
-} | null> {
+  xls: string;
+  xlsFilename: string;
+};
+
+function withExcel(
+  baseName: string,
+  sheetName: string,
+  headerAndRows: string[][],
+): ExportPayload {
+  const day = new Date().toISOString().slice(0, 10);
+  return {
+    filename: `${baseName}-${day}.csv`,
+    csv: toCsv(headerAndRows),
+    xlsFilename: `${baseName}-${day}.xls`,
+    xls: toSpreadsheetMl(sheetName, headerAndRows),
+  };
+}
+
+export async function exportAuditLogsCsvAction(): Promise<ExportPayload | null> {
   const { userId } = await requireAdminAccess('compliance');
   const supabase = await createClient();
   const { data } = await supabase
@@ -44,7 +63,7 @@ export async function exportAuditLogsCsvAction(): Promise<{
     metadata: unknown;
   }>;
 
-  const csv = toCsv([
+  const table = [
     [
       'id',
       'created_at',
@@ -65,25 +84,19 @@ export async function exportAuditLogsCsvAction(): Promise<{
       row.jamiya_id ?? '',
       JSON.stringify(row.metadata ?? {}),
     ]),
-  ]);
+  ];
 
   await supabase.from('audit_logs').insert({
     actor_id: userId,
     action: 'export',
     entity_type: 'audit_logs',
-    metadata: { count: rows.length, format: 'csv' },
+    metadata: { count: rows.length, format: 'csv+xls' },
   } as never);
 
-  return {
-    filename: `amanah-audit-${new Date().toISOString().slice(0, 10)}.csv`,
-    csv,
-  };
+  return withExcel('amanah-audit', 'Audit', table);
 }
 
-export async function exportTransactionsCsvAction(): Promise<{
-  filename: string;
-  csv: string;
-} | null> {
+export async function exportTransactionsCsvAction(): Promise<ExportPayload | null> {
   const { userId } = await requireAdminAccess('admin');
   const supabase = await createClient();
   const { data } = await supabase
@@ -107,7 +120,7 @@ export async function exportTransactionsCsvAction(): Promise<{
     created_at: string;
   }>;
 
-  const csv = toCsv([
+  const table = [
     [
       'id',
       'created_at',
@@ -132,17 +145,14 @@ export async function exportTransactionsCsvAction(): Promise<{
       row.currency,
       row.reference ?? '',
     ]),
-  ]);
+  ];
 
   await supabase.from('audit_logs').insert({
     actor_id: userId,
     action: 'export',
     entity_type: 'transactions',
-    metadata: { count: rows.length, format: 'csv' },
+    metadata: { count: rows.length, format: 'csv+xls' },
   } as never);
 
-  return {
-    filename: `amanah-transactions-${new Date().toISOString().slice(0, 10)}.csv`,
-    csv,
-  };
+  return withExcel('amanah-transactions', 'Transactions', table);
 }

@@ -73,3 +73,17 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
   revalidatePath('/admin/withdrawals');
   revalidatePath('/wallet');
 }
+
+/** Simulated B2C for circle payout cashouts until live Daraja. */
+export async function processPayoutCashoutAction(formData: FormData): Promise<void> {
+  const withdrawalId = String(formData.get('withdrawalId') ?? '');
+  if (!withdrawalId) return;
+
+  await callRpc('process_payout_cashout', {
+    p_withdrawal_id: withdrawalId,
+    p_simulate: true,
+  });
+
+  revalidatePath('/admin/withdrawals');
+  revalidatePath('/wallet');
+}

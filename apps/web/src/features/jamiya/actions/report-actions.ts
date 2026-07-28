@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { toSpreadsheetMl } from '@/lib/export/spreadsheet';
 
 function csv(rows: string[][]): string {
   return rows.map((row) => row.map((cell) =>
@@ -9,7 +10,12 @@ function csv(rows: string[][]): string {
 }
 
 /** Export member details for a circle the requesting user can access. */
-export async function exportCircleReportAction(slug: string): Promise<{ filename: string; csv: string } | null> {
+export async function exportCircleReportAction(slug: string): Promise<{
+  filename: string;
+  csv: string;
+  xlsFilename: string;
+  xls: string;
+} | null> {
   if (!slug) return null;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -25,14 +31,17 @@ export async function exportCircleReportAction(slug: string): Promise<{ filename
   const ids = rows.map((member) => member.user_id);
   const { data: profiles } = ids.length ? await supabase.from('profiles').select('id, full_name, email, mpesa_phone').in('id', ids) : { data: [] };
   const profileById = new Map(((profiles ?? []) as unknown as Array<{ id: string; full_name: string | null; email: string | null; mpesa_phone: string | null }>).map((profile) => [profile.id, profile]));
+  const table = [
+    ['name', 'email', 'phone', 'role', 'status', 'payout_position', 'joined_at'],
+    ...rows.map((member) => {
+      const profile = profileById.get(member.user_id);
+      return [profile?.full_name ?? '', profile?.email ?? '', profile?.mpesa_phone ?? '', member.role, member.status, String(member.payout_position ?? ''), member.joined_at ?? ''];
+    }),
+  ];
   return {
     filename: `${jamiya.slug}-members.csv`,
-    csv: csv([
-      ['name', 'email', 'phone', 'role', 'status', 'payout_position', 'joined_at'],
-      ...rows.map((member) => {
-        const profile = profileById.get(member.user_id);
-        return [profile?.full_name ?? '', profile?.email ?? '', profile?.mpesa_phone ?? '', member.role, member.status, String(member.payout_position ?? ''), member.joined_at ?? ''];
-      }),
-    ]),
+    csv: csv(table),
+    xlsFilename: `${jamiya.slug}-members.xls`,
+    xls: toSpreadsheetMl('Members', table),
   };
 }

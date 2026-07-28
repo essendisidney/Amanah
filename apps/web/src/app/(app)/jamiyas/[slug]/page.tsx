@@ -21,6 +21,7 @@ import {
   type SchedulePayout,
 } from '@/features/jamiya/components/schedule-panel';
 import { OpenDisputeForm } from '@/features/jamiya/components/open-dispute-form';
+import { ExportCircleReportButtons } from '@/features/jamiya/components/export-circle-report';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -324,9 +325,17 @@ export default async function JamiyaDetailsPage({ params }: Props) {
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Members
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Members
+          </h2>
+          {membership?.status === 'active' &&
+          ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(
+            membership?.role ?? '',
+          ) ? (
+            <ExportCircleReportButtons slug={jamiya.slug} />
+          ) : null}
+        </div>
         <MembersList members={members} slug={slug} canManage={canManageMembers} />
       </section>
 

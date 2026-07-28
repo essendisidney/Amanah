@@ -80,7 +80,20 @@ See `docs/PHASE_9.md`.
 
 See `docs/PHASE_10.md`.
 
+## Phase 11 — Polish (Daraja deferred)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 11.1 | Auto-sim payout cashout + admin queue | Complete |
+| 11.2 | Excel + CSV exports (admin + circle) | Complete |
+| 11.3 | Richer USSD (balance / circles / dues) | Complete |
+| 11.4 | Tawarruq partner handoff + worker stub | Complete |
+| 11.5 | Push token scaffold + Expo dispatch | Complete |
+
+See `docs/PHASE_11.md`.
+
 ## Later
-- Live Daraja B2C cash-out (today queues withdrawal for admin process)
-- Push notifications, Excel/PDF reports, full USSD, Tawarruq partner API
+- Live Daraja STK + B2C cash-out (secrets + Edge deploy)
+- Full partner bank API for Tawarruq
 - Sharia board sign-off on Sadaka fee mode
+- Native Expo push registration UX polish

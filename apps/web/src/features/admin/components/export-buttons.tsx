@@ -2,39 +2,48 @@
 
 import { useTransition } from 'react';
 import { Button } from '@jamiya/ui';
+import { downloadBlob } from '@/lib/export/spreadsheet';
 import {
   exportAuditLogsCsvAction,
   exportTransactionsCsvAction,
 } from '../actions/export-actions';
 
-function downloadCsv(filename: string, csv: string) {
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.click();
-  URL.revokeObjectURL(url);
-}
-
 export function ExportAuditButton() {
   const [pending, start] = useTransition();
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled={pending}
-      onClick={() =>
-        start(async () => {
-          const result = await exportAuditLogsCsvAction();
-          if (result) downloadCsv(result.filename, result.csv);
-        })
-      }
-    >
-      {pending ? 'Exporting…' : 'Export CSV'}
-    </Button>
+    <div className="flex flex-wrap gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const result = await exportAuditLogsCsvAction();
+            if (result) downloadBlob(result.filename, result.csv, 'text/csv;charset=utf-8');
+          })
+        }
+      >
+        {pending ? 'Exporting…' : 'Export CSV'}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const result = await exportAuditLogsCsvAction();
+            if (result) {
+              downloadBlob(result.xlsFilename, result.xls, 'application/vnd.ms-excel');
+            }
+          })
+        }
+      >
+        {pending ? 'Exporting…' : 'Export Excel'}
+      </Button>
+    </div>
   );
 }
 
@@ -42,19 +51,37 @@ export function ExportTransactionsButton() {
   const [pending, start] = useTransition();
 
   return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled={pending}
-      onClick={() =>
-        start(async () => {
-          const result = await exportTransactionsCsvAction();
-          if (result) downloadCsv(result.filename, result.csv);
-        })
-      }
-    >
-      {pending ? 'Exporting…' : 'Export CSV'}
-    </Button>
+    <div className="flex flex-wrap gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const result = await exportTransactionsCsvAction();
+            if (result) downloadBlob(result.filename, result.csv, 'text/csv;charset=utf-8');
+          })
+        }
+      >
+        {pending ? 'Exporting…' : 'Export CSV'}
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const result = await exportTransactionsCsvAction();
+            if (result) {
+              downloadBlob(result.xlsFilename, result.xls, 'application/vnd.ms-excel');
+            }
+          })
+        }
+      >
+        {pending ? 'Exporting…' : 'Export Excel'}
+      </Button>
+    </div>
   );
 }

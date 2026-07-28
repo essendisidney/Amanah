@@ -154,7 +154,7 @@ export function PayoutSchedule({
                   className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
                 />
                 <Button type="submit" size="sm">
-                  Settle → M-Pesa queue
+                  Settle → M-Pesa (sim)
                 </Button>
               </form>
             </div>
