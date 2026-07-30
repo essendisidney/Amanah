@@ -6,6 +6,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
+import { ReferralPanel } from '@/features/profile/components/referral-panel';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -23,6 +24,7 @@ type ProfileRow = {
   platform_role: string;
   kyc_status: string;
   profile_completed: boolean;
+  referral_code: string | null;
 };
 
 type KycRow = {
@@ -43,11 +45,11 @@ export default async function ProfilePage() {
     redirect('/login?next=/profile');
   }
 
-  const [{ data: profileData }, { data: docsData }] = await Promise.all([
+  const [{ data: profileData }, { data: docsData }, { data: referralData }] = await Promise.all([
     supabase
       .from('profiles')
       .select(
-        'full_name, email, phone, mpesa_phone, bio, country_code, platform_role, kyc_status, profile_completed',
+        'full_name, email, phone, mpesa_phone, bio, country_code, platform_role, kyc_status, profile_completed, referral_code',
       )
       .eq('id', user.id)
       .maybeSingle(),
@@ -57,10 +59,23 @@ export default async function ProfilePage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20),
+    supabase
+      .from('referrals')
+      .select('id, status, reward_amount, currency, created_at')
+      .or(`referrer_id.eq.${user.id},referee_id.eq.${user.id}`)
+      .order('created_at', { ascending: false })
+      .limit(20),
   ]);
 
   const profile = profileData as unknown as ProfileRow | null;
   const docs = (docsData ?? []) as unknown as KycRow[];
+  const referrals = (referralData ?? []) as unknown as Array<{
+    id: string;
+    status: string;
+    reward_amount: number | string;
+    currency: string;
+    created_at: string;
+  }>;
 
   return (
     <div className="space-y-10">
@@ -105,6 +120,8 @@ export default async function ProfilePage() {
           </h2>
           <MpesaLinkForm defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''} />
         </div>
+
+        <ReferralPanel referralCode={profile?.referral_code ?? null} referrals={referrals} />
 
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-6">

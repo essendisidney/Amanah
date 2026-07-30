@@ -202,6 +202,71 @@ export async function decideWelfareClaimAction(formData: FormData): Promise<Fina
   return state;
 }
 
+export async function decideQardAction(formData: FormData): Promise<FinanceActionState> {
+  const loanId = String(formData.get('loanId') ?? '');
+  const approve = String(formData.get('approve') ?? 'true') === 'true';
+  if (!loanId) return { success: false, message: 'Missing loan.' };
+  const { data, error } = await callRpc('decide_qard', {
+    p_loan_id: loanId,
+    p_approve: approve,
+  });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not decide Qard request.');
+  if (state.success) {
+    state.message = approve ? 'Loan approved and disbursed.' : 'Loan rejected.';
+    revalidatePath('/finance/qard');
+    revalidatePath('/wallet');
+  }
+  return state;
+}
+
+export async function decideQardFormAction(formData: FormData): Promise<void> {
+  await decideQardAction(formData);
+}
+
+export async function applyReferralAction(
+  _prev: FinanceActionState,
+  formData: FormData,
+): Promise<FinanceActionState> {
+  const code = String(formData.get('referralCode') ?? '').trim();
+  if (code.length < 4) return { success: false, message: 'Enter a valid referral code.' };
+  const { data, error } = await callRpc('apply_referral', { p_code: code });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not apply referral.');
+  if (state.success) {
+    state.message = 'Referral applied. It qualifies after your first paid contribution.';
+    revalidatePath('/profile');
+  } else {
+    const codeErr = (data as { error?: string } | null)?.error;
+    const messages: Record<string, string> = {
+      CODE_NOT_FOUND: 'Referral code not found.',
+      SELF_REFERRAL: 'You cannot use your own code.',
+      ALREADY_APPLIED: 'You already applied a referral.',
+    };
+    state.message = messages[codeErr ?? ''] ?? state.message;
+  }
+  return state;
+}
+
+export async function applyReferralFormAction(formData: FormData): Promise<void> {
+  await applyReferralAction({ success: false, message: '' }, formData);
+}
+
+export async function syncPhoneFromAuthAction(): Promise<FinanceActionState> {
+  const { data, error } = await callRpc('sync_phone_from_auth', {});
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'No verified phone on your auth account.');
+  if (state.success) {
+    state.message = 'Phone synced from your verified sign-in.';
+    revalidatePath('/profile');
+  }
+  return state;
+}
+
+export async function syncPhoneFormAction(): Promise<void> {
+  await syncPhoneFromAuthAction();
+}
+
 export async function requestQardFormAction(formData: FormData): Promise<void> {
   await requestQardAction(formData);
 }

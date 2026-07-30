@@ -60,6 +60,33 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   revalidateCircle(slug || undefined);
 }
 
+export async function payContributionAheadAction(formData: FormData): Promise<void> {
+  const contributionId = String(formData.get('contributionId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  if (!contributionId) return;
+
+  const { data, error } = await callRpc('pay_contribution_ahead', {
+    p_contribution_id: contributionId,
+  });
+
+  if (error) {
+    console.error('pay_contribution_ahead', error.message);
+    return;
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    console.error('pay_contribution_ahead', result?.error);
+    return;
+  }
+
+  await callRpc('charge_contribution_fee', {
+    p_contribution_id: contributionId,
+  });
+
+  revalidateCircle(slug || undefined);
+}
+
 export async function settlePayoutAction(formData: FormData): Promise<void> {
   const payoutId = String(formData.get('payoutId') ?? '');
   const slug = String(formData.get('slug') ?? '');

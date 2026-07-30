@@ -22,6 +22,7 @@ import {
 } from '@/features/jamiya/components/schedule-panel';
 import { OpenDisputeForm } from '@/features/jamiya/components/open-dispute-form';
 import { ExportCircleReportButtons } from '@/features/jamiya/components/export-circle-report';
+import { OfficerOverviewStrip } from '@/features/jamiya/components/officer-overview';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -35,6 +36,7 @@ type JamiyaRow = {
   slug: string;
   description: string | null;
   status: string;
+  segment: string;
   contribution_amount: number | string;
   currency: string;
   max_members: number;
@@ -64,7 +66,7 @@ export default async function JamiyaDetailsPage({ params }: Props) {
     .from('jamiyas')
     .select(
       `
-      id, name, slug, description, status, contribution_amount, currency,
+      id, name, slug, description, status, segment, contribution_amount, currency,
       max_members, member_count, cycle_count, current_cycle,
       contribution_frequency_days, start_date
     `,
@@ -249,16 +251,45 @@ export default async function JamiyaDetailsPage({ params }: Props) {
     };
   });
 
+  const lateCount = contributions.filter((c) => c.status === 'late').length;
+  const nextPayout = payouts.find(
+    (p) => p.status === 'scheduled' || p.status === 'processing',
+  );
+  const { count: pendingGraceCount } = canManageMembers
+    ? await supabase
+        .from('grace_period_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('jamiya_id', jamiya.id)
+        .eq('status', 'pending')
+    : { count: 0 };
+
+  const segmentLabel =
+    jamiya.segment === 'womens_circle'
+      ? 'Women’s circle'
+      : jamiya.segment === 'boda_stage'
+        ? 'Boda / tuktuk stage'
+        : null;
+  const segmentBlurb =
+    jamiya.segment === 'womens_circle'
+      ? 'Community gatekeeping and welfare support for women’s savings circles.'
+      : jamiya.segment === 'boda_stage'
+        ? 'Stage-based savings with welfare emphasis for riders and operators.'
+        : null;
+
   return (
     <div className="space-y-10">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={jamiya.status} />
           {membership ? <StatusBadge status={membership.role} /> : null}
+          {segmentLabel ? <StatusBadge status={jamiya.segment} /> : null}
         </div>
         <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
           {jamiya.name}
         </h1>
+        {segmentBlurb ? (
+          <p className="max-w-2xl text-sm text-muted-foreground">{segmentBlurb}</p>
+        ) : null}
         {jamiya.description ? (
           <p className="max-w-2xl text-muted-foreground">{jamiya.description}</p>
         ) : null}
@@ -272,6 +303,18 @@ export default async function JamiyaDetailsPage({ params }: Props) {
           </div>
         ) : null}
       </div>
+
+      {canManageMembers ? (
+        <OfficerOverviewStrip
+          slug={jamiya.slug}
+          lateCount={lateCount}
+          pendingGrace={pendingGraceCount ?? 0}
+          nextPayoutLabel={nextPayout?.memberLabel ?? null}
+          nextPayoutDate={nextPayout?.scheduledDate ?? null}
+          nextPayoutAmount={nextPayout?.amount ?? null}
+          currency={jamiya.currency}
+        />
+      ) : null}
 
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5">

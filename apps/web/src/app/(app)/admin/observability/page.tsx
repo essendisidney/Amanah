@@ -8,14 +8,17 @@ export const dynamic = 'force-dynamic';
 export default async function AdminObservabilityPage() {
   await requireAdminAccess('compliance');
   const supabase = await createClient();
+  const agedCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
   const [
     users,
     jamiyas,
     openCases,
     pendingWithdrawals,
+    agedWithdrawals,
     pendingKyc,
     outboxPending,
+    outboxFailed,
     bankJobs,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
@@ -29,6 +32,11 @@ export default async function AdminObservabilityPage() {
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
     supabase
+      .from('withdrawal_requests')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['pending', 'processing'])
+      .lt('created_at', agedCutoff),
+    supabase
       .from('kyc_documents')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'uploaded'),
@@ -36,6 +44,10 @@ export default async function AdminObservabilityPage() {
       .from('notification_outbox')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
+    supabase
+      .from('notification_outbox')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'failed'),
     supabase
       .from('bank_transfer_jobs')
       .select('id', { count: 'exact', head: true })
@@ -47,8 +59,10 @@ export default async function AdminObservabilityPage() {
     { label: 'Circles', value: jamiyas.count ?? 0 },
     { label: 'Open collection cases', value: openCases.count ?? 0 },
     { label: 'Pending withdrawals', value: pendingWithdrawals.count ?? 0 },
+    { label: 'Aged withdrawals (>24h)', value: agedWithdrawals.count ?? 0 },
     { label: 'KYC awaiting review', value: pendingKyc.count ?? 0 },
     { label: 'Outbox pending', value: outboxPending.count ?? 0 },
+    { label: 'Outbox failed', value: outboxFailed.count ?? 0 },
     { label: 'Bank jobs in flight', value: bankJobs.count ?? 0 },
   ];
 
@@ -59,8 +73,9 @@ export default async function AdminObservabilityPage() {
           Observability
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Operational snapshot. Wire <code className="text-xs">NEXT_PUBLIC_SENTRY_DSN</code> for
-          error capture; health at <code className="text-xs">/api/v1/health</code>.
+          Operational snapshot including aged withdrawals and failed outbox. Wire{' '}
+          <code className="text-xs">NEXT_PUBLIC_SENTRY_DSN</code> for error capture; health at{' '}
+          <code className="text-xs">/api/v1/health</code>.
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

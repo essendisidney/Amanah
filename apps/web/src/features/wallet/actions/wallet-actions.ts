@@ -201,16 +201,19 @@ export async function topUpWalletAction(
 }
 
 /** Retry a failed/expired/cancelled payment intent (new intent + STK if mpesa). */
-export async function retryPaymentIntentAction(formData: FormData): Promise<void> {
+export async function retryPaymentIntentAction(
+  _prev: WalletActionState,
+  formData: FormData,
+): Promise<WalletActionState> {
   const intentId = String(formData.get('intentId') ?? '');
-  if (!intentId) return;
+  if (!intentId) return { success: false, message: 'Missing payment intent.' };
 
   const { data, error } = await callRpc('retry_payment_intent', {
     p_intent_id: intentId,
   });
   if (error) {
     logger.error('retry_payment_intent failed', { message: error.message });
-    return;
+    return { success: false, message: error.message };
   }
 
   const created = data as {
@@ -223,18 +226,33 @@ export async function retryPaymentIntentAction(formData: FormData): Promise<void
   } | null;
 
   if (!created?.ok || !created.intent_id) {
-    logger.error('retry_payment_intent', { error: created?.error });
-    return;
+    return { success: false, message: created?.error ?? 'Retry failed.' };
   }
 
   if (created.provider === 'mpesa' && created.phone) {
     const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
-    await invokeMpesaStk({
+    const stk = await invokeMpesaStk({
       intentId: created.intent_id,
       amount: Number(created.amount ?? 0),
       phone: created.phone,
     });
-  } else if (created.provider === 'simulated') {
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
+    if (!stk.ok) {
+      return {
+        success: false,
+        message: stk.error ?? 'Could not start M-Pesa retry.',
+        intentId: created.intent_id,
+      };
+    }
+    return {
+      success: true,
+      message: stk.customer_message ?? 'M-Pesa prompt re-sent.',
+      intentId: created.intent_id,
+    };
+  }
+
+  if (created.provider === 'simulated') {
     await callRpc('complete_payment_intent', {
       p_intent_id: created.intent_id,
       p_provider_reference: `retry-sim:${created.intent_id}`,
@@ -244,4 +262,9 @@ export async function retryPaymentIntentAction(formData: FormData): Promise<void
 
   revalidatePath('/wallet');
   revalidatePath('/dashboard');
+  return {
+    success: true,
+    message: 'Payment retry started.',
+    intentId: created.intent_id,
+  };
 }

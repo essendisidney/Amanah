@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import type { Route } from 'next';
 import { useTransition } from 'react';
 import { Button } from '@jamiya/ui';
 import { downloadBlob } from '@/lib/export/spreadsheet';
@@ -39,6 +41,9 @@ export function ExportCircleReportButtons({ slug }: { slug: string }) {
         }
       >
         {pending ? 'Exporting…' : 'Export Excel'}
+      </Button>
+      <Button asChild variant="outline" size="sm">
+        <Link href={`/jamiyas/${slug}/report` as Route}>Print / PDF</Link>
       </Button>
     </div>
   );

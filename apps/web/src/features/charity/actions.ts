@@ -3,7 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 
-export type CharityActionState = { success: boolean; message: string; intentId?: string };
+export type CharityActionState = {
+  success: boolean;
+  message: string;
+  intentId?: string;
+  receiptCode?: string;
+};
 
 function paymentProvider(): 'simulated' | 'mpesa' | 'bank' {
   const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
@@ -90,6 +95,7 @@ async function initiateAndSettleCharityPayment(input: {
         ? `Payment recorded. Receipt: ${completed.receipt_code}`
         : 'Payment recorded. Thank you.',
       intentId: created.intent_id,
+      receiptCode: completed.receipt_code,
     };
   }
 
@@ -179,6 +185,7 @@ export async function donateAction(formData: FormData): Promise<CharityActionSta
       message: result.receipt_code
         ? `Donation recorded (no STK). Receipt: ${result.receipt_code}`
         : 'Donation recorded. Thank you.',
+      receiptCode: result.receipt_code,
     };
   }
 

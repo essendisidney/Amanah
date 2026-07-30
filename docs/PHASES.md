@@ -92,8 +92,23 @@ See `docs/PHASE_10.md`.
 
 See `docs/PHASE_11.md`.
 
+## Phase 12 — Improve without Daraja
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 12.1 | Sadaka receipts + fee disclosure UX | Complete |
+| 12.2 | Wallet pending intents + retry feedback | Complete |
+| 12.3 | Pay-ahead + Qard decide + officer strip | Complete |
+| 12.4 | Multi-channel reminders + payout reminders | Complete |
+| 12.5 | Referrals + phone sync | Complete |
+| 12.6 | Segment badges + printable PDF report | Complete |
+| 12.7 | Observability aged/failed + Expo push register | Complete |
+
+See `docs/PHASE_12.md`.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Full partner bank API for Tawarruq
 - Sharia board sign-off on Sadaka fee mode
-- Native Expo push registration UX polish
+- Full Expo feature parity (wallet/finance/officer)
+- Production Africa’s Talking USSD shortcode

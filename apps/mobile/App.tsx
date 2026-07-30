@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { apiGet, apiPost, supabase } from './src/api';
+import { registerDevicePushToken } from './src/push';
 
 type Tab = 'home' | 'circles' | 'dues' | 'invites' | 'kyc';
 
@@ -134,6 +135,9 @@ export default function App() {
           token: pushToken,
           platform: 'expo',
         }).catch(() => undefined);
+      }
+      if (!authError && data.session?.access_token) {
+        void registerDevicePushToken(data.session.access_token);
       }
       if (authError) throw authError;
       setToken(data.session?.access_token ?? null);

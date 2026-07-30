@@ -4,6 +4,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import {
   activateJamiyaAction,
   payContributionAction,
+  payContributionAheadAction,
   settlePayoutAction,
   settlePayoutToMpesaAction,
 } from '../actions/ledger-actions';
@@ -84,11 +85,19 @@ export function ContributionCalendar({
             </p>
           </div>
           {item.isMine && (item.status === 'pending' || item.status === 'late') ? (
-            <form action={payContributionAction}>
+            <form
+              action={
+                new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10))
+                  ? payContributionAheadAction
+                  : payContributionAction
+              }
+            >
               <input type="hidden" name="contributionId" value={item.id} />
               <input type="hidden" name="slug" value={slug} />
               <Button type="submit" size="sm">
-                Pay from wallet
+                {new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10))
+                  ? 'Pay ahead'
+                  : 'Pay from wallet'}
               </Button>
             </form>
           ) : null}

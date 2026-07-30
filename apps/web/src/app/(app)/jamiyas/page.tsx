@@ -24,6 +24,7 @@ type MembershipRow = {
     name: string;
     slug: string;
     status: string;
+    segment: string;
     contribution_amount: number | string;
     currency: string;
     member_count: number;
@@ -57,6 +58,7 @@ export default async function MyJamiyasPage() {
         name,
         slug,
         status,
+        segment,
         contribution_amount,
         currency,
         member_count,
@@ -117,6 +119,9 @@ export default async function MyJamiyasPage() {
                       <p className="text-lg font-medium text-foreground">{jamiya.name}</p>
                       <StatusBadge status={jamiya.status} />
                       <StatusBadge status={row.role} />
+                      {jamiya.segment && jamiya.segment !== 'general' ? (
+                        <StatusBadge status={jamiya.segment} />
+                      ) : null}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {jamiya.member_count}/{jamiya.max_members} members · Cycle{' '}
