@@ -14,7 +14,15 @@ import { StatusBar } from 'expo-status-bar';
 import { apiGet, apiPost, supabase } from './src/api';
 import { registerDevicePushToken } from './src/push';
 
-type Tab = 'home' | 'circles' | 'dues' | 'invites' | 'kyc';
+type Tab =
+  | 'home'
+  | 'circles'
+  | 'dues'
+  | 'wallet'
+  | 'finance'
+  | 'officer'
+  | 'invites'
+  | 'kyc';
 
 type MeResponse = {
   ok: boolean;
@@ -65,6 +73,79 @@ type KycResponse = {
   documents: Array<{ id: string; document_type: string; status: string }>;
 };
 
+type WalletResponse = {
+  ok: boolean;
+  wallets: Array<{
+    currency: string;
+    balance: number | string;
+    available_balance: number | string;
+  }>;
+  transactions: Array<{
+    id: string;
+    type: string;
+    amount: number | string;
+    currency: string;
+    direction: string;
+    status: string;
+    created_at: string;
+  }>;
+  pendingIntents: Array<{
+    id: string;
+    amount: number | string;
+    currency: string;
+    status: string;
+    provider: string;
+  }>;
+  failedIntents: Array<{
+    id: string;
+    amount: number | string;
+    currency: string;
+    status: string;
+    error_message?: string | null;
+  }>;
+};
+
+type QardLoan = {
+  id: string;
+  amount: number | string;
+  currency: string;
+  status: string;
+  purpose: string;
+  amount_repaid?: number | string;
+};
+
+type OfficerResponse = {
+  ok: boolean;
+  role: string;
+  lateCount: number;
+  pendingGrace: number;
+  nextPayouts: Array<{
+    id: string;
+    cycle_number: number;
+    amount: number | string;
+    currency: string;
+    scheduled_date: string | null;
+  }>;
+  graceRequests: Array<{ id: string; reason: string | null; requested_days: number }>;
+  members: Array<{
+    id: string;
+    role: string;
+    status: string;
+    profile?: { full_name?: string | null; email?: string | null } | null;
+  }>;
+};
+
+const TABS: Array<[Tab, string]> = [
+  ['home', 'Home'],
+  ['circles', 'Circles'],
+  ['dues', 'Dues'],
+  ['wallet', 'Wallet'],
+  ['finance', 'Finance'],
+  ['officer', 'Officer'],
+  ['invites', 'Invites'],
+  ['kyc', 'KYC'],
+];
+
 export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -75,7 +156,15 @@ export default function App() {
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [kyc, setKyc] = useState<KycResponse | null>(null);
+  const [wallet, setWallet] = useState<WalletResponse | null>(null);
+  const [loans, setLoans] = useState<QardLoan[]>([]);
+  const [officer, setOfficer] = useState<OfficerResponse | null>(null);
+  const [officerJamiyaId, setOfficerJamiyaId] = useState<string | null>(null);
   const [inviteToken, setInviteToken] = useState('');
+  const [topUpAmount, setTopUpAmount] = useState('500');
+  const [qardAmount, setQardAmount] = useState('1000');
+  const [qardPurpose, setQardPurpose] = useState('Short-term need');
+  const [qardJamiyaId, setQardJamiyaId] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -98,6 +187,37 @@ export default function App() {
             accessToken,
           );
           setContributions(data.contributions ?? []);
+        } else if (active === 'wallet') {
+          setWallet(await apiGet<WalletResponse>('/api/v1/wallet', accessToken));
+        } else if (active === 'finance') {
+          const [qard, circles] = await Promise.all([
+            apiGet<{ ok: boolean; loans: QardLoan[] }>('/api/v1/finance/qard', accessToken),
+            apiGet<{ ok: boolean; memberships: Membership[] }>('/api/v1/jamiyas', accessToken),
+          ]);
+          setLoans(qard.loans ?? []);
+          setMemberships(circles.memberships ?? []);
+          if (!qardJamiyaId && circles.memberships?.[0]?.jamiya?.id) {
+            setQardJamiyaId(circles.memberships[0].jamiya!.id);
+          }
+        } else if (active === 'officer') {
+          const circles = await apiGet<{ ok: boolean; memberships: Membership[] }>(
+            '/api/v1/jamiyas',
+            accessToken,
+          );
+          setMemberships(circles.memberships ?? []);
+          const officerCircle =
+            circles.memberships?.find((m) =>
+              ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(m.role),
+            ) ?? null;
+          const jid = officerCircle?.jamiya?.id ?? null;
+          setOfficerJamiyaId(jid);
+          if (jid) {
+            setOfficer(
+              await apiGet<OfficerResponse>(`/api/v1/jamiyas/${jid}/officer`, accessToken),
+            );
+          } else {
+            setOfficer(null);
+          }
         } else if (active === 'invites') {
           const data = await apiGet<{ ok: boolean; invitations: Invitation[] }>(
             '/api/v1/invitations',
@@ -111,7 +231,7 @@ export default function App() {
         setError(err instanceof Error ? err.message : 'Failed to load');
       }
     },
-    [],
+    [qardJamiyaId],
   );
 
   useEffect(() => {
@@ -128,19 +248,10 @@ export default function App() {
         email,
         password,
       });
-      // Optional: register Expo push token when provided by the build env
-      const pushToken = process.env.EXPO_PUBLIC_PUSH_TOKEN;
-      if (!authError && data.session?.access_token && pushToken) {
-        void apiPost('/api/v1/push-token', data.session.access_token, {
-          token: pushToken,
-          platform: 'expo',
-        }).catch(() => undefined);
-      }
-      if (!authError && data.session?.access_token) {
-        void registerDevicePushToken(data.session.access_token);
-      }
       if (authError) throw authError;
-      setToken(data.session?.access_token ?? null);
+      const access = data.session?.access_token ?? null;
+      setToken(access);
+      if (access) void registerDevicePushToken(access);
       setTab('home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign-in failed');
@@ -160,6 +271,85 @@ export default function App() {
       await refresh(token, 'home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Payment failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function topUp() {
+    if (!token) return;
+    const amount = Number(topUpAmount);
+    if (!Number.isFinite(amount) || amount < 100) {
+      setError('Top-up must be at least 100');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await apiPost('/api/v1/wallet/top-up', token, { amount, currency: 'KES' });
+      setMessage('Wallet topped up');
+      await refresh(token, 'wallet');
+      await refresh(token, 'home');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Top-up failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function retryIntent(intentId: string) {
+    if (!token) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await apiPost('/api/v1/wallet/retry', token, { intentId });
+      setMessage('Intent retried');
+      await refresh(token, 'wallet');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Retry failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function requestQard() {
+    if (!token || !qardJamiyaId) {
+      setError('Pick a circle for Qard');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      await apiPost('/api/v1/finance/qard', token, {
+        action: 'request',
+        jamiyaId: qardJamiyaId,
+        amount: Number(qardAmount),
+        purpose: qardPurpose,
+        installments: 4,
+      });
+      setMessage('Qard requested');
+      await refresh(token, 'finance');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Qard request failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function decideGrace(requestId: string, approve: boolean) {
+    if (!token || !officerJamiyaId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await apiPost(`/api/v1/jamiyas/${officerJamiyaId}/officer`, token, {
+        action: 'decide_grace',
+        requestId,
+        approve,
+      });
+      setMessage(approve ? 'Grace approved' : 'Grace rejected');
+      await refresh(token, 'officer');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Grace decision failed');
     } finally {
       setLoading(false);
     }
@@ -195,6 +385,9 @@ export default function App() {
     setContributions([]);
     setInvitations([]);
     setKyc(null);
+    setWallet(null);
+    setLoans([]);
+    setOfficer(null);
     void supabase.auth.signOut();
   }
 
@@ -203,7 +396,7 @@ export default function App() {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.brand}>Amanah</Text>
-        <Text style={styles.sub}>Phase 6 · circles, dues, invites, KYC</Text>
+        <Text style={styles.sub}>Phase 13 · wallet, finance, officer parity</Text>
 
         {!token ? (
           <View style={styles.card}>
@@ -231,15 +424,7 @@ export default function App() {
         ) : (
           <>
             <View style={styles.tabs}>
-              {(
-                [
-                  ['home', 'Home'],
-                  ['circles', 'Circles'],
-                  ['dues', 'Dues'],
-                  ['invites', 'Invites'],
-                  ['kyc', 'KYC'],
-                ] as const
-              ).map(([key, label]) => (
+              {TABS.map(([key, label]) => (
                 <Pressable
                   key={key}
                   onPress={() => setTab(key)}
@@ -258,9 +443,9 @@ export default function App() {
                   {me?.profile?.full_name ?? me?.profile?.email ?? 'Member'}
                 </Text>
                 <Text style={styles.meta}>KYC: {me?.profile?.kyc_status ?? '—'}</Text>
-                {(me?.wallets ?? []).map((wallet) => (
-                  <Text key={wallet.currency} style={styles.wallet}>
-                    {wallet.currency}: {String(wallet.available_balance)}
+                {(me?.wallets ?? []).map((w) => (
+                  <Text key={w.currency} style={styles.wallet}>
+                    {w.currency}: {String(w.available_balance)}
                   </Text>
                 ))}
                 <Button title="Sign out" color="#6b7280" onPress={signOut} />
@@ -311,6 +496,133 @@ export default function App() {
                       )}
                     </View>
                   ))
+                )}
+              </View>
+            ) : null}
+
+            {tab === 'wallet' ? (
+              <View style={styles.card}>
+                <Text style={styles.heading}>Wallet</Text>
+                {(wallet?.wallets ?? []).map((w) => (
+                  <Text key={w.currency} style={styles.wallet}>
+                    {w.currency} available {String(w.available_balance)} / balance{' '}
+                    {String(w.balance)}
+                  </Text>
+                ))}
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={topUpAmount}
+                  onChangeText={setTopUpAmount}
+                  placeholder="Top-up amount"
+                />
+                <Button title="Top up (simulated/bank)" color="#047857" onPress={() => void topUp()} />
+                {(wallet?.failedIntents ?? []).map((intent) => (
+                  <View key={intent.id} style={styles.row}>
+                    <Text style={styles.meta}>
+                      Failed {String(intent.amount)} {intent.currency}:{' '}
+                      {intent.error_message ?? intent.status}
+                    </Text>
+                    <Button
+                      title="Retry"
+                      color="#047857"
+                      onPress={() => void retryIntent(intent.id)}
+                    />
+                  </View>
+                ))}
+                {(wallet?.transactions ?? []).slice(0, 8).map((tx) => (
+                  <Text key={tx.id} style={styles.meta}>
+                    {tx.direction} {String(tx.amount)} {tx.currency} · {tx.type} · {tx.status}
+                  </Text>
+                ))}
+              </View>
+            ) : null}
+
+            {tab === 'finance' ? (
+              <View style={styles.card}>
+                <Text style={styles.heading}>Qard</Text>
+                <Text style={styles.meta}>Request an interest-free circle loan.</Text>
+                <TextInput
+                  style={styles.input}
+                  value={qardJamiyaId}
+                  onChangeText={setQardJamiyaId}
+                  placeholder="Jamiya id"
+                  autoCapitalize="none"
+                />
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={qardAmount}
+                  onChangeText={setQardAmount}
+                  placeholder="Amount"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={qardPurpose}
+                  onChangeText={setQardPurpose}
+                  placeholder="Purpose"
+                />
+                <Button title="Request Qard" color="#047857" onPress={() => void requestQard()} />
+                {loans.map((loan) => (
+                  <View key={loan.id} style={styles.row}>
+                    <Text style={styles.rowTitle}>
+                      {String(loan.amount)} {loan.currency} · {loan.status}
+                    </Text>
+                    <Text style={styles.meta}>{loan.purpose}</Text>
+                  </View>
+                ))}
+                <Text style={styles.meta}>
+                  Tawarruq, goals, and welfare are available on web; mobile uses the same
+                  /api/v1/finance/* routes.
+                </Text>
+              </View>
+            ) : null}
+
+            {tab === 'officer' ? (
+              <View style={styles.card}>
+                <Text style={styles.heading}>Officer</Text>
+                {!officerJamiyaId ? (
+                  <Text style={styles.meta}>
+                    No officer role on your circles (need chair, treasurer, secretary, or
+                    circle_admin).
+                  </Text>
+                ) : (
+                  <>
+                    <Text style={styles.meta}>
+                      Role {officer?.role} · late {officer?.lateCount ?? 0} · grace{' '}
+                      {officer?.pendingGrace ?? 0}
+                    </Text>
+                    {(officer?.nextPayouts ?? []).map((p) => (
+                      <Text key={p.id} style={styles.meta}>
+                        Next payout cycle {p.cycle_number}: {String(p.amount)} {p.currency}
+                      </Text>
+                    ))}
+                    {(officer?.graceRequests ?? []).map((g) => (
+                      <View key={g.id} style={styles.row}>
+                        <Text style={styles.meta}>
+                          Grace {g.requested_days}d · {g.reason ?? 'no reason'}
+                        </Text>
+                        <View style={styles.rowActions}>
+                          <Button
+                            title="Approve"
+                            color="#047857"
+                            onPress={() => void decideGrace(g.id, true)}
+                          />
+                          <Button
+                            title="Reject"
+                            color="#b91c1c"
+                            onPress={() => void decideGrace(g.id, false)}
+                          />
+                        </View>
+                      </View>
+                    ))}
+                    {(officer?.members ?? []).slice(0, 12).map((m) => (
+                      <Text key={m.id} style={styles.meta}>
+                        {m.profile?.full_name ?? m.profile?.email ?? m.id.slice(0, 8)} · {m.role} ·{' '}
+                        {m.status}
+                      </Text>
+                    ))}
+                  </>
                 )}
               </View>
             ) : null}
@@ -410,7 +722,12 @@ const styles = StyleSheet.create({
   tabActive: { backgroundColor: '#047857', borderColor: '#047857' },
   tabText: { color: '#374151', fontSize: 13, fontWeight: '600' },
   tabTextActive: { color: '#fff' },
-  row: { gap: 6, paddingVertical: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#e5e7eb' },
+  row: {
+    gap: 6,
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#e5e7eb',
+  },
   rowTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
   rowActions: { gap: 8 },
 });

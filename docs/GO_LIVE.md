@@ -43,6 +43,24 @@ npx supabase functions deploy notify-dispatch --project-ref vzpnixfqkvovbniaoudx
 
 Health: `GET /api/v1/payments/mpesa-health`
 
+## 3b. Tawarruq partner + USSD (Phase 13)
+
+| Env | Where | Purpose |
+|-----|--------|---------|
+| `TAWARRUQ_PARTNER_API_URL` | Supabase Edge | Partner bank applications API |
+| `TAWARRUQ_PARTNER_API_KEY` | Supabase Edge | Partner auth |
+| `TAWARRUQ_WEBHOOK_SECRET` | Supabase Edge | Partner → Amanah status webhooks |
+| `USSD_CALLBACK_SECRET` | Vercel | Africa’s Talking callback auth |
+| `AT_USSD_SHORTCODE` | Vercel | Optional serviceCode check |
+| `AT_USERNAME` / `AT_API_KEY` | AT console | Shortcode provisioning (docs only) |
+
+```bash
+npx supabase functions deploy tawarruq-partner --project-ref vzpnixfqkvovbniaoudx
+```
+
+USSD callback: `https://amanah-liart.vercel.app/api/ussd`  
+Sadaka fee endorsement after board sign-off: `/admin/sadaka`
+
 ## 4. GitHub auto-deploy
 
 Repo currently deploys via Vercel CLI. For git-based deploys:

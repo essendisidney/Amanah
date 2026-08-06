@@ -1,6 +1,6 @@
 # Amanah Mobile (Expo)
 
-Phase 6 client with Home, Circles, Dues (pay), Invites, and KYC status — backed by `/api/v1`.
+Phase 13 client: Home, Circles, Dues, **Wallet**, **Finance**, **Officer**, Invites, KYC — backed by `/api/v1`.
 
 ## Setup
 
@@ -13,3 +13,13 @@ pnpm start
 ```
 
 For production API base use your Vercel URL, e.g. `https://amanah-liart.vercel.app`.
+
+### API surface used
+
+| Tab | Routes |
+|-----|--------|
+| Wallet | `GET /api/v1/wallet`, `POST /api/v1/wallet/top-up`, `POST /api/v1/wallet/retry` |
+| Finance | `GET\|POST /api/v1/finance/qard` (+ tawarruq/goals/welfare available) |
+| Officer | `GET\|POST /api/v1/jamiyas/[id]/officer` |
+
+Top-up follows web `PAYMENT_PROVIDER` (`simulated` or `bank`). Live Daraja remains deferred.

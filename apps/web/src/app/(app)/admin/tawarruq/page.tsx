@@ -21,6 +21,7 @@ type AppRow = {
   status: string;
   partner_status: string | null;
   partner_reference: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
 };
 
@@ -30,7 +31,7 @@ export default async function AdminTawarruqPage() {
   const { data } = await supabase
     .from('tawarruq_applications')
     .select(
-      'id, user_id, amount, currency, purpose, status, partner_status, partner_reference, created_at',
+      'id, user_id, amount, currency, purpose, status, partner_status, partner_reference, metadata, created_at',
     )
     .order('created_at', { ascending: false })
     .limit(100);
@@ -44,8 +45,10 @@ export default async function AdminTawarruqPage() {
           Tawarruq handoff
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Submit applications to the simulated partner queue, then update status as the partner
-          responds. Live bank API comes later.
+          Submit applications to the partner queue. The{' '}
+          <code className="text-xs">tawarruq-partner</code> Edge worker calls{' '}
+          <code className="text-xs">TAWARRUQ_PARTNER_API_*</code> when set, otherwise simulates
+          acknowledgement.
         </p>
       </div>
       {rows.length === 0 ? (
@@ -68,6 +71,19 @@ export default async function AdminTawarruqPage() {
                       {row.partner_reference ? ` · ref ${row.partner_reference}` : ''}
                       {row.partner_status ? ` · partner ${row.partner_status}` : ''}
                     </p>
+                    {typeof row.metadata?.last_error === 'string' ? (
+                      <p className="mt-1 text-xs text-destructive">
+                        Last API error: {row.metadata.last_error}
+                        {typeof row.metadata.handoff === 'string'
+                          ? ` · handoff ${row.metadata.handoff}`
+                          : ''}
+                      </p>
+                    ) : typeof row.metadata?.handoff === 'string' ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Handoff: {row.metadata.handoff}
+                        {row.metadata.simulated === true ? ' (simulated)' : ''}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">

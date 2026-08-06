@@ -25,7 +25,22 @@ Expect: health `ok: true`, pages `200`.
 8. **Support** — `/support` tip (platform, not charity)  
 9. **Finance** — `/finance/qard` request (needs membership + history)  
 10. **Community** — `/jamiyas/<slug>/community` send a chat message  
-11. **Admin** (if compliance role) — `/admin/observability`
+11. **Admin** (if compliance role) — `/admin/observability`, `/admin/sadaka` fee policy
+12. **USSD** (optional) — `curl -X POST .../api/ussd` with form fields (see below)
+
+## USSD smoke (Africa’s Talking shape)
+
+```bash
+curl -sS -X POST 'https://amanah-liart.vercel.app/api/ussd' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -H "X-USSD-Secret: $USSD_CALLBACK_SECRET" \
+  --data-urlencode 'sessionId=test-1' \
+  --data-urlencode 'phoneNumber=+254712345678' \
+  --data-urlencode 'text=' \
+  --data-urlencode 'serviceCode=*123#'
+```
+
+Expect plain text starting with `CON` or `END`.
 
 ## Failures to watch
 

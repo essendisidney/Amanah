@@ -178,10 +178,31 @@ async function saveSession(session: UssdSession) {
 }
 
 export async function POST(request: Request) {
+  const expected = process.env.USSD_CALLBACK_SECRET?.trim();
+  if (expected) {
+    const provided =
+      request.headers.get('X-USSD-Secret') ??
+      request.headers.get('x-ussd-secret') ??
+      new URL(request.url).searchParams.get('secret') ??
+      '';
+    if (provided !== expected) {
+      return new NextResponse('END Unauthorized.', { status: 401 });
+    }
+  }
+
   const form = await request.formData();
   const sessionId = String(form.get('sessionId') ?? '');
   const phone = String(form.get('phoneNumber') ?? '');
   const text = String(form.get('text') ?? '');
+  const serviceCode = String(form.get('serviceCode') ?? '');
+  const configuredShortcode = process.env.AT_USSD_SHORTCODE?.trim();
+  if (
+    configuredShortcode &&
+    serviceCode &&
+    serviceCode.replace(/\s/g, '') !== configuredShortcode.replace(/\s/g, '')
+  ) {
+    return new NextResponse('END Unknown service.', { status: 403 });
+  }
   if (!sessionId || !phone) {
     return new NextResponse('END Invalid USSD request.', { status: 400 });
   }

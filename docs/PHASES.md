@@ -106,9 +106,19 @@ See `docs/PHASE_11.md`.
 
 See `docs/PHASE_12.md`.
 
+## Phase 13 — Deferred without Daraja
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 13.1 | Sadaka fee admin + Sharia policy audit | Complete |
+| 13.2 | Tawarruq partner Edge API + webhook | Complete |
+| 13.3 | Expo wallet / finance / officer + v1 APIs | Complete |
+| 13.4 | Africa’s Talking USSD auth + shortcode docs | Complete |
+
+See `docs/PHASE_13.md`.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
-- Full partner bank API for Tawarruq
-- Sharia board sign-off on Sadaka fee mode
-- Full Expo feature parity (wallet/finance/officer)
-- Production Africa’s Talking USSD shortcode
+- Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
+- Sharia board meeting → flip endorsement in `/admin/sadaka`
+- Production Africa’s Talking shortcode provisioning (callback hardened)
