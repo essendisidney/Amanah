@@ -120,6 +120,62 @@ async function dueSummary(userId: string): Promise<string> {
     .join('\n');
 }
 
+async function nextPayoutSummary(userId: string): Promise<string> {
+  const supabase = await serviceClient();
+  if (!supabase) return 'Unavailable offline.';
+  const { data: members } = await supabase
+    .from('members')
+    .select('id, jamiya_id')
+    .eq('user_id', userId)
+    .eq('status', 'active');
+  const memberRows = (members ?? []) as Array<{ id: string; jamiya_id: string }>;
+  if (!memberRows.length) return 'Join a circle to see payouts.';
+  const memberIds = memberRows.map((m) => m.id);
+  const { data: payouts } = await supabase
+    .from('payouts')
+    .select('cycle_number, amount, currency, scheduled_date, status, member_id')
+    .in('member_id', memberIds)
+    .in('status', ['scheduled', 'pending'])
+    .order('scheduled_date', { ascending: true })
+    .limit(3);
+  const rows = (payouts ?? []) as Array<{
+    cycle_number: number;
+    amount: number | string;
+    currency: string;
+    scheduled_date: string | null;
+    status: string;
+  }>;
+  if (!rows.length) return 'No upcoming payouts scheduled.';
+  return rows
+    .map(
+      (row) =>
+        `Cycle ${row.cycle_number}: ${row.currency} ${Number(row.amount).toFixed(0)} (${row.status})${
+          row.scheduled_date ? ` ${row.scheduled_date.slice(0, 10)}` : ''
+        }`,
+    )
+    .join('\n');
+}
+
+async function graceSummary(userId: string): Promise<string> {
+  const supabase = await serviceClient();
+  if (!supabase) return 'Unavailable offline.';
+  const { data } = await supabase
+    .from('grace_period_requests')
+    .select('requested_days, status, reason, created_at')
+    .eq('requester_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(3);
+  const rows = (data ?? []) as Array<{
+    requested_days: number;
+    status: string;
+    reason: string | null;
+  }>;
+  if (!rows.length) return 'No grace requests. Ask in the app → Community.';
+  return rows
+    .map((row) => `${row.requested_days}d · ${row.status}${row.reason ? ` · ${row.reason}` : ''}`)
+    .join('\n');
+}
+
 async function menu(text: string, phone: string): Promise<string> {
   const parts = text.split('*').filter(Boolean);
   const profile = await resolveUser(phone);
@@ -128,12 +184,12 @@ async function menu(text: string, phone: string): Promise<string> {
     : 'CON Welcome to Amanah\n';
 
   if (parts.length === 0) {
-    return `${greet}1. Balance\n2. Circles\n3. Dues\n4. Help`;
+    return `${greet}1. Balance\n2. Circles\n3. Dues\n4. Next payout\n5. Grace\n6. Help`;
   }
 
   switch (parts[0]) {
     case '1': {
-      if (!profile) return 'END Link this phone in the Amanah app (Profile → M-Pesa).';
+      if (!profile) return 'END Link this phone in the Amanah app (Profile → phone).';
       const bal = await walletBalance(profile.id);
       return `END Wallet: ${bal}`;
     }
@@ -144,17 +200,27 @@ async function menu(text: string, phone: string): Promise<string> {
     }
     case '3': {
       if (parts.length === 1) {
-        return 'CON Dues\n1. View pending\n2. Pay in app';
+        return 'CON Dues\n1. View pending\n2. How to pay';
       }
       if (parts[1] === '1') {
         if (!profile) return 'END Link this phone in the Amanah app first.';
         const dues = await dueSummary(profile.id);
         return `END ${dues}`;
       }
-      return 'END Open the Amanah app → Circles to pay securely.';
+      return 'END Pay in the Amanah app (Circles → Pay) or top up wallet first. USSD cannot move money yet.';
     }
-    case '4':
-      return 'END Support: use in-app chat or visit amanah.app. Dial again for menu.';
+    case '4': {
+      if (!profile) return 'END Link this phone in the Amanah app first.';
+      const payouts = await nextPayoutSummary(profile.id);
+      return `END ${payouts}`;
+    }
+    case '5': {
+      if (!profile) return 'END Link this phone in the Amanah app first.';
+      const grace = await graceSummary(profile.id);
+      return `END Grace:\n${grace}`;
+    }
+    case '6':
+      return 'END Support: in-app chat or amanah-liart.vercel.app. Dial again for menu.';
     default:
       return 'END Invalid choice. Please dial again.';
   }

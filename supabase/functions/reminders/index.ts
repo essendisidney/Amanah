@@ -132,6 +132,17 @@ Deno.serve(async (req) => {
       else if (result?.ok) payoutReminders += 1;
     }
 
+    // Auto-credit qualified referral rewards (wallet credit; no Daraja needed)
+    let referralRewards = null;
+    try {
+      const { data: rewardData } = await supabase.rpc("reward_qualified_referrals", {
+        p_limit: 50,
+      });
+      referralRewards = rewardData;
+    } catch {
+      referralRewards = { ok: false, error: "RPC_UNAVAILABLE" };
+    }
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -140,6 +151,7 @@ Deno.serve(async (req) => {
         contribution_skipped: contributionSkipped,
         payout_reminders: payoutReminders,
         payout_skipped: payoutSkipped,
+        referral_rewards: referralRewards,
       }),
       { headers: { "Content-Type": "application/json" } },
     );

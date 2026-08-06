@@ -31,10 +31,10 @@ export function OfficerOverviewStrip({
           </h2>
         </div>
         <Link
-          href={`/jamiyas/${slug}/community` as Route}
+          href={`/jamiyas/${slug}/officer` as Route}
           className="text-sm font-medium text-accent hover:underline"
         >
-          Community &amp; grace
+          Officer console
         </Link>
       </div>
       <dl className="mt-4 grid gap-4 sm:grid-cols-3">

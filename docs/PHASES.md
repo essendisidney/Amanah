@@ -117,8 +117,20 @@ See `docs/PHASE_12.md`.
 
 See `docs/PHASE_13.md`.
 
+## Phase 14–17 — Phone-first + officer + referrals
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| 14 | AT SMS + richer USSD + Vercel cron fan-out | Complete |
+| 15 | Expo parity (shipped with Phase 13 APIs) | Complete |
+| 16 | Officer console `/jamiyas/[slug]/officer` | Complete |
+| 17 | Auto referral wallet rewards | Complete |
+
+See `docs/PHASE_14.md`.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
-- Production Africa’s Talking shortcode provisioning (callback hardened)
+- Production Africa’s Talking shortcode + SMS sender ID (ops)
+- Expo Router / EAS store packaging

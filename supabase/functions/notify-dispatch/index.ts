@@ -2,12 +2,22 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
- * Dispatches pending notification_outbox rows via Resend (email) / Twilio (SMS) / Expo (push).
+ * Dispatches pending notification_outbox rows via Resend (email) /
+ * Africa's Talking or Twilio (SMS) / Expo (push).
  * Without provider credentials, marks rows as sent with metadata.skipped=true (dev).
  */
 
 function env(name: string): string {
   return Deno.env.get(name) ?? "";
+}
+
+function normalizeMsisdn(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.startsWith("254") && digits.length >= 12) return `+${digits}`;
+  if (digits.startsWith("0") && digits.length === 10) return `+254${digits.slice(1)}`;
+  if (digits.length === 9) return `+254${digits}`;
+  if (raw.startsWith("+")) return raw;
+  return raw.startsWith("+") ? raw : `+${digits}`;
 }
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
@@ -31,14 +41,39 @@ async function sendEmail(to: string, subject: string, body: string): Promise<voi
   }
 }
 
-async function sendSms(to: string, body: string): Promise<void> {
+async function sendSmsAfricaTalking(to: string, body: string): Promise<boolean> {
+  const username = env("AT_USERNAME");
+  const apiKey = env("AT_API_KEY");
+  const from = env("AT_SMS_SHORTCODE") || env("AT_SENDER_ID") || "";
+  if (!username || !apiKey) return false;
+
+  const params = new URLSearchParams({
+    username,
+    to: normalizeMsisdn(to),
+    message: body,
+  });
+  if (from) params.set("from", from);
+
+  const res = await fetch("https://api.africastalking.com/version1/messaging", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      apiKey,
+    },
+    body: params,
+  });
+  if (!res.ok) {
+    throw new Error(`AfricaTalking SMS ${res.status}: ${await res.text()}`);
+  }
+  return true;
+}
+
+async function sendSmsTwilio(to: string, body: string): Promise<boolean> {
   const sid = env("TWILIO_ACCOUNT_SID");
   const token = env("TWILIO_AUTH_TOKEN");
   const from = env("TWILIO_FROM_NUMBER");
-  if (!sid || !token || !from) {
-    console.info("sms skipped (Twilio not configured)", { to });
-    return;
-  }
+  if (!sid || !token || !from) return false;
 
   const auth = btoa(`${sid}:${token}`);
   const params = new URLSearchParams({ To: to, From: from, Body: body });
@@ -56,6 +91,36 @@ async function sendSms(to: string, body: string): Promise<void> {
   if (!res.ok) {
     throw new Error(`Twilio ${res.status}: ${await res.text()}`);
   }
+  return true;
+}
+
+async function sendSms(to: string, body: string): Promise<void> {
+  const prefer = (env("SMS_PROVIDER") || "auto").toLowerCase();
+  const requireReal = env("REQUIRE_REAL_PROVIDERS") === "true";
+
+  if (prefer === "africastalking" || prefer === "at") {
+    const ok = await sendSmsAfricaTalking(to, body);
+    if (!ok) {
+      if (requireReal) throw new Error("AT_SMS_NOT_CONFIGURED");
+      console.info("sms skipped (Africa's Talking not configured)", { to });
+    }
+    return;
+  }
+
+  if (prefer === "twilio") {
+    const ok = await sendSmsTwilio(to, body);
+    if (!ok) {
+      if (requireReal) throw new Error("TWILIO_NOT_CONFIGURED");
+      console.info("sms skipped (Twilio not configured)", { to });
+    }
+    return;
+  }
+
+  // auto: prefer AT for Kenya, else Twilio
+  if (await sendSmsAfricaTalking(to, body)) return;
+  if (await sendSmsTwilio(to, body)) return;
+  if (requireReal) throw new Error("SMS_NOT_CONFIGURED");
+  console.info("sms skipped (no AT or Twilio credentials)", { to });
 }
 
 async function sendExpoPush(
