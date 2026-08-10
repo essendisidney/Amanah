@@ -33,6 +33,20 @@ type Props = { searchParams: Promise<{ category?: string }> };
 export default async function SadakaPage({ searchParams }: Props) {
   const { category } = await searchParams;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isCircleMember = false;
+  if (user) {
+    const { count } = await supabase
+      .from('members')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'active');
+    isCircleMember = (count ?? 0) > 0;
+  }
+
   let query = supabase
     .from('charity_campaigns')
     .select(
@@ -59,31 +73,67 @@ export default async function SadakaPage({ searchParams }: Props) {
             Sadaka
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            Support reviewed community causes. Every campaign discloses its fee. Funds pass through
-            briefly — never held as lasting custody.
+            Circle members start campaigns with documentation. Admins review and approve. Anyone can
+            contribute. When the target is reached, funds go to the beneficiary M-Pesa.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href={'/sadaka/new' as Route}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Start a campaign
-          </Link>
+          {isCircleMember ? (
+            <Link
+              href={'/sadaka/new' as Route}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+            >
+              Start a campaign
+            </Link>
+          ) : user ? (
+            <Link
+              href={'/circles' as Route}
+              className="rounded-md border border-border px-4 py-2 text-sm"
+            >
+              Join a circle to start a campaign
+            </Link>
+          ) : (
+            <Link
+              href={'/login?next=/sadaka/new' as Route}
+              className="rounded-md border border-border px-4 py-2 text-sm"
+            >
+              Sign in to start a campaign
+            </Link>
+          )}
           <Link
             href={'/sadaka/adopt' as Route}
             className="rounded-md border border-border px-4 py-2 text-sm"
           >
             Adopt an institution
           </Link>
-          <Link
-            href={'/sadaka/my' as Route}
-            className="rounded-md border border-border px-4 py-2 text-sm"
-          >
-            My campaigns
-          </Link>
+          {user ? (
+            <Link
+              href={'/sadaka/my' as Route}
+              className="rounded-md border border-border px-4 py-2 text-sm"
+            >
+              My campaigns
+            </Link>
+          ) : null}
         </div>
       </div>
+
+      <ol className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
+        <li className="border-l-2 border-accent pl-3">
+          <span className="font-medium text-foreground">1. Member submits</span>
+          <br />
+          Story, target, beneficiary M-Pesa, and KYC docs.
+        </li>
+        <li className="border-l-2 border-accent pl-3">
+          <span className="font-medium text-foreground">2. Admin approves</span>
+          <br />
+          Only reviewed campaigns go live here.
+        </li>
+        <li className="border-l-2 border-accent pl-3">
+          <span className="font-medium text-foreground">3. Anyone can give</span>
+          <br />
+          At target, funds release to the beneficiary.
+        </li>
+      </ol>
 
       <div className="mt-8 flex flex-wrap gap-2">
         <Link
@@ -103,7 +153,10 @@ export default async function SadakaPage({ searchParams }: Props) {
         ))}
       </div>
 
-      <div className="mt-10 space-y-4">
+      <h2 className="mt-10 font-[family-name:var(--font-display)] text-2xl font-semibold">
+        Active campaigns
+      </h2>
+      <div className="mt-4 space-y-4">
         {campaigns.length ? (
           campaigns.map((campaign) => {
             const goal = Number(campaign.goal_amount);
@@ -119,9 +172,9 @@ export default async function SadakaPage({ searchParams }: Props) {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+                      <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
                         {campaign.title}
-                      </h2>
+                      </h3>
                       {campaign.category ? (
                         <span className="rounded-md border border-border px-2 py-0.5 text-xs">
                           {CATEGORY_LABELS[campaign.category] ?? campaign.category}
@@ -152,12 +205,13 @@ export default async function SadakaPage({ searchParams }: Props) {
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
                   {progress}% of {formatCurrency(goal, campaign.currency)}
+                  {campaign.status === 'live' ? ' · Contribute' : ''}
                 </p>
               </Link>
             );
           })
         ) : (
-          <p className="py-10 text-muted-foreground">No live campaigns in this category.</p>
+          <p className="py-10 text-muted-foreground">No active campaigns in this category yet.</p>
         )}
       </div>
     </main>

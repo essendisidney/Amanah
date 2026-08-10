@@ -66,5 +66,39 @@ Sandbox test MSISDN/PIN: use Safaricom Daraja portal credentials.
 ## Out of scope (later)
 
 - STK status query polling UI
-- B2C payouts for withdrawals
 - Till (Buy Goods) auto-routing per merchant
+
+## B2C (Sadaka Option B beneficiary payout)
+
+Auto-disburse queues a `charity_disbursements` row when a campaign hits its goal.
+Daily cron `job=sadaka` → Edge `sadaka-ops` → `payments-mpesa` `action: b2c_payment`.
+
+### Extra Edge secrets (B2C)
+
+```bash
+npx supabase secrets set \
+  MPESA_B2C_INITIATOR=... \
+  MPESA_B2C_SECURITY_CREDENTIAL=... \
+  MPESA_B2C_RESULT_URL=https://vzpnixfqkvovbniaoudx.supabase.co/functions/v1/payments-mpesa \
+  MPESA_B2C_TIMEOUT_URL=https://vzpnixfqkvovbniaoudx.supabase.co/functions/v1/payments-mpesa \
+  MPESA_B2C_COMMAND_ID=BusinessPayment
+```
+
+Deploy both functions:
+
+```bash
+npx supabase functions deploy payments-mpesa --project-ref vzpnixfqkvovbniaoudx
+npx supabase functions deploy sadaka-ops --project-ref vzpnixfqkvovbniaoudx
+```
+
+Without B2C secrets, `sadaka-ops` completes disbursements as **simulated** (pilot-safe).
+Set `REQUIRE_REAL_PROVIDERS=true` only after live B2C works in sandbox.
+
+### Custody
+
+- `custody_mode=amanah_pass_through` (default) — Option B short hold + auto B2C
+- `custody_mode=psp_subaccount` — Option A reserved; Amanah will not auto-disburse from float
+
+### Sponsorship renewals
+
+Same `sadaka-ops` cron calls `queue_due_sponsorship_charges` and initiates STK when a phone is on file.

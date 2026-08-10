@@ -19,9 +19,14 @@ curl -X POST "$SUPABASE_URL/functions/v1/collections" \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY"
 ```
 
-### payments-bank
-Bank initiate/confirm stub. Completes as simulated without `BANK_*` unless `REQUIRE_REAL_PROVIDERS=true`.
+### payments-mpesa
+STK initiate + callback. Also B2C initiate + result callback for Sadaka Option B.
+
+### sadaka-ops
+Daily cron: claim pending campaign disbursements (B2C or sim) and queue due sponsorship STK charges.
 
 ```bash
-supabase functions serve payments-bank --env-file supabase/.env.local
+supabase functions serve sadaka-ops --env-file supabase/.env.local
+curl -X POST "$SUPABASE_URL/functions/v1/sadaka-ops" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY"
 ```

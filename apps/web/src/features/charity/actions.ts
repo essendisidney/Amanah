@@ -245,6 +245,27 @@ export async function submitCampaignAction(
   const beneficiaryPhone = String(formData.get('beneficiaryPhone') ?? '').trim();
   const kycUrl = String(formData.get('kycDocUrl') ?? '').trim();
 
+  const { createClient } = await import('@/lib/supabase/server');
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, message: 'Sign in to create a campaign.' };
+  }
+
+  const { count } = await supabase
+    .from('members')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'active');
+  if ((count ?? 0) < 1) {
+    return {
+      success: false,
+      message: 'Join an active circle before submitting a Sadaka campaign.',
+    };
+  }
+
   const { data, error } = await callRpc('submit_sadaka_campaign', {
     p_title: title,
     p_story: story,
@@ -262,8 +283,9 @@ export async function submitCampaignAction(
       UNAUTHENTICATED: 'Sign in to create a campaign.',
       INVALID_STORY: 'Story must be at least 40 characters.',
       INVALID_TARGET: 'Target must be at least KES 100.',
-      BENEFICIARY_KYC_REQUIRED: 'Beneficiary name, M-Pesa number, and KYC doc URL are required.',
+      BENEFICIARY_KYC_REQUIRED: 'Beneficiary name, M-Pesa number, and KYC documentation are required.',
       INVALID_CATEGORY: 'Choose a valid category.',
+      NOT_A_MEMBER: 'Join an active circle before submitting a Sadaka campaign.',
     };
     return {
       success: false,
@@ -275,7 +297,7 @@ export async function submitCampaignAction(
   revalidatePath('/admin/sadaka');
   return {
     success: true,
-    message: 'Campaign submitted for review.',
+    message: 'Submitted for admin review. It will appear under Active campaigns after approval.',
     slug: result.slug,
   };
 }
@@ -333,17 +355,52 @@ export async function createAdoptionProfileFormAction(formData: FormData): Promi
 export async function startSponsorshipAction(
   formData: FormData,
 ): Promise<CharityActionState> {
+  const phone = String(formData.get('phone') ?? '').trim() || null;
   const { data, error } = await callRpc('start_sponsorship', {
     p_adoption_profile_id: String(formData.get('profileId') ?? ''),
     p_monthly_amount: Number(formData.get('monthlyAmount')),
-    p_phone: String(formData.get('phone') ?? '').trim() || null,
+    p_phone: phone,
   });
   if (error) return { success: false, message: error.message };
-  const result = data as { ok?: boolean; error?: string; note?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    note?: string;
+    needs_stk?: boolean;
+    intent_id?: string;
+    amount?: number;
+    phone?: string;
+  } | null;
   if (!result?.ok) {
     return { success: false, message: result?.error ?? 'Could not start sponsorship.' };
   }
+
+  if (result.needs_stk && result.intent_id && result.phone) {
+    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
+    const stk = await invokeMpesaStk({
+      intentId: result.intent_id,
+      amount: Number(result.amount),
+      phone: result.phone,
+      description: 'Amanah adopt',
+    });
+    if (!stk.ok) {
+      return {
+        success: false,
+        message: stk.error ?? 'Sponsorship created but M-Pesa STK failed.',
+      };
+    }
+    revalidatePath('/sadaka/adopt');
+    revalidatePath('/sadaka/my');
+    return {
+      success: true,
+      message: stk.fallback
+        ? 'Sponsorship started (payment simulated).'
+        : 'Check your phone to approve the sponsorship STK payment.',
+    };
+  }
+
   revalidatePath('/sadaka/adopt');
+  revalidatePath('/sadaka/my');
   return {
     success: true,
     message: result.note ?? 'Sponsorship started. First month recorded.',

@@ -59,6 +59,9 @@ export async function GET(request: Request) {
     if (job === 'all' || job === 'tawarruq') {
       results.tawarruq = await invokeEdge('tawarruq-partner', secret);
     }
+    if (job === 'all' || job === 'sadaka') {
+      results.sadaka = await invokeEdge('sadaka-ops', secret);
+    }
     return NextResponse.json({ ok: true, results });
   } catch (error) {
     return NextResponse.json(

@@ -62,7 +62,10 @@ export function DonateForm({
     <form action={action} className="space-y-4 border border-border bg-card p-6">
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="slug" value={slug} />
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Make a gift</h2>
+      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Contribute</h2>
+      <p className="text-sm text-muted-foreground">
+        Your gift helps reach the target. When the goal is met, funds go to the beneficiary M-Pesa.
+      </p>
       <div className="space-y-2">
         <Label htmlFor="amount">Amount ({currency})</Label>
         <Input
@@ -108,7 +111,7 @@ export function DonateForm({
         </p>
       ) : null}
       <Button type="submit" disabled={pending}>
-        {pending ? 'Processing…' : 'Record donation'}
+        {pending ? 'Processing…' : 'Contribute'}
       </Button>
     </form>
   );

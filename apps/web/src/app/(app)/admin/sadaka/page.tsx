@@ -31,6 +31,19 @@ type Campaign = {
   category: string | null;
   currency: string;
   updated_at: string;
+  custody_mode: string | null;
+  auto_disburse: boolean | null;
+};
+
+type PendingDisbursement = {
+  id: string;
+  campaign_id: string;
+  net_amount: number | string;
+  currency: string;
+  status: string;
+  beneficiary_phone: string;
+  notes: string | null;
+  created_at: string;
 };
 
 type PolicyEvent = {
@@ -58,13 +71,14 @@ export default async function AdminSadakaPage() {
   await requireAdminAccess('compliance');
   const supabase = await createClient();
 
-  const [{ data: campaigns }, { data: events }, { data: institutions }] = await Promise.all([
+  const [{ data: campaigns }, { data: events }, { data: institutions }, { data: pendingDisbursements }] =
+    await Promise.all([
     supabase
       .from('charity_campaigns')
       .select(
         `id, slug, title, status, fee_mode, fee_bps, sharia_board_endorsed, goal_amount, raised_amount,
          disbursed_amount, beneficiary_phone, beneficiary_name, beneficiary_kyc_doc_url, category,
-         currency, updated_at`,
+         currency, updated_at, custody_mode, auto_disburse`,
       )
       .order('updated_at', { ascending: false })
       .limit(80),
@@ -80,11 +94,18 @@ export default async function AdminSadakaPage() {
       .select('id, name, type, verification_status, contact_person, registration_doc_url, created_at')
       .order('created_at', { ascending: false })
       .limit(40),
+    supabase
+      .from('charity_disbursements')
+      .select('id, campaign_id, net_amount, currency, status, beneficiary_phone, notes, created_at')
+      .in('status', ['pending', 'processing'])
+      .order('created_at', { ascending: true })
+      .limit(40),
   ]);
 
   const rows = (campaigns ?? []) as unknown as Campaign[];
   const history = (events ?? []) as unknown as PolicyEvent[];
   const orgs = (institutions ?? []) as unknown as Institution[];
+  const queued = (pendingDisbursements ?? []) as unknown as PendingDisbursement[];
   const pending = rows.filter((r) => r.status === 'pending_review' || r.status === 'draft');
   const payable = rows.filter(
     (r) =>
@@ -99,8 +120,9 @@ export default async function AdminSadakaPage() {
           Sadaka operations
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Review campaigns before they go live, disburse raised funds (simulated B2C for MVP), verify
-          institutions, and manage fee policy.
+          Review campaigns before they go live. Option B: when a campaign hits target,
+          disbursement is auto-queued (short Amanah pass-through). Cron completes B2C when
+          Daraja is configured, otherwise simulates. Institutions and fee policy below.
         </p>
       </div>
 
@@ -171,7 +193,37 @@ export default async function AdminSadakaPage() {
 
       <section className="space-y-3">
         <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Disburse raised funds
+          Queued disbursements
+        </h3>
+        {queued.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No pending or processing payouts.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {queued.map((d) => (
+              <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">
+                      {formatCurrency(Number(d.net_amount), d.currency)}
+                    </p>
+                    <StatusBadge status={d.status} />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    → {d.beneficiary_phone} · {formatDate(d.created_at)}
+                  </p>
+                  {d.notes ? (
+                    <p className="mt-1 text-xs text-muted-foreground">{d.notes}</p>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Manual disburse
         </h3>
         {payable.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing available to disburse.</p>
@@ -201,7 +253,7 @@ export default async function AdminSadakaPage() {
                       className="w-36"
                     />
                     <Button type="submit" size="sm">
-                      Disburse (sim B2C)
+                      Queue B2C
                     </Button>
                   </form>
                 </li>

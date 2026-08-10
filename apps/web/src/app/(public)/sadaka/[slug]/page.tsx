@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { DonateForm } from '@/features/charity/components/donate-form';
@@ -21,6 +23,8 @@ type Campaign = {
   category: string | null;
   beneficiary_name: string | null;
   status: string;
+  created_by: string | null;
+  rejection_reason: string | null;
   disbursed_amount: number | string | null;
   last_disbursed_at: string | null;
 };
@@ -36,22 +40,32 @@ type Disbursement = {
 export default async function CampaignPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const { data } = await supabase
     .from('charity_campaigns')
     .select(
       `id, slug, title, summary, description, goal_amount, raised_amount, currency, fee_mode, fee_bps,
-       sharia_board_endorsed, category, beneficiary_name, status, disbursed_amount, last_disbursed_at`,
+       sharia_board_endorsed, category, beneficiary_name, status, created_by, rejection_reason,
+       disbursed_amount, last_disbursed_at`,
     )
     .eq('slug', slug)
-    .in('status', ['live', 'funded', 'disbursed', 'closed'])
     .maybeSingle();
+
   if (!data) notFound();
   const campaign = data as unknown as Campaign;
+  const isCreator = Boolean(user && campaign.created_by === user.id);
+  const publicOk = ['live', 'funded', 'disbursed', 'closed'].includes(campaign.status);
+  if (!publicOk && !isCreator) notFound();
+
   const goal = Number(campaign.goal_amount);
   const raised = Number(campaign.raised_amount);
   const progress = Math.min(100, Math.round((raised / Math.max(goal, 1)) * 100));
   const addon = campaign.fee_mode === 'donation_addon';
   const feePct = (campaign.fee_bps / 100).toFixed(2);
+  const canDonate = campaign.status === 'live';
 
   const { data: disbursementsData } = await supabase
     .from('charity_disbursements')
@@ -61,28 +75,54 @@ export default async function CampaignPage({ params }: Props) {
     .order('created_at', { ascending: false })
     .limit(10);
   const disbursements = (disbursementsData ?? []) as unknown as Disbursement[];
-  const canDonate = campaign.status === 'live' || campaign.status === 'funded';
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-12">
       <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-        Public sadaka campaign
+        Sadaka campaign
         {campaign.category ? ` · ${campaign.category.replaceAll('_', ' ')}` : ''}
       </p>
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <h1 className="font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight">
           {campaign.title}
         </h1>
+        <span className="rounded-md border border-border px-3 py-1 text-sm capitalize">
+          {campaign.status.replaceAll('_', ' ')}
+        </span>
         {campaign.sharia_board_endorsed ? (
           <span className="rounded-md bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
             Sharia board endorsed
           </span>
-        ) : (
+        ) : campaign.status === 'live' ? (
           <span className="rounded-md border border-border px-3 py-1 text-sm text-muted-foreground">
             Fee policy under Sharia review
           </span>
-        )}
+        ) : null}
       </div>
+
+      {campaign.status === 'pending_review' ? (
+        <p className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
+          Waiting for admin review. This campaign is not public yet — only you and compliance can see
+          it.
+        </p>
+      ) : null}
+      {campaign.status === 'rejected' && campaign.rejection_reason ? (
+        <p className="mt-4 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          Rejected: {campaign.rejection_reason}
+        </p>
+      ) : null}
+      {campaign.status === 'funded' ? (
+        <p className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
+          Target reached. Contributions are closed. Funds are being released to the beneficiary
+          M-Pesa.
+        </p>
+      ) : null}
+      {campaign.status === 'disbursed' ? (
+        <p className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
+          Campaign complete — raised funds have been sent to the beneficiary.
+        </p>
+      ) : null}
+
       <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
         {campaign.description ?? campaign.summary}
       </p>
@@ -98,11 +138,12 @@ export default async function CampaignPage({ params }: Props) {
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {formatCurrency(raised, campaign.currency)} of{' '}
-          {formatCurrency(goal, campaign.currency)} · {progress}% funded · status {campaign.status}
+          {formatCurrency(goal, campaign.currency)} · {progress}% funded
         </p>
         {Number(campaign.disbursed_amount ?? 0) > 0 ? (
           <p className="mt-1 text-sm font-medium">
-            Disbursed: {formatCurrency(Number(campaign.disbursed_amount), campaign.currency)}
+            Sent to beneficiary:{' '}
+            {formatCurrency(Number(campaign.disbursed_amount), campaign.currency)}
             {campaign.last_disbursed_at ? ` on ${formatDate(campaign.last_disbursed_at)}` : ''}
           </p>
         ) : null}
@@ -116,7 +157,7 @@ export default async function CampaignPage({ params }: Props) {
           <ul className="text-sm text-muted-foreground">
             {disbursements.map((d) => (
               <li key={d.id}>
-                Disbursed {formatCurrency(Number(d.net_amount), d.currency)}
+                Sent {formatCurrency(Number(d.net_amount), d.currency)}
                 {d.paid_at ? ` on ${formatDate(d.paid_at)}` : ''}
               </li>
             ))}
@@ -134,6 +175,15 @@ export default async function CampaignPage({ params }: Props) {
               ? `${feePct}% platform fee is added on top of your gift. 100% of the gift amount reaches this cause.`
               : `${feePct}% platform fee is deducted from your payment. The remaining net amount reaches this cause.`}
           </p>
+          {!user && canDonate ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              You do not need an Amanah account to contribute. Sign in only if you want M-Pesa STK
+              tied to your wallet profile.{' '}
+              <Link href={`/login?next=/sadaka/${slug}` as Route} className="underline">
+                Sign in
+              </Link>
+            </p>
+          ) : null}
         </div>
         {canDonate ? (
           <DonateForm
@@ -145,7 +195,9 @@ export default async function CampaignPage({ params }: Props) {
           />
         ) : (
           <p className="text-sm text-muted-foreground">
-            This campaign is no longer accepting donations.
+            {campaign.status === 'pending_review'
+              ? 'Contributions open after admin approval.'
+              : 'This campaign is not accepting contributions right now.'}
           </p>
         )}
       </section>

@@ -104,7 +104,7 @@ export async function disburseCampaignAction(formData: FormData): Promise<Charit
   revalidatePath('/sadaka');
   return {
     success: true,
-    message: `Disbursed KES ${result.net ?? ''} (simulated B2C).`,
+    message: `Disbursement queued (KES ${result.net ?? ''}). Cron completes via B2C or sim.`,
   };
 }
 

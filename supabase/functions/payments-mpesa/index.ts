@@ -2,16 +2,20 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
- * M-Pesa STK Push initiator + Daraja callback handler (Phase 9).
+ * M-Pesa STK Push + B2C initiator + Daraja callback handler (Phase 9 / Option B).
  *
  * POST JSON:
  * - { action: "stk_push", intent_id, amount?, phone? }  (service-role)
+ * - { action: "b2c_payment", disbursement_id, amount?, phone? }  (service-role)
  * - { action: "health" }  (service-role) — config readiness
- * - Daraja callback body (Body.stkCallback)
+ * - Daraja STK callback body (Body.stkCallback)
+ * - Daraja B2C Result callback (Result.ResultType / ConversationID)
  *
  * Secrets (Edge): MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET, MPESA_SHORTCODE,
  * MPESA_PASSKEY, MPESA_CALLBACK_URL, optional MPESA_BASE_URL,
- * MPESA_TRANSACTION_TYPE (CustomerPayBillOnline | CustomerBuyGoodsOnline).
+ * MPESA_TRANSACTION_TYPE (CustomerPayBillOnline | CustomerBuyGoodsOnline),
+ * optional B2C: MPESA_B2C_INITIATOR, MPESA_B2C_SECURITY_CREDENTIAL,
+ * MPESA_B2C_RESULT_URL, MPESA_B2C_TIMEOUT_URL, MPESA_B2C_COMMAND_ID.
  *
  * Without Daraja secrets: completes as simulated unless REQUIRE_REAL_PROVIDERS=true.
  */
@@ -19,6 +23,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 type StkBody = {
   action?: string;
   intent_id?: string;
+  disbursement_id?: string;
   amount?: number;
   phone?: string;
   description?: string;
@@ -91,11 +96,24 @@ function darajaConfigured(): boolean {
   );
 }
 
+function b2cConfigured(): boolean {
+  return Boolean(
+    env("MPESA_CONSUMER_KEY") &&
+      env("MPESA_CONSUMER_SECRET") &&
+      env("MPESA_SHORTCODE") &&
+      env("MPESA_B2C_INITIATOR") &&
+      env("MPESA_B2C_SECURITY_CREDENTIAL") &&
+      (env("MPESA_B2C_RESULT_URL") || env("MPESA_CALLBACK_URL")),
+  );
+}
+
 function descForKind(kind: string | undefined, fallback?: string): string {
   if (fallback) return fallback.slice(0, 13);
   switch (kind) {
     case "sadaka":
       return "Amanah sadaka";
+    case "sponsorship":
+      return "Amanah adopt";
     case "platform_tip":
       return "Amanah support";
     default:
@@ -131,10 +149,129 @@ Deno.serve(async (req) => {
       return Response.json({
         ok: true,
         daraja_configured: darajaConfigured(),
+        b2c_configured: b2cConfigured(),
         require_real: requireReal(),
         base_url: env("MPESA_BASE_URL") || "https://sandbox.safaricom.co.ke",
         transaction_type:
           env("MPESA_TRANSACTION_TYPE") || "CustomerPayBillOnline",
+      });
+    }
+
+    // ---- B2C initiate (service) — Sadaka Option B beneficiary payout ----
+    if ((json as StkBody).action === "b2c_payment") {
+      if (auth !== `Bearer ${serviceKey}`) {
+        return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+      }
+
+      const body = json as StkBody;
+      if (!body.disbursement_id) {
+        return Response.json({ ok: false, error: "INVALID_BODY" }, { status: 400 });
+      }
+
+      const { data: row, error: rowErr } = await supabase
+        .from("charity_disbursements")
+        .select("id, net_amount, beneficiary_phone, status, currency")
+        .eq("id", body.disbursement_id)
+        .maybeSingle();
+
+      if (rowErr || !row) {
+        return Response.json({ ok: false, error: "DISBURSEMENT_NOT_FOUND" }, { status: 404 });
+      }
+      if (!["pending", "processing"].includes(row.status as string)) {
+        return Response.json(
+          { ok: false, error: "NOT_PAYABLE", status: row.status },
+          { status: 409 },
+        );
+      }
+
+      const amount = Number(body.amount ?? row.net_amount);
+      const phone = String(body.phone ?? row.beneficiary_phone ?? "");
+      if (!Number.isFinite(amount) || amount < 1) {
+        return Response.json({ ok: false, error: "INVALID_AMOUNT" }, { status: 400 });
+      }
+      if (!phone) {
+        return Response.json({ ok: false, error: "PHONE_REQUIRED" }, { status: 400 });
+      }
+
+      const token = await getDarajaToken();
+      if (!token || !b2cConfigured()) {
+        if (requireReal()) {
+          await supabase.rpc("complete_sadaka_disbursement", {
+            p_disbursement_id: body.disbursement_id,
+            p_success: false,
+            p_error: "B2C secrets not configured",
+          });
+          return Response.json({ ok: false, error: "B2C_UNAVAILABLE" }, { status: 502 });
+        }
+
+        const { data } = await supabase.rpc("complete_sadaka_disbursement", {
+          p_disbursement_id: body.disbursement_id,
+          p_success: true,
+          p_mpesa_b2c_id: `sim-b2c:${body.disbursement_id}`,
+          p_error: null,
+        });
+        return Response.json({ ok: true, fallback: "simulated", result: data });
+      }
+
+      const shortcode = env("MPESA_SHORTCODE");
+      const initiator = env("MPESA_B2C_INITIATOR");
+      const securityCredential = env("MPESA_B2C_SECURITY_CREDENTIAL");
+      const resultUrl =
+        env("MPESA_B2C_RESULT_URL") || env("MPESA_CALLBACK_URL");
+      const timeoutUrl =
+        env("MPESA_B2C_TIMEOUT_URL") || resultUrl;
+      const commandId = env("MPESA_B2C_COMMAND_ID") || "BusinessPayment";
+      const base = env("MPESA_BASE_URL") || "https://sandbox.safaricom.co.ke";
+      const msisdn = toMsisdn(phone);
+
+      const b2cRes = await fetch(`${base}/mpesa/b2c/v1/paymentrequest`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          InitiatorName: initiator,
+          SecurityCredential: securityCredential,
+          CommandID: commandId,
+          Amount: Math.max(1, Math.round(amount)),
+          PartyA: shortcode,
+          PartyB: msisdn,
+          Remarks: "Amanah sadaka",
+          QueueTimeOutURL: timeoutUrl,
+          ResultURL: resultUrl,
+          Occasion: String(body.disbursement_id).replace(/-/g, "").slice(0, 20),
+        }),
+      });
+
+      const b2cJson = await b2cRes.json();
+      if (!b2cRes.ok || String(b2cJson.ResponseCode) !== "0") {
+        await supabase.rpc("complete_sadaka_disbursement", {
+          p_disbursement_id: body.disbursement_id,
+          p_success: false,
+          p_error:
+            b2cJson.errorMessage ??
+            b2cJson.ResponseDescription ??
+            "B2C initiate failed",
+        });
+        return Response.json({ ok: false, error: b2cJson }, { status: 502 });
+      }
+
+      await supabase
+        .from("charity_disbursements")
+        .update({
+          status: "processing",
+          mpesa_b2c_id: String(
+            b2cJson.ConversationID ?? b2cJson.OriginatorConversationID ?? "",
+          ),
+        })
+        .eq("id", body.disbursement_id);
+
+      return Response.json({
+        ok: true,
+        conversation_id: b2cJson.ConversationID ?? null,
+        originator_conversation_id: b2cJson.OriginatorConversationID ?? null,
+        response_description: b2cJson.ResponseDescription ?? null,
       });
     }
 
@@ -305,6 +442,74 @@ Deno.serve(async (req) => {
         await supabase.rpc("fail_payment_intent", {
           p_intent_id: intentId,
           p_error_message: callback.ResultDesc ?? "M-Pesa declined",
+        });
+      }
+
+      return Response.json({ ResultCode: 0, ResultDesc: "Accepted" });
+    }
+
+    // ---- Daraja B2C result callback ----
+    const b2cResult = (
+      json as {
+        Result?: {
+          ResultCode?: number;
+          ResultDesc?: string;
+          ConversationID?: string;
+          OriginatorConversationID?: string;
+          TransactionID?: string;
+          ResultParameters?: {
+            ResultParameter?: Array<{ Key: string; Value?: string | number }>;
+          };
+        };
+      }
+    ).Result;
+
+    if (b2cResult?.ConversationID || b2cResult?.OriginatorConversationID) {
+      const conv =
+        b2cResult.ConversationID ?? b2cResult.OriginatorConversationID ?? "";
+      const { data: rows } = await supabase
+        .from("charity_disbursements")
+        .select("id, status")
+        .eq("mpesa_b2c_id", conv)
+        .limit(1);
+
+      let disbursementId = rows?.[0]?.id as string | undefined;
+      if (!disbursementId && b2cResult.OriginatorConversationID) {
+        const { data: alt } = await supabase
+          .from("charity_disbursements")
+          .select("id, status")
+          .eq("mpesa_b2c_id", b2cResult.OriginatorConversationID)
+          .limit(1);
+        disbursementId = alt?.[0]?.id as string | undefined;
+      }
+
+      if (!disbursementId) {
+        console.error("B2C_DISBURSEMENT_NOT_FOUND", conv);
+        return Response.json({ ResultCode: 0, ResultDesc: "Accepted" });
+      }
+
+      if (rows?.[0]?.status === "paid") {
+        return Response.json({ ResultCode: 0, ResultDesc: "Already paid" });
+      }
+
+      const receipt =
+        b2cResult.TransactionID ??
+        b2cResult.ResultParameters?.ResultParameter?.find(
+          (p) => p.Key === "TransactionReceipt",
+        )?.Value;
+
+      if (Number(b2cResult.ResultCode) === 0) {
+        await supabase.rpc("complete_sadaka_disbursement", {
+          p_disbursement_id: disbursementId,
+          p_success: true,
+          p_mpesa_b2c_id: String(receipt ?? conv),
+          p_error: null,
+        });
+      } else {
+        await supabase.rpc("complete_sadaka_disbursement", {
+          p_disbursement_id: disbursementId,
+          p_success: false,
+          p_error: b2cResult.ResultDesc ?? "B2C declined",
         });
       }
 
