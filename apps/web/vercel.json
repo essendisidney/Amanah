@@ -1,4 +1,4 @@
-{
+﻿{
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "cd ../.. && pnpm install",
@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/dispatch?job=notify",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/dispatch?job=collections",
@@ -18,7 +18,7 @@
     },
     {
       "path": "/api/cron/dispatch?job=tawarruq",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 8 * * *"
     }
   ]
 }
