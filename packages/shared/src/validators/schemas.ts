@@ -104,7 +104,7 @@ export const createInvitationSchema = z
     path: ['email'],
   });
 
-/** Circle admin add-member: email required when provisioning new users. */
+/** Circle admin add-member: email and/or phone (phone-only OK for elders). */
 export const addCircleMemberSchema = z
   .object({
     jamiyaId: z.string().uuid(),

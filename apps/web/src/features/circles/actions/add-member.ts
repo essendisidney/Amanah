@@ -21,12 +21,15 @@ async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;
   jamiyaId: string;
   invitedBy: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   inviteeUserId: string;
   circleName: string;
   slug: string;
 }): Promise<{ inviteUrl: string; inviteCode: string } | { error: string }> {
+  if (!args.email && !args.phone) {
+    return { error: 'Email or phone required for claim invitation.' };
+  }
   const token = generateInvitationToken();
   const tokenHash = hashInvitationToken(token);
   let inviteCode = generateInviteCode(8);
@@ -178,12 +181,12 @@ export async function addMemberAction(
     return { success: false, message: mapAddError(existing.error) };
   }
 
-  // Provision new Auth user
-  if (!email) {
+  // Provision new Auth user (email invite and/or phone-only account)
+  if (!email && !phone) {
     return {
       success: false,
-      message: 'Email is required to add someone who is not on Amanah yet.',
-      fieldErrors: { email: ['Email is required for new members'] },
+      message: 'Provide an email or phone number.',
+      fieldErrors: { email: ['Email or phone is required'] },
     };
   }
 
@@ -198,39 +201,66 @@ export async function addMemberAction(
     };
   }
 
-  const redirectTo = `${getSiteUrl()}/login`;
-  const { data: invited, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
-    email,
-    {
-      redirectTo,
-      data: {
-        full_name: fullName ?? undefined,
-        phone: phone ?? undefined,
-      },
-    },
-  );
+  let newUserId: string | null = null;
+  let provisionError: string | undefined;
 
-  let newUserId = invited?.user?.id ?? null;
-
-  if (inviteErr || !newUserId) {
-    const { data: created, error: createErr } = await service.auth.admin.createUser({
+  if (email) {
+    const redirectTo = `${getSiteUrl()}/login`;
+    const { data: invited, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
       email,
-      email_confirm: false,
+      {
+        redirectTo,
+        data: {
+          full_name: fullName ?? undefined,
+          phone: phone ?? undefined,
+        },
+      },
+    );
+    newUserId = invited?.user?.id ?? null;
+    if (!newUserId) {
+      const { data: created, error: createErr } = await service.auth.admin.createUser({
+        email,
+        phone: phone ?? undefined,
+        email_confirm: false,
+        phone_confirm: Boolean(phone),
+        user_metadata: {
+          full_name: fullName ?? undefined,
+          phone: phone ?? undefined,
+        },
+      });
+      newUserId = created?.user?.id ?? null;
+      provisionError = inviteErr?.message ?? createErr?.message;
+    }
+  } else if (phone) {
+    // Phone-only: elders without email — claim via SMS OTP on /phone
+    const { data: created, error: createErr } = await service.auth.admin.createUser({
+      phone,
+      phone_confirm: true,
       user_metadata: {
         full_name: fullName ?? undefined,
-        phone: phone ?? undefined,
       },
     });
-    if (createErr || !created.user) {
-      return {
-        success: false,
-        message:
-          inviteErr?.message ??
-          createErr?.message ??
-          'Could not create an Amanah account for this email.',
-      };
+    newUserId = created?.user?.id ?? null;
+    provisionError = createErr?.message;
+
+    if (!newUserId) {
+      // Phone may already exist — reuse that profile
+      const { data: byPhone } = await service
+        .from('profiles')
+        .select('id')
+        .eq('phone', phone)
+        .maybeSingle();
+      newUserId = (byPhone as { id: string } | null)?.id ?? null;
     }
-    newUserId = created.user.id;
+  }
+
+  if (!newUserId) {
+    return {
+      success: false,
+      message:
+        provisionError ??
+        'Could not create an Amanah account. For phone-only members, enable Phone auth in Supabase.',
+    };
   }
 
   for (let i = 0; i < 8; i++) {
@@ -248,7 +278,7 @@ export async function addMemberAction(
     .update({
       ...(fullName ? { full_name: fullName } : {}),
       ...(phone ? { phone } : {}),
-      email,
+      ...(email ? { email } : {}),
     })
     .eq('id', newUserId);
 
@@ -273,7 +303,7 @@ export async function addMemberAction(
     supabase,
     jamiyaId,
     invitedBy: user.id,
-    email,
+    email: email || null,
     phone,
     inviteeUserId: newUserId,
     circleName: circle.name,
@@ -292,11 +322,14 @@ export async function addMemberAction(
     };
   }
 
+  const phoneHint = !email && phone
+    ? ' They can sign in with phone OTP on Amanah, then use the code or link.'
+    : '';
+
   return {
     success: true,
     mode: 'invited',
-    message:
-      'Seat reserved. Share the claim link or invite code so they can activate their Amanah account.',
+    message: `Seat reserved. Share the claim link or invite code.${phoneHint}`,
     inviteUrl: claim.inviteUrl,
     inviteCode: claim.inviteCode,
   };

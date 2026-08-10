@@ -21,8 +21,9 @@ export function AddMemberForm({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Existing Amanah users join immediately. New people get an account invite and a
-        reserved seat — share the claim link with them.
+        Existing Amanah users join immediately. New people get a reserved seat — use{' '}
+        <strong className="font-medium text-foreground">phone only</strong> for members
+        without email (they sign in with SMS OTP), or email if they have one.
       </p>
 
       {state.message ? (
@@ -52,20 +53,7 @@ export function AddMemberForm({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="member@example.com"
-            autoComplete="email"
-          />
-          {state.fieldErrors?.email?.[0] ? (
-            <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone (optional)</Label>
+          <Label htmlFor="phone">Phone</Label>
           <Input
             id="phone"
             name="phone"
@@ -76,8 +64,22 @@ export function AddMemberForm({
           {state.fieldErrors?.phone?.[0] ? (
             <p className="text-sm text-destructive">{state.fieldErrors.phone[0]}</p>
           ) : null}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email (optional)</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="member@example.com"
+            autoComplete="email"
+          />
+          {state.fieldErrors?.email?.[0] ? (
+            <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
+          ) : null}
           <p className="text-[11px] text-muted-foreground">
-            Email is required when the person is not already on Amanah.
+            Phone alone is enough for elders without email. Share the invite code on
+            WhatsApp; they open Amanah → Phone login → paste the code.
           </p>
         </div>
         <Button type="submit" disabled={pending}>

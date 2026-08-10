@@ -68,8 +68,8 @@ export async function POST(
     return NextResponse.json({ ok: false, error: existing.error }, { status: 400 });
   }
 
-  if (!email) {
-    return NextResponse.json({ ok: false, error: 'EMAIL_REQUIRED_FOR_NEW' }, { status: 400 });
+  if (!email && !phone) {
+    return NextResponse.json({ ok: false, error: 'EMAIL_OR_PHONE_REQUIRED' }, { status: 400 });
   }
 
   let service;
@@ -79,28 +79,52 @@ export async function POST(
     return NextResponse.json({ ok: false, error: 'SERVICE_ROLE_MISSING' }, { status: 500 });
   }
 
-  const { data: invited, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
-    email,
-    {
-      redirectTo: `${getSiteUrl()}/login`,
-      data: { full_name: fullName ?? undefined, phone: phone ?? undefined },
-    },
-  );
+  let newUserId: string | null = null;
+  let provisionError: string | undefined;
 
-  let newUserId = invited?.user?.id ?? null;
-  if (inviteErr || !newUserId) {
-    const { data: created, error: createErr } = await service.auth.admin.createUser({
+  if (email) {
+    const { data: invited, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
       email,
-      email_confirm: false,
-      user_metadata: { full_name: fullName ?? undefined, phone: phone ?? undefined },
-    });
-    if (createErr || !created.user) {
-      return NextResponse.json(
-        { ok: false, error: inviteErr?.message ?? createErr?.message ?? 'PROVISION_FAILED' },
-        { status: 500 },
-      );
+      {
+        redirectTo: `${getSiteUrl()}/login`,
+        data: { full_name: fullName ?? undefined, phone: phone ?? undefined },
+      },
+    );
+    newUserId = invited?.user?.id ?? null;
+    if (!newUserId) {
+      const { data: created, error: createErr } = await service.auth.admin.createUser({
+        email,
+        phone: phone ?? undefined,
+        email_confirm: false,
+        phone_confirm: Boolean(phone),
+        user_metadata: { full_name: fullName ?? undefined, phone: phone ?? undefined },
+      });
+      newUserId = created?.user?.id ?? null;
+      provisionError = inviteErr?.message ?? createErr?.message;
     }
-    newUserId = created.user.id;
+  } else if (phone) {
+    const { data: created, error: createErr } = await service.auth.admin.createUser({
+      phone,
+      phone_confirm: true,
+      user_metadata: { full_name: fullName ?? undefined },
+    });
+    newUserId = created?.user?.id ?? null;
+    provisionError = createErr?.message;
+    if (!newUserId) {
+      const { data: byPhone } = await service
+        .from('profiles')
+        .select('id')
+        .eq('phone', phone)
+        .maybeSingle();
+      newUserId = (byPhone as { id: string } | null)?.id ?? null;
+    }
+  }
+
+  if (!newUserId) {
+    return NextResponse.json(
+      { ok: false, error: provisionError ?? 'PROVISION_FAILED' },
+      { status: 500 },
+    );
   }
 
   for (let i = 0; i < 8; i++) {
@@ -118,7 +142,7 @@ export async function POST(
     .update({
       ...(fullName ? { full_name: fullName } : {}),
       ...(phone ? { phone } : {}),
-      email,
+      ...(email ? { email } : {}),
     })
     .eq('id', newUserId);
 
@@ -146,7 +170,7 @@ export async function POST(
     .insert({
       jamiya_id: jamiyaId,
       invited_by: user.id,
-      email,
+      email: email || null,
       phone,
       invitee_user_id: newUserId,
       token_hash: tokenHash,
