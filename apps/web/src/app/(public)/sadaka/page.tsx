@@ -62,59 +62,82 @@ export default async function SadakaPage({ searchParams }: Props) {
   const { data } = await query;
   const campaigns = (data ?? []) as unknown as Campaign[];
 
+  const startHref = (
+    isCircleMember
+      ? '/sadaka/new'
+      : user
+        ? '/circles'
+        : '/login?next=/sadaka/new'
+  ) as Route;
+  const startLabel = isCircleMember
+    ? 'Start a campaign'
+    : user
+      ? 'Join a circle to start a campaign'
+      : 'Sign in to start a campaign';
+
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            Give with care
+      <div>
+        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+          Give with care
+        </p>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight">
+          Sadaka
+        </h1>
+        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          Members set up campaigns with documentation. Admins approve. Anyone can contribute. When
+          the target is reached, funds go to the beneficiary M-Pesa.
+        </p>
+      </div>
+
+      <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Sadaka options">
+        <Link
+          href={startHref}
+          className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted/30"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent">Members</p>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-xl font-semibold">
+            {startLabel}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Submit a cause with KYC docs. It goes to admin review before it goes live.
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight">
-            Sadaka
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            Circle members start campaigns with documentation. Admins review and approve. Anyone can
-            contribute. When the target is reached, funds go to the beneficiary M-Pesa.
+        </Link>
+
+        <a
+          href="#active-campaigns"
+          className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted/30"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent">Everyone</p>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-xl font-semibold">
+            Active campaigns
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Browse approved campaigns below and contribute — no membership required.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {isCircleMember ? (
-            <Link
-              href={'/sadaka/new' as Route}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-            >
-              Start a campaign
-            </Link>
-          ) : user ? (
-            <Link
-              href={'/circles' as Route}
-              className="rounded-md border border-border px-4 py-2 text-sm"
-            >
-              Join a circle to start a campaign
-            </Link>
-          ) : (
-            <Link
-              href={'/login?next=/sadaka/new' as Route}
-              className="rounded-md border border-border px-4 py-2 text-sm"
-            >
-              Sign in to start a campaign
-            </Link>
-          )}
-          <Link
-            href={'/sadaka/adopt' as Route}
-            className="rounded-md border border-border px-4 py-2 text-sm"
-          >
-            Adopt an institution
-          </Link>
-          {user ? (
-            <Link
-              href={'/sadaka/my' as Route}
-              className="rounded-md border border-border px-4 py-2 text-sm"
-            >
-              My campaigns
-            </Link>
-          ) : null}
-        </div>
+        </a>
+
+        <Link
+          href={(user ? '/sadaka/my' : '/login?next=/sadaka/my') as Route}
+          className="rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-muted/30"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.14em] text-accent">Your space</p>
+          <h2 className="mt-2 font-[family-name:var(--font-display)] text-xl font-semibold">
+            My campaigns
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Track pending review, live status, and sponsorships you started.
+          </p>
+        </Link>
+      </section>
+
+      <div className="mt-6 flex flex-wrap gap-2">
+        <Link
+          href={'/sadaka/adopt' as Route}
+          className="rounded-md border border-border px-4 py-2 text-sm"
+        >
+          Adopt an institution
+        </Link>
       </div>
 
       <ol className="mt-8 grid gap-3 text-sm text-muted-foreground sm:grid-cols-3">
@@ -135,7 +158,7 @@ export default async function SadakaPage({ searchParams }: Props) {
         </li>
       </ol>
 
-      <div className="mt-8 flex flex-wrap gap-2">
+      <div className="mt-10 flex flex-wrap gap-2">
         <Link
           href={'/sadaka' as Route}
           className={`rounded-md px-3 py-1.5 text-sm ${!category ? 'bg-primary text-primary-foreground' : 'border border-border'}`}
@@ -153,7 +176,10 @@ export default async function SadakaPage({ searchParams }: Props) {
         ))}
       </div>
 
-      <h2 className="mt-10 font-[family-name:var(--font-display)] text-2xl font-semibold">
+      <h2
+        id="active-campaigns"
+        className="mt-10 scroll-mt-24 font-[family-name:var(--font-display)] text-2xl font-semibold"
+      >
         Active campaigns
       </h2>
       <div className="mt-4 space-y-4">
@@ -211,7 +237,9 @@ export default async function SadakaPage({ searchParams }: Props) {
             );
           })
         ) : (
-          <p className="py-10 text-muted-foreground">No active campaigns in this category yet.</p>
+          <p className="py-10 text-muted-foreground">
+            No active campaigns yet. Members can start one for admin review.
+          </p>
         )}
       </div>
     </main>

@@ -58,12 +58,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               {APP_NAME}
             </Link>
-            <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+            <nav
+              className="flex max-w-[min(100%,42rem)] items-center gap-1 overflow-x-auto md:max-w-none"
+              aria-label="Primary"
+            >
               {navItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
                   {item.label}
                   {item.label === 'Notifications' && unread > 0 ? (
