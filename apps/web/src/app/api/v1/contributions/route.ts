@@ -25,10 +25,10 @@ export async function GET(request: Request) {
   const { data, error } = await supabase
     .from('contributions')
     .select(
-      'id, cycle_number, amount, currency, status, due_date, jamiya_id, member_id',
+      'id, cycle_number, amount, amount_paid, currency, status, due_date, jamiya_id, member_id',
     )
     .in('member_id', memberIds)
-    .in('status', ['pending', 'late'])
+    .in('status', ['pending', 'late', 'partial'])
     .order('due_date', { ascending: true })
     .limit(50);
 

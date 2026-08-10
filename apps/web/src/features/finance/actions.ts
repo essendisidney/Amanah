@@ -212,6 +212,12 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
   });
   if (error) return { success: false, message: error.message };
   const state = rpcState(data, 'Could not decide Qard request.');
+  if (!state.success) {
+    const code = (data as { error?: string } | null)?.error;
+    if (code === 'AGREEMENT_REQUIRED') {
+      state.message = 'Borrower must accept the facility agreement first.';
+    }
+  }
   if (state.success) {
     state.message = approve ? 'Loan approved and disbursed.' : 'Loan rejected.';
     revalidatePath('/finance/qard');
@@ -222,6 +228,31 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
 
 export async function decideQardFormAction(formData: FormData): Promise<void> {
   await decideQardAction(formData);
+}
+
+export async function acceptQardAgreementAction(
+  formData: FormData,
+): Promise<FinanceActionState> {
+  const loanId = String(formData.get('loanId') ?? '');
+  const signerName = String(formData.get('signerName') ?? '').trim();
+  if (!loanId || signerName.length < 2) {
+    return { success: false, message: 'Enter your full name to accept the agreement.' };
+  }
+  const { data, error } = await callRpc('accept_qard_agreement', {
+    p_loan_id: loanId,
+    p_signer_name: signerName,
+  });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not accept agreement.');
+  if (state.success) {
+    state.message = 'Facility agreement accepted.';
+    revalidatePath('/finance/qard');
+  }
+  return state;
+}
+
+export async function acceptQardAgreementFormAction(formData: FormData): Promise<void> {
+  await acceptQardAgreementAction(formData);
 }
 
 export async function applyReferralAction(

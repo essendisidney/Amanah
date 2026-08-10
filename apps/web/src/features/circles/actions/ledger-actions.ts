@@ -36,10 +36,18 @@ export async function activateCircleAction(formData: FormData): Promise<void> {
 export async function payContributionAction(formData: FormData): Promise<void> {
   const contributionId = String(formData.get('contributionId') ?? '');
   const slug = String(formData.get('slug') ?? '');
+  const amountRaw = String(formData.get('amount') ?? '').trim();
   if (!contributionId) return;
+
+  const p_amount = amountRaw ? Number(amountRaw) : null;
+  if (amountRaw && (!Number.isFinite(p_amount) || (p_amount as number) <= 0)) {
+    console.error('pay_contribution', 'INVALID_AMOUNT');
+    return;
+  }
 
   const { data, error } = await callRpc('pay_contribution', {
     p_contribution_id: contributionId,
+    p_amount,
   });
 
   if (error) {
@@ -47,15 +55,17 @@ export async function payContributionAction(formData: FormData): Promise<void> {
     return;
   }
 
-  const result = data as { ok?: boolean; error?: string } | null;
+  const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
     console.error('pay_contribution', result?.error);
     return;
   }
 
-  await callRpc('charge_contribution_fee', {
-    p_contribution_id: contributionId,
-  });
+  if (result.status === 'paid') {
+    await callRpc('charge_contribution_fee', {
+      p_contribution_id: contributionId,
+    });
+  }
 
   revalidateCircle(slug || undefined);
 }
@@ -63,10 +73,18 @@ export async function payContributionAction(formData: FormData): Promise<void> {
 export async function payContributionAheadAction(formData: FormData): Promise<void> {
   const contributionId = String(formData.get('contributionId') ?? '');
   const slug = String(formData.get('slug') ?? '');
+  const amountRaw = String(formData.get('amount') ?? '').trim();
   if (!contributionId) return;
+
+  const p_amount = amountRaw ? Number(amountRaw) : null;
+  if (amountRaw && (!Number.isFinite(p_amount) || (p_amount as number) <= 0)) {
+    console.error('pay_contribution_ahead', 'INVALID_AMOUNT');
+    return;
+  }
 
   const { data, error } = await callRpc('pay_contribution_ahead', {
     p_contribution_id: contributionId,
+    p_amount,
   });
 
   if (error) {
@@ -74,15 +92,17 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
     return;
   }
 
-  const result = data as { ok?: boolean; error?: string } | null;
+  const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
     console.error('pay_contribution_ahead', result?.error);
     return;
   }
 
-  await callRpc('charge_contribution_fee', {
-    p_contribution_id: contributionId,
-  });
+  if (result.status === 'paid') {
+    await callRpc('charge_contribution_fee', {
+      p_contribution_id: contributionId,
+    });
+  }
 
   revalidateCircle(slug || undefined);
 }

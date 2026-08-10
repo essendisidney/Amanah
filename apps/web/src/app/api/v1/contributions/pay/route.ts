@@ -13,6 +13,7 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     contributionId?: string;
+    amount?: number;
   } | null;
 
   if (!body?.contributionId) {
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase.rpc('pay_contribution', {
     p_contribution_id: body.contributionId,
+    p_amount: body.amount ?? null,
   });
 
   if (error) {

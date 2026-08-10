@@ -18,7 +18,7 @@ export type JamiyaStatus =
   | 'completed'
   | 'cancelled';
 
-export type ContributionStatus = 'pending' | 'paid' | 'late' | 'waived' | 'failed';
+export type ContributionStatus = 'pending' | 'paid' | 'late' | 'waived' | 'failed' | 'partial';
 
 export type PayoutStatus = 'scheduled' | 'processing' | 'paid' | 'failed' | 'cancelled';
 

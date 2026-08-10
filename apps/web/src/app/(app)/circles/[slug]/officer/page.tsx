@@ -93,7 +93,7 @@ export default async function OfficerConsolePage({ params }: Props) {
         .limit(5),
       supabase
         .from('members')
-        .select('id, role, status, user_id')
+        .select('id, role, status, user_id, member_code')
         .eq('jamiya_id', jamiya.id)
         .order('created_at', { ascending: true })
         .limit(80),
@@ -111,6 +111,7 @@ export default async function OfficerConsolePage({ params }: Props) {
     role: string;
     status: string;
     user_id: string;
+    member_code: string | null;
   }>;
   const userIds = memberRows.map((m) => m.user_id);
   const { data: profiles } = userIds.length
@@ -296,6 +297,7 @@ export default async function OfficerConsolePage({ params }: Props) {
                     {profile?.full_name ?? profile?.email ?? m.user_id.slice(0, 8)}
                   </p>
                   <p className="text-xs text-muted-foreground">
+                    {m.member_code ? `${m.member_code} · ` : ''}
                     {m.role} · {m.status}
                   </p>
                 </div>

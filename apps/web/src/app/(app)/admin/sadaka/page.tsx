@@ -3,7 +3,12 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
-import { setCampaignFeePolicyFormAction } from '@/features/charity/admin-actions';
+import {
+  disburseCampaignFormAction,
+  reviewCampaignFormAction,
+  setCampaignFeePolicyFormAction,
+  verifyInstitutionFormAction,
+} from '@/features/charity/admin-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Sadaka' };
@@ -19,6 +24,11 @@ type Campaign = {
   sharia_board_endorsed: boolean;
   goal_amount: number | string;
   raised_amount: number | string;
+  disbursed_amount: number | string | null;
+  beneficiary_phone: string | null;
+  beneficiary_name: string | null;
+  beneficiary_kyc_doc_url: string | null;
+  category: string | null;
   currency: string;
   updated_at: string;
 };
@@ -34,18 +44,30 @@ type PolicyEvent = {
   created_at: string;
 };
 
+type Institution = {
+  id: string;
+  name: string;
+  type: string;
+  verification_status: string;
+  contact_person: string;
+  registration_doc_url: string | null;
+  created_at: string;
+};
+
 export default async function AdminSadakaPage() {
   await requireAdminAccess('compliance');
   const supabase = await createClient();
 
-  const [{ data: campaigns }, { data: events }] = await Promise.all([
+  const [{ data: campaigns }, { data: events }, { data: institutions }] = await Promise.all([
     supabase
       .from('charity_campaigns')
       .select(
-        'id, slug, title, status, fee_mode, fee_bps, sharia_board_endorsed, goal_amount, raised_amount, currency, updated_at',
+        `id, slug, title, status, fee_mode, fee_bps, sharia_board_endorsed, goal_amount, raised_amount,
+         disbursed_amount, beneficiary_phone, beneficiary_name, beneficiary_kyc_doc_url, category,
+         currency, updated_at`,
       )
       .order('updated_at', { ascending: false })
-      .limit(50),
+      .limit(80),
     supabase
       .from('sharia_fee_policy_events')
       .select(
@@ -53,138 +75,295 @@ export default async function AdminSadakaPage() {
       )
       .order('created_at', { ascending: false })
       .limit(30),
+    supabase
+      .from('sadaka_institutions')
+      .select('id, name, type, verification_status, contact_person, registration_doc_url, created_at')
+      .order('created_at', { ascending: false })
+      .limit(40),
   ]);
 
   const rows = (campaigns ?? []) as unknown as Campaign[];
   const history = (events ?? []) as unknown as PolicyEvent[];
+  const orgs = (institutions ?? []) as unknown as Institution[];
+  const pending = rows.filter((r) => r.status === 'pending_review' || r.status === 'draft');
+  const payable = rows.filter(
+    (r) =>
+      ['live', 'funded', 'disbursed'].includes(r.status) &&
+      Number(r.raised_amount) - Number(r.disbursed_amount ?? 0) > 0,
+  );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <div>
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Sadaka fee policy
+          Sadaka operations
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Set donation fee mode and record Sharia board endorsement. Both{' '}
-          <code className="text-xs">donation_addon</code> and{' '}
-          <code className="text-xs">donation_deduct</code> are supported in ledger math; flip
-          endorsement after board sign-off without a redeploy.
+          Review campaigns before they go live, disburse raised funds (simulated B2C for MVP), verify
+          institutions, and manage fee policy.
         </p>
       </div>
 
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No campaigns yet.</p>
-      ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-          {rows.map((row) => {
-            const raised =
-              typeof row.raised_amount === 'number'
-                ? row.raised_amount
-                : Number(row.raised_amount);
-            const goal =
-              typeof row.goal_amount === 'number' ? row.goal_amount : Number(row.goal_amount);
-            return (
-              <li key={row.id} className="space-y-4 px-5 py-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
+      <section className="space-y-3">
+        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Pending review
+        </h3>
+        {pending.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No campaigns awaiting review.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {pending.map((row) => (
+              <li key={row.id} className="space-y-3 px-5 py-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium">{row.title}</p>
+                    <StatusBadge status={row.status} />
+                    {row.category ? <StatusBadge status={row.category} /> : null}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Target {formatCurrency(Number(row.goal_amount), row.currency)} · beneficiary{' '}
+                    {row.beneficiary_name ?? '—'} · {row.beneficiary_phone ?? 'no phone'}
+                  </p>
+                  {row.beneficiary_kyc_doc_url ? (
+                    <p className="mt-1 break-all text-xs text-muted-foreground">
+                      KYC: {row.beneficiary_kyc_doc_url}
+                    </p>
+                  ) : null}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <form action={reviewCampaignFormAction} className="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="campaignId" value={row.id} />
+                    <input type="hidden" name="approve" value="1" />
+                    <label className="text-xs text-muted-foreground">
+                      Sharia endorse
+                      <select
+                        name="shariaEndorsed"
+                        defaultValue="false"
+                        className="ml-2 h-9 border border-input bg-background px-2"
+                      >
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                      </select>
+                    </label>
+                    <Button type="submit" size="sm">
+                      Approve → live
+                    </Button>
+                  </form>
+                  <form action={reviewCampaignFormAction} className="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="campaignId" value={row.id} />
+                    <input type="hidden" name="approve" value="0" />
+                    <Input
+                      name="rejectionReason"
+                      placeholder="Rejection reason"
+                      required
+                      className="w-56"
+                    />
+                    <Button type="submit" size="sm" variant="outline">
+                      Reject
+                    </Button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Disburse raised funds
+        </h3>
+        {payable.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nothing available to disburse.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {payable.map((row) => {
+              const available =
+                Number(row.raised_amount) - Number(row.disbursed_amount ?? 0);
+              return (
+                <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
                   <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">{row.title}</p>
-                      <StatusBadge status={row.status} />
-                      {row.sharia_board_endorsed ? (
-                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                          Endorsed
-                        </span>
-                      ) : (
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                          Pending board
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      /{row.slug} · raised {formatCurrency(raised, row.currency)} of{' '}
-                      {formatCurrency(goal, row.currency)} · fee {(row.fee_bps / 100).toFixed(2)}%{' '}
-                      ({row.fee_mode}) · updated {formatDate(row.updated_at)}
+                    <p className="font-medium">{row.title}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Available {formatCurrency(available, row.currency)} →{' '}
+                      {row.beneficiary_phone ?? 'missing phone'}
                     </p>
                   </div>
-                </div>
-                <form
-                  action={setCampaignFeePolicyFormAction}
-                  className="grid gap-3 rounded-lg border border-border/70 bg-muted/30 p-3 sm:grid-cols-2 lg:grid-cols-3"
-                >
-                  <input type="hidden" name="campaignId" value={row.id} />
-                  <div className="space-y-1">
-                    <Label htmlFor={`mode-${row.id}`}>Fee mode</Label>
-                    <select
-                      id={`mode-${row.id}`}
-                      name="feeMode"
-                      defaultValue={row.fee_mode}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                    >
-                      <option value="donation_addon">donation_addon (donor pays fee on top)</option>
-                      <option value="donation_deduct">donation_deduct (fee from gift)</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor={`bps-${row.id}`}>Fee (bps)</Label>
+                  <form action={disburseCampaignFormAction} className="flex flex-wrap gap-2">
+                    <input type="hidden" name="campaignId" value={row.id} />
                     <Input
-                      id={`bps-${row.id}`}
-                      name="feeBps"
+                      name="amount"
                       type="number"
-                      min={0}
-                      max={2000}
-                      defaultValue={row.fee_bps}
+                      min={1}
+                      step="0.01"
+                      max={available}
+                      placeholder="Full available"
+                      className="w-36"
                     />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor={`status-${row.id}`}>Status</Label>
-                    <select
-                      id={`status-${row.id}`}
-                      name="status"
-                      defaultValue={row.status}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                    >
-                      <option value="draft">draft</option>
-                      <option value="live">live</option>
-                      <option value="paused">paused</option>
-                      <option value="completed">completed</option>
-                      <option value="cancelled">cancelled</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor={`endorsed-${row.id}`}>Sharia board</Label>
-                    <select
-                      id={`endorsed-${row.id}`}
-                      name="shariaBoardEndorsed"
-                      defaultValue={row.sharia_board_endorsed ? 'true' : 'false'}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                    >
-                      <option value="false">Pending sign-off</option>
-                      <option value="true">Endorsed</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor={`ref-${row.id}`}>Decision reference</Label>
-                    <Input
-                      id={`ref-${row.id}`}
-                      name="decisionReference"
-                      placeholder="Board minute / letter ID"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor={`notes-${row.id}`}>Notes</Label>
-                    <Input id={`notes-${row.id}`} name="notes" placeholder="Optional notes" />
-                  </div>
-                  <div className="flex items-end sm:col-span-2 lg:col-span-3">
                     <Button type="submit" size="sm">
-                      Save fee policy
+                      Disburse (sim B2C)
                     </Button>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Institution verification
+        </h3>
+        {orgs.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No institutions registered.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {orgs.map((org) => (
+              <li key={org.id} className="space-y-2 px-5 py-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{org.name}</p>
+                  <StatusBadge status={org.type} />
+                  <StatusBadge status={org.verification_status} />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Contact {org.contact_person} · {formatDate(org.created_at)}
+                </p>
+                {org.registration_doc_url ? (
+                  <p className="break-all text-xs text-muted-foreground">
+                    Docs: {org.registration_doc_url}
+                  </p>
+                ) : null}
+                {org.verification_status === 'pending_verification' ? (
+                  <div className="flex flex-wrap gap-2">
+                    <form action={verifyInstitutionFormAction}>
+                      <input type="hidden" name="institutionId" value={org.id} />
+                      <input type="hidden" name="approve" value="1" />
+                      <Button type="submit" size="sm">
+                        Verify
+                      </Button>
+                    </form>
+                    <form action={verifyInstitutionFormAction} className="flex gap-2">
+                      <input type="hidden" name="institutionId" value={org.id} />
+                      <input type="hidden" name="approve" value="0" />
+                      <Input name="rejectionReason" placeholder="Reason" className="w-48" />
+                      <Button type="submit" size="sm" variant="outline">
+                        Reject
+                      </Button>
+                    </form>
                   </div>
-                </form>
+                ) : null}
               </li>
-            );
-          })}
-        </ul>
-      )}
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Fee policy
+        </h3>
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No campaigns yet.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {rows.map((row) => {
+              const raised = Number(row.raised_amount);
+              const goal = Number(row.goal_amount);
+              return (
+                <li key={row.id} className="space-y-4 px-5 py-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium">{row.title}</p>
+                        <StatusBadge status={row.status} />
+                      </div>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        /{row.slug} · raised {formatCurrency(raised, row.currency)} of{' '}
+                        {formatCurrency(goal, row.currency)} · fee {(row.fee_bps / 100).toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                  <form
+                    action={setCampaignFeePolicyFormAction}
+                    className="grid gap-3 rounded-lg border border-border/70 bg-muted/30 p-3 sm:grid-cols-2 lg:grid-cols-3"
+                  >
+                    <input type="hidden" name="campaignId" value={row.id} />
+                    <div className="space-y-1">
+                      <Label htmlFor={`mode-${row.id}`}>Fee mode</Label>
+                      <select
+                        id={`mode-${row.id}`}
+                        name="feeMode"
+                        defaultValue={row.fee_mode}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        <option value="donation_addon">donation_addon</option>
+                        <option value="donation_deduct">donation_deduct</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`bps-${row.id}`}>Fee (bps)</Label>
+                      <Input
+                        id={`bps-${row.id}`}
+                        name="feeBps"
+                        type="number"
+                        min={0}
+                        max={2000}
+                        defaultValue={row.fee_bps}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`status-${row.id}`}>Status</Label>
+                      <select
+                        id={`status-${row.id}`}
+                        name="status"
+                        defaultValue={row.status}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        <option value="draft">draft</option>
+                        <option value="pending_review">pending_review</option>
+                        <option value="live">live</option>
+                        <option value="paused">paused</option>
+                        <option value="funded">funded</option>
+                        <option value="disbursed">disbursed</option>
+                        <option value="closed">closed</option>
+                        <option value="rejected">rejected</option>
+                        <option value="completed">completed</option>
+                        <option value="cancelled">cancelled</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`endorsed-${row.id}`}>Sharia board</Label>
+                      <select
+                        id={`endorsed-${row.id}`}
+                        name="shariaBoardEndorsed"
+                        defaultValue={row.sharia_board_endorsed ? 'true' : 'false'}
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        <option value="false">Pending sign-off</option>
+                        <option value="true">Endorsed</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`ref-${row.id}`}>Decision reference</Label>
+                      <Input id={`ref-${row.id}`} name="decisionReference" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`notes-${row.id}`}>Notes</Label>
+                      <Input id={`notes-${row.id}`} name="notes" />
+                    </div>
+                    <div className="flex items-end sm:col-span-2 lg:col-span-3">
+                      <Button type="submit" size="sm">
+                        Save fee policy
+                      </Button>
+                    </div>
+                  </form>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
       <section className="space-y-3">
         <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">

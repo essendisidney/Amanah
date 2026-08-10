@@ -8,11 +8,13 @@ import {
   settlePayoutAction,
   settlePayoutToMpesaAction,
 } from '../actions/ledger-actions';
+import { confirmPayoutReceiptAction } from '../actions/ops-actions';
 
 export type ScheduleContribution = {
   id: string;
   cycleNumber: number;
   amount: number;
+  amountPaid: number;
   currency: string;
   status: string;
   dueDate: string;
@@ -27,6 +29,8 @@ export type SchedulePayout = {
   status: string;
   scheduledDate: string;
   memberLabel: string;
+  isMine?: boolean;
+  receiptConfirmedAt?: string | null;
 };
 
 export function ActivateCircleButton({
@@ -66,43 +70,65 @@ export function ContributionCalendar({
 
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-      {contributions.map((item) => (
-        <li
-          key={item.id}
-          className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-medium">Cycle {item.cycleNumber}</p>
-              <StatusBadge status={item.status} />
-              {item.isMine ? (
-                <span className="text-xs text-muted-foreground">Yours</span>
-              ) : null}
+      {contributions.map((item) => {
+        const paid = item.amountPaid ?? 0;
+        const remaining = Math.max(item.amount - paid, 0);
+        const payable =
+          item.isMine &&
+          (item.status === 'pending' ||
+            item.status === 'late' ||
+            item.status === 'partial');
+        const ahead =
+          new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10));
+
+        return (
+          <li
+            key={item.id}
+            className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium">Cycle {item.cycleNumber}</p>
+                <StatusBadge status={item.status} />
+                {item.isMine ? (
+                  <span className="text-xs text-muted-foreground">Yours</span>
+                ) : null}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Due {formatDate(item.dueDate)} · Due{' '}
+                {formatCurrency(item.amount, item.currency)}
+                {paid > 0
+                  ? ` · Paid ${formatCurrency(paid, item.currency)} · Remaining ${formatCurrency(remaining, item.currency)}`
+                  : null}
+              </p>
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Due {formatDate(item.dueDate)} ·{' '}
-              {formatCurrency(item.amount, item.currency)}
-            </p>
-          </div>
-          {item.isMine && (item.status === 'pending' || item.status === 'late') ? (
-            <form
-              action={
-                new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10))
-                  ? payContributionAheadAction
-                  : payContributionAction
-              }
-            >
-              <input type="hidden" name="contributionId" value={item.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm">
-                {new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10))
-                  ? 'Pay ahead'
-                  : 'Pay from wallet'}
-              </Button>
-            </form>
-          ) : null}
-        </li>
-      ))}
+            {payable ? (
+              <form
+                action={ahead ? payContributionAheadAction : payContributionAction}
+                className="flex flex-wrap items-end gap-2"
+              >
+                <input type="hidden" name="contributionId" value={item.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <label className="text-xs text-muted-foreground">
+                  Amount (blank = full remaining)
+                  <input
+                    name="amount"
+                    type="number"
+                    min={1}
+                    step="0.01"
+                    max={remaining}
+                    placeholder={String(remaining)}
+                    className="ml-2 h-9 w-28 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+                  />
+                </label>
+                <Button type="submit" size="sm">
+                  {ahead ? 'Pay ahead' : 'Lipa / Pay'}
+                </Button>
+              </form>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -143,31 +169,45 @@ export function PayoutSchedule({
               {formatCurrency(item.amount, item.currency)}
             </p>
           </div>
-          {isCircleAdmin &&
-          (item.status === 'scheduled' || item.status === 'processing') ? (
-            <div className="flex flex-col gap-2 sm:items-end">
-              <form action={settlePayoutAction}>
+          <div className="flex flex-col gap-2 sm:items-end">
+            {isCircleAdmin &&
+            (item.status === 'scheduled' || item.status === 'processing') ? (
+              <>
+                <form action={settlePayoutAction}>
+                  <input type="hidden" name="payoutId" value={item.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <Button type="submit" size="sm" variant="outline">
+                    Settle to wallet
+                  </Button>
+                </form>
+                <form action={settlePayoutToMpesaAction} className="flex flex-wrap gap-2">
+                  <input type="hidden" name="payoutId" value={item.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <input
+                    name="phone"
+                    type="tel"
+                    placeholder="+2547…"
+                    className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
+                  />
+                  <Button type="submit" size="sm">
+                    Settle → M-Pesa (sim)
+                  </Button>
+                </form>
+              </>
+            ) : null}
+            {item.isMine && item.status === 'paid' && !item.receiptConfirmedAt ? (
+              <form action={confirmPayoutReceiptAction}>
                 <input type="hidden" name="payoutId" value={item.id} />
                 <input type="hidden" name="slug" value={slug} />
-                <Button type="submit" size="sm" variant="outline">
-                  Settle to wallet
-                </Button>
-              </form>
-              <form action={settlePayoutToMpesaAction} className="flex flex-wrap gap-2">
-                <input type="hidden" name="payoutId" value={item.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <input
-                  name="phone"
-                  type="tel"
-                  placeholder="+2547…"
-                  className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
-                />
                 <Button type="submit" size="sm">
-                  Settle → M-Pesa (sim)
+                  Confirm receipt
                 </Button>
               </form>
-            </div>
-          ) : null}
+            ) : null}
+            {item.receiptConfirmedAt ? (
+              <p className="text-xs text-muted-foreground">Receipt confirmed</p>
+            ) : null}
+          </div>
         </li>
       ))}
     </ul>

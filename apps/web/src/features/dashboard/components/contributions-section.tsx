@@ -43,16 +43,29 @@ export function ContributionsSection({
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Cycle {item.cycleNumber} · Due {formatDate(item.dueDate)}
+                  {item.amountPaid > 0
+                    ? ` · Paid ${formatCurrency(item.amountPaid, item.currency)} · Left ${formatCurrency(Math.max(item.amount - item.amountPaid, 0), item.currency)}`
+                    : null}
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <p className="text-sm font-semibold text-foreground">
                   {formatCurrency(item.amount, item.currency)}
                 </p>
-                {item.status === 'pending' || item.status === 'late' ? (
-                  <form action={payContributionAction}>
+                {item.status === 'pending' ||
+                item.status === 'late' ||
+                item.status === 'partial' ? (
+                  <form action={payContributionAction} className="flex items-center gap-2">
                     <input type="hidden" name="contributionId" value={item.id} />
                     <input type="hidden" name="slug" value={item.jamiyaSlug} />
+                    <input
+                      name="amount"
+                      type="number"
+                      min={1}
+                      step="0.01"
+                      placeholder="Mdogo"
+                      className="h-9 w-24 rounded-md border border-input bg-background px-2 text-sm"
+                    />
                     <Button type="submit" size="sm">
                       Pay
                     </Button>

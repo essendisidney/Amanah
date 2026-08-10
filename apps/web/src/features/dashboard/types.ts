@@ -39,6 +39,7 @@ export type DashboardContribution = {
   id: string;
   cycleNumber: number;
   amount: number;
+  amountPaid: number;
   currency: string;
   status: ContributionStatusEnum;
   dueDate: string;

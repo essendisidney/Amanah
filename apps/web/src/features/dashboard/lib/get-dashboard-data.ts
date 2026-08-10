@@ -48,6 +48,7 @@ type ContributionRow = {
   id: string;
   cycle_number: number;
   amount: number | string;
+  amount_paid?: number | string | null;
   currency: string;
   status: DashboardContribution['status'];
   due_date: string;
@@ -202,6 +203,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
           id,
           cycle_number,
           amount,
+          amount_paid,
           currency,
           status,
           due_date,
@@ -210,7 +212,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
         `,
         )
         .in('member_id', memberIds)
-        .in('status', ['pending', 'late'])
+        .in('status', ['pending', 'late', 'partial'])
         .order('due_date', { ascending: true })
         .limit(8),
       supabase
@@ -241,6 +243,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
           id: row.id,
           cycleNumber: row.cycle_number,
           amount: toNumber(row.amount),
+          amountPaid: toNumber(row.amount_paid ?? 0),
           currency: row.currency,
           status: row.status,
           dueDate: row.due_date,

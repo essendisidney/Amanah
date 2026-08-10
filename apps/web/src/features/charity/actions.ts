@@ -233,3 +233,123 @@ export async function donateFormAction(formData: FormData): Promise<void> {
 export async function tipFormAction(formData: FormData): Promise<void> {
   await tipAction(formData);
 }
+
+export async function submitCampaignAction(
+  formData: FormData,
+): Promise<CharityActionState & { slug?: string }> {
+  const title = String(formData.get('title') ?? '').trim();
+  const story = String(formData.get('story') ?? '').trim();
+  const category = String(formData.get('category') ?? '');
+  const target = Number(formData.get('targetAmount'));
+  const beneficiaryName = String(formData.get('beneficiaryName') ?? '').trim();
+  const beneficiaryPhone = String(formData.get('beneficiaryPhone') ?? '').trim();
+  const kycUrl = String(formData.get('kycDocUrl') ?? '').trim();
+
+  const { data, error } = await callRpc('submit_sadaka_campaign', {
+    p_title: title,
+    p_story: story,
+    p_category: category,
+    p_target_amount: target,
+    p_beneficiary_name: beneficiaryName,
+    p_beneficiary_phone: beneficiaryPhone,
+    p_beneficiary_kyc_doc_url: kycUrl,
+    p_slug: null,
+  });
+  if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string; slug?: string } | null;
+  if (!result?.ok) {
+    const messages: Record<string, string> = {
+      UNAUTHENTICATED: 'Sign in to create a campaign.',
+      INVALID_STORY: 'Story must be at least 40 characters.',
+      INVALID_TARGET: 'Target must be at least KES 100.',
+      BENEFICIARY_KYC_REQUIRED: 'Beneficiary name, M-Pesa number, and KYC doc URL are required.',
+      INVALID_CATEGORY: 'Choose a valid category.',
+    };
+    return {
+      success: false,
+      message: messages[result?.error ?? ''] ?? result?.error ?? 'Could not submit campaign.',
+    };
+  }
+  revalidatePath('/sadaka');
+  revalidatePath('/sadaka/my');
+  revalidatePath('/admin/sadaka');
+  return {
+    success: true,
+    message: 'Campaign submitted for review.',
+    slug: result.slug,
+  };
+}
+
+export async function submitCampaignFormAction(formData: FormData): Promise<void> {
+  await submitCampaignAction(formData);
+}
+
+export async function registerInstitutionAction(
+  formData: FormData,
+): Promise<CharityActionState> {
+  const { data, error } = await callRpc('register_sadaka_institution', {
+    p_name: String(formData.get('name') ?? '').trim(),
+    p_type: String(formData.get('type') ?? ''),
+    p_contact_person: String(formData.get('contactPerson') ?? '').trim(),
+    p_registration_doc_url: String(formData.get('registrationDocUrl') ?? '').trim(),
+    p_contact_phone: String(formData.get('contactPhone') ?? '').trim() || null,
+  });
+  if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    return { success: false, message: result?.error ?? 'Could not register institution.' };
+  }
+  revalidatePath('/sadaka/adopt');
+  revalidatePath('/admin/sadaka');
+  return { success: true, message: 'Institution submitted for verification.' };
+}
+
+export async function registerInstitutionFormAction(formData: FormData): Promise<void> {
+  await registerInstitutionAction(formData);
+}
+
+export async function createAdoptionProfileAction(
+  formData: FormData,
+): Promise<CharityActionState> {
+  const { data, error } = await callRpc('create_adoption_profile', {
+    p_institution_id: String(formData.get('institutionId') ?? ''),
+    p_title: String(formData.get('title') ?? '').trim(),
+    p_description: String(formData.get('description') ?? '').trim(),
+    p_suggested_monthly_amount: Number(formData.get('monthlyAmount')),
+  });
+  if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string; slug?: string } | null;
+  if (!result?.ok) {
+    return { success: false, message: result?.error ?? 'Could not create adoption profile.' };
+  }
+  revalidatePath('/sadaka/adopt');
+  return { success: true, message: 'Adoption profile published.' };
+}
+
+export async function createAdoptionProfileFormAction(formData: FormData): Promise<void> {
+  await createAdoptionProfileAction(formData);
+}
+
+export async function startSponsorshipAction(
+  formData: FormData,
+): Promise<CharityActionState> {
+  const { data, error } = await callRpc('start_sponsorship', {
+    p_adoption_profile_id: String(formData.get('profileId') ?? ''),
+    p_monthly_amount: Number(formData.get('monthlyAmount')),
+    p_phone: String(formData.get('phone') ?? '').trim() || null,
+  });
+  if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string; note?: string } | null;
+  if (!result?.ok) {
+    return { success: false, message: result?.error ?? 'Could not start sponsorship.' };
+  }
+  revalidatePath('/sadaka/adopt');
+  return {
+    success: true,
+    message: result.note ?? 'Sponsorship started. First month recorded.',
+  };
+}
+
+export async function startSponsorshipFormAction(formData: FormData): Promise<void> {
+  await startSponsorshipAction(formData);
+}

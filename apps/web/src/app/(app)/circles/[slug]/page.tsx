@@ -24,6 +24,15 @@ import {
 import { OpenDisputeForm } from '@/features/circles/components/open-dispute-form';
 import { ExportCircleReportButtons } from '@/features/circles/components/export-circle-report';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
+import {
+  CircleOpsPanel,
+  NextPayoutBoard,
+  type AnnouncementRow,
+  type BookEntryRow,
+  type MemberOption,
+  type PenaltySettings,
+  type TableBankingFund,
+} from '@/features/circles/components/circle-ops-panel';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -46,6 +55,11 @@ type JamiyaRow = {
   current_cycle: number;
   contribution_frequency_days: number;
   start_date: string | null;
+  late_contribution_penalty?: number | string | null;
+  missed_contribution_penalty?: number | string | null;
+  late_loan_penalty_fixed?: number | string | null;
+  late_loan_penalty_pct?: number | string | null;
+  payout_compliance_mode?: string | null;
 };
 
 type Props = {
@@ -69,7 +83,9 @@ export default async function CircleDetailsPage({ params }: Props) {
       `
       id, name, slug, description, status, segment, contribution_amount, currency,
       max_members, member_count, cycle_count, current_cycle,
-      contribution_frequency_days, start_date
+      contribution_frequency_days, start_date,
+      late_contribution_penalty, missed_contribution_penalty,
+      late_loan_penalty_fixed, late_loan_penalty_pct, payout_compliance_mode
     `,
     )
     .eq('slug', slug)
@@ -89,10 +105,12 @@ export default async function CircleDetailsPage({ params }: Props) {
     { data: myMembership },
     { data: contribData },
     { data: payoutData },
+    { data: bookData },
+    { data: announcementData },
   ] = await Promise.all([
     supabase
       .from('members')
-      .select('id, role, status, payout_position, joined_at, user_id')
+      .select('id, role, status, payout_position, joined_at, user_id, member_code')
       .eq('jamiya_id', jamiya.id)
       .order('payout_position', { ascending: true, nullsFirst: false }),
     supabase
@@ -109,16 +127,30 @@ export default async function CircleDetailsPage({ params }: Props) {
       .maybeSingle(),
     supabase
       .from('contributions')
-      .select('id, cycle_number, amount, currency, status, due_date, member_id')
+      .select('id, cycle_number, amount, amount_paid, currency, status, due_date, member_id')
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
       .limit(120),
     supabase
       .from('payouts')
-      .select('id, cycle_number, amount, currency, status, scheduled_date, member_id')
+      .select(
+        'id, cycle_number, amount, currency, status, scheduled_date, member_id, receipt_confirmed_at',
+      )
       .eq('jamiya_id', jamiya.id)
       .order('cycle_number', { ascending: true })
       .limit(60),
+    supabase
+      .from('book_entries')
+      .select('id, entry_type, amount, currency, effective_date, notes')
+      .eq('jamiya_id', jamiya.id)
+      .order('effective_date', { ascending: false })
+      .limit(20),
+    supabase
+      .from('announcements')
+      .select('id, title, body, created_at')
+      .eq('jamiya_id', jamiya.id)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   const membership = myMembership as unknown as {
@@ -143,6 +175,7 @@ export default async function CircleDetailsPage({ params }: Props) {
     payout_position: number | null;
     joined_at: string | null;
     user_id: string;
+    member_code: string | null;
   }>;
 
   const userIds = memberRows.map((row) => row.user_id);
@@ -184,6 +217,7 @@ export default async function CircleDetailsPage({ params }: Props) {
       joinedAt: row.joined_at,
       fullName: profile?.full_name ?? null,
       email: profile?.email ?? null,
+      memberCode: row.member_code,
       vouchStatus: vouchByMember.get(row.id) ?? null,
     };
   });
@@ -213,6 +247,7 @@ export default async function CircleDetailsPage({ params }: Props) {
       id: string;
       cycle_number: number;
       amount: number | string;
+      amount_paid?: number | string | null;
       currency: string;
       status: string;
       due_date: string;
@@ -222,6 +257,10 @@ export default async function CircleDetailsPage({ params }: Props) {
     id: row.id,
     cycleNumber: row.cycle_number,
     amount: typeof row.amount === 'number' ? row.amount : Number(row.amount),
+    amountPaid:
+      typeof row.amount_paid === 'number'
+        ? row.amount_paid
+        : Number(row.amount_paid ?? 0),
     currency: row.currency,
     status: row.status,
     dueDate: row.due_date,
@@ -237,6 +276,7 @@ export default async function CircleDetailsPage({ params }: Props) {
       status: string;
       scheduled_date: string;
       member_id: string;
+      receipt_confirmed_at: string | null;
     }>
   ).map((row) => {
     const member = membersById.get(row.member_id);
@@ -249,13 +289,95 @@ export default async function CircleDetailsPage({ params }: Props) {
       status: row.status,
       scheduledDate: row.scheduled_date,
       memberLabel: profile?.full_name || profile?.email || 'Member',
+      isMine: membership?.id === row.member_id,
+      receiptConfirmedAt: row.receipt_confirmed_at,
     };
   });
+
+  const bookEntries: BookEntryRow[] = (
+    (bookData ?? []) as unknown as Array<{
+      id: string;
+      entry_type: string;
+      amount: number | string;
+      currency: string;
+      effective_date: string;
+      notes: string | null;
+    }>
+  ).map((row) => ({
+    id: row.id,
+    entryType: row.entry_type,
+    amount: Number(row.amount),
+    currency: row.currency,
+    effectiveDate: row.effective_date,
+    notes: row.notes,
+  }));
+
+  const announcements: AnnouncementRow[] = (
+    (announcementData ?? []) as unknown as Array<{
+      id: string;
+      title: string;
+      body: string;
+      created_at: string;
+    }>
+  ).map((row) => ({
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    createdAt: row.created_at,
+  }));
+
+  const memberOptions: MemberOption[] = members.map((m) => ({
+    id: m.id,
+    label: m.fullName ?? m.email ?? m.id.slice(0, 8),
+    memberCode: m.memberCode ?? null,
+  }));
+
+  const penaltySettings: PenaltySettings = {
+    lateContributionPenalty: Number(jamiya.late_contribution_penalty ?? 0),
+    missedContributionPenalty: Number(jamiya.missed_contribution_penalty ?? 0),
+    lateLoanPenaltyFixed: Number(jamiya.late_loan_penalty_fixed ?? 0),
+    lateLoanPenaltyPct: Number(jamiya.late_loan_penalty_pct ?? 0),
+    payoutComplianceMode: jamiya.payout_compliance_mode ?? 'block',
+  };
+
+  let fund: TableBankingFund | null = null;
+  let creditRating: string | null = null;
+  if (membership?.status === 'active') {
+    const [{ data: fundData }, { data: creditData }] = await Promise.all([
+      supabase.rpc('table_banking_fund', { p_jamiya_id: jamiya.id }),
+      membership.id
+        ? supabase.rpc('member_credit_snapshot', { p_member_id: membership.id })
+        : Promise.resolve({ data: null }),
+    ]);
+    const f = fundData as Record<string, unknown> | null;
+    if (f?.ok) {
+      fund = {
+        memberContributions: Number(f.member_contributions ?? 0),
+        penaltiesReceived: Number(f.penalties_received ?? 0),
+        lentOut: Number(f.lent_out ?? 0),
+        repaid: Number(f.repaid ?? 0),
+        outstanding: Number(f.outstanding ?? 0),
+        overdue: Number(f.overdue ?? 0),
+        availableToLend: Number(f.available_to_lend ?? 0),
+        portfolioAtRiskPct: Number(f.portfolio_at_risk_pct ?? 0),
+      };
+    }
+    const c = creditData as { ok?: boolean; rating?: string; repayment_rate?: number } | null;
+    if (c?.ok && c.rating) {
+      creditRating = `${c.rating} (${c.repayment_rate ?? 0}% on-time)`;
+    }
+  }
 
   const lateCount = contributions.filter((c) => c.status === 'late').length;
   const nextPayout = payouts.find(
     (p) => p.status === 'scheduled' || p.status === 'processing',
   );
+  const nextPayoutRaw = (
+    (payoutData ?? []) as Array<{ member_id: string; status: string }>
+  ).find((p) => p.status === 'scheduled' || p.status === 'processing');
+  const nextMember = nextPayoutRaw
+    ? memberRows.find((m) => m.id === nextPayoutRaw.member_id)
+    : null;
   const { count: pendingGraceCount } = canManageMembers
     ? await supabase
         .from('grace_period_requests')
@@ -317,6 +439,22 @@ export default async function CircleDetailsPage({ params }: Props) {
         />
       ) : null}
 
+      <NextPayoutBoard
+        currency={jamiya.currency}
+        next={
+          nextPayout
+            ? {
+                memberLabel: nextPayout.memberLabel,
+                memberCode: nextMember?.member_code ?? null,
+                cycleNumber: nextPayout.cycleNumber,
+                amount: nextPayout.amount,
+                scheduledDate: nextPayout.scheduledDate,
+                status: nextPayout.status,
+              }
+            : null
+        }
+      />
+
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5">
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">Contribution</dt>
@@ -348,6 +486,14 @@ export default async function CircleDetailsPage({ params }: Props) {
             {jamiya.start_date ? formatDate(jamiya.start_date) : 'Not set'}
           </dd>
         </div>
+        {creditRating ? (
+          <div className="rounded-xl border border-border bg-card p-5">
+            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+              Your credit snapshot
+            </dt>
+            <dd className="mt-2 text-lg font-semibold">{creditRating}</dd>
+          </div>
+        ) : null}
       </dl>
 
       <section className="space-y-4">
@@ -398,6 +544,24 @@ export default async function CircleDetailsPage({ params }: Props) {
         <>
           <section className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+              Circle operations
+            </h2>
+            <CircleOpsPanel
+              jamiyaId={jamiya.id}
+              slug={jamiya.slug}
+              currency={jamiya.currency}
+              settings={penaltySettings}
+              fund={fund}
+              bookEntries={bookEntries}
+              announcements={announcements}
+              members={memberOptions}
+              myMemberId={membership?.id ?? null}
+              canManage
+            />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
               Add members
             </h2>
             <div className="rounded-xl border border-border bg-card p-6">
@@ -425,6 +589,21 @@ export default async function CircleDetailsPage({ params }: Props) {
             />
           </section>
         </>
+      ) : membership?.status === 'active' && (fund || announcements.length) ? (
+        <section className="space-y-4">
+          <CircleOpsPanel
+            jamiyaId={jamiya.id}
+            slug={jamiya.slug}
+            currency={jamiya.currency}
+            settings={penaltySettings}
+            fund={fund}
+            bookEntries={[]}
+            announcements={announcements}
+            members={memberOptions}
+            myMemberId={membership.id}
+            canManage={false}
+          />
+        </section>
       ) : null}
 
       <Button asChild variant="outline">

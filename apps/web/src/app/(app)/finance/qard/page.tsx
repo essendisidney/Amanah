@@ -3,6 +3,7 @@ import { formatCurrency } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
+  acceptQardAgreementFormAction,
   decideQardFormAction,
   repayQardFormAction,
   requestQardFormAction,
@@ -20,6 +21,8 @@ type Loan = {
   purpose: string;
   status: string;
   due_date: string | null;
+  agreement_accepted_at?: string | null;
+  agreement_signer_name?: string | null;
 };
 
 type Membership = {
@@ -40,7 +43,7 @@ export default async function QardPage() {
       supabase
         .from('qard_loans')
         .select(
-          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date',
+          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
         )
         .eq('borrower_id', user.id)
         .order('created_at', { ascending: false }),
@@ -52,7 +55,7 @@ export default async function QardPage() {
       supabase
         .from('qard_loans')
         .select(
-          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date',
+          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at',
         )
         .eq('status', 'requested')
         .order('created_at', { ascending: false })
@@ -173,13 +176,20 @@ export default async function QardPage() {
                   <p className="font-medium">{loan.purpose}</p>
                   <p className="text-sm text-muted-foreground">
                     {formatCurrency(Number(loan.amount), loan.currency)} · requested
+                    {loan.agreement_accepted_at
+                      ? ' · agreement signed'
+                      : ' · awaiting borrower agreement'}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <form action={decideQardFormAction}>
                     <input type="hidden" name="loanId" value={loan.id} />
                     <input type="hidden" name="approve" value="true" />
-                    <Button type="submit" size="sm">
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={!loan.agreement_accepted_at}
+                    >
                       Approve
                     </Button>
                   </form>
@@ -217,6 +227,33 @@ export default async function QardPage() {
                       {loan.due_date ? ` · due ${loan.due_date}` : ''}
                     </p>
                   </div>
+                  {loan.status === 'requested' && !loan.agreement_accepted_at ? (
+                    <form
+                      action={acceptQardAgreementFormAction}
+                      className="max-w-md space-y-2 rounded-md border border-border p-3"
+                    >
+                      <input type="hidden" name="loanId" value={loan.id} />
+                      <p className="text-xs text-muted-foreground">
+                        Qard Hassan facility agreement (v1): interest-free loan repaid in agreed
+                        installments. I accept the circle rules and repayment schedule.
+                      </p>
+                      <Input
+                        name="signerName"
+                        placeholder="Full name as signature"
+                        required
+                        minLength={2}
+                      />
+                      <Button type="submit" size="sm">
+                        Accept agreement
+                      </Button>
+                    </form>
+                  ) : null}
+                  {loan.status === 'requested' && loan.agreement_accepted_at ? (
+                    <p className="text-xs text-muted-foreground">
+                      Agreement signed
+                      {loan.agreement_signer_name ? ` by ${loan.agreement_signer_name}` : ''}
+                    </p>
+                  ) : null}
                   {loan.status === 'active' ? (
                     <form action={repayQardFormAction} className="flex items-center gap-2">
                       <input type="hidden" name="loanId" value={loan.id} />

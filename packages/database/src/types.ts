@@ -35,7 +35,13 @@ export type MembershipStatusEnum =
   | 'left'
   | 'removed';
 
-export type ContributionStatusEnum = 'pending' | 'paid' | 'late' | 'waived' | 'failed';
+export type ContributionStatusEnum =
+  | 'pending'
+  | 'paid'
+  | 'late'
+  | 'waived'
+  | 'failed'
+  | 'partial';
 
 export type PayoutStatusEnum = 'scheduled' | 'processing' | 'paid' | 'failed' | 'cancelled';
 

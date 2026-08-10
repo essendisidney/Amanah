@@ -12,6 +12,7 @@ export type MemberListItem = {
   joinedAt: string | null;
   fullName: string | null;
   email: string | null;
+  memberCode?: string | null;
   vouchStatus?: string | null;
 };
 
@@ -49,6 +50,11 @@ export function MembersList({
                 <p className="font-medium text-foreground">
                   {member.fullName ?? member.email ?? 'Member'}
                 </p>
+                {member.memberCode ? (
+                  <span className="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    {member.memberCode}
+                  </span>
+                ) : null}
                 <StatusBadge status={member.role} />
                 <StatusBadge status={member.status} />
                 {member.vouchStatus ? <StatusBadge status={`vouch:${member.vouchStatus}`} /> : null}
