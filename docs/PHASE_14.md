@@ -6,7 +6,7 @@ Continues after Phase 13 **without Daraja**.
 |------|--------|--------|
 | 14 | Africa’s Talking SMS + richer USSD + cron fan-out | Complete (code) |
 | 15 | Expo wallet/finance/officer already shipped in P13; finance APIs live | Complete (scaffold) |
-| 16 | Officer console `/jamiyas/[slug]/officer` | Complete |
+| 16 | Officer console `/circles/[slug]/officer` | Complete |
 | 17 | Auto referral wallet rewards + reminders hook | Complete |
 
 ## 14 — Phone-first
@@ -24,7 +24,7 @@ Continues after Phase 13 **without Daraja**.
 
 ## 16 — Officer trust OS
 
-Circle officers get `/jamiyas/[slug]/officer`: late dues, grace decide, collection cases, vouch.
+Circle officers get `/circles/[slug]/officer`: late dues, grace decide, collection cases, vouch.
 
 ## 17 — Referral auto-reward
 

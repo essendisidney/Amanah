@@ -3,7 +3,7 @@ import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
-import { resolveDisputeAction } from '@/features/jamiya/actions/dispute-actions';
+import { resolveDisputeAction } from '@/features/circles/actions/dispute-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Disputes' };

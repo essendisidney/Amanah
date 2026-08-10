@@ -5,7 +5,7 @@ import { Button } from '@jamiya/ui';
 import type { DashboardContribution } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 import { StatusBadge } from './dashboard-stats';
-import { payContributionAction } from '@/features/jamiya/actions/ledger-actions';
+import { payContributionAction } from '@/features/circles/actions/ledger-actions';
 
 export function ContributionsSection({
   contributions,
@@ -34,7 +34,7 @@ export function ContributionsSection({
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/jamiyas/${item.jamiyaSlug}` as Route}
+                    href={`/circles/${item.jamiyaSlug}` as Route}
                     className="font-medium text-foreground hover:text-primary"
                   >
                     {item.jamiyaName}

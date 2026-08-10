@@ -1,0 +1,303 @@
+'use server';
+
+import { addCircleMemberSchema } from '@jamiya/shared';
+import { revalidatePath } from 'next/cache';
+import { createClient } from '@/lib/supabase/server';
+import { callRpc } from '@/lib/supabase/rpc';
+import { createServiceRoleClient } from '@/lib/supabase/service';
+import {
+  generateInvitationToken,
+  generateInviteCode,
+  getInvitationExpiry,
+  hashInvitationToken,
+} from '../lib/invitation-token';
+import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
+
+function getSiteUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+}
+
+async function createClaimInvitation(args: {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  jamiyaId: string;
+  invitedBy: string;
+  email: string;
+  phone: string | null;
+  inviteeUserId: string;
+  circleName: string;
+  slug: string;
+}): Promise<{ inviteUrl: string; inviteCode: string } | { error: string }> {
+  const token = generateInvitationToken();
+  const tokenHash = hashInvitationToken(token);
+  let inviteCode = generateInviteCode(8);
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data, error } = await args.supabase
+      .from('invitations')
+      .insert({
+        jamiya_id: args.jamiyaId,
+        invited_by: args.invitedBy,
+        email: args.email,
+        phone: args.phone,
+        invitee_user_id: args.inviteeUserId,
+        token_hash: tokenHash,
+        invite_code: inviteCode,
+        status: 'pending',
+        expires_at: getInvitationExpiry(14),
+      } as never)
+      .select('id, invite_code')
+      .single();
+
+    if (!error && data) {
+      const invite = data as { id: string; invite_code: string };
+      const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
+
+      await args.supabase.from('notifications').insert({
+        user_id: args.inviteeUserId,
+        type: 'invitation',
+        channel: 'in_app',
+        title: `Invitation to ${args.circleName}`,
+        body: 'Claim your reserved seat in this Amanah circle.',
+        data: {
+          jamiya_id: args.jamiyaId,
+          slug: args.slug,
+          invitation_id: invite.id,
+          invite_path: `/invitations/${token}`,
+          invite_code: invite.invite_code,
+        },
+      } as never);
+
+      await args.supabase.rpc('queue_invitation_delivery', {
+        p_invitation_id: invite.id,
+        p_invite_url: inviteUrl,
+      });
+
+      return { inviteUrl, inviteCode: invite.invite_code };
+    }
+
+    if (error?.code === '23505' || /invite_code|unique/i.test(error?.message ?? '')) {
+      inviteCode = generateInviteCode(8);
+      continue;
+    }
+    return { error: error?.message ?? 'Failed to create claim invitation.' };
+  }
+
+  return { error: 'Failed to create claim invitation.' };
+}
+
+function mapAddError(code?: string): string {
+  const messages: Record<string, string> = {
+    ALREADY_MEMBER: 'That person is already an active member.',
+    CIRCLE_FULL: 'This circle is full.',
+    FORBIDDEN: 'Only circle admins can add members.',
+    USER_NOT_FOUND: 'User not found.',
+    UNAUTHENTICATED: 'Sign in to continue.',
+  };
+  return messages[code ?? ''] ?? 'Could not add member.';
+}
+
+export async function addMemberAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = addCircleMemberSchema.safeParse({
+    jamiyaId: formData.get('jamiyaId'),
+    email: formData.get('email') || '',
+    phone: formData.get('phone') || '',
+    fullName: formData.get('fullName') || '',
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Please fix the errors below.',
+      fieldErrors: mapZodFieldErrors(parsed.error),
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: 'Authentication required.' };
+  }
+
+  const jamiyaId = parsed.data.jamiyaId;
+  const email = (parsed.data.email || '').trim().toLowerCase();
+  const phone = (parsed.data.phone || '').trim() || null;
+  const fullName = (parsed.data.fullName || '').trim() || null;
+
+  const { data: jamiya } = await supabase
+    .from('jamiyas')
+    .select('id, slug, name')
+    .eq('id', jamiyaId)
+    .maybeSingle();
+
+  const circle = jamiya as { id: string; slug: string; name: string } | null;
+  if (!circle) {
+    return { success: false, message: 'Circle not found.' };
+  }
+
+  // Try existing profile via definer RPC (email/phone lookup)
+  const { data: existingData, error: existingErr } = await callRpc(
+    'admin_add_circle_member',
+    {
+      p_jamiya_id: jamiyaId,
+      p_user_id: null,
+      p_status: 'active',
+      p_email: email || null,
+      p_phone: phone,
+    },
+  );
+
+  if (existingErr) {
+    return { success: false, message: existingErr.message };
+  }
+
+  const existing = existingData as {
+    ok?: boolean;
+    error?: string;
+    fee_warning?: boolean;
+  } | null;
+
+  if (existing?.ok) {
+    revalidatePath(`/circles/${circle.slug}`);
+    revalidatePath('/circles');
+    return {
+      success: true,
+      mode: 'added',
+      message: existing.fee_warning
+        ? 'Member added. Join fee could not be charged yet — they should top up their wallet.'
+        : 'Member added to the circle.',
+    };
+  }
+
+  if (existing?.error && existing.error !== 'USER_NOT_FOUND') {
+    return { success: false, message: mapAddError(existing.error) };
+  }
+
+  // Provision new Auth user
+  if (!email) {
+    return {
+      success: false,
+      message: 'Email is required to add someone who is not on Amanah yet.',
+      fieldErrors: { email: ['Email is required for new members'] },
+    };
+  }
+
+  let service;
+  try {
+    service = createServiceRoleClient();
+  } catch {
+    return {
+      success: false,
+      message:
+        'Server is not configured to provision new members (missing service role key).',
+    };
+  }
+
+  const redirectTo = `${getSiteUrl()}/login`;
+  const { data: invited, error: inviteErr } = await service.auth.admin.inviteUserByEmail(
+    email,
+    {
+      redirectTo,
+      data: {
+        full_name: fullName ?? undefined,
+        phone: phone ?? undefined,
+      },
+    },
+  );
+
+  let newUserId = invited?.user?.id ?? null;
+
+  if (inviteErr || !newUserId) {
+    const { data: created, error: createErr } = await service.auth.admin.createUser({
+      email,
+      email_confirm: false,
+      user_metadata: {
+        full_name: fullName ?? undefined,
+        phone: phone ?? undefined,
+      },
+    });
+    if (createErr || !created.user) {
+      return {
+        success: false,
+        message:
+          inviteErr?.message ??
+          createErr?.message ??
+          'Could not create an Amanah account for this email.',
+      };
+    }
+    newUserId = created.user.id;
+  }
+
+  for (let i = 0; i < 8; i++) {
+    const { data: profile } = await service
+      .from('profiles')
+      .select('id')
+      .eq('id', newUserId)
+      .maybeSingle();
+    if (profile) break;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
+  await service
+    .from('profiles')
+    .update({
+      ...(fullName ? { full_name: fullName } : {}),
+      ...(phone ? { phone } : {}),
+      email,
+    })
+    .eq('id', newUserId);
+
+  const { data, error } = await callRpc('admin_add_circle_member', {
+    p_jamiya_id: jamiyaId,
+    p_user_id: newUserId,
+    p_status: 'invited',
+    p_email: null,
+    p_phone: null,
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    return { success: false, message: mapAddError(result?.error) };
+  }
+
+  const claim = await createClaimInvitation({
+    supabase,
+    jamiyaId,
+    invitedBy: user.id,
+    email,
+    phone,
+    inviteeUserId: newUserId,
+    circleName: circle.name,
+    slug: circle.slug,
+  });
+
+  revalidatePath(`/circles/${circle.slug}`);
+  revalidatePath('/circles');
+
+  if ('error' in claim) {
+    return {
+      success: true,
+      mode: 'invited',
+      message:
+        'Account created and seat reserved, but claim link failed — share a new invite from Pending invitations.',
+    };
+  }
+
+  return {
+    success: true,
+    mode: 'invited',
+    message:
+      'Seat reserved. Share the claim link or invite code so they can activate their Amanah account.',
+    inviteUrl: claim.inviteUrl,
+    inviteCode: claim.inviteCode,
+  };
+}

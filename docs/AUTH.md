@@ -35,7 +35,7 @@ Browser form
 2. Redirect unauthenticated users away from protected prefixes
 3. Redirect authenticated users away from auth pages (except reset-password)
 
-Protected prefixes: `/dashboard`, `/profile`, `/settings`, `/jamiyas`, `/wallet`, `/admin`
+Protected prefixes: `/dashboard`, `/profile`, `/settings`, `/circles`, `/wallet`, `/admin`
 
 ### Profile auto-provisioning
 

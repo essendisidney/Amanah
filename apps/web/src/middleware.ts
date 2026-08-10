@@ -13,7 +13,8 @@ const PROTECTED_PREFIXES = [
   '/dashboard',
   '/profile',
   '/settings',
-  '/jamiyas',
+  '/circles',
+  '/jamiyas', // legacy → redirected below, still auth-gated
   '/wallet',
   '/admin',
   '/invitations',
@@ -27,7 +28,26 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
+/** Permanent redirects: /jamiyas → /circles (and admin). */
+function legacyCircleRedirect(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl;
+  if (pathname === '/jamiyas' || pathname.startsWith('/jamiyas/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/jamiyas/, '/circles');
+    return NextResponse.redirect(url, 308);
+  }
+  if (pathname === '/admin/jamiyas' || pathname.startsWith('/admin/jamiyas/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/admin\/jamiyas/, '/admin/circles');
+    return NextResponse.redirect(url, 308);
+  }
+  return null;
+}
+
 export async function middleware(request: NextRequest) {
+  const legacy = legacyCircleRedirect(request);
+  if (legacy) return legacy;
+
   const hasSupabaseEnv =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(

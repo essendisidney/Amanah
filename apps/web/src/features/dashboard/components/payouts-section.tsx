@@ -28,7 +28,7 @@ export function PayoutsSection({ payouts }: { payouts: DashboardPayout[] }) {
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/jamiyas/${item.jamiyaSlug}` as Route}
+                    href={`/circles/${item.jamiyaSlug}` as Route}
                     className="font-medium text-foreground hover:text-primary"
                   >
                     {item.jamiyaName}

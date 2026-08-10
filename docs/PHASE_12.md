@@ -14,7 +14,7 @@ Closes remaining trust/ops gaps while live M-Pesa stays deferred.
 | 12.6 | Reminders | Edge enqueues email/SMS/push with daily dedupe + payout reminders |
 | 12.7 | Referrals | `apply_referral`, qualify-on-paid trigger, profile UI |
 | 12.8 | Phone sync | `sync_phone_from_auth` from profile |
-| 12.9 | Segment + PDF | Segment badges; printable `/jamiyas/[slug]/report` |
+| 12.9 | Segment + PDF | Segment badges; printable `/circles/[slug]/report` |
 | 12.10 | Observability | Failed outbox + aged withdrawals (>24h) |
 | 12.11 | Expo push | `expo-notifications` + device token registration |
 

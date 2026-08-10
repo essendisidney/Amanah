@@ -123,7 +123,7 @@ See `docs/PHASE_13.md`.
 |------|-------------|--------|
 | 14 | AT SMS + richer USSD + Vercel cron fan-out | Complete |
 | 15 | Expo parity (shipped with Phase 13 APIs) | Complete |
-| 16 | Officer console `/jamiyas/[slug]/officer` | Complete |
+| 16 | Officer console `/circles/[slug]/officer` | Complete |
 | 17 | Auto referral wallet rewards | Complete |
 
 See `docs/PHASE_14.md`.

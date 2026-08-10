@@ -6,8 +6,8 @@ import { formatDate } from '@jamiya/shared';
 import { Alert, AlertDescription, Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
-import { hashInvitationToken } from '@/features/jamiya/lib/invitation-token';
-import { InvitationDecisionButtons } from '@/features/jamiya/components/invitation-decision-buttons';
+import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
+import { InvitationDecisionButtons } from '@/features/circles/components/invitation-decision-buttons';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = {
@@ -31,10 +31,10 @@ export default async function InvitationPage({ params }: Props) {
     redirect(`/login?next=/invitations/${encodeURIComponent(token)}`);
   }
 
-  const tokenHash = hashInvitationToken(token);
-  const { data, error } = await callRpc('preview_invitation', {
-    p_token_hash: tokenHash,
-  });
+  const { data, error } = await callRpc(
+    'preview_invitation',
+    invitationRpcArgs(token),
+  );
 
   const rows = (data ?? []) as unknown as Array<{
     invitation_id: string;

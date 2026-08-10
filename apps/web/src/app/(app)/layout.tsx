@@ -34,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const navItems: Array<{ href: Route; label: string }> = [
     { href: '/dashboard' as Route, label: 'Dashboard' },
-    { href: '/jamiyas' as Route, label: 'My circles' },
+    { href: '/circles' as Route, label: 'My circles' },
     { href: '/finance' as Route, label: 'Finance' },
     { href: '/sadaka' as Route, label: 'Sadaka' },
     { href: '/support' as Route, label: 'Support' },

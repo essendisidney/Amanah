@@ -22,9 +22,9 @@ Server Components fetch under RLS. No client-side data waterfall for the initial
 | Route | Purpose |
 |-------|---------|
 | `/dashboard` | Stats, my jamiyas, contributions, payouts, notifications |
-| `/jamiyas` | Full membership list |
-| `/jamiyas/[slug]` | Read-only circle summary |
-| `/jamiyas/new` | Placeholder → Phase 1.5 |
+| `/circles` | Full membership list |
+| `/circles/[slug]` | Read-only circle summary |
+| `/circles/new` | Placeholder → Phase 1.5 |
 | `/notifications` | Inbox + mark read actions |
 | `/wallet` | Balance display (read-only) |
 | `/profile` | Read-only profile summary → Phase 1.7 edit |

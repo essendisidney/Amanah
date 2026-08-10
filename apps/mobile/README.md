@@ -18,8 +18,9 @@ For production API base use your Vercel URL, e.g. `https://amanah-liart.vercel.a
 
 | Tab | Routes |
 |-----|--------|
+| Circles | `GET\|POST /api/v1/circles`, `POST /api/v1/invitations` |
 | Wallet | `GET /api/v1/wallet`, `POST /api/v1/wallet/top-up`, `POST /api/v1/wallet/retry` |
 | Finance | `GET\|POST /api/v1/finance/qard` (+ tawarruq/goals/welfare available) |
-| Officer | `GET\|POST /api/v1/jamiyas/[id]/officer` |
+| Officer | `GET\|POST /api/v1/circles/[id]/officer` |
 
 Top-up follows web `PAYMENT_PROVIDER` (`simulated` or `bank`). Live Daraja remains deferred.

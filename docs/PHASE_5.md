@@ -5,7 +5,7 @@
 1. **Collections** — `collection_cases` from late contributions; `sync_collection_cases` / `update_collection_case`; `/admin/collections`; Edge Function `collections`.
 2. **Mobile API** — Bearer + cookie auth via `createApiClient`:
    - `GET /api/v1/me`
-   - `GET /api/v1/jamiyas`
+   - `GET /api/v1/circles`
    - `GET /api/v1/contributions` · `POST /api/v1/contributions/pay`
    - `POST /api/v1/wallet/top-up`
    - `GET /api/v1/notifications`

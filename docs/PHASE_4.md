@@ -6,7 +6,7 @@
 2. **Bank rails** — `PAYMENT_PROVIDER=bank` + Edge Function `payments-bank` (initiate/confirm; simulated fallback unless `REQUIRE_REAL_PROVIDERS=true`).
 3. **Risk scoring** — `member_risk_scores` from late contributions, open disputes, failed payments. `/admin/risk` + recompute.
 4. **Gates** — Withdrawals ≥ 20k need KYC; risk score ≥ 80 blocks withdrawals.
-5. **Mobile-ready API** — `GET /api/v1/me`, `GET /api/v1/jamiyas`, `POST /api/v1/wallet/top-up` (session auth).
+5. **Mobile-ready API** — `GET /api/v1/me`, `GET /api/v1/circles`, `POST /api/v1/wallet/top-up` (session auth).
 
 ## Env
 

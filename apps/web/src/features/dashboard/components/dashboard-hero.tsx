@@ -34,10 +34,10 @@ export function DashboardHero({
 
       <div className="flex flex-wrap gap-3">
         <Button asChild>
-          <Link href={'/jamiyas/new' as Route}>Create circle</Link>
+          <Link href={'/circles/new' as Route}>Create circle</Link>
         </Button>
         <Button asChild variant="outline">
-          <Link href={'/jamiyas' as Route}>My circles</Link>
+          <Link href={'/circles' as Route}>My circles</Link>
         </Button>
         {profile && !profile.profile_completed ? (
           <Button asChild variant="accent">

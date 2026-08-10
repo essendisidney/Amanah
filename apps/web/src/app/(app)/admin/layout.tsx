@@ -5,7 +5,7 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 const links: Array<{ href: Route; label: string }> = [
   { href: '/admin' as Route, label: 'Overview' },
   { href: '/admin/users' as Route, label: 'Users' },
-  { href: '/admin/jamiyas' as Route, label: 'Circles' },
+  { href: '/admin/circles' as Route, label: 'Circles' },
   { href: '/admin/transactions' as Route, label: 'Transactions' },
   { href: '/admin/kyc' as Route, label: 'KYC' },
   { href: '/admin/disputes' as Route, label: 'Disputes' },

@@ -26,7 +26,7 @@ export const paginationSchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
 });
 
-export const createJamiyaSchema = z
+export const createCircleSchema = z
   .object({
     name: z
       .string()
@@ -104,8 +104,24 @@ export const createInvitationSchema = z
     path: ['email'],
   });
 
+/** Circle admin add-member: email required when provisioning new users. */
+export const addCircleMemberSchema = z
+  .object({
+    jamiyaId: z.string().uuid(),
+    email: emailSchema.optional().or(z.literal('')),
+    phone: phoneSchema.optional().or(z.literal('')),
+    fullName: z.string().trim().max(120).optional().or(z.literal('')),
+  })
+  .refine((data) => Boolean(data.email) || Boolean(data.phone), {
+    message: 'Provide an email or phone number',
+    path: ['email'],
+  });
+
 export const invitationTokenSchema = z.object({
-  token: z.string().min(20, 'Invalid invitation token'),
+  token: z
+    .string()
+    .trim()
+    .min(6, 'Invalid invitation code or token'),
 });
 
 export const registerSchema = z
@@ -171,9 +187,14 @@ export const openDisputeSchema = z.object({
   description: z.string().trim().min(10).max(4000),
 });
 
-export type CreateJamiyaInput = z.infer<typeof createJamiyaSchema>;
+export type CreateCircleInput = z.infer<typeof createCircleSchema>;
+/** @deprecated Use createCircleSchema */
+export const createJamiyaSchema = createCircleSchema;
+/** @deprecated Use CreateCircleInput */
+export type CreateJamiyaInput = CreateCircleInput;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type CreateInvitationInput = z.infer<typeof createInvitationSchema>;
+export type AddCircleMemberInput = z.infer<typeof addCircleMemberSchema>;
 export type InvitationTokenInput = z.infer<typeof invitationTokenSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

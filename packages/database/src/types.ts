@@ -247,6 +247,7 @@ export type Database = {
           phone: string | null;
           invitee_user_id: string | null;
           token_hash: string;
+          invite_code: string;
           status: InvitationStatusEnum;
           expires_at: string;
           accepted_at: string | null;
@@ -259,6 +260,7 @@ export type Database = {
           phone?: string | null;
           invitee_user_id?: string | null;
           token_hash: string;
+          invite_code: string;
           status?: InvitationStatusEnum;
           expires_at: string;
           accepted_at?: string | null;
@@ -273,6 +275,7 @@ export type Database = {
           phone?: string | null;
           invitee_user_id?: string | null;
           token_hash?: string;
+          invite_code?: string;
           status?: InvitationStatusEnum;
           expires_at?: string;
           accepted_at?: string | null;

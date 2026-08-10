@@ -25,6 +25,18 @@ const nextConfig: NextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  async redirects() {
+    return [
+      { source: '/jamiyas', destination: '/circles', permanent: true },
+      { source: '/jamiyas/:path*', destination: '/circles/:path*', permanent: true },
+      { source: '/admin/jamiyas', destination: '/admin/circles', permanent: true },
+      {
+        source: '/admin/jamiyas/:path*',
+        destination: '/admin/circles/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

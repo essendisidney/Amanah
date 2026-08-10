@@ -32,8 +32,11 @@ export async function apiPost<T>(
     },
     body: JSON.stringify(body),
   });
+  const json = (await res.json().catch(() => null)) as
+    | (T & { error?: string; message?: string })
+    | null;
   if (!res.ok) {
-    throw new Error(`API ${res.status}`);
+    throw new Error(json?.error ?? json?.message ?? `API ${res.status}`);
   }
-  return res.json() as Promise<T>;
+  return (json ?? {}) as T;
 }

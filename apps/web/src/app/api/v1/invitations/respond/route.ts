@@ -1,12 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createHash } from 'node:crypto';
 import { createApiClient } from '@/lib/supabase/api';
+import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
 
-function hashToken(token: string): string {
-  return createHash('sha256').update(token, 'utf8').digest('hex');
-}
-
-/** Accept or decline an invitation by raw invite token. */
+/** Accept or decline an invitation by raw invite token or short invite code. */
 export async function POST(request: Request) {
   const supabase = await createApiClient(request);
   const {
@@ -19,10 +15,12 @@ export async function POST(request: Request) {
 
   const body = (await request.json().catch(() => null)) as {
     token?: string;
+    inviteCode?: string;
     decision?: 'accept' | 'reject' | 'decline';
   } | null;
 
-  if (!body?.token || !body.decision) {
+  const credential = (body?.inviteCode ?? body?.token ?? '').trim();
+  if (!credential || !body?.decision) {
     return NextResponse.json(
       { ok: false, error: 'TOKEN_AND_DECISION_REQUIRED' },
       { status: 400 },
@@ -32,9 +30,7 @@ export async function POST(request: Request) {
   const rpc =
     body.decision === 'accept' ? 'accept_invitation' : 'decline_invitation';
 
-  const { data, error } = await supabase.rpc(rpc, {
-    p_token_hash: hashToken(body.token),
-  });
+  const { data, error } = await supabase.rpc(rpc, invitationRpcArgs(credential));
 
   if (error) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 });

@@ -18,13 +18,13 @@ Expect: health `ok: true`, pages `200`.
 1. **Register** at `/register` with a real email you can access  
 2. **Login** at `/login`  
 3. **Profile** — set phone / start KYC upload  
-4. **Create circle** — `/jamiyas/new`  
+4. **Create circle** — `/circles/new`  
 5. **Wallet** — simulated top-up (≥ 100 KES)  
 6. **Activate** circle (as admin) and pay a contribution  
 7. **Sadaka** — `/sadaka` → open campaign → donate (≥ 10 KES) while signed in  
 8. **Support** — `/support` tip (platform, not charity)  
 9. **Finance** — `/finance/qard` request (needs membership + history)  
-10. **Community** — `/jamiyas/<slug>/community` send a chat message  
+10. **Community** — `/circles/<slug>/community` send a chat message  
 11. **Admin** (if compliance role) — `/admin/observability`, `/admin/sadaka` fee policy
 12. **USSD** (optional) — `curl -X POST .../api/ussd` with form fields (see below)
 

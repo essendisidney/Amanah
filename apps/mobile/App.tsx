@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Button,
+  Image,
+  Linking,
   Pressable,
   SafeAreaView,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -165,6 +168,14 @@ export default function App() {
   const [qardAmount, setQardAmount] = useState('1000');
   const [qardPurpose, setQardPurpose] = useState('Short-term need');
   const [qardJamiyaId, setQardJamiyaId] = useState('');
+  const [newCircleName, setNewCircleName] = useState('');
+  const [newCircleAmount, setNewCircleAmount] = useState('1000');
+  const [newCircleMembers, setNewCircleMembers] = useState('5');
+  const [inviteJamiyaId, setInviteJamiyaId] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePhone, setInvitePhone] = useState('');
+  const [lastInviteUrl, setLastInviteUrl] = useState<string | null>(null);
+  const [lastInviteCode, setLastInviteCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -177,10 +188,17 @@ export default function App() {
           setMe(await apiGet<MeResponse>('/api/v1/me', accessToken));
         } else if (active === 'circles') {
           const data = await apiGet<{ ok: boolean; memberships: Membership[] }>(
-            '/api/v1/jamiyas',
+            '/api/v1/circles',
             accessToken,
           );
           setMemberships(data.memberships ?? []);
+          const adminCircle =
+            data.memberships?.find((m) => m.role === 'circle_admin') ??
+            data.memberships?.[0] ??
+            null;
+          if (!inviteJamiyaId && adminCircle?.jamiya?.id) {
+            setInviteJamiyaId(adminCircle.jamiya.id);
+          }
         } else if (active === 'dues') {
           const data = await apiGet<{ ok: boolean; contributions: Contribution[] }>(
             '/api/v1/contributions',
@@ -192,7 +210,7 @@ export default function App() {
         } else if (active === 'finance') {
           const [qard, circles] = await Promise.all([
             apiGet<{ ok: boolean; loans: QardLoan[] }>('/api/v1/finance/qard', accessToken),
-            apiGet<{ ok: boolean; memberships: Membership[] }>('/api/v1/jamiyas', accessToken),
+            apiGet<{ ok: boolean; memberships: Membership[] }>('/api/v1/circles', accessToken),
           ]);
           setLoans(qard.loans ?? []);
           setMemberships(circles.memberships ?? []);
@@ -201,7 +219,7 @@ export default function App() {
           }
         } else if (active === 'officer') {
           const circles = await apiGet<{ ok: boolean; memberships: Membership[] }>(
-            '/api/v1/jamiyas',
+            '/api/v1/circles',
             accessToken,
           );
           setMemberships(circles.memberships ?? []);
@@ -213,7 +231,7 @@ export default function App() {
           setOfficerJamiyaId(jid);
           if (jid) {
             setOfficer(
-              await apiGet<OfficerResponse>(`/api/v1/jamiyas/${jid}/officer`, accessToken),
+              await apiGet<OfficerResponse>(`/api/v1/circles/${jid}/officer`, accessToken),
             );
           } else {
             setOfficer(null);
@@ -231,7 +249,7 @@ export default function App() {
         setError(err instanceof Error ? err.message : 'Failed to load');
       }
     },
-    [qardJamiyaId],
+    [qardJamiyaId, inviteJamiyaId],
   );
 
   useEffect(() => {
@@ -257,6 +275,109 @@ export default function App() {
       setError(err instanceof Error ? err.message : 'Sign-in failed');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function createCircle() {
+    if (!token) return;
+    const name = newCircleName.trim();
+    const amount = Number(newCircleAmount);
+    const maxMembers = Number(newCircleMembers);
+    if (name.length < 3) {
+      setError('Circle name must be at least 3 characters');
+      return;
+    }
+    if (!Number.isFinite(amount) || amount < 100) {
+      setError('Contribution must be at least 100');
+      return;
+    }
+    if (!Number.isFinite(maxMembers) || maxMembers < 2) {
+      setError('Need at least 2 members');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await apiPost<{
+        ok: boolean;
+        circle?: { id: string; slug: string; name: string };
+        jamiya?: { id: string; slug: string; name: string };
+        error?: string;
+      }>('/api/v1/circles', token, {
+        name,
+        contributionAmount: amount,
+        currency: 'KES',
+        maxMembers,
+        cycleCount: maxMembers,
+        contributionFrequencyDays: 30,
+        status: 'open',
+      });
+      const created = result.circle ?? result.jamiya;
+      setMessage(`Created ${created?.name ?? 'circle'}`);
+      setNewCircleName('');
+      if (created?.id) setInviteJamiyaId(created.id);
+      await refresh(token, 'circles');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Create circle failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function inviteMember() {
+    if (!token) return;
+    if (!inviteJamiyaId) {
+      setError('Select a circle to invite into');
+      return;
+    }
+    if (!inviteEmail.trim() && !invitePhone.trim()) {
+      setError('Enter invitee email or phone (+254…)');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setLastInviteUrl(null);
+    setLastInviteCode(null);
+    try {
+      const result = await apiPost<{
+        ok: boolean;
+        inviteUrl?: string;
+        inviteCode?: string;
+        token?: string;
+        error?: string;
+      }>('/api/v1/invitations', token, {
+        jamiyaId: inviteJamiyaId,
+        email: inviteEmail.trim() || undefined,
+        phone: invitePhone.trim() || undefined,
+      });
+      setMessage('Invitation created — use Share / WhatsApp / QR below');
+      setLastInviteUrl(result.inviteUrl ?? null);
+      setLastInviteCode(result.inviteCode ?? result.token ?? null);
+      setInviteEmail('');
+      setInvitePhone('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invite failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function shareInvite(channel: 'system' | 'whatsapp' | 'sms') {
+    if (!lastInviteUrl) return;
+    const codeLine = lastInviteCode ? `Invite code: ${lastInviteCode}\n` : '';
+    const body = `You're invited to join an Amanah savings circle.\n\n${codeLine}Or open: ${lastInviteUrl}`;
+    try {
+      if (channel === 'whatsapp') {
+        await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(body)}`);
+        return;
+      }
+      if (channel === 'sms') {
+        await Linking.openURL(`sms:?body=${encodeURIComponent(body)}`);
+        return;
+      }
+      await Share.share({ message: body, url: lastInviteUrl, title: 'Amanah invitation' });
+    } catch {
+      setError('Could not open share sheet');
     }
   }
 
@@ -341,7 +462,7 @@ export default function App() {
     setLoading(true);
     setError(null);
     try {
-      await apiPost(`/api/v1/jamiyas/${officerJamiyaId}/officer`, token, {
+      await apiPost(`/api/v1/circles/${officerJamiyaId}/officer`, token, {
         action: 'decide_grace',
         requestId,
         approve,
@@ -357,7 +478,7 @@ export default function App() {
 
   async function respondInvite(decision: 'accept' | 'decline') {
     if (!token || !inviteToken.trim()) {
-      setError('Paste the invite token from your email/SMS link');
+      setError('Paste the invite code from the share panel or invite link');
       return;
     }
     setLoading(true);
@@ -396,7 +517,7 @@ export default function App() {
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.brand}>Amanah</Text>
-        <Text style={styles.sub}>Phase 13 · wallet, finance, officer parity</Text>
+        <Text style={styles.sub}>Create circles, invite members, wallet &amp; dues</Text>
 
         {!token ? (
           <View style={styles.card}>
@@ -456,7 +577,7 @@ export default function App() {
               <View style={styles.card}>
                 <Text style={styles.heading}>My circles</Text>
                 {memberships.length === 0 ? (
-                  <Text style={styles.meta}>No circles yet</Text>
+                  <Text style={styles.meta}>No circles yet — create one below</Text>
                 ) : (
                   memberships.map((m) => (
                     <View key={m.id} style={styles.row}>
@@ -465,9 +586,107 @@ export default function App() {
                         {m.role} · {m.jamiya?.status} · cycle{' '}
                         {m.jamiya?.current_cycle}/{m.jamiya?.cycle_count}
                       </Text>
+                      <Text style={styles.meta}>id {m.jamiya?.id ?? '—'}</Text>
                     </View>
                   ))
                 )}
+
+                <Text style={styles.heading}>Create circle</Text>
+                <TextInput
+                  style={styles.input}
+                  value={newCircleName}
+                  onChangeText={setNewCircleName}
+                  placeholder="Circle name"
+                />
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={newCircleAmount}
+                  onChangeText={setNewCircleAmount}
+                  placeholder="Contribution (KES)"
+                />
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={newCircleMembers}
+                  onChangeText={setNewCircleMembers}
+                  placeholder="Max members"
+                />
+                <Button
+                  title="Create circle"
+                  color="#047857"
+                  onPress={() => void createCircle()}
+                />
+
+                <Text style={styles.heading}>Invite member</Text>
+                <Text style={styles.meta}>
+                  Only circle admins can invite. Paste circle id or use the one filled after create.
+                </Text>
+                <TextInput
+                  style={styles.input}
+                  value={inviteJamiyaId}
+                  onChangeText={setInviteJamiyaId}
+                  placeholder="Circle id"
+                  autoCapitalize="none"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={inviteEmail}
+                  onChangeText={setInviteEmail}
+                  placeholder="Invitee email"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={invitePhone}
+                  onChangeText={setInvitePhone}
+                  placeholder="Phone +2547…"
+                  autoCapitalize="none"
+                  keyboardType="phone-pad"
+                />
+                <Button
+                  title="Send invite"
+                  color="#047857"
+                  onPress={() => void inviteMember()}
+                />
+                {lastInviteUrl ? (
+                  <View style={styles.shareBox}>
+                    <Text style={styles.meta} selectable>
+                      Link: {lastInviteUrl}
+                    </Text>
+                    {lastInviteCode ? (
+                      <Text style={styles.meta} selectable>
+                        Code: {lastInviteCode}
+                      </Text>
+                    ) : null}
+                    <View style={styles.shareRow}>
+                      <Button
+                        title="Share…"
+                        color="#047857"
+                        onPress={() => void shareInvite('system')}
+                      />
+                      <Button
+                        title="WhatsApp"
+                        color="#128C7E"
+                        onPress={() => void shareInvite('whatsapp')}
+                      />
+                      <Button
+                        title="SMS"
+                        color="#2563eb"
+                        onPress={() => void shareInvite('sms')}
+                      />
+                    </View>
+                    <Image
+                      source={{
+                        uri: `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lastInviteUrl)}`,
+                      }}
+                      style={styles.qr}
+                      accessibilityLabel="Invitation QR code"
+                    />
+                    <Text style={styles.meta}>Scan QR or paste the code in Invites tab</Text>
+                  </View>
+                ) : null}
               </View>
             ) : null}
 
@@ -546,7 +765,7 @@ export default function App() {
                   style={styles.input}
                   value={qardJamiyaId}
                   onChangeText={setQardJamiyaId}
-                  placeholder="Jamiya id"
+                  placeholder="Circle id"
                   autoCapitalize="none"
                 />
                 <TextInput
@@ -636,13 +855,13 @@ export default function App() {
                   </Text>
                 ))}
                 <Text style={styles.meta}>
-                  Paste the token from your invite link to accept or decline.
+                  Paste the invite code (or token from the invite link) to accept or decline.
                 </Text>
                 <TextInput
                   style={styles.input}
                   value={inviteToken}
                   onChangeText={setInviteToken}
-                  placeholder="Invite token"
+                  placeholder="Invite code"
                   autoCapitalize="none"
                 />
                 <View style={styles.rowActions}>
@@ -730,4 +949,13 @@ const styles = StyleSheet.create({
   },
   rowTitle: { fontSize: 16, fontWeight: '600', color: '#111827' },
   rowActions: { gap: 8 },
+  shareBox: { gap: 10, marginTop: 4 },
+  shareRow: { gap: 8 },
+  qr: {
+    width: 160,
+    height: 160,
+    alignSelf: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
 });

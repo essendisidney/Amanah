@@ -37,7 +37,7 @@ New `/api/v1` routes (Bearer auth):
 
 - `GET /api/v1/wallet`, `POST /api/v1/wallet/retry`
 - `GET|POST /api/v1/finance/qard|tawarruq|goals|welfare`
-- `GET|POST /api/v1/jamiyas/[id]/officer`
+- `GET|POST /api/v1/circles/[id]/officer`
 
 Expo tabs: Wallet, Finance, Officer (plus existing Home / Circles / Dues / Invites / KYC).
 

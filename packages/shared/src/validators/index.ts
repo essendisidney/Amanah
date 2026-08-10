@@ -3,9 +3,11 @@ export {
   passwordSchema,
   phoneSchema,
   paginationSchema,
+  createCircleSchema,
   createJamiyaSchema,
   updateProfileSchema,
   createInvitationSchema,
+  addCircleMemberSchema,
   invitationTokenSchema,
   registerSchema,
   loginSchema,
@@ -16,9 +18,11 @@ export {
 } from './schemas';
 
 export type {
+  CreateCircleInput,
   CreateJamiyaInput,
   UpdateProfileInput,
   CreateInvitationInput,
+  AddCircleMemberInput,
   InvitationTokenInput,
   RegisterInput,
   LoginInput,
