@@ -3,8 +3,6 @@
 import {
   forgotPasswordSchema,
   loginSchema,
-  phoneOtpRequestSchema,
-  phoneOtpVerifySchema,
   registerSchema,
   resetPasswordSchema,
   sanitizePlainText,
@@ -168,72 +166,26 @@ export async function resetPasswordAction(
   redirect('/dashboard');
 }
 
+/** @deprecated Phone OTP uses /api/auth/phone/* (Taifa) via PhoneOtpForm. */
 export async function requestPhoneOtpAction(
   _prev: AuthActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<AuthActionState> {
-  const parsed = phoneOtpRequestSchema.safeParse({
-    phone: formData.get('phone'),
-  });
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Enter a valid phone number in E.164 format.',
-      fieldErrors: mapZodErrors(parsed.error),
-    };
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    phone: parsed.data.phone,
-  });
-
-  if (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
-
   return {
-    success: true,
-    message: 'OTP sent. Enter the code to continue.',
+    success: false,
+    message: 'Use the phone sign-in form — OTP is sent via Taifa SMS.',
   };
 }
 
+/** @deprecated Phone OTP uses /api/auth/phone/* (Taifa) via PhoneOtpForm. */
 export async function verifyPhoneOtpAction(
   _prev: AuthActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<AuthActionState> {
-  const parsed = phoneOtpVerifySchema.safeParse({
-    phone: formData.get('phone'),
-    token: formData.get('token'),
-  });
-
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Enter a valid phone number and 6-digit code.',
-      fieldErrors: mapZodErrors(parsed.error),
-    };
-  }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
-    phone: parsed.data.phone,
-    token: parsed.data.token,
-    type: 'sms',
-  });
-
-  if (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
-
-  redirect('/dashboard');
+  return {
+    success: false,
+    message: 'Use the phone sign-in form — OTP is verified via Taifa SMS.',
+  };
 }
 
 export async function signOutAction(): Promise<void> {

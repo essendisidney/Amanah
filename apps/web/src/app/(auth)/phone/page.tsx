@@ -5,13 +5,16 @@ export const metadata: Metadata = {
   title: 'Phone sign in',
 };
 
-export default function PhoneAuthPage() {
+type SearchParams = Promise<{ next?: string }>;
+
+export default async function PhoneAuthPage({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams;
   return (
     <AuthCard
       title="Sign in with phone"
-      description="We’ll text you a one-time code. Standard SMS rates may apply."
+      description="Enter your Kenya mobile — we’ll text a one-time code (same as Creda / Savr)."
     >
-      <PhoneOtpForm />
+      <PhoneOtpForm next={params.next ?? '/dashboard'} />
     </AuthCard>
   );
 }

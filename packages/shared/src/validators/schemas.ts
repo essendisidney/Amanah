@@ -155,12 +155,19 @@ export const resetPasswordSchema = z
     path: ['confirmPassword'],
   });
 
+/** Kenya mobile for OTP login — accepts 07… or +254… (normalized server-side). */
+export const kenyaMobileSchema = z
+  .string()
+  .trim()
+  .min(9, 'Enter a Kenya mobile number')
+  .max(20);
+
 export const phoneOtpRequestSchema = z.object({
-  phone: phoneSchema,
+  phone: kenyaMobileSchema,
 });
 
 export const phoneOtpVerifySchema = z.object({
-  phone: phoneSchema,
+  phone: kenyaMobileSchema,
   token: z
     .string()
     .trim()

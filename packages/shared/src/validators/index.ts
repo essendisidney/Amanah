@@ -13,6 +13,7 @@ export {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  kenyaMobileSchema,
   phoneOtpRequestSchema,
   phoneOtpVerifySchema,
 } from './schemas';
