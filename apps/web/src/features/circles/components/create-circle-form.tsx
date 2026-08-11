@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useTransition } from 'react';
+import { useActionState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
@@ -58,21 +58,8 @@ export function CreateCircleForm() {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors },
   } = form;
-
-  const maxMembers = watch('maxMembers');
-  const cycleCount = watch('cycleCount');
-
-  useEffect(() => {
-    if (typeof maxMembers === 'number' && maxMembers >= JAMIYA_CONSTRAINTS.minMembers) {
-      if (!cycleCount || cycleCount < maxMembers) {
-        setValue('cycleCount', maxMembers, { shouldValidate: true });
-      }
-    }
-  }, [maxMembers, cycleCount, setValue]);
 
   const onValid = (values: FormValues) => {
     const fd = new FormData();
@@ -169,9 +156,6 @@ export function CreateCircleForm() {
               max={JAMIYA_CONSTRAINTS.maxMembers}
               {...register('maxMembers')}
             />
-            <p className="text-xs text-muted-foreground">
-              Classic circle: one payout turn per member.
-            </p>
             <FieldError message={fieldError('maxMembers')} />
           </div>
 
@@ -184,6 +168,9 @@ export function CreateCircleForm() {
               max={JAMIYA_CONSTRAINTS.maxCycles}
               {...register('cycleCount')}
             />
+            <p className="text-xs text-muted-foreground">
+              How many contribution rounds this challenge runs. Independent of member count.
+            </p>
             <FieldError message={fieldError('cycleCount')} />
           </div>
         </div>

@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     contributionAmount: body.contributionAmount ?? body.contribution_amount,
     currency: body.currency ?? 'KES',
     maxMembers: body.maxMembers ?? body.max_members ?? 10,
-    cycleCount: body.cycleCount ?? body.cycle_count ?? body.maxMembers ?? body.max_members ?? 10,
+    cycleCount: body.cycleCount ?? body.cycle_count ?? 6,
     contributionFrequencyDays:
       body.contributionFrequencyDays ?? body.contribution_frequency_days ?? 30,
     startDate: body.startDate ?? body.start_date ?? '',

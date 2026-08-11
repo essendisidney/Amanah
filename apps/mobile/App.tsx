@@ -171,6 +171,7 @@ export default function App() {
   const [newCircleName, setNewCircleName] = useState('');
   const [newCircleAmount, setNewCircleAmount] = useState('1000');
   const [newCircleMembers, setNewCircleMembers] = useState('5');
+  const [newCircleCycles, setNewCircleCycles] = useState('6');
   const [inviteJamiyaId, setInviteJamiyaId] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePhone, setInvitePhone] = useState('');
@@ -283,6 +284,7 @@ export default function App() {
     const name = newCircleName.trim();
     const amount = Number(newCircleAmount);
     const maxMembers = Number(newCircleMembers);
+    const cycleCount = Number(newCircleCycles);
     if (name.length < 3) {
       setError('Circle name must be at least 3 characters');
       return;
@@ -293,6 +295,10 @@ export default function App() {
     }
     if (!Number.isFinite(maxMembers) || maxMembers < 2) {
       setError('Need at least 2 members');
+      return;
+    }
+    if (!Number.isFinite(cycleCount) || cycleCount < 2) {
+      setError('Need at least 2 cycles');
       return;
     }
     setLoading(true);
@@ -308,7 +314,7 @@ export default function App() {
         contributionAmount: amount,
         currency: 'KES',
         maxMembers,
-        cycleCount: maxMembers,
+        cycleCount,
         contributionFrequencyDays: 30,
         status: 'open',
       });
@@ -611,6 +617,13 @@ export default function App() {
                   value={newCircleMembers}
                   onChangeText={setNewCircleMembers}
                   placeholder="Max members"
+                />
+                <TextInput
+                  style={styles.input}
+                  keyboardType="numeric"
+                  value={newCircleCycles}
+                  onChangeText={setNewCircleCycles}
+                  placeholder="Number of cycles"
                 />
                 <Button
                   title="Create circle"
