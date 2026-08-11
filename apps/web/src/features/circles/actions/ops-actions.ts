@@ -114,6 +114,8 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
   const category = String(formData.get('category') ?? 'regular');
   const label = String(formData.get('label') ?? '').trim();
   const target = Number(formData.get('targetAmount') ?? 0);
+  const durationRaw = Number(formData.get('durationMonths') ?? 0);
+  const durationMonths = [1, 3, 6, 12].includes(durationRaw) ? durationRaw : null;
   const currency = String(formData.get('currency') ?? 'KES');
   if (!jamiyaId || !memberId) return;
 
@@ -124,6 +126,7 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
     category,
     label: label || null,
     target_amount: Number.isFinite(target) && target > 0 ? target : null,
+    duration_months: category === 'goal' ? durationMonths : null,
     balance: 0,
     currency,
   } as never);

@@ -75,21 +75,31 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
 export async function createGoalAction(formData: FormData): Promise<FinanceActionState> {
   const title = String(formData.get('title') ?? '').trim();
   const target = Number(formData.get('targetAmount'));
+  const durationRaw = Number(formData.get('durationMonths'));
+  const durationMonths = [1, 3, 6, 12].includes(durationRaw) ? durationRaw : null;
   if (title.length < 2 || !Number.isFinite(target) || target <= 0) {
     return { success: false, message: 'Provide a title and positive target.' };
+  }
+  if (!durationMonths) {
+    return { success: false, message: 'Choose a goal period: 1, 3, 6, or 12 months.' };
   }
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { success: false, message: 'Sign in to manage goals.' };
+
+  const targetDate = new Date();
+  targetDate.setMonth(targetDate.getMonth() + durationMonths);
+
   const { error } = await supabase.from('savings_goals').insert({
     user_id: user.id,
     title,
     target_amount: target,
     saved_amount: 0,
     currency: 'KES',
-    target_date: String(formData.get('targetDate') ?? '') || null,
+    duration_months: durationMonths,
+    target_date: targetDate.toISOString().slice(0, 10),
   } as never);
   if (error) return { success: false, message: error.message };
   revalidatePath('/finance/goals');

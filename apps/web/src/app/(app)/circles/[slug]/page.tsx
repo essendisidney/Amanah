@@ -425,6 +425,22 @@ export default async function CircleDetailsPage({ params }: Props) {
             />
           </div>
         ) : null}
+        <div className="flex flex-wrap gap-2 pt-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/community` as Route}>Meetings & chat</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/elections` as Route}>Elections</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/registration` as Route}>Circle KYC</Link>
+          </Button>
+          {canManageMembers ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/circles/${slug}/officer` as Route}>Officer console</Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {canManageMembers ? (

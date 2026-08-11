@@ -386,11 +386,32 @@ export function CircleOpsPanel({
               <Label htmlFor="label">Label (optional)</Label>
               <Input id="label" name="label" />
             </div>
-            <div className="space-y-1 sm:col-span-2">
+            <div className="space-y-1">
               <Label htmlFor="targetAmount">Target amount (optional)</Label>
-              <Input id="targetAmount" name="targetAmount" type="number" min="0" step="0.01" />
+              <Input
+                id="targetAmount"
+                name="targetAmount"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+              />
             </div>
-            <Button type="submit" className="w-fit">
+            <div className="space-y-1">
+              <Label htmlFor="durationMonths">Goal period</Label>
+              <select
+                id="durationMonths"
+                name="durationMonths"
+                className="h-10 w-full border border-input bg-background px-3"
+                defaultValue="3"
+              >
+                <option value="1">1 month</option>
+                <option value="3">3 months</option>
+                <option value="6">6 months</option>
+                <option value="12">12 months</option>
+              </select>
+            </div>
+            <Button type="submit" className="min-h-11 w-full sm:w-fit sm:col-span-2">
               Create pocket
             </Button>
           </form>

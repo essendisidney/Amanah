@@ -5,6 +5,10 @@ import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
+import {
+  scheduleMeetingAction,
+  updateMeetingStatusAction,
+} from '@/features/circles/actions/meeting-actions';
 
 export const metadata: Metadata = { title: 'Circle chat & meetings' };
 export const dynamic = 'force-dynamic';
@@ -22,27 +26,6 @@ async function postMessageAction(formData: FormData) {
     jamiya_id: jamiyaId,
     sender_id: user.id,
     body,
-  } as never);
-  revalidatePath(`/circles/${slug}/community`);
-}
-
-async function scheduleMeetingAction(formData: FormData) {
-  'use server';
-  const slug = String(formData.get('slug') ?? '');
-  const jamiyaId = String(formData.get('jamiyaId') ?? '');
-  const title = String(formData.get('title') ?? '').trim();
-  const startsAt = String(formData.get('startsAt') ?? '');
-  const location = String(formData.get('location') ?? '');
-  if (!jamiyaId || !title || !startsAt) return;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-  await supabase.from('circle_meetings').insert({
-    jamiya_id: jamiyaId,
-    title,
-    location: location || null,
-    starts_at: new Date(startsAt).toISOString(),
-    created_by: user.id,
   } as never);
   revalidatePath(`/circles/${slug}/community`);
 }
@@ -136,9 +119,14 @@ export default async function CircleCommunityPage({ params }: Props) {
           {j.name}
         </h1>
         <p className="mt-2 text-muted-foreground">Chat, meetings, and grace requests.</p>
-        <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
-        </Button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/elections` as Route}>Elections</Link>
+          </Button>
+        </div>
       </div>
 
       <section className="space-y-4">
@@ -170,18 +158,26 @@ export default async function CircleCommunityPage({ params }: Props) {
           <input type="hidden" name="jamiyaId" value={j.id} />
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="title">Title</Label>
-            <Input id="title" name="title" required />
+            <Input id="title" name="title" required placeholder="Monthly chama meeting" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="startsAt">Starts</Label>
             <Input id="startsAt" name="startsAt" type="datetime-local" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input id="location" name="location" />
+            <Label htmlFor="endsAt">Ends (optional)</Label>
+            <Input id="endsAt" name="endsAt" type="datetime-local" />
           </div>
-          <Button type="submit" size="sm" className="sm:col-span-2 w-fit">
-            Schedule
+          <div className="space-y-2">
+            <Label htmlFor="location">Location / link</Label>
+            <Input id="location" name="location" placeholder="Hall, Zoom, phone…" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="notes">Agenda / notes</Label>
+            <Input id="notes" name="notes" placeholder="Optional" />
+          </div>
+          <Button type="submit" className="min-h-11 w-full sm:col-span-2 sm:w-fit">
+            Schedule meeting
           </Button>
         </form>
         <ul className="space-y-2 text-sm">
@@ -198,6 +194,26 @@ export default async function CircleCommunityPage({ params }: Props) {
                 {new Date(m.starts_at).toLocaleString()}
                 {m.location ? ` · ${m.location}` : ''} · {m.status}
               </p>
+              {m.status === 'scheduled' ? (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <form action={updateMeetingStatusAction}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="meetingId" value={m.id} />
+                    <input type="hidden" name="status" value="completed" />
+                    <Button type="submit" size="sm">
+                      Mark completed
+                    </Button>
+                  </form>
+                  <form action={updateMeetingStatusAction}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="meetingId" value={m.id} />
+                    <input type="hidden" name="status" value="cancelled" />
+                    <Button type="submit" size="sm" variant="outline">
+                      Cancel
+                    </Button>
+                  </form>
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>
