@@ -90,10 +90,40 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
         />
       </div>
 
+      <div className="space-y-3 rounded-lg border border-border/70 bg-muted/20 p-3">
+        <div className="space-y-2">
+          <Label htmlFor="coverImage">Campaign cover photo</Label>
+          <p className="text-xs text-muted-foreground">
+            Shown publicly on Sadaka after approval (JPEG / PNG / WebP).
+          </p>
+          <input
+            id="coverImage"
+            name="coverImage"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="galleryImages">Story photos (optional, up to 4)</Label>
+          <p className="text-xs text-muted-foreground">
+            Extra public photos for the campaign page — not private KYC.
+          </p>
+          <input
+            id="galleryImages"
+            name="galleryImages"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium"
+          />
+        </div>
+      </div>
+
       <div className="space-y-2 rounded-lg border border-border/70 bg-muted/20 p-3">
-        <Label>Supporting documentation (KYC)</Label>
+        <Label>Supporting documentation (KYC — private)</Label>
         <p className="text-xs text-muted-foreground">
-          Required for admin review. Prefer a document already uploaded in{' '}
+          For admin review only — not shown publicly. Prefer a document already uploaded in{' '}
           <Link href={'/profile' as Route} className="underline">
             Profile → KYC
           </Link>

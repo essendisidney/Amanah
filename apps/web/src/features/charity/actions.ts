@@ -234,6 +234,31 @@ export async function tipFormAction(formData: FormData): Promise<void> {
   await tipAction(formData);
 }
 
+async function uploadSadakaImage(
+  supabase: Awaited<ReturnType<typeof import('@/lib/supabase/server').createClient>>,
+  userId: string,
+  file: File,
+  kind: 'cover' | 'gallery',
+): Promise<string | null> {
+  if (!(file instanceof File) || file.size === 0) return null;
+  if (file.size > 10 * 1024 * 1024) return null;
+  const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+  if (!allowed.includes(file.type)) return null;
+
+  const ext =
+    file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpg';
+  const path = `${userId}/${crypto.randomUUID()}/${kind}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const { error } = await supabase.storage.from('sadaka-media').upload(path, buffer, {
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) return null;
+
+  const { data } = supabase.storage.from('sadaka-media').getPublicUrl(path);
+  return data.publicUrl || null;
+}
+
 export async function submitCampaignAction(
   formData: FormData,
 ): Promise<CharityActionState & { slug?: string }> {
@@ -266,6 +291,26 @@ export async function submitCampaignAction(
     };
   }
 
+  const coverFile = formData.get('coverImage');
+  let coverUrl: string | null = null;
+  if (coverFile instanceof File && coverFile.size > 0) {
+    coverUrl = await uploadSadakaImage(supabase, user.id, coverFile, 'cover');
+    if (!coverUrl) {
+      return {
+        success: false,
+        message: 'Cover photo must be JPEG, PNG, or WebP under 10MB.',
+      };
+    }
+  }
+
+  const galleryUrls: string[] = [];
+  const gallery = formData.getAll('galleryImages');
+  for (const item of gallery.slice(0, 4)) {
+    if (!(item instanceof File) || item.size === 0) continue;
+    const url = await uploadSadakaImage(supabase, user.id, item, 'gallery');
+    if (url) galleryUrls.push(url);
+  }
+
   const { data, error } = await callRpc('submit_sadaka_campaign', {
     p_title: title,
     p_story: story,
@@ -275,6 +320,8 @@ export async function submitCampaignAction(
     p_beneficiary_phone: beneficiaryPhone,
     p_beneficiary_kyc_doc_url: kycUrl,
     p_slug: null,
+    p_cover_image_url: coverUrl,
+    p_public_media_urls: galleryUrls,
   });
   if (error) return { success: false, message: error.message };
   const result = data as { ok?: boolean; error?: string; slug?: string } | null;

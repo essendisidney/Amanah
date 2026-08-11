@@ -27,6 +27,8 @@ type Campaign = {
   rejection_reason: string | null;
   disbursed_amount: number | string | null;
   last_disbursed_at: string | null;
+  cover_image_url: string | null;
+  public_media_urls: string[] | null;
 };
 
 type Disbursement = {
@@ -49,7 +51,7 @@ export default async function CampaignPage({ params }: Props) {
     .select(
       `id, slug, title, summary, description, goal_amount, raised_amount, currency, fee_mode, fee_bps,
        sharia_board_endorsed, category, beneficiary_name, status, created_by, rejection_reason,
-       disbursed_amount, last_disbursed_at`,
+       disbursed_amount, last_disbursed_at, cover_image_url, public_media_urls`,
     )
     .eq('slug', slug)
     .maybeSingle();
@@ -87,7 +89,7 @@ export default async function CampaignPage({ params }: Props) {
           {campaign.title}
         </h1>
         <span className="rounded-md border border-border px-3 py-1 text-sm capitalize">
-          {campaign.status.replaceAll('_', ' ')}
+          {campaign.status.replace(/_/g, ' ')}
         </span>
         {campaign.sharia_board_endorsed ? (
           <span className="rounded-md bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
@@ -99,6 +101,15 @@ export default async function CampaignPage({ params }: Props) {
           </span>
         ) : null}
       </div>
+
+      {campaign.cover_image_url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={campaign.cover_image_url}
+          alt=""
+          className="mt-6 aspect-[16/9] w-full rounded-xl object-cover"
+        />
+      ) : null}
 
       {campaign.status === 'pending_review' ? (
         <p className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 text-sm">
@@ -130,6 +141,25 @@ export default async function CampaignPage({ params }: Props) {
         <p className="mt-3 text-sm text-muted-foreground">
           Beneficiary: {campaign.beneficiary_name}
         </p>
+      ) : null}
+
+      {(campaign.public_media_urls ?? []).length > 0 ? (
+        <section className="mt-8">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Photos
+          </h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {(campaign.public_media_urls ?? []).map((url) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={url}
+                src={url}
+                alt=""
+                className="aspect-[4/3] w-full rounded-lg object-cover"
+              />
+            ))}
+          </div>
+        </section>
       ) : null}
 
       <div className="mt-8">

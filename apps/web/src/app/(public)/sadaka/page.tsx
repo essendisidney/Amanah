@@ -17,6 +17,7 @@ type Campaign = {
   category: string | null;
   fee_bps: number;
   status: string;
+  cover_image_url: string | null;
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -50,7 +51,7 @@ export default async function SadakaPage({ searchParams }: Props) {
   let query = supabase
     .from('charity_campaigns')
     .select(
-      'id, slug, title, summary, goal_amount, raised_amount, currency, sharia_board_endorsed, category, fee_bps, status',
+      'id, slug, title, summary, goal_amount, raised_amount, currency, sharia_board_endorsed, category, fee_bps, status, cover_image_url',
     )
     .in('status', ['live', 'funded', 'disbursed'])
     .order('created_at', { ascending: false });
@@ -196,7 +197,15 @@ export default async function SadakaPage({ searchParams }: Props) {
                 className="block border-b border-border py-6 transition-colors hover:bg-muted/30"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
+                  <div className="min-w-0 flex-1">
+                    {campaign.cover_image_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={campaign.cover_image_url}
+                        alt=""
+                        className="mb-4 aspect-[16/9] w-full max-w-xl rounded-lg object-cover"
+                      />
+                    ) : null}
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
                         {campaign.title}
