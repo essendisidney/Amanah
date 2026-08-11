@@ -31,6 +31,7 @@ import {
   type BookEntryRow,
   type MemberOption,
   type PenaltySettings,
+  type SavingsPocketRow,
   type TableBankingFund,
 } from '@/features/circles/components/circle-ops-panel';
 
@@ -342,12 +343,21 @@ export default async function CircleDetailsPage({ params }: Props) {
 
   let fund: TableBankingFund | null = null;
   let creditRating: string | null = null;
+  let pockets: SavingsPocketRow[] = [];
   if (membership?.status === 'active') {
-    const [{ data: fundData }, { data: creditData }] = await Promise.all([
+    const [{ data: fundData }, { data: creditData }, { data: pocketData }] = await Promise.all([
       supabase.rpc('table_banking_fund', { p_jamiya_id: jamiya.id }),
       membership.id
         ? supabase.rpc('member_credit_snapshot', { p_member_id: membership.id })
         : Promise.resolve({ data: null }),
+      membership.id
+        ? supabase
+            .from('savings_pockets')
+            .select('id, category, label, balance, target_amount, duration_months, currency')
+            .eq('jamiya_id', jamiya.id)
+            .eq('member_id', membership.id)
+            .order('created_at', { ascending: false })
+        : Promise.resolve({ data: [] }),
     ]);
     const f = fundData as Record<string, unknown> | null;
     if (f?.ok) {
@@ -366,6 +376,25 @@ export default async function CircleDetailsPage({ params }: Props) {
     if (c?.ok && c.rating) {
       creditRating = `${c.rating} (${c.repayment_rate ?? 0}% on-time)`;
     }
+    pockets = (
+      (pocketData ?? []) as unknown as Array<{
+        id: string;
+        category: string;
+        label: string | null;
+        balance: number | string;
+        target_amount: number | string | null;
+        duration_months: number | null;
+        currency: string;
+      }>
+    ).map((row) => ({
+      id: row.id,
+      category: row.category,
+      label: row.label,
+      balance: Number(row.balance ?? 0),
+      targetAmount: row.target_amount != null ? Number(row.target_amount) : null,
+      durationMonths: row.duration_months,
+      currency: row.currency,
+    }));
   }
 
   const lateCount = contributions.filter((c) => c.status === 'late').length;
@@ -572,6 +601,7 @@ export default async function CircleDetailsPage({ params }: Props) {
               announcements={announcements}
               members={memberOptions}
               myMemberId={membership?.id ?? null}
+              pockets={pockets}
               canManage
             />
           </section>
@@ -605,7 +635,8 @@ export default async function CircleDetailsPage({ params }: Props) {
             />
           </section>
         </>
-      ) : membership?.status === 'active' && (fund || announcements.length) ? (
+      ) : membership?.status === 'active' &&
+        (fund || announcements.length || pockets.length || membership.id) ? (
         <section className="space-y-4">
           <CircleOpsPanel
             jamiyaId={jamiya.id}
@@ -617,6 +648,7 @@ export default async function CircleDetailsPage({ params }: Props) {
             announcements={announcements}
             members={memberOptions}
             myMemberId={membership.id}
+            pockets={pockets}
             canManage={false}
           />
         </section>

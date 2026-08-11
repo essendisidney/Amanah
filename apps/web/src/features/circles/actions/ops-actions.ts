@@ -135,7 +135,7 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
   const usesHorizon = ['goal', 'hajj', 'umrah', 'udhiyah'].includes(category);
 
   const supabase = await createClient();
-  await supabase.from('savings_pockets').insert({
+  const { error } = await supabase.from('savings_pockets').insert({
     jamiya_id: jamiyaId,
     member_id: memberId,
     category,
@@ -145,6 +145,37 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
     balance: 0,
     currency,
   } as never);
+  if (error) {
+    console.error('[createSavingsPocket]', error.message);
+    return;
+  }
 
   revalidateCircle(slug || undefined);
+}
+
+export async function moveSavingsPocketAction(formData: FormData): Promise<void> {
+  const pocketId = String(formData.get('pocketId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const direction = String(formData.get('direction') ?? '');
+  const amount = Number(formData.get('amount') ?? 0);
+  if (!pocketId || !['deposit', 'withdraw'].includes(direction)) return;
+  if (!Number.isFinite(amount) || amount <= 0) return;
+
+  const { data, error } = await callRpc('move_savings_pocket', {
+    p_pocket_id: pocketId,
+    p_amount: amount,
+    p_direction: direction,
+  });
+  if (error) {
+    console.error('[moveSavingsPocket]', error.message);
+    return;
+  }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    console.error('[moveSavingsPocket]', result?.error ?? 'FAILED');
+    return;
+  }
+
+  revalidateCircle(slug || undefined);
+  revalidatePath('/wallet');
 }

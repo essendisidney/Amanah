@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import {
@@ -5,6 +7,7 @@ import {
   broadcastAnnouncementAction,
   createBookEntryAction,
   createSavingsPocketAction,
+  moveSavingsPocketAction,
   updatePenaltySettingsAction,
 } from '../actions/ops-actions';
 
@@ -49,6 +52,28 @@ export type MemberOption = {
   memberCode: string | null;
 };
 
+export type SavingsPocketRow = {
+  id: string;
+  category: string;
+  label: string | null;
+  balance: number;
+  targetAmount: number | null;
+  durationMonths: number | null;
+  currency: string;
+};
+
+const POCKET_LABELS: Record<string, string> = {
+  hajj: 'Hajj',
+  umrah: 'Umra',
+  udhiyah: 'Udhiyah',
+  regular: 'Regular',
+  emergency: 'Emergency',
+  school: 'School',
+  holiday: 'Holiday',
+  investment: 'Investment',
+  goal: 'Custom goal',
+};
+
 const ENTRY_TYPES = [
   'opening_balance',
   'contribution',
@@ -83,6 +108,7 @@ export function CircleOpsPanel({
   announcements,
   members,
   myMemberId,
+  pockets = [],
   canManage = true,
 }: {
   jamiyaId: string;
@@ -94,6 +120,7 @@ export function CircleOpsPanel({
   announcements: AnnouncementRow[];
   members: MemberOption[];
   myMemberId: string | null;
+  pockets?: SavingsPocketRow[];
   canManage?: boolean;
 }) {
   return (
@@ -137,6 +164,17 @@ export function CircleOpsPanel({
             {formatCurrency(fund.lentOut, currency)} · repaid{' '}
             {formatCurrency(fund.repaid, currency)}
           </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button asChild size="sm">
+              <Link href={'/finance/qard' as Route}>Request / repay loan</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href={'/finance/welfare' as Route}>Welfare fund</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline">
+              <Link href={'/wallet' as Route}>Top up wallet</Link>
+            </Button>
+          </div>
         </section>
       ) : null}
 
@@ -360,11 +398,78 @@ export function CircleOpsPanel({
       {myMemberId ? (
         <section className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Savings pocket
+            Savings pockets
           </h2>
           <p className="text-sm text-muted-foreground">
-            Popular picks: Hajj, Umra, and Udhiyah — or choose another category.
+            Popular picks: Hajj, Umra, and Udhiyah — deposit from your wallet, withdraw back.
           </p>
+
+          {pockets.length ? (
+            <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+              {pockets.map((pocket) => (
+                <li key={pocket.id} className="space-y-3 p-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <div>
+                      <p className="font-medium">
+                        {POCKET_LABELS[pocket.category] ?? pocket.category}
+                        {pocket.label ? ` · ${pocket.label}` : ''}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {pocket.targetAmount
+                          ? `Target ${formatCurrency(pocket.targetAmount, pocket.currency)}`
+                          : 'No target'}
+                        {pocket.durationMonths ? ` · ${pocket.durationMonths} months` : ''}
+                      </p>
+                    </div>
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(pocket.balance, pocket.currency)}
+                    </p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <form action={moveSavingsPocketAction} className="flex gap-2">
+                      <input type="hidden" name="pocketId" value={pocket.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="direction" value="deposit" />
+                      <Input
+                        name="amount"
+                        type="number"
+                        inputMode="decimal"
+                        min="1"
+                        step="0.01"
+                        required
+                        placeholder="Deposit"
+                        className="h-10"
+                      />
+                      <Button type="submit" size="sm" className="min-h-10 shrink-0">
+                        Deposit
+                      </Button>
+                    </form>
+                    <form action={moveSavingsPocketAction} className="flex gap-2">
+                      <input type="hidden" name="pocketId" value={pocket.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="direction" value="withdraw" />
+                      <Input
+                        name="amount"
+                        type="number"
+                        inputMode="decimal"
+                        min="1"
+                        step="0.01"
+                        required
+                        placeholder="Withdraw"
+                        className="h-10"
+                      />
+                      <Button type="submit" size="sm" variant="outline" className="min-h-10 shrink-0">
+                        Withdraw
+                      </Button>
+                    </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground">No pockets yet — create one below.</p>
+          )}
+
           <form
             action={createSavingsPocketAction}
             className="grid max-w-xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
@@ -404,12 +509,12 @@ export function CircleOpsPanel({
               />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="durationMonths">Goal period</Label>
+              <Label htmlFor="durationMonths">Goal period (Hajj / Umra / Udhiyah / custom)</Label>
               <select
                 id="durationMonths"
                 name="durationMonths"
                 className="h-10 w-full border border-input bg-background px-3"
-                defaultValue="3"
+                defaultValue="12"
               >
                 <option value="1">1 month</option>
                 <option value="3">3 months</option>
