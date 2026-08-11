@@ -27,10 +27,12 @@ export function TopUpForm({
           id="amount"
           name="amount"
           type="number"
+          inputMode="decimal"
           min={100}
           step={100}
           defaultValue={1000}
           required
+          className="h-11 text-base sm:h-10 sm:text-sm"
         />
       </div>
       {provider === 'mpesa' ? (
@@ -40,8 +42,10 @@ export function TopUpForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+254712345678"
+            inputMode="tel"
+            placeholder="0712 345 678"
             required
+            className="h-11 text-base sm:h-10 sm:text-sm"
           />
         </div>
       ) : provider === 'bank' ? (
@@ -50,8 +54,7 @@ export function TopUpForm({
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Simulated funding (set <code>PAYMENT_PROVIDER=mpesa</code> or{' '}
-          <code>bank</code>).
+          Demo funding for testing. Live M-Pesa will replace this when enabled.
         </p>
       )}
       {state.message ? (
@@ -64,7 +67,7 @@ export function TopUpForm({
           {state.message}
         </p>
       ) : null}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" className="min-h-11 w-full" disabled={pending}>
         {pending
           ? 'Processing…'
           : provider === 'mpesa'

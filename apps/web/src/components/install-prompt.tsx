@@ -91,7 +91,7 @@ export function InstallPrompt() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-[60] px-3 md:bottom-4 md:px-4"
+      className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-[60] px-3 md:bottom-4 md:px-4"
       role="dialog"
       aria-labelledby="amanah-install-title"
     >

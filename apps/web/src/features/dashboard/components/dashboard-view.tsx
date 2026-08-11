@@ -14,21 +14,27 @@ export function DashboardView({
   email?: string | null;
 }) {
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 md:space-y-10">
       <DashboardHero profile={data.profile} email={email} />
-      <DashboardStats data={data} />
 
-      <div className="grid gap-10 lg:grid-cols-5">
-        <div className="space-y-10 lg:col-span-3">
-          <MyCirclesSection jamiyas={data.jamiyas} />
-          <ContributionsSection contributions={data.contributions} />
+      {/* On phones: dues first. Stats sit below the fold. */}
+      <div className="flex flex-col gap-8 md:gap-10">
+        <div className="order-2 md:order-1">
+          <DashboardStats data={data} />
         </div>
-        <div className="space-y-10 lg:col-span-2">
-          <PayoutsSection payouts={data.payouts} />
-          <NotificationsSection
-            notifications={data.notifications}
-            unreadCount={data.unreadNotificationCount}
-          />
+
+        <div className="order-1 grid gap-8 md:order-2 md:gap-10 lg:grid-cols-5">
+          <div className="space-y-8 md:space-y-10 lg:col-span-3">
+            <ContributionsSection contributions={data.contributions} />
+            <MyCirclesSection jamiyas={data.jamiyas} />
+          </div>
+          <div className="space-y-8 md:space-y-10 lg:col-span-2">
+            <PayoutsSection payouts={data.payouts} />
+            <NotificationsSection
+              notifications={data.notifications}
+              unreadCount={data.unreadNotificationCount}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -48,25 +48,38 @@ export function ContributionsSection({
                     : null}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
                 <p className="text-sm font-semibold text-foreground">
                   {formatCurrency(item.amount, item.currency)}
+                  {item.amountPaid > 0 ? (
+                    <span className="ml-2 font-normal text-muted-foreground">
+                      · left{' '}
+                      {formatCurrency(
+                        Math.max(item.amount - item.amountPaid, 0),
+                        item.currency,
+                      )}
+                    </span>
+                  ) : null}
                 </p>
                 {item.status === 'pending' ||
                 item.status === 'late' ||
                 item.status === 'partial' ? (
-                  <form action={payContributionAction} className="flex items-center gap-2">
+                  <form
+                    action={payContributionAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+                  >
                     <input type="hidden" name="contributionId" value={item.id} />
                     <input type="hidden" name="slug" value={item.jamiyaSlug} />
                     <input
                       name="amount"
                       type="number"
+                      inputMode="decimal"
                       min={1}
                       step="0.01"
-                      placeholder="Mdogo"
-                      className="h-9 w-24 rounded-md border border-input bg-background px-2 text-sm"
+                      placeholder="Amount (blank = full)"
+                      className="h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:w-40 sm:text-sm"
                     />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Pay
                     </Button>
                   </form>

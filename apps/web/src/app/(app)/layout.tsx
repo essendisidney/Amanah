@@ -1,9 +1,6 @@
-import Link from 'next/link';
-import type { Route } from 'next';
-import { APP_NAME } from '@jamiya/shared';
 import { isComplianceRole } from '@jamiya/auth';
 import type { PlatformRole } from '@jamiya/types';
-import { Button } from '@jamiya/ui';
+import { AppShell } from '@/components/app-shell';
 import { signOutAction } from '@/features/auth';
 import { NotificationRealtime } from '@/features/dashboard/components/notification-realtime';
 import { createClient } from '@/lib/supabase/server';
@@ -32,61 +29,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     showAdmin = isComplianceRole(role);
   }
 
-  const navItems: Array<{ href: Route; label: string }> = [
-    { href: '/dashboard' as Route, label: 'Dashboard' },
-    { href: '/circles' as Route, label: 'My circles' },
-    { href: '/finance' as Route, label: 'Finance' },
-    { href: '/sadaka' as Route, label: 'Sadaka' },
-    { href: '/support' as Route, label: 'Support' },
-    { href: '/notifications' as Route, label: 'Notifications' },
-    { href: '/wallet' as Route, label: 'Wallet' },
-    { href: '/profile' as Route, label: 'Profile' },
-  ];
-
-  if (showAdmin) {
-    navItems.push({ href: '/admin' as Route, label: 'Admin' });
-  }
-
   return (
-    <div className="min-h-dvh bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5f0_100%)]">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-card/85 backdrop-blur">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-6">
-          <div className="flex items-center gap-8">
-            <Link
-              href={'/dashboard' as Route}
-              className="font-[family-name:var(--font-display)] text-xl font-semibold text-primary"
-            >
-              {APP_NAME}
-            </Link>
-            <nav
-              className="flex max-w-[min(100%,42rem)] items-center gap-1 overflow-x-auto md:max-w-none"
-              aria-label="Primary"
-            >
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  {item.label}
-                  {item.label === 'Notifications' && unread > 0 ? (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-                      {unread > 9 ? '9+' : unread}
-                    </span>
-                  ) : null}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <form action={signOutAction}>
-            <Button type="submit" variant="outline" size="sm">
-              Sign out
-            </Button>
-          </form>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-6xl px-6 py-8 md:py-10">{children}</main>
+    <>
+      <AppShell unread={unread} showAdmin={showAdmin} signOutAction={signOutAction}>
+        {children}
+      </AppShell>
       {user ? <NotificationRealtime userId={user.id} /> : null}
-    </div>
+    </>
   );
 }

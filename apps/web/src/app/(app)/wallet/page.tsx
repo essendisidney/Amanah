@@ -139,34 +139,36 @@ export default async function WalletPage() {
         </ul>
       )}
 
-      <section className="max-w-md space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Top up
-        </h2>
-        <div className="rounded-xl border border-border bg-card p-6">
-          <TopUpForm
-            currency={primaryCurrency}
-            provider={
-              ['mpesa', 'bank'].includes(
-                (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase(),
-              )
-                ? ((process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase() as
-                    | 'mpesa'
-                    | 'bank')
-                : 'simulated'
-            }
-          />
-        </div>
-      </section>
+      <div className="grid gap-6 md:grid-cols-2">
+        <section className="space-y-4">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Top up
+          </h2>
+          <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+            <TopUpForm
+              currency={primaryCurrency}
+              provider={
+                ['mpesa', 'bank'].includes(
+                  (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase(),
+                )
+                  ? ((process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase() as
+                      | 'mpesa'
+                      | 'bank')
+                  : 'simulated'
+              }
+            />
+          </div>
+        </section>
 
-      <section className="max-w-md space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Withdraw
-        </h2>
-        <div className="rounded-xl border border-border bg-card p-6">
-          <WithdrawalForm currency={primaryCurrency} />
-        </div>
-      </section>
+        <section className="space-y-4">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Withdraw
+          </h2>
+          <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
+            <WithdrawalForm currency={primaryCurrency} />
+          </div>
+        </section>
+      </div>
 
       {pendingIntents.length > 0 ? (
         <section className="space-y-4">

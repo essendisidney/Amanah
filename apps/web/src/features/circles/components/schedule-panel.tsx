@@ -68,9 +68,14 @@ export function ContributionCalendar({
     );
   }
 
+  const ordered = [...contributions].sort((a, b) => {
+    if (a.isMine === b.isMine) return a.cycleNumber - b.cycleNumber;
+    return a.isMine ? -1 : 1;
+  });
+
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-      {contributions.map((item) => {
+      {ordered.map((item) => {
         const paid = item.amountPaid ?? 0;
         const remaining = Math.max(item.amount - paid, 0);
         const payable =
@@ -105,23 +110,24 @@ export function ContributionCalendar({
             {payable ? (
               <form
                 action={ahead ? payContributionAheadAction : payContributionAction}
-                className="flex flex-wrap items-end gap-2"
+                className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
               >
                 <input type="hidden" name="contributionId" value={item.id} />
                 <input type="hidden" name="slug" value={slug} />
-                <label className="text-xs text-muted-foreground">
+                <label className="block text-xs text-muted-foreground sm:inline">
                   Amount (blank = full remaining)
                   <input
                     name="amount"
                     type="number"
+                    inputMode="decimal"
                     min={1}
                     step="0.01"
                     max={remaining}
                     placeholder={String(remaining)}
-                    className="ml-2 h-9 w-28 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+                    className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:ml-2 sm:mt-0 sm:inline-block sm:h-10 sm:w-32 sm:text-sm"
                   />
                 </label>
-                <Button type="submit" size="sm">
+                <Button type="submit" className="min-h-11 w-full sm:w-auto">
                   {ahead ? 'Pay ahead' : 'Lipa / Pay'}
                 </Button>
               </form>

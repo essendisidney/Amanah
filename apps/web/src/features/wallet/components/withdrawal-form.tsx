@@ -24,17 +24,19 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
           id="withdraw-amount"
           name="amount"
           type="number"
+          inputMode="decimal"
           min={100}
           step={100}
           defaultValue={1000}
           required
+          className="h-11 text-base sm:h-10 sm:text-sm"
         />
       </div>
 
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           type="button"
-          size="sm"
+          className="min-h-11"
           variant={destinationType === 'mpesa' ? 'default' : 'outline'}
           onClick={() => setDestinationType('mpesa')}
         >
@@ -42,7 +44,7 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
         </Button>
         <Button
           type="button"
-          size="sm"
+          className="min-h-11"
           variant={destinationType === 'bank' ? 'default' : 'outline'}
           onClick={() => setDestinationType('bank')}
         >
@@ -53,7 +55,15 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
       {destinationType === 'mpesa' ? (
         <div className="space-y-2">
           <Label htmlFor="phone">M-Pesa phone</Label>
-          <Input id="phone" name="phone" type="tel" placeholder="+254712345678" required />
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            placeholder="0712 345 678"
+            required
+            className="h-11 text-base sm:h-10 sm:text-sm"
+          />
         </div>
       ) : (
         <>
@@ -82,7 +92,7 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
         </p>
       ) : null}
 
-      <Button type="submit" variant="outline" disabled={pending}>
+      <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
         {pending ? 'Submitting…' : 'Request withdrawal'}
       </Button>
     </form>
