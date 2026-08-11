@@ -235,7 +235,18 @@ export async function tipFormAction(formData: FormData): Promise<void> {
 }
 
 async function uploadSadakaImage(
-  supabase: Awaited<ReturnType<typeof import('@/lib/supabase/server').createClient>>,
+  supabase: {
+    storage: {
+      from: (bucket: string) => {
+        upload: (
+          path: string,
+          data: Buffer,
+          options: { contentType: string; upsert: boolean },
+        ) => Promise<{ error: { message: string } | null }>;
+        getPublicUrl: (path: string) => { data: { publicUrl: string } };
+      };
+    };
+  },
   userId: string,
   file: File,
   kind: 'cover' | 'gallery',
