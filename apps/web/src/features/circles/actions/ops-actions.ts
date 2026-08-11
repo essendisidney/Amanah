@@ -119,6 +119,21 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
   const currency = String(formData.get('currency') ?? 'KES');
   if (!jamiyaId || !memberId) return;
 
+  const allowed = [
+    'regular',
+    'emergency',
+    'school',
+    'holiday',
+    'investment',
+    'goal',
+    'hajj',
+    'umrah',
+    'udhiyah',
+  ];
+  if (!allowed.includes(category)) return;
+
+  const usesHorizon = ['goal', 'hajj', 'umrah', 'udhiyah'].includes(category);
+
   const supabase = await createClient();
   await supabase.from('savings_pockets').insert({
     jamiya_id: jamiyaId,
@@ -126,7 +141,7 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
     category,
     label: label || null,
     target_amount: Number.isFinite(target) && target > 0 ? target : null,
-    duration_months: category === 'goal' ? durationMonths : null,
+    duration_months: usesHorizon ? durationMonths : null,
     balance: 0,
     currency,
   } as never);

@@ -1,11 +1,8 @@
 import { redirect } from 'next/navigation';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
-import {
-  createGoalFormAction,
-  deleteGoalAction,
-  updateGoalFormAction,
-} from '@/features/finance/actions';
+import { deleteGoalAction, updateGoalFormAction } from '@/features/finance/actions';
+import { CreateGoalForm } from '@/features/finance/components/create-goal-form';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,13 +15,6 @@ type Goal = {
   target_date: string | null;
   duration_months: number | null;
 };
-
-const PERIODS = [
-  { value: '1', label: '1 month' },
-  { value: '3', label: '3 months' },
-  { value: '6', label: '6 months' },
-  { value: '12', label: '12 months' },
-] as const;
 
 export default async function GoalsPage() {
   const supabase = await createClient();
@@ -50,52 +40,11 @@ export default async function GoalsPage() {
           Savings goals
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Set a target with a 1, 3, 6, or 12 month horizon.
+          Save for Hajj, Umra, Udhiyah, or any goal — with a 1, 3, 6, or 12 month horizon.
         </p>
       </div>
 
-      <form
-        action={createGoalFormAction}
-        className="grid max-w-2xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2 sm:p-6"
-      >
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="title">Goal</Label>
-          <Input id="title" name="title" required placeholder="School fees, business stock…" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="targetAmount">Target (KES)</Label>
-          <Input
-            id="targetAmount"
-            name="targetAmount"
-            type="number"
-            inputMode="decimal"
-            min="1"
-            required
-            className="h-11 text-base sm:h-10 sm:text-sm"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="durationMonths">Period</Label>
-          <select
-            id="durationMonths"
-            name="durationMonths"
-            required
-            defaultValue="3"
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
-          >
-            {PERIODS.map((p) => (
-              <option key={p.value} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="sm:col-span-2">
-          <Button type="submit" className="min-h-11 w-full sm:w-auto">
-            Create goal
-          </Button>
-        </div>
-      </form>
+      <CreateGoalForm />
 
       <section className="space-y-5">
         {goals.map((goal) => {

@@ -62,12 +62,15 @@ const ENTRY_TYPES = [
 ] as const;
 
 const POCKET_CATEGORIES = [
-  'regular',
-  'emergency',
-  'school',
-  'holiday',
-  'investment',
-  'goal',
+  { value: 'hajj', label: 'Hajj' },
+  { value: 'umrah', label: 'Umra' },
+  { value: 'udhiyah', label: 'Udhiyah' },
+  { value: 'regular', label: 'Regular' },
+  { value: 'emergency', label: 'Emergency' },
+  { value: 'school', label: 'School' },
+  { value: 'holiday', label: 'Holiday' },
+  { value: 'investment', label: 'Investment' },
+  { value: 'goal', label: 'Custom goal' },
 ] as const;
 
 export function CircleOpsPanel({
@@ -359,6 +362,9 @@ export function CircleOpsPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Savings pocket
           </h2>
+          <p className="text-sm text-muted-foreground">
+            Popular picks: Hajj, Umra, and Udhiyah — or choose another category.
+          </p>
           <form
             action={createSavingsPocketAction}
             className="grid max-w-xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
@@ -373,11 +379,11 @@ export function CircleOpsPanel({
                 id="category"
                 name="category"
                 className="h-10 w-full border border-input bg-background px-3"
-                defaultValue="regular"
+                defaultValue="hajj"
               >
                 {POCKET_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </select>

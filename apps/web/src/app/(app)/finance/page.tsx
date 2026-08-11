@@ -19,7 +19,7 @@ export default async function FinancePage() {
     ['Welfare fund', 'Medical, funeral, and accident support for your circle.', '/finance/welfare'],
     ['Qard Hassan', 'Request and repay interest-free circle loans.', '/finance/qard'],
     ['Tawarruq', 'Apply for partner-facilitated Sharia-compliant finance.', '/finance/tawarruq'],
-    ['Savings goals', 'Set a personal saving target and track progress.', '/finance/goals'],
+    ['Savings goals', 'Save for Hajj, Umra, Udhiyah, or any personal target.', '/finance/goals'],
   ] as const;
   return <div className="space-y-10">
     <div><p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Circle finance</p><h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">Finance</h1><p className="mt-2 text-muted-foreground">Manage Sharia-conscious finance tools connected to your circles.</p></div>
