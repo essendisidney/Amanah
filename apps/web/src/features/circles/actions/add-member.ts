@@ -92,7 +92,7 @@ function mapAddError(code?: string): string {
   const messages: Record<string, string> = {
     ALREADY_MEMBER: 'That person is already an active member.',
     CIRCLE_FULL: 'This circle is full.',
-    FORBIDDEN: 'Only circle admins can add members.',
+    FORBIDDEN: 'Only circle admins, chairs, or treasurers can add members.',
     USER_NOT_FOUND: 'User not found.',
     UNAUTHENTICATED: 'Sign in to continue.',
   };

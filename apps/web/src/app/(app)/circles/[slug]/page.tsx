@@ -166,13 +166,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     role: string;
     status: string;
   } | null;
-  const isCircleAdmin =
-    membership?.role === 'circle_admin' && membership.status === 'active';
   const canManageMembers =
     membership?.status === 'active' &&
     ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
+  /** Chair/treasurer share ops: invites, penalties, books, announcements. */
+  const canManageOps = canManageMembers;
   const canActivate =
-    isCircleAdmin &&
+    canManageOps &&
     (jamiya.status === 'draft' || jamiya.status === 'open') &&
     jamiya.member_count >= 2;
 
@@ -630,7 +630,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <PayoutSchedule
           payouts={payouts}
           slug={jamiya.slug}
-          isCircleAdmin={Boolean(isCircleAdmin)}
+          isCircleAdmin={Boolean(canManageOps)}
         />
       </section>
 
@@ -672,7 +672,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      {isCircleAdmin ? (
+      {canManageOps ? (
         <>
           <section className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
@@ -718,7 +718,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <PendingInvitationsList
               invitations={invitations}
               slug={jamiya.slug}
-              canManage={isCircleAdmin}
+              canManage={canManageOps}
             />
           </section>
         </>

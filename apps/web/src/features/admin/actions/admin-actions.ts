@@ -54,3 +54,20 @@ export async function reviewKycDocumentAction(formData: FormData): Promise<void>
   revalidatePath('/admin');
   revalidatePath('/profile');
 }
+
+export async function setJamiyaStatusAction(formData: FormData): Promise<void> {
+  await requireAdminAccess('admin');
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const status = String(formData.get('status') ?? '');
+  const allowed = ['draft', 'open', 'active', 'paused', 'completed', 'cancelled'];
+  if (!jamiyaId || !allowed.includes(status)) return;
+
+  await callRpc('admin_set_jamiya_status', {
+    p_jamiya_id: jamiyaId,
+    p_status: status,
+  });
+
+  revalidatePath('/admin/circles');
+  revalidatePath('/admin');
+  revalidatePath('/circles');
+}

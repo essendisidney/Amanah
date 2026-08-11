@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { setJamiyaStatusAction } from '@/features/admin/actions/admin-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Circles' };
@@ -21,6 +23,8 @@ type JamiyaRow = {
   created_at: string;
 };
 
+const STATUSES = ['draft', 'open', 'active', 'paused', 'completed', 'cancelled'] as const;
+
 export default async function AdminCirclesPage() {
   await requireAdminAccess('admin');
   const supabase = await createClient();
@@ -36,7 +40,12 @@ export default async function AdminCirclesPage() {
 
   return (
     <div className="space-y-4">
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Circles</h2>
+      <div>
+        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Circles</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Open, activate, pause, or close circles across the platform.
+        </p>
+      </div>
       <ul className="divide-y divide-border rounded-xl border border-border bg-card">
         {rows.map((item) => {
           const amount =
@@ -44,7 +53,10 @@ export default async function AdminCirclesPage() {
               ? item.contribution_amount
               : Number(item.contribution_amount);
           return (
-            <li key={item.id} className="flex items-center justify-between gap-4 px-5 py-4">
+            <li
+              key={item.id}
+              className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            >
               <div>
                 <Link
                   href={`/circles/${item.slug}` as Route}
@@ -57,7 +69,26 @@ export default async function AdminCirclesPage() {
                   {formatCurrency(amount, item.currency)} · {formatDate(item.created_at)}
                 </p>
               </div>
-              <StatusBadge status={item.status} />
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge status={item.status} />
+                <form action={setJamiyaStatusAction} className="flex flex-wrap items-center gap-2">
+                  <input type="hidden" name="jamiyaId" value={item.id} />
+                  <select
+                    name="status"
+                    defaultValue={item.status}
+                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+                  >
+                    {STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                  <Button type="submit" size="sm" variant="outline">
+                    Update
+                  </Button>
+                </form>
+              </div>
             </li>
           );
         })}

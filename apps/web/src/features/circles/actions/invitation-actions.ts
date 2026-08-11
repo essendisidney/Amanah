@@ -77,8 +77,14 @@ export async function createInvitationAction(
     .maybeSingle();
 
   const member = membership as unknown as { role: string; status: string } | null;
-  if (!member || member.role !== 'circle_admin' || member.status !== 'active') {
-    return { success: false, message: 'Only circle admins can invite members.' };
+  const canInvite =
+    member?.status === 'active' &&
+    ['circle_admin', 'chair', 'treasurer'].includes(member.role);
+  if (!canInvite) {
+    return {
+      success: false,
+      message: 'Only circle admins, chairs, or treasurers can invite members.',
+    };
   }
 
   let inviteeUserId: string | null = null;
