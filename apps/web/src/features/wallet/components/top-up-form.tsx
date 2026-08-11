@@ -54,7 +54,8 @@ export function TopUpForm({
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Demo funding for testing. Live M-Pesa will replace this when enabled.
+          Instant demo wallet credit (no M-Pesa). Use this to pay dues, fund pockets, and repay
+          loans while testing.
         </p>
       )}
       {state.message ? (

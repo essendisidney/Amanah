@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
+import {
+  mapMoneyError,
+  redirectWithCircleNotice,
+} from '../lib/circle-notice';
 
 function revalidateCircle(slug?: string) {
   revalidatePath('/dashboard');
@@ -146,11 +150,17 @@ export async function createSavingsPocketAction(formData: FormData): Promise<voi
     currency,
   } as never);
   if (error) {
-    console.error('[createSavingsPocket]', error.message);
+    if (slug) {
+      const msg = error.message.toLowerCase().includes('duplicate')
+        ? 'You already have a pocket with that category and label.'
+        : error.message;
+      redirectWithCircleNotice(slug, msg);
+    }
     return;
   }
 
   revalidateCircle(slug || undefined);
+  if (slug) redirectWithCircleNotice(slug, 'Savings pocket created.', 'success');
 }
 
 export async function moveSavingsPocketAction(formData: FormData): Promise<void> {
@@ -159,7 +169,10 @@ export async function moveSavingsPocketAction(formData: FormData): Promise<void>
   const direction = String(formData.get('direction') ?? '');
   const amount = Number(formData.get('amount') ?? 0);
   if (!pocketId || !['deposit', 'withdraw'].includes(direction)) return;
-  if (!Number.isFinite(amount) || amount <= 0) return;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    if (slug) redirectWithCircleNotice(slug, 'Enter a valid amount.');
+    return;
+  }
 
   const { data, error } = await callRpc('move_savings_pocket', {
     p_pocket_id: pocketId,
@@ -167,15 +180,24 @@ export async function moveSavingsPocketAction(formData: FormData): Promise<void>
     p_direction: direction,
   });
   if (error) {
-    console.error('[moveSavingsPocket]', error.message);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message));
     return;
   }
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    console.error('[moveSavingsPocket]', result?.error ?? 'FAILED');
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(result?.error));
     return;
   }
 
   revalidateCircle(slug || undefined);
   revalidatePath('/wallet');
+  if (slug) {
+    redirectWithCircleNotice(
+      slug,
+      direction === 'deposit'
+        ? 'Deposited from wallet into your savings pocket.'
+        : 'Withdrawn from pocket back to your wallet.',
+      'success',
+    );
+  }
 }

@@ -3,8 +3,25 @@
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
+import {
+  mapMoneyError,
+  redirectWithCircleNotice,
+} from '@/features/circles/lib/circle-notice';
 
 export type FinanceActionState = { success: boolean; message: string };
+
+function finishCircleFinance(formData: FormData, state: FinanceActionState): void {
+  const slug = String(formData.get('slug') ?? '').trim();
+  if (!slug) return;
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath('/finance/qard');
+  revalidatePath('/wallet');
+  redirectWithCircleNotice(
+    slug,
+    state.success ? state.message : mapMoneyError(state.message),
+    state.success ? 'success' : 'error',
+  );
+}
 
 function rpcState(data: unknown, fallback: string): FinanceActionState {
   const result = data as { ok?: boolean; error?: string } | null;
@@ -237,7 +254,8 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
 }
 
 export async function decideQardFormAction(formData: FormData): Promise<void> {
-  await decideQardAction(formData);
+  const state = await decideQardAction(formData);
+  finishCircleFinance(formData, state);
 }
 
 export async function acceptQardAgreementAction(
@@ -262,7 +280,8 @@ export async function acceptQardAgreementAction(
 }
 
 export async function acceptQardAgreementFormAction(formData: FormData): Promise<void> {
-  await acceptQardAgreementAction(formData);
+  const state = await acceptQardAgreementAction(formData);
+  finishCircleFinance(formData, state);
 }
 
 export async function applyReferralAction(
@@ -309,10 +328,15 @@ export async function syncPhoneFormAction(): Promise<void> {
 }
 
 export async function requestQardFormAction(formData: FormData): Promise<void> {
-  await requestQardAction(formData);
+  const state = await requestQardAction(formData);
+  finishCircleFinance(formData, state);
 }
 export async function repayQardFormAction(formData: FormData): Promise<void> {
-  await repayQardAction(formData);
+  const state = await repayQardAction(formData);
+  if (!state.success && state.message) {
+    state.message = mapMoneyError(state.message);
+  }
+  finishCircleFinance(formData, state);
 }
 export async function submitTawarruqFormAction(formData: FormData): Promise<void> {
   await submitTawarruqAction(formData);

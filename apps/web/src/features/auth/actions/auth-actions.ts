@@ -53,9 +53,17 @@ export async function registerAction(
   });
 
   if (error) {
+    const msg = error.message.toLowerCase();
+    const exists =
+      msg.includes('already') ||
+      msg.includes('registered') ||
+      msg.includes('exists') ||
+      error.code === 'user_already_exists';
     return {
       success: false,
-      message: error.message,
+      message: exists
+        ? 'An account with this email already exists. Reset your password or sign in with phone OTP.'
+        : error.message,
     };
   }
 
@@ -91,7 +99,8 @@ export async function loginAction(
   if (error) {
     return {
       success: false,
-      message: 'Invalid email or password.',
+      message:
+        'Invalid email or password. Reset your password, or sign in with phone OTP if you use a Kenya mobile.',
     };
   }
 
@@ -191,5 +200,5 @@ export async function verifyPhoneOtpAction(
 export async function signOutAction(): Promise<void> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/login');
+  redirect('/phone');
 }

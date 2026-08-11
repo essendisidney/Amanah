@@ -27,10 +27,10 @@ export default function LandingPage() {
             <Link href="/sadaka">Sadaka</Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link href="/login">Sign in</Link>
+            <Link href="/phone">Sign in</Link>
           </Button>
           <Button asChild>
-            <Link href="/register">Get started</Link>
+            <Link href="/phone">Get started</Link>
           </Button>
         </nav>
       </header>
@@ -47,12 +47,22 @@ export default function LandingPage() {
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <Button size="lg" asChild>
-            <Link href="/register">Start a circle</Link>
+            <Link href="/phone">Start with phone</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/login">Join your circle</Link>
+            <Link href="/phone">Join your circle</Link>
           </Button>
         </div>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Prefer email?{' '}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Sign in
+          </Link>
+          {' · '}
+          <Link href="/register" className="font-medium text-primary hover:underline">
+            Create account
+          </Link>
+        </p>
       </main>
     </div>
   );

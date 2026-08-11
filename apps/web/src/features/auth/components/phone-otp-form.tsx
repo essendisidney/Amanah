@@ -274,6 +274,10 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
         <Link href="/login" className="font-medium text-primary hover:underline">
           Sign in with password
         </Link>
+        {' · '}
+        <Link href="/register" className="font-medium text-primary hover:underline">
+          Create email account
+        </Link>
       </AuthFormMessage>
     </div>
   );

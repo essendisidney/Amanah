@@ -11,11 +11,13 @@ export function isProductionRuntime(): boolean {
   return process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production';
 }
 
-/** Prefer hard cutover automatically in production unless explicitly opted out. */
+/**
+ * Block simulated wallet top-ups only when real providers are required.
+ * M-Pesa/Daraja remains optional — demos use PAYMENT_PROVIDER=simulated.
+ */
 export function shouldBlockSimulatedPayments(): boolean {
   if (process.env.ALLOW_SIMULATED_IN_PROD === 'true') return false;
-  if (requireRealProviders()) return true;
-  return isProductionRuntime();
+  return requireRealProviders();
 }
 
 export function assertProviderConfigured(provider: 'mpesa' | 'bank' | 'simulated'): void {

@@ -2,6 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
+import {
+  mapMoneyError,
+  redirectWithCircleNotice,
+} from '../lib/circle-notice';
 
 function revalidateCircle(slug?: string) {
   revalidatePath('/dashboard');
@@ -51,13 +55,13 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    console.error('pay_contribution', error.message);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message));
     return;
   }
 
   const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
-    console.error('pay_contribution', result?.error);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(result?.error));
     return;
   }
 
@@ -68,6 +72,7 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   }
 
   revalidateCircle(slug || undefined);
+  if (slug) redirectWithCircleNotice(slug, 'Contribution paid from your wallet.', 'success');
 }
 
 export async function payContributionAheadAction(formData: FormData): Promise<void> {
@@ -88,13 +93,13 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
   });
 
   if (error) {
-    console.error('pay_contribution_ahead', error.message);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message));
     return;
   }
 
   const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
-    console.error('pay_contribution_ahead', result?.error);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(result?.error));
     return;
   }
 
@@ -105,6 +110,7 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
   }
 
   revalidateCircle(slug || undefined);
+  if (slug) redirectWithCircleNotice(slug, 'Contribution paid ahead from your wallet.', 'success');
 }
 
 export async function settlePayoutAction(formData: FormData): Promise<void> {

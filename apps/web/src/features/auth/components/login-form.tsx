@@ -17,14 +17,27 @@ export function LoginForm({
   error?: string;
 }) {
   const [state, formAction, pending] = useActionState(loginAction, initialAuthActionState);
+  const showError = error || (state.message && !state.success);
 
   return (
     <div className="space-y-6">
-      {(error || (state.message && !state.success)) && (
+      {showError ? (
         <Alert variant="destructive">
-          <AlertDescription>{error ?? state.message}</AlertDescription>
+          <AlertDescription>
+            {error ?? state.message}{' '}
+            <Link href={'/forgot-password' as Route} className="font-medium underline">
+              Reset password
+            </Link>
+            {' · '}
+            <Link
+              href={`/phone?next=${encodeURIComponent(next)}` as Route}
+              className="font-medium underline"
+            >
+              Phone OTP
+            </Link>
+          </AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
       <form action={formAction} className="space-y-4">
         <input type="hidden" name="next" value={next} />
@@ -64,23 +77,30 @@ export function LoginForm({
           ) : null}
         </div>
         <Button type="submit" className="w-full" disabled={pending}>
-          {pending ? 'Signing in…' : 'Sign in'}
+          {pending ? 'Signing in…' : 'Sign in with email'}
         </Button>
       </form>
 
       <GoogleSignInButton next={next} />
 
-      <p className="text-center text-sm text-muted-foreground">
+      <AuthFormMessage>
         Prefer phone?{' '}
-        <Link href={'/phone' as Route} className="font-medium text-primary hover:underline">
+        <Link
+          href={`/phone?next=${encodeURIComponent(next)}` as Route}
+          className="font-medium text-primary hover:underline"
+        >
           Sign in with OTP
         </Link>
-      </p>
+      </AuthFormMessage>
 
       <AuthFormMessage>
         New to Amanah?{' '}
+        <Link href={'/phone' as Route} className="font-medium text-primary hover:underline">
+          Start with phone
+        </Link>
+        {' · '}
         <Link href={'/register' as Route} className="font-medium text-primary hover:underline">
-          Create an account
+          Email account
         </Link>
       </AuthFormMessage>
     </div>

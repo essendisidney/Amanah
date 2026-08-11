@@ -34,6 +34,11 @@ import {
   type SavingsPocketRow,
   type TableBankingFund,
 } from '@/features/circles/components/circle-ops-panel';
+import {
+  CircleFundLoans,
+  type CircleLoanRow,
+} from '@/features/circles/components/circle-fund-loans';
+import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -65,17 +70,19 @@ type JamiyaRow = {
 
 type Props = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
 };
 
-export default async function CircleDetailsPage({ params }: Props) {
+export default async function CircleDetailsPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const notices = (await searchParams) ?? {};
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?next=/circles/${slug}`);
+    redirect(`/phone?next=/circles/${slug}`);
   }
 
   const { data } = await supabase
@@ -344,8 +351,22 @@ export default async function CircleDetailsPage({ params }: Props) {
   let fund: TableBankingFund | null = null;
   let creditRating: string | null = null;
   let pockets: SavingsPocketRow[] = [];
+  let myLoans: CircleLoanRow[] = [];
+  let pendingApprovals: CircleLoanRow[] = [];
+  let qardCap: number | null = null;
+  const canApproveLoans =
+    membership?.status === 'active' &&
+    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
+
   if (membership?.status === 'active') {
-    const [{ data: fundData }, { data: creditData }, { data: pocketData }] = await Promise.all([
+    const [
+      { data: fundData },
+      { data: creditData },
+      { data: pocketData },
+      { data: myLoanData },
+      { data: pendingLoanData },
+      { data: capData },
+    ] = await Promise.all([
       supabase.rpc('table_banking_fund', { p_jamiya_id: jamiya.id }),
       membership.id
         ? supabase.rpc('member_credit_snapshot', { p_member_id: membership.id })
@@ -358,6 +379,27 @@ export default async function CircleDetailsPage({ params }: Props) {
             .eq('member_id', membership.id)
             .order('created_at', { ascending: false })
         : Promise.resolve({ data: [] }),
+      supabase
+        .from('qard_loans')
+        .select(
+          'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
+        )
+        .eq('jamiya_id', jamiya.id)
+        .eq('borrower_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20),
+      canApproveLoans
+        ? supabase
+            .from('qard_loans')
+            .select(
+              'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
+            )
+            .eq('jamiya_id', jamiya.id)
+            .eq('status', 'requested')
+            .order('created_at', { ascending: false })
+            .limit(20)
+        : Promise.resolve({ data: [] }),
+      supabase.rpc('qard_cap_for_jamiya', { p_jamiya_id: jamiya.id }),
     ]);
     const f = fundData as Record<string, unknown> | null;
     if (f?.ok) {
@@ -395,6 +437,37 @@ export default async function CircleDetailsPage({ params }: Props) {
       durationMonths: row.duration_months,
       currency: row.currency,
     }));
+
+    const mapLoan = (row: {
+      id: string;
+      borrower_id: string;
+      amount: number | string;
+      amount_repaid: number | string;
+      currency: string;
+      purpose: string;
+      status: string;
+      due_date: string | null;
+      agreement_accepted_at: string | null;
+      agreement_signer_name: string | null;
+    }): CircleLoanRow => ({
+      id: row.id,
+      borrowerId: row.borrower_id,
+      amount: Number(row.amount),
+      amountRepaid: Number(row.amount_repaid),
+      currency: row.currency,
+      purpose: row.purpose,
+      status: row.status,
+      dueDate: row.due_date,
+      agreementAcceptedAt: row.agreement_accepted_at,
+      agreementSignerName: row.agreement_signer_name,
+    });
+
+    myLoans = ((myLoanData ?? []) as unknown as Parameters<typeof mapLoan>[0][]).map(mapLoan);
+    pendingApprovals = ((pendingLoanData ?? []) as unknown as Parameters<typeof mapLoan>[0][])
+      .map(mapLoan)
+      .filter((loan) => loan.borrowerId !== user.id);
+    const cap = capData as { ok?: boolean; cap?: number } | null;
+    if (cap?.ok) qardCap = Number(cap.cap ?? 0);
   }
 
   const lateCount = contributions.filter((c) => c.status === 'late').length;
@@ -430,6 +503,8 @@ export default async function CircleDetailsPage({ params }: Props) {
 
   return (
     <div className="space-y-10">
+      <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+
       <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge status={jamiya.status} />
@@ -583,6 +658,18 @@ export default async function CircleDetailsPage({ params }: Props) {
             <OpenDisputeForm jamiyaId={jamiya.id} slug={jamiya.slug} />
           </div>
         </section>
+      ) : null}
+
+      {membership?.status === 'active' ? (
+        <CircleFundLoans
+          jamiyaId={jamiya.id}
+          slug={jamiya.slug}
+          currency={jamiya.currency}
+          myLoans={myLoans}
+          pendingApprovals={pendingApprovals}
+          canApprove={canApproveLoans}
+          qardCap={qardCap}
+        />
       ) : null}
 
       {isCircleAdmin ? (
