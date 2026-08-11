@@ -21,6 +21,11 @@ function readApiError(json: unknown, fallback: string): string {
       const value = nested[key];
       if (typeof value === 'string' && value.trim()) return value.trim();
     }
+    // Never render "{}" from an empty error object
+    const serialized = JSON.stringify(err);
+    if (serialized && serialized !== '{}' && serialized !== 'null') {
+      return fallback;
+    }
   }
   if (typeof record.message === 'string' && record.message.trim()) {
     return record.message.trim();
@@ -148,7 +153,11 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
     <div className="space-y-6">
       {error ? (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>
+            {typeof error === 'string' && error.trim() && error !== '{}'
+              ? error
+              : 'Could not verify code. Request a new one.'}
+          </AlertDescription>
         </Alert>
       ) : null}
       {info && !error ? (

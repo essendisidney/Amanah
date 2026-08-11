@@ -236,12 +236,12 @@ export async function POST(req: NextRequest) {
     }
 
     if (!authUserId) {
+      // Do not set auth.users.phone here: GoTrue may store MSISDN without '+',
+      // and the profile trigger historically copied that into profiles.phone
+      // (E.164 required). Metadata carries +254… for the trigger / profile.
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
-        // Match existing Amanah phone-OTP users (MSISDN without '+').
-        phone: normalized,
-        phone_confirm: true,
         user_metadata: { phone: e164, created_via: 'taifa_otp' },
       });
 
@@ -265,7 +265,12 @@ export async function POST(req: NextRequest) {
           console.error('[auth/phone/verify] createUser', createErr);
           await releaseOtp();
           return NextResponse.json(
-            { error: errorMessage(createErr?.message, 'Account creation failed') },
+            {
+              error: errorMessage(
+                createErr?.message ?? createErr,
+                'Account creation failed. Request a new code.',
+              ),
+            },
             { status: 500 },
           );
         }
@@ -285,6 +290,7 @@ export async function POST(req: NextRequest) {
       {
         email: loginEmail.includes('@') ? loginEmail : email,
         email_confirm: true,
+        // Auth stores without '+'; profiles keep E.164 via upsert below.
         phone: normalized,
         phone_confirm: true,
         user_metadata: { phone: e164, created_via: 'taifa_otp' },
