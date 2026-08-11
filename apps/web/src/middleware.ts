@@ -45,6 +45,17 @@ function legacyCircleRedirect(request: NextRequest): NextResponse | null {
 }
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // PWA assets must bypass auth session work.
+  if (
+    pathname === '/sw.js' ||
+    pathname === '/manifest.webmanifest' ||
+    pathname.startsWith('/icons/')
+  ) {
+    return NextResponse.next();
+  }
+
   const legacy = legacyCircleRedirect(request);
   if (legacy) return legacy;
 
@@ -61,7 +72,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const { user, response } = await updateSession(request);
-  const { pathname } = request.nextUrl;
 
   if (pathname.startsWith('/auth/callback')) {
     return response;
@@ -86,6 +96,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
