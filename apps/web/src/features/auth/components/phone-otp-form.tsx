@@ -10,6 +10,24 @@ import { AuthFormMessage } from './auth-form-message';
 
 type Step = 'request' | 'verify';
 
+function readApiError(json: unknown, fallback: string): string {
+  if (!json || typeof json !== 'object') return fallback;
+  const record = json as Record<string, unknown>;
+  const err = record.error;
+  if (typeof err === 'string' && err.trim()) return err.trim();
+  if (err && typeof err === 'object') {
+    const nested = err as Record<string, unknown>;
+    for (const key of ['error_description', 'message', 'msg', 'error']) {
+      const value = nested[key];
+      if (typeof value === 'string' && value.trim()) return value.trim();
+    }
+  }
+  if (typeof record.message === 'string' && record.message.trim()) {
+    return record.message.trim();
+  }
+  return fallback;
+}
+
 export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
   const router = useRouter();
   const [phone, setPhone] = useState('');
@@ -44,13 +62,13 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
     });
     const json = (await res.json().catch(() => ({}))) as {
       success?: boolean;
-      error?: string;
+      error?: unknown;
       retry_after?: number;
       hint?: string;
       dev_otp?: string;
     };
     if (!res.ok || !json.success) {
-      setError(json.error ?? 'Could not send code.');
+      setError(readApiError(json, 'Could not send code.'));
       if (json.retry_after) setCooldown(json.retry_after);
       return false;
     }
@@ -81,12 +99,14 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
       });
       const json = (await res.json().catch(() => ({}))) as {
         success?: boolean;
-        error?: string;
+        error?: unknown;
         access_token?: string;
         refresh_token?: string;
       };
       if (!res.ok || !json.success || !json.access_token || !json.refresh_token) {
-        setError(json.error ?? 'Invalid or expired code.');
+        setError(readApiError(json, 'Invalid or expired code. Request a new one.'));
+        // Prevent auto-retry loops on the same failed code.
+        lastVerifiedToken.current = trimmed;
         return false;
       }
 
@@ -98,13 +118,16 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
         refresh_token: json.refresh_token,
       });
       if (sessionError) {
-        setError(sessionError.message);
+        setError(sessionError.message || 'Signed in, but session failed. Try again.');
         lastVerifiedToken.current = null;
         return false;
       }
       router.replace(next);
       router.refresh();
       return true;
+    } catch {
+      setError('Something went wrong. Please try again.');
+      return false;
     } finally {
       verifyingRef.current = false;
     }

@@ -4,14 +4,129 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
 
-function oneTimePassword() {
-  const a = crypto.randomUUID().replace(/-/g, '');
-  const b = crypto.randomUUID().replace(/-/g, '');
-  return `amanah_${a}${b}`;
-}
-
 function internalEmail(normalized254: string) {
   return `${normalized254}@amanah.internal`;
+}
+
+function errorMessage(value: unknown, fallback: string): string {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (value && typeof value === 'object') {
+    const o = value as Record<string, unknown>;
+    for (const key of ['error_description', 'message', 'msg', 'error']) {
+      const v = o[key];
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+  }
+  return fallback;
+}
+
+async function adminFindUserByEmail(
+  url: string,
+  serviceKey: string,
+  email: string,
+): Promise<{ id: string; email?: string; phone?: string } | null> {
+  const res = await fetch(
+    `${url}/auth/v1/admin/users?email=${encodeURIComponent(email)}`,
+    {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+      cache: 'no-store',
+    },
+  );
+  if (!res.ok) return null;
+  const json = (await res.json()) as {
+    users?: Array<{ id: string; email?: string; phone?: string }>;
+    id?: string;
+    email?: string;
+    phone?: string;
+  };
+  if (json.id) return { id: json.id, email: json.email, phone: json.phone };
+  const match = json.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+  return match ?? null;
+}
+
+async function adminFindUserByPhone(
+  url: string,
+  serviceKey: string,
+  phone: string,
+): Promise<{ id: string; email?: string; phone?: string } | null> {
+  const res = await fetch(
+    `${url}/auth/v1/admin/users?phone=${encodeURIComponent(phone)}`,
+    {
+      headers: {
+        apikey: serviceKey,
+        Authorization: `Bearer ${serviceKey}`,
+      },
+      cache: 'no-store',
+    },
+  );
+  if (!res.ok) return null;
+  const json = (await res.json()) as {
+    users?: Array<{ id: string; email?: string; phone?: string }>;
+    id?: string;
+    email?: string;
+    phone?: string;
+  };
+  if (json.id) return { id: json.id, email: json.email, phone: json.phone };
+  const match = json.users?.find((u) => u.phone === phone);
+  return match ?? null;
+}
+
+async function createSessionForEmail(
+  admin: ReturnType<typeof createServiceRoleClient>,
+  url: string,
+  anon: string,
+  email: string,
+): Promise<{ access_token: string; refresh_token: string; expires_in?: number } | { error: string }> {
+  const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
+    type: 'magiclink',
+    email,
+  });
+
+  const hashed = linkData?.properties?.hashed_token;
+  if (linkError || !hashed) {
+    return { error: errorMessage(linkError?.message, 'Could not start session') };
+  }
+
+  for (const type of ['magiclink', 'email'] as const) {
+    const verifyRes = await fetch(`${url}/auth/v1/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: anon,
+        Authorization: `Bearer ${anon}`,
+      },
+      body: JSON.stringify({ type, token_hash: hashed }),
+    });
+    const verifyData = (await verifyRes.json()) as {
+      access_token?: string;
+      refresh_token?: string;
+      expires_in?: number;
+      error_description?: string;
+      msg?: string;
+      error?: unknown;
+      message?: string;
+    };
+    if (verifyData.access_token && verifyData.refresh_token) {
+      return {
+        access_token: verifyData.access_token,
+        refresh_token: verifyData.refresh_token,
+        expires_in: verifyData.expires_in,
+      };
+    }
+    if (type === 'email') {
+      return {
+        error: errorMessage(
+          verifyData.error_description ?? verifyData.msg ?? verifyData.message ?? verifyData.error,
+          'Could not create session',
+        ),
+      };
+    }
+  }
+
+  return { error: 'Could not create session' };
 }
 
 export async function POST(req: NextRequest) {
@@ -19,12 +134,21 @@ export async function POST(req: NextRequest) {
   const anon =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  if (!url || !anon) {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !anon || !serviceKey) {
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
+  let claimedOtpId: string | null = null;
+  const admin = createServiceRoleClient();
+
+  const releaseOtp = async () => {
+    if (!claimedOtpId) return;
+    await admin.from('otp_codes').update({ used: false }).eq('id', claimedOtpId);
+    claimedOtpId = null;
+  };
+
   try {
-    const admin = createServiceRoleClient();
     const body = (await req.json()) as { phone?: string; otp?: string; code?: string };
     const phoneRaw = String(body.phone ?? '').trim();
     const codeRaw = String(body.otp ?? body.code ?? '').trim();
@@ -39,12 +163,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Enter the 6-digit code' }, { status: 400 });
     }
 
+    // Auth stores Kenya MSISDN without '+'; profiles use E.164 with '+'.
     const normalized = normalizePhone254(phoneRaw);
     const e164 = `+${normalized}`;
+    const email = internalEmail(normalized);
     const now = new Date().toISOString();
 
-    // Look up first, then claim atomically so a double-submit cannot both "succeed"
-    // and leave the UI on a stale "Invalid or expired code" from the loser.
     const { data: otpRecord, error: otpLookupError } = await admin
       .from('otp_codes')
       .select('id')
@@ -84,126 +208,128 @@ export async function POST(req: NextRequest) {
         { status: 400 },
       );
     }
-
-    const email = internalEmail(normalized);
-    const password = oneTimePassword();
+    claimedOtpId = claimed.id;
 
     let authUserId: string | null = null;
+    let loginEmail = email;
 
-    // Amanah profiles store E.164 (+254…)
     const { data: existingProfile } = await admin
       .from('profiles')
-      .select('id')
+      .select('id, email')
       .eq('phone', e164)
       .maybeSingle();
 
     if (existingProfile?.id) {
       authUserId = existingProfile.id;
+      if (existingProfile.email) loginEmail = existingProfile.email;
     }
 
     if (!authUserId) {
-      const { data: listed } = await admin.auth.admin.listUsers({ perPage: 1000 });
-      const found = listed.users?.find(
-        (u) => u.email === email || u.phone === e164 || u.phone === normalized,
-      );
-      if (found) authUserId = found.id;
+      const byEmail = await adminFindUserByEmail(url, serviceKey, email);
+      const byPhonePlus = await adminFindUserByPhone(url, serviceKey, e164);
+      const byPhonePlain = await adminFindUserByPhone(url, serviceKey, normalized);
+      const found = byEmail ?? byPhonePlus ?? byPhonePlain;
+      if (found) {
+        authUserId = found.id;
+        if (found.email) loginEmail = found.email;
+      }
     }
 
     if (!authUserId) {
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
-        password,
         email_confirm: true,
-        phone: e164,
+        // Match existing Amanah phone-OTP users (MSISDN without '+').
+        phone: normalized,
         phone_confirm: true,
         user_metadata: { phone: e164, created_via: 'taifa_otp' },
       });
 
       if (createErr || !created.user?.id) {
-        if (createErr?.message?.toLowerCase().includes('already')) {
-          const { data: listed } = await admin.auth.admin.listUsers({ perPage: 1000 });
-          const found = listed.users?.find((u) => u.email === email || u.phone === e164);
+        const msg = (createErr?.message ?? '').toLowerCase();
+        if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
+          const byEmail = await adminFindUserByEmail(url, serviceKey, email);
+          const byPhonePlain = await adminFindUserByPhone(url, serviceKey, normalized);
+          const byPhonePlus = await adminFindUserByPhone(url, serviceKey, e164);
+          const found = byEmail ?? byPhonePlain ?? byPhonePlus;
           if (!found) {
+            await releaseOtp();
             return NextResponse.json(
               { error: 'Could not create account. Contact support.' },
               { status: 500 },
             );
           }
           authUserId = found.id;
+          if (found.email) loginEmail = found.email;
         } else {
+          console.error('[auth/phone/verify] createUser', createErr);
+          await releaseOtp();
           return NextResponse.json(
-            { error: createErr?.message ?? 'Account creation failed' },
+            { error: errorMessage(createErr?.message, 'Account creation failed') },
             { status: 500 },
           );
         }
       } else {
         authUserId = created.user.id;
+        loginEmail = created.user.email ?? email;
       }
     }
 
     if (!authUserId) {
+      await releaseOtp();
       return NextResponse.json({ error: 'Could not resolve account' }, { status: 500 });
     }
 
-    await admin.auth.admin.updateUserById(authUserId, {
-      password,
-      email,
-      email_confirm: true,
-      phone: e164,
-      phone_confirm: true,
-    });
+    const { data: ensuredUser, error: updateErr } = await admin.auth.admin.updateUserById(
+      authUserId,
+      {
+        email: loginEmail.includes('@') ? loginEmail : email,
+        email_confirm: true,
+        phone: normalized,
+        phone_confirm: true,
+        user_metadata: { phone: e164, created_via: 'taifa_otp' },
+      },
+    );
 
-    await admin.from('profiles').upsert(
+    if (updateErr) {
+      console.error('[auth/phone/verify] updateUser', updateErr);
+    } else if (ensuredUser.user?.email) {
+      loginEmail = ensuredUser.user.email;
+    } else {
+      loginEmail = email;
+    }
+
+    const { error: profileErr } = await admin.from('profiles').upsert(
       {
         id: authUserId,
         phone: e164,
-        email,
+        email: loginEmail,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'id' },
     );
-
-    const signInRes = await fetch(`${url}/auth/v1/token?grant_type=password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: anon,
-        Authorization: `Bearer ${anon}`,
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const signInData = (await signInRes.json()) as {
-      access_token?: string;
-      refresh_token?: string;
-      expires_in?: number;
-      error_description?: string;
-      msg?: string;
-      error?: string;
-    };
-
-    if (!signInData.access_token || !signInData.refresh_token) {
-      return NextResponse.json(
-        {
-          error:
-            signInData.error_description ??
-            signInData.msg ??
-            signInData.error ??
-            'Could not create session',
-        },
-        { status: 500 },
-      );
+    if (profileErr) {
+      console.error('[auth/phone/verify] profile upsert', profileErr);
     }
 
+    const session = await createSessionForEmail(admin, url, anon, loginEmail);
+    if ('error' in session) {
+      console.error('[auth/phone/verify] session', session.error);
+      await releaseOtp();
+      return NextResponse.json({ error: session.error }, { status: 500 });
+    }
+
+    claimedOtpId = null;
     return NextResponse.json({
       success: true,
-      access_token: signInData.access_token,
-      refresh_token: signInData.refresh_token,
-      expires_in: signInData.expires_in,
+      access_token: session.access_token,
+      refresh_token: session.refresh_token,
+      expires_in: session.expires_in,
       userId: authUserId,
     });
   } catch (err) {
     console.error('[auth/phone/verify]', err);
+    await releaseOtp();
     return NextResponse.json(
       { error: 'Something went wrong. Please try again.' },
       { status: 500 },
