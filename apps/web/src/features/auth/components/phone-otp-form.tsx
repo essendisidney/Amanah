@@ -20,7 +20,8 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
   const [devOtp, setDevOtp] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
   const [pending, startTransition] = useTransition();
-  const autoSubmitted = useRef(false);
+  const verifyingRef = useRef(false);
+  const lastVerifiedToken = useRef<string | null>(null);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -60,49 +61,65 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
         : `Code sent to ${formatPhoneHint(rawPhone)}.`,
     );
     if (json.dev_otp) setDevOtp(json.dev_otp);
+    lastVerifiedToken.current = null;
     return true;
   }
 
   async function verifyCode(rawPhone: string, code: string) {
-    setError(null);
-    const res = await fetch('/api/auth/phone/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone: rawPhone, otp: code }),
-    });
-    const json = (await res.json().catch(() => ({}))) as {
-      success?: boolean;
-      error?: string;
-      access_token?: string;
-      refresh_token?: string;
-    };
-    if (!res.ok || !json.success || !json.access_token || !json.refresh_token) {
-      setError(json.error ?? 'Invalid or expired code.');
-      return false;
-    }
+    const trimmed = code.trim();
+    if (verifyingRef.current) return false;
+    if (lastVerifiedToken.current === trimmed) return false;
 
-    const supabase = createClient();
-    const { error: sessionError } = await supabase.auth.setSession({
-      access_token: json.access_token,
-      refresh_token: json.refresh_token,
-    });
-    if (sessionError) {
-      setError(sessionError.message);
-      return false;
+    verifyingRef.current = true;
+    setError(null);
+
+    try {
+      const res = await fetch('/api/auth/phone/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: rawPhone, otp: trimmed }),
+      });
+      const json = (await res.json().catch(() => ({}))) as {
+        success?: boolean;
+        error?: string;
+        access_token?: string;
+        refresh_token?: string;
+      };
+      if (!res.ok || !json.success || !json.access_token || !json.refresh_token) {
+        setError(json.error ?? 'Invalid or expired code.');
+        return false;
+      }
+
+      lastVerifiedToken.current = trimmed;
+
+      const supabase = createClient();
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: json.access_token,
+        refresh_token: json.refresh_token,
+      });
+      if (sessionError) {
+        setError(sessionError.message);
+        lastVerifiedToken.current = null;
+        return false;
+      }
+      router.replace(next);
+      router.refresh();
+      return true;
+    } finally {
+      verifyingRef.current = false;
     }
-    router.replace(next);
-    router.refresh();
-    return true;
   }
 
   useEffect(() => {
-    if (step !== 'verify' || token.length !== 6 || autoSubmitted.current || pending) return;
-    autoSubmitted.current = true;
+    if (step !== 'verify' || token.length !== 6) return;
+    if (verifyingRef.current || lastVerifiedToken.current === token) return;
     startTransition(async () => {
-      const ok = await verifyCode(phone, token);
-      if (!ok) autoSubmitted.current = false;
+      await verifyCode(phone, token);
     });
-  }, [token, step, phone, pending]);
+    // Auto-submit once when the 6-digit code is complete — do not depend on `pending`
+    // or a resettable flag, or a failed attempt will immediately retry a used code.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: only token/step/phone
+  }, [token, step, phone]);
 
   return (
     <div className="space-y-6">
@@ -132,7 +149,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               if (ok) {
                 setStep('verify');
                 setToken('');
-                autoSubmitted.current = false;
+                lastVerifiedToken.current = null;
               }
             });
           }}
@@ -163,6 +180,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
+            if (token.length !== 6) return;
             startTransition(async () => {
               await verifyCode(phone, token);
             });
@@ -195,7 +213,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
             disabled={pending || cooldown > 0}
             onClick={() => {
               startTransition(async () => {
-                autoSubmitted.current = false;
+                lastVerifiedToken.current = null;
                 await sendCode(phone);
               });
             }}
@@ -211,7 +229,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               setToken('');
               setInfo(null);
               setDevOtp(null);
-              autoSubmitted.current = false;
+              lastVerifiedToken.current = null;
             }}
           >
             Use a different number

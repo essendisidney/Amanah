@@ -43,7 +43,9 @@ export async function POST(req: NextRequest) {
     const e164 = `+${normalized}`;
     const now = new Date().toISOString();
 
-    const { data: otpRecord } = await admin
+    // Look up first, then claim atomically so a double-submit cannot both "succeed"
+    // and leave the UI on a stale "Invalid or expired code" from the loser.
+    const { data: otpRecord, error: otpLookupError } = await admin
       .from('otp_codes')
       .select('id')
       .eq('phone', normalized)
@@ -54,11 +56,34 @@ export async function POST(req: NextRequest) {
       .limit(1)
       .maybeSingle();
 
+    if (otpLookupError) {
+      console.error('[auth/phone/verify] otp lookup', otpLookupError);
+      return NextResponse.json({ error: 'Could not verify code. Try again.' }, { status: 500 });
+    }
+
     if (!otpRecord) {
       return NextResponse.json({ error: 'Invalid or expired code' }, { status: 400 });
     }
 
-    await admin.from('otp_codes').update({ used: true }).eq('id', otpRecord.id);
+    const { data: claimed, error: claimError } = await admin
+      .from('otp_codes')
+      .update({ used: true })
+      .eq('id', otpRecord.id)
+      .eq('used', false)
+      .select('id')
+      .maybeSingle();
+
+    if (claimError) {
+      console.error('[auth/phone/verify] otp claim', claimError);
+      return NextResponse.json({ error: 'Could not verify code. Try again.' }, { status: 500 });
+    }
+
+    if (!claimed) {
+      return NextResponse.json(
+        { error: 'Code already used. Request a new one.' },
+        { status: 400 },
+      );
+    }
 
     const email = internalEmail(normalized);
     const password = oneTimePassword();

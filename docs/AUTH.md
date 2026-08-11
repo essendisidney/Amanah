@@ -12,7 +12,7 @@ Ship production-ready authentication before the full domain schema.
 | Login | `/login` | Email + password (`signInWithPassword`) |
 | Forgot password | `/forgot-password` | `resetPasswordForEmail` |
 | Reset password | `/reset-password` | `updateUser({ password })` after recovery session |
-| Phone OTP | `/phone` | Taifa SMS + `otp_codes` (Creda/Savr pattern); session via password grant |
+| Phone OTP | `/phone` | Taifa SMS + `otp_codes`; session via password grant |
 | Google OAuth | Login / Register | `signInWithOAuth({ provider: 'google' })` |
 | OAuth / email callback | `/auth/callback` | `exchangeCodeForSession` |
 | Sign out | Dashboard | `signOut` server action |

@@ -1,7 +1,7 @@
 import { normalizePhone254 } from '@jamiya/shared';
 
 /**
- * Send SMS via Taifa Mobile (same provider as Creda / Savr).
+ * Send SMS via Taifa Mobile.
  * API expects mobile as 2547XXXXXXXX (no +).
  */
 export async function sendSMS(phone: string, message: string): Promise<void> {

@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 
 const RESEND_COOLDOWN_SEC = 60;
 
-/** Taifa Mobile SMS + otp_codes — same pattern as Creda / Savr. */
+/** Taifa Mobile SMS + otp_codes. */
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as { phone?: string };

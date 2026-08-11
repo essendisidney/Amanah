@@ -12,7 +12,7 @@ export default async function PhoneAuthPage({ searchParams }: { searchParams: Se
   return (
     <AuthCard
       title="Sign in with phone"
-      description="Enter your Kenya mobile — we’ll text a one-time code (same as Creda / Savr)."
+      description="Enter your Kenya mobile — we’ll text a one-time code."
     >
       <PhoneOtpForm next={params.next ?? '/dashboard'} />
     </AuthCard>
