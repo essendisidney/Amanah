@@ -7,6 +7,7 @@ import {
   decideQardFormAction,
   repayQardFormAction,
   requestQardFormAction,
+  respondQardGuaranteeFormAction,
 } from '@/features/finance/actions';
 
 export const dynamic = 'force-dynamic';
@@ -38,8 +39,12 @@ export default async function QardPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/finance/qard');
 
-  const [{ data: loansData }, { data: membershipsData }, { data: pendingData }] =
-    await Promise.all([
+  const [
+    { data: loansData },
+    { data: membershipsData },
+    { data: pendingData },
+    { data: pendingGuaranteeData },
+  ] = await Promise.all([
       supabase
         .from('qard_loans')
         .select(
@@ -60,6 +65,14 @@ export default async function QardPage() {
         .eq('status', 'requested')
         .order('created_at', { ascending: false })
         .limit(50),
+      supabase
+        .from('qard_guarantees')
+        .select(
+          'id, loan_id, status, loan:qard_loans(id, amount, currency, purpose, status, borrower_id)',
+        )
+        .eq('guarantor_user_id', user.id)
+        .eq('status', 'pending')
+        .limit(30),
     ]);
 
   const loans = (loansData ?? []) as unknown as Loan[];
@@ -99,7 +112,8 @@ export default async function QardPage() {
         </h1>
         <p className="mt-2 text-muted-foreground">
           Cap is 50% of your paid contributions in that circle (minimum KES 5,000 if you have no
-          paid history yet).
+          paid history yet). To ask fellow members to guarantee (kafala) a request, open the circle
+          page and select guarantors when requesting.
         </p>
       </div>
 
@@ -116,6 +130,69 @@ export default async function QardPage() {
             </li>
           ))}
         </ul>
+      ) : null}
+
+      {((pendingGuaranteeData ?? []) as unknown as Array<{
+        id: string;
+        loan:
+          | { amount: number | string; currency: string; purpose: string; status: string }
+          | Array<{ amount: number | string; currency: string; purpose: string; status: string }>
+          | null;
+      }>).filter((row) => {
+        const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
+        return loan?.status === 'requested';
+      }).length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Guarantee requests for you
+          </h2>
+          <ul className="divide-y divide-border border-y border-border">
+            {((pendingGuaranteeData ?? []) as unknown as Array<{
+              id: string;
+              loan:
+                | { amount: number | string; currency: string; purpose: string; status: string }
+                | Array<{
+                    amount: number | string;
+                    currency: string;
+                    purpose: string;
+                    status: string;
+                  }>
+                | null;
+            }>).map((row) => {
+              const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
+              if (!loan || loan.status !== 'requested') return null;
+              return (
+                <li
+                  key={row.id}
+                  className="flex flex-wrap items-center justify-between gap-4 py-5"
+                >
+                  <div>
+                    <p className="font-medium">{loan.purpose}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {formatCurrency(Number(loan.amount), loan.currency)} · kafala request
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <form action={respondQardGuaranteeFormAction}>
+                      <input type="hidden" name="guaranteeId" value={row.id} />
+                      <input type="hidden" name="accept" value="true" />
+                      <Button type="submit" size="sm">
+                        Accept
+                      </Button>
+                    </form>
+                    <form action={respondQardGuaranteeFormAction}>
+                      <input type="hidden" name="guaranteeId" value={row.id} />
+                      <input type="hidden" name="accept" value="false" />
+                      <Button type="submit" size="sm" variant="destructive">
+                        Decline
+                      </Button>
+                    </form>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       ) : null}
 
       <form action={requestQardFormAction} className="max-w-xl space-y-4 border border-border bg-card p-6">

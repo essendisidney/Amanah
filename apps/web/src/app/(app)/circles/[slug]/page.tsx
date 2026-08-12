@@ -37,6 +37,7 @@ import {
 import {
   CircleFundLoans,
   type CircleLoanRow,
+  type PendingGuaranteeRequest,
 } from '@/features/circles/components/circle-fund-loans';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 
@@ -353,6 +354,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   let pockets: SavingsPocketRow[] = [];
   let myLoans: CircleLoanRow[] = [];
   let pendingApprovals: CircleLoanRow[] = [];
+  let officerActiveLoans: CircleLoanRow[] = [];
+  let pendingGuaranteeRequests: PendingGuaranteeRequest[] = [];
   let qardCap: number | null = null;
   const canApproveLoans =
     membership?.status === 'active' &&
@@ -365,6 +368,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       { data: pocketData },
       { data: myLoanData },
       { data: pendingLoanData },
+      { data: activeLoanData },
+      { data: myPendingGuaranteeData },
       { data: capData },
     ] = await Promise.all([
       supabase.rpc('table_banking_fund', { p_jamiya_id: jamiya.id }),
@@ -399,6 +404,26 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             .order('created_at', { ascending: false })
             .limit(20)
         : Promise.resolve({ data: [] }),
+      canApproveLoans
+        ? supabase
+            .from('qard_loans')
+            .select(
+              'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
+            )
+            .eq('jamiya_id', jamiya.id)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(20)
+        : Promise.resolve({ data: [] }),
+      supabase
+        .from('qard_guarantees')
+        .select(
+          'id, loan_id, status, loan:qard_loans(id, borrower_id, amount, currency, purpose, status)',
+        )
+        .eq('jamiya_id', jamiya.id)
+        .eq('guarantor_user_id', user.id)
+        .eq('status', 'pending')
+        .limit(20),
       supabase.rpc('qard_cap_for_jamiya', { p_jamiya_id: jamiya.id }),
     ]);
     const f = fundData as Record<string, unknown> | null;
@@ -438,7 +463,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       currency: row.currency,
     }));
 
-    const mapLoan = (row: {
+    type LoanDbRow = {
       id: string;
       borrower_id: string;
       amount: number | string;
@@ -449,7 +474,44 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       due_date: string | null;
       agreement_accepted_at: string | null;
       agreement_signer_name: string | null;
-    }): CircleLoanRow => ({
+    };
+
+    const loanRowsForGuarantees = [
+      ...((myLoanData ?? []) as unknown as LoanDbRow[]),
+      ...((pendingLoanData ?? []) as unknown as LoanDbRow[]),
+      ...((activeLoanData ?? []) as unknown as LoanDbRow[]),
+    ];
+    const loanIds = [...new Set(loanRowsForGuarantees.map((row) => row.id))];
+    const { data: guaranteeRows } =
+      loanIds.length > 0
+        ? await supabase
+            .from('qard_guarantees')
+            .select('id, loan_id, guarantor_user_id, status')
+            .in('loan_id', loanIds)
+        : { data: [] as Array<{ id: string; loan_id: string; guarantor_user_id: string; status: string }> };
+
+    const guaranteesByLoan = new Map<
+      string,
+      Array<{ id: string; guarantorUserId: string; guarantorName: string; status: string }>
+    >();
+    for (const row of (guaranteeRows ?? []) as unknown as Array<{
+      id: string;
+      loan_id: string;
+      guarantor_user_id: string;
+      status: string;
+    }>) {
+      const profile = profilesById.get(row.guarantor_user_id);
+      const list = guaranteesByLoan.get(row.loan_id) ?? [];
+      list.push({
+        id: row.id,
+        guarantorUserId: row.guarantor_user_id,
+        guarantorName: profile?.full_name || profile?.email || 'Member',
+        status: row.status,
+      });
+      guaranteesByLoan.set(row.loan_id, list);
+    }
+
+    const mapLoan = (row: LoanDbRow): CircleLoanRow => ({
       id: row.id,
       borrowerId: row.borrower_id,
       amount: Number(row.amount),
@@ -460,12 +522,56 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       dueDate: row.due_date,
       agreementAcceptedAt: row.agreement_accepted_at,
       agreementSignerName: row.agreement_signer_name,
+      guarantees: guaranteesByLoan.get(row.id) ?? [],
     });
 
-    myLoans = ((myLoanData ?? []) as unknown as Parameters<typeof mapLoan>[0][]).map(mapLoan);
-    pendingApprovals = ((pendingLoanData ?? []) as unknown as Parameters<typeof mapLoan>[0][])
+    myLoans = ((myLoanData ?? []) as unknown as LoanDbRow[]).map(mapLoan);
+    pendingApprovals = ((pendingLoanData ?? []) as unknown as LoanDbRow[])
       .map(mapLoan)
       .filter((loan) => loan.borrowerId !== user.id);
+    officerActiveLoans = ((activeLoanData ?? []) as unknown as LoanDbRow[])
+      .map(mapLoan)
+      .filter((loan) => loan.borrowerId !== user.id);
+
+    pendingGuaranteeRequests = (
+      (myPendingGuaranteeData ?? []) as unknown as Array<{
+        id: string;
+        loan_id: string;
+        loan:
+          | {
+              id: string;
+              borrower_id: string;
+              amount: number | string;
+              currency: string;
+              purpose: string;
+              status: string;
+            }
+          | Array<{
+              id: string;
+              borrower_id: string;
+              amount: number | string;
+              currency: string;
+              purpose: string;
+              status: string;
+            }>
+          | null;
+      }>
+    )
+      .map((row) => {
+        const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
+        if (!loan || loan.status !== 'requested') return null;
+        const borrower = profilesById.get(loan.borrower_id);
+        return {
+          id: row.id,
+          loanId: loan.id,
+          borrowerName: borrower?.full_name || borrower?.email || 'Member',
+          amount: Number(loan.amount),
+          currency: loan.currency,
+          purpose: loan.purpose,
+        } satisfies PendingGuaranteeRequest;
+      })
+      .filter((row): row is PendingGuaranteeRequest => row != null);
+
     const cap = capData as { ok?: boolean; cap?: number } | null;
     if (cap?.ok) qardCap = Number(cap.cap ?? 0);
   }
@@ -667,6 +773,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           currency={jamiya.currency}
           myLoans={myLoans}
           pendingApprovals={pendingApprovals}
+          pendingGuaranteeRequests={pendingGuaranteeRequests}
+          officerActiveLoans={officerActiveLoans}
+          guarantorCandidates={memberRows
+            .filter((row) => row.status === 'active' && row.user_id !== user.id)
+            .map((row) => {
+              const profile = profilesById.get(row.user_id);
+              return {
+                userId: row.user_id,
+                label: profile?.full_name || profile?.email || 'Member',
+              };
+            })}
           canApprove={canApproveLoans}
           qardCap={qardCap}
         />
