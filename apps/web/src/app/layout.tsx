@@ -4,6 +4,7 @@ import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
 import { InstallPrompt } from '@/components/install-prompt';
 import { Providers } from '@/components/providers';
 import { PwaRegister } from '@/components/pwa-register';
+import { getLocale } from '@/i18n/get-dictionary';
 import './globals.css';
 
 const dmSans = DM_Sans({
@@ -54,13 +55,14 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   return (
-    <html lang="en" className={`${dmSans.variable} ${fraunces.variable}`}>
+    <html lang={locale} className={`${dmSans.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh font-sans">
         <Providers>
           {children}

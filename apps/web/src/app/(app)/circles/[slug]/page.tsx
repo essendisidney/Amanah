@@ -40,6 +40,7 @@ import {
   type PendingGuaranteeRequest,
 } from '@/features/circles/components/circle-fund-loans';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'Circle details',

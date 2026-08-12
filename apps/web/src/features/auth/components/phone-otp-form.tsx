@@ -6,9 +6,12 @@ import { useRouter } from 'next/navigation';
 import { formatPhoneHint, isValidKeMobile } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import { AuthFormMessage } from './auth-form-message';
 
 type Step = 'request' | 'verify';
+type PhoneLabels = Dictionary['phoneAuth'];
 
 function readApiError(json: unknown, fallback: string): string {
   if (!json || typeof json !== 'object') return fallback;
@@ -33,7 +36,13 @@ function readApiError(json: unknown, fallback: string): string {
   return fallback;
 }
 
-export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
+export function PhoneOtpForm({
+  next = '/dashboard',
+  labels,
+}: {
+  next?: string;
+  labels: PhoneLabels;
+}) {
   const router = useRouter();
   const [phone, setPhone] = useState('');
   const [token, setToken] = useState('');
@@ -57,7 +66,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
     setInfo(null);
     setDevOtp(null);
     if (!isValidKeMobile(rawPhone)) {
-      setError('Enter a valid Kenya mobile (e.g. 0712 345 678).');
+      setError(labels.invalidPhone);
       return false;
     }
     const res = await fetch('/api/auth/phone/send', {
@@ -73,15 +82,15 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
       dev_otp?: string;
     };
     if (!res.ok || !json.success) {
-      setError(readApiError(json, 'Could not send code.'));
+      setError(readApiError(json, labels.sendFailed));
       if (json.retry_after) setCooldown(json.retry_after);
       return false;
     }
     setCooldown(json.retry_after ?? 60);
     setInfo(
       json.hint
-        ? `${json.hint} Code sent to ${formatPhoneHint(rawPhone)}.`
-        : `Code sent to ${formatPhoneHint(rawPhone)}.`,
+        ? `${json.hint} ${t(labels.codeSent, { phone: formatPhoneHint(rawPhone) })}`
+        : t(labels.codeSent, { phone: formatPhoneHint(rawPhone) }),
     );
     if (json.dev_otp) setDevOtp(json.dev_otp);
     lastVerifiedToken.current = null;
@@ -187,7 +196,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone number</Label>
+            <Label htmlFor="phone">{labels.phoneLabel}</Label>
             <Input
               id="phone"
               name="phone"
@@ -199,12 +208,14 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               onChange={(e) => setPhone(e.target.value)}
               required
             />
-            <p className="text-xs text-muted-foreground">
-              Kenya mobiles — 07… or +254… both work.
-            </p>
+            <p className="text-xs text-muted-foreground">{labels.phoneHint}</p>
           </div>
           <Button type="submit" className="w-full" disabled={pending || cooldown > 0}>
-            {pending ? 'Sending code…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Send OTP'}
+            {pending
+              ? labels.sending
+              : cooldown > 0
+                ? t(labels.resendIn, { seconds: cooldown })
+                : labels.sendOtp}
           </Button>
         </form>
       ) : (
@@ -219,7 +230,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="token">Verification code</Label>
+            <Label htmlFor="token">{labels.codeLabel}</Label>
             <Input
               id="token"
               name="token"
@@ -232,11 +243,11 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               required
             />
             <p className="text-xs text-muted-foreground">
-              Sent to {formatPhoneHint(phone)}
+              {t(labels.sentTo, { phone: formatPhoneHint(phone) })}
             </p>
           </div>
           <Button type="submit" className="w-full" disabled={pending || token.length !== 6}>
-            {pending ? 'Verifying…' : 'Verify & continue'}
+            {pending ? labels.verifying : labels.verify}
           </Button>
           <Button
             type="button"
@@ -250,7 +261,7 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               });
             }}
           >
-            {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+            {cooldown > 0 ? t(labels.resendIn, { seconds: cooldown }) : labels.sendOtp}
           </Button>
           <Button
             type="button"
@@ -264,19 +275,19 @@ export function PhoneOtpForm({ next = '/dashboard' }: { next?: string }) {
               lastVerifiedToken.current = null;
             }}
           >
-            Use a different number
+            {labels.changeNumber}
           </Button>
         </form>
       )}
 
       <AuthFormMessage>
-        Prefer email?{' '}
+        {labels.preferEmail}{' '}
         <Link href="/login" className="font-medium text-primary hover:underline">
-          Sign in with password
+          {labels.signInPassword}
         </Link>
         {' · '}
         <Link href="/register" className="font-medium text-primary hover:underline">
-          Create email account
+          {labels.createEmailAccount}
         </Link>
       </AuthFormMessage>
     </div>

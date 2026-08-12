@@ -14,6 +14,9 @@ import {
 import { APP_NAME } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { cn } from '@/lib/utils';
+import { LanguageSwitcher } from '@/i18n/language-switcher';
+import type { Dictionary } from '@/i18n/dictionaries';
+import type { Locale } from '@/i18n/config';
 
 type Tab = {
   href: Route;
@@ -21,14 +24,6 @@ type Tab = {
   short: string;
   icon: React.ComponentType<{ className?: string }>;
 };
-
-const TABS: Tab[] = [
-  { href: '/dashboard' as Route, label: 'Dashboard', short: 'Home', icon: Home },
-  { href: '/circles' as Route, label: 'Circles', short: 'Circles', icon: LayoutGrid },
-  { href: '/wallet' as Route, label: 'Wallet', short: 'Wallet', icon: Wallet },
-  { href: '/finance' as Route, label: 'Finance', short: 'Finance', icon: CircleDollarSign },
-  { href: '/profile' as Route, label: 'Profile', short: 'You', icon: UserRound },
-];
 
 function pathActive(pathname: string, href: string) {
   if (href === '/dashboard') return pathname === '/dashboard';
@@ -40,22 +35,59 @@ export function AppShell({
   unread,
   showAdmin,
   signOutAction,
+  locale,
+  dict,
 }: {
   children: React.ReactNode;
   unread: number;
   showAdmin: boolean;
   signOutAction: () => Promise<void>;
+  locale: Locale;
+  dict: Dictionary;
 }) {
   const pathname = usePathname() || '';
 
+  const tabs: Tab[] = [
+    {
+      href: '/dashboard' as Route,
+      label: dict.nav.dashboard,
+      short: dict.nav.dashboardShort,
+      icon: Home,
+    },
+    {
+      href: '/circles' as Route,
+      label: dict.nav.circles,
+      short: dict.nav.circlesShort,
+      icon: LayoutGrid,
+    },
+    {
+      href: '/wallet' as Route,
+      label: dict.nav.wallet,
+      short: dict.nav.walletShort,
+      icon: Wallet,
+    },
+    {
+      href: '/finance' as Route,
+      label: dict.nav.finance,
+      short: dict.nav.financeShort,
+      icon: CircleDollarSign,
+    },
+    {
+      href: '/profile' as Route,
+      label: dict.nav.profile,
+      short: dict.nav.profileShort,
+      icon: UserRound,
+    },
+  ];
+
   const desktopLinks: Array<{ href: Route; label: string }> = [
-    ...TABS.map((t) => ({ href: t.href, label: t.label })),
-    { href: '/sadaka' as Route, label: 'Sadaka' },
-    { href: '/support' as Route, label: 'Support' },
-    { href: '/notifications' as Route, label: 'Notifications' },
+    ...tabs.map((t) => ({ href: t.href, label: t.label })),
+    { href: '/sadaka' as Route, label: dict.common.sadaka },
+    { href: '/support' as Route, label: dict.common.support },
+    { href: '/notifications' as Route, label: dict.common.notifications },
   ];
   if (showAdmin) {
-    desktopLinks.push({ href: '/admin' as Route, label: 'Admin' });
+    desktopLinks.push({ href: '/admin' as Route, label: dict.common.admin });
   }
 
   return (
@@ -84,7 +116,7 @@ export function AppShell({
                   )}
                 >
                   {item.label}
-                  {item.label === 'Notifications' && unread > 0 ? (
+                  {item.href === '/notifications' && unread > 0 ? (
                     <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                       {unread > 9 ? '9+' : unread}
                     </span>
@@ -95,6 +127,7 @@ export function AppShell({
           </nav>
 
           <div className="flex items-center gap-1">
+            <LanguageSwitcher locale={locale} label={dict.common.language} />
             <Link
               href={'/sadaka' as Route}
               className={cn(
@@ -104,13 +137,15 @@ export function AppShell({
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
             >
-              Sadaka
+              {dict.common.sadaka}
             </Link>
             <Link
               href={'/notifications' as Route}
               className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
               aria-label={
-                unread > 0 ? `Notifications, ${unread} unread` : 'Notifications'
+                unread > 0
+                  ? `${dict.common.notifications}, ${unread}`
+                  : dict.common.notifications
               }
             >
               <Bell className="h-5 w-5" />
@@ -122,7 +157,7 @@ export function AppShell({
             </Link>
             <form action={signOutAction} className="hidden sm:block">
               <Button type="submit" variant="outline" size="sm">
-                Sign out
+                {dict.common.signOut}
               </Button>
             </form>
           </div>
@@ -138,7 +173,7 @@ export function AppShell({
         aria-label="Mobile primary"
       >
         <ul className="mx-auto grid max-w-lg grid-cols-5">
-          {TABS.map((item) => {
+          {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
             return (

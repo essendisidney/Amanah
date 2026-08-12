@@ -8,6 +8,8 @@ import {
   requestQardFormAction,
   respondQardGuaranteeFormAction,
 } from '@/features/finance/actions';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 
 export type CircleLoanGuarantee = {
   id: string;
@@ -44,14 +46,16 @@ export type PendingGuaranteeRequest = {
   purpose: string;
 };
 
-function guaranteeSummary(guarantees: CircleLoanGuarantee[]): string {
-  if (!guarantees.length) return 'no guarantors nominated';
+type LoanLabels = Dictionary['loans'];
+
+function guaranteeSummary(guarantees: CircleLoanGuarantee[], labels: LoanLabels): string {
+  if (!guarantees.length) return labels.noGuarantors;
   const accepted = guarantees.filter((g) => g.status === 'accepted').length;
   const pending = guarantees.filter((g) => g.status === 'pending').length;
   const declined = guarantees.filter((g) => g.status === 'declined').length;
-  const parts = [`${accepted} accepted`];
-  if (pending) parts.push(`${pending} pending`);
-  if (declined) parts.push(`${declined} declined`);
+  const parts = [`${accepted} ${labels.accepted}`];
+  if (pending) parts.push(`${pending} ${labels.pending}`);
+  if (declined) parts.push(`${declined} ${labels.declined}`);
   return parts.join(' · ');
 }
 
@@ -66,6 +70,7 @@ export function CircleFundLoans({
   guarantorCandidates,
   canApprove,
   qardCap,
+  labels,
 }: {
   jamiyaId: string;
   slug: string;
@@ -77,18 +82,18 @@ export function CircleFundLoans({
   guarantorCandidates: GuarantorCandidate[];
   canApprove: boolean;
   qardCap: number | null;
+  labels: LoanLabels;
 }) {
   return (
     <section className="space-y-5">
       <div>
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Circle loans (Qard Hassan)
+          {labels.title}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Interest-free loans from the table banking pool. Optionally ask fellow members to
-          guarantee (kafala) your request — officers wait for those accepts before approving.
+          {labels.intro}
           {qardCap != null
-            ? ` Your request cap: ${formatCurrency(qardCap, currency)}.`
+            ? ` ${labels.capPrefix} ${formatCurrency(qardCap, currency)}.`
             : ''}
         </p>
       </div>
@@ -100,15 +105,15 @@ export function CircleFundLoans({
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <div className="space-y-1 sm:col-span-2">
-          <Label htmlFor="purpose">Purpose</Label>
+          <Label htmlFor="purpose">{labels.purpose}</Label>
           <Textarea id="purpose" name="purpose" minLength={5} required rows={2} />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="loanAmount">Amount ({currency})</Label>
+          <Label htmlFor="loanAmount">{t(labels.amount, { currency })}</Label>
           <Input id="loanAmount" name="amount" type="number" min="100" required />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="installments">Installments</Label>
+          <Label htmlFor="installments">{labels.installments}</Label>
           <Input
             id="installments"
             name="installments"
@@ -121,7 +126,7 @@ export function CircleFundLoans({
         </div>
         {guarantorCandidates.length > 0 ? (
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="guarantorUserIds">Ask members to guarantee (optional)</Label>
+            <Label htmlFor="guarantorUserIds">{labels.guarantorsLabel}</Label>
             <select
               id="guarantorUserIds"
               name="guarantorUserIds"
@@ -135,20 +140,18 @@ export function CircleFundLoans({
                 </option>
               ))}
             </select>
-            <p className="text-xs text-muted-foreground">
-              Hold Ctrl/Cmd to select more than one. Guarantors must accept before approval.
-            </p>
+            <p className="text-xs text-muted-foreground">{labels.guarantorsHint}</p>
           </div>
         ) : null}
         <Button type="submit" className="min-h-11 w-full sm:w-fit sm:col-span-2">
-          Request loan
+          {labels.requestLoan}
         </Button>
       </form>
 
       {pendingGuaranteeRequests.length > 0 ? (
         <div className="space-y-3">
           <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Guarantee requests for you
+            {labels.guaranteeInbox}
           </h3>
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {pendingGuaranteeRequests.map((req) => (
@@ -161,10 +164,7 @@ export function CircleFundLoans({
                   <p className="text-sm text-muted-foreground">
                     {formatCurrency(req.amount, req.currency)} · {req.purpose}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Accepting means you stand as kafala if they default (circle record + notice —
-                    no automatic wallet debit).
-                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{labels.guaranteeAcceptNote}</p>
                 </div>
                 <div className="flex gap-2">
                   <form action={respondQardGuaranteeFormAction}>
@@ -172,7 +172,7 @@ export function CircleFundLoans({
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="accept" value="true" />
                     <Button type="submit" size="sm">
-                      Accept
+                      {labels.accept}
                     </Button>
                   </form>
                   <form action={respondQardGuaranteeFormAction}>
@@ -180,7 +180,7 @@ export function CircleFundLoans({
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="accept" value="false" />
                     <Button type="submit" size="sm" variant="destructive">
-                      Decline
+                      {labels.decline}
                     </Button>
                   </form>
                 </div>
@@ -193,14 +193,12 @@ export function CircleFundLoans({
       {canApprove && pendingApprovals.length > 0 ? (
         <div className="space-y-3">
           <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Pending approvals
+            {labels.pendingApprovals}
           </h3>
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {pendingApprovals.map((loan) => {
               const pendingGuarantees = loan.guarantees.filter((g) => g.status === 'pending').length;
-              const acceptedGuarantees = loan.guarantees.filter(
-                (g) => g.status === 'accepted',
-              ).length;
+              const acceptedGuarantees = loan.guarantees.filter((g) => g.status === 'accepted').length;
               const canApproveLoan =
                 Boolean(loan.agreementAcceptedAt) &&
                 pendingGuarantees === 0 &&
@@ -215,18 +213,11 @@ export function CircleFundLoans({
                     <p className="text-sm text-muted-foreground">
                       {formatCurrency(loan.amount, loan.currency)}
                       {loan.agreementAcceptedAt
-                        ? ' · agreement signed'
-                        : ' · awaiting borrower agreement'}
+                        ? ` · ${labels.agreementSigned}`
+                        : ` · ${labels.awaitingAgreement}`}
                       {' · '}
-                      {guaranteeSummary(loan.guarantees)}
+                      {guaranteeSummary(loan.guarantees, labels)}
                     </p>
-                    {loan.guarantees.length > 0 ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {loan.guarantees
-                          .map((g) => `${g.guarantorName} (${g.status})`)
-                          .join(', ')}
-                      </p>
-                    ) : null}
                   </div>
                   <div className="flex gap-2">
                     <form action={decideQardFormAction}>
@@ -234,7 +225,7 @@ export function CircleFundLoans({
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="approve" value="true" />
                       <Button type="submit" size="sm" disabled={!canApproveLoan}>
-                        Approve
+                        {labels.approve}
                       </Button>
                     </form>
                     <form action={decideQardFormAction}>
@@ -242,7 +233,7 @@ export function CircleFundLoans({
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="approve" value="false" />
                       <Button type="submit" size="sm" variant="destructive">
-                        Reject
+                        {labels.reject}
                       </Button>
                     </form>
                   </div>
@@ -255,7 +246,7 @@ export function CircleFundLoans({
 
       <div className="space-y-3">
         <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Your loans in this circle
+          {labels.yourLoans}
         </h3>
         {myLoans.length ? (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -269,10 +260,10 @@ export function CircleFundLoans({
                   <div>
                     <p className="font-medium">{loan.purpose}</p>
                     <p className="text-sm text-muted-foreground">
-                      {loan.status} · {formatCurrency(due, loan.currency)} remaining
+                      {loan.status} · {formatCurrency(due, loan.currency)} {labels.remaining}
                       {loan.dueDate ? ` · due ${loan.dueDate}` : ''}
                       {' · '}
-                      {guaranteeSummary(loan.guarantees)}
+                      {guaranteeSummary(loan.guarantees, labels)}
                     </p>
                   </div>
                   {loan.status === 'requested' && !loan.agreementAcceptedAt ? (
@@ -282,17 +273,15 @@ export function CircleFundLoans({
                     >
                       <input type="hidden" name="loanId" value={loan.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <p className="text-xs text-muted-foreground">
-                        Interest-free Qard Hassan — accept the facility agreement to continue.
-                      </p>
+                      <p className="text-xs text-muted-foreground">{labels.acceptAgreementHint}</p>
                       <Input
                         name="signerName"
-                        placeholder="Full name as signature"
+                        placeholder={labels.signerPlaceholder}
                         required
                         minLength={2}
                       />
                       <Button type="submit" size="sm">
-                        Accept agreement
+                        {labels.acceptAgreement}
                       </Button>
                     </form>
                   ) : null}
@@ -305,12 +294,12 @@ export function CircleFundLoans({
                         type="number"
                         min="1"
                         max={due}
-                        placeholder="Repay"
+                        placeholder={labels.repay}
                         required
                         className="w-28"
                       />
                       <Button type="submit" size="sm">
-                        Repay
+                        {labels.repay}
                       </Button>
                     </form>
                   ) : null}
@@ -319,14 +308,14 @@ export function CircleFundLoans({
             })}
           </ul>
         ) : (
-          <p className="text-sm text-muted-foreground">No loans yet in this circle.</p>
+          <p className="text-sm text-muted-foreground">{labels.noLoans}</p>
         )}
       </div>
 
       {canApprove && officerActiveLoans.length > 0 ? (
         <div className="space-y-3">
           <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Active loans (officer)
+            {labels.activeOfficer}
           </h3>
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {officerActiveLoans.map((loan) => (
@@ -337,17 +326,17 @@ export function CircleFundLoans({
                 <div>
                   <p className="font-medium">{loan.purpose}</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCurrency(loan.amount - loan.amountRepaid, loan.currency)} remaining
+                    {formatCurrency(loan.amount - loan.amountRepaid, loan.currency)} {labels.remaining}
                     {loan.dueDate ? ` · due ${loan.dueDate}` : ''}
                     {' · '}
-                    {guaranteeSummary(loan.guarantees)}
+                    {guaranteeSummary(loan.guarantees, labels)}
                   </p>
                 </div>
                 <form action={markQardDefaultedFormAction}>
                   <input type="hidden" name="loanId" value={loan.id} />
                   <input type="hidden" name="slug" value={slug} />
                   <Button type="submit" size="sm" variant="outline">
-                    Mark defaulted
+                    {labels.markDefaulted}
                   </Button>
                 </form>
               </li>
