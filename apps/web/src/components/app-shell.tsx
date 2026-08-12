@@ -8,6 +8,7 @@ import {
   CircleDollarSign,
   Home,
   LayoutGrid,
+  LogOut,
   UserRound,
   Wallet,
 } from 'lucide-react';
@@ -159,6 +160,16 @@ export function AppShell({
               <Button type="submit" variant="outline" size="sm">
                 {dict.common.signOut}
               </Button>
+            </form>
+            <form action={signOutAction} className="sm:hidden">
+              <button
+                type="submit"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                aria-label={dict.common.signOut}
+                title={dict.common.signOut}
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
             </form>
           </div>
         </div>

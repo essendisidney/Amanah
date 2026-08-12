@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
+import { signOutAction } from '@/features/auth';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 import { ReferralPanel } from '@/features/profile/components/referral-panel';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -44,6 +47,8 @@ export default async function ProfilePage() {
   if (!user) {
     redirect('/login?next=/profile');
   }
+
+  const { dict } = await getDictionary();
 
   const [{ data: profileData }, { data: docsData }, { data: referralData }] = await Promise.all([
     supabase
@@ -156,6 +161,20 @@ export default async function ProfilePage() {
             )}
           </div>
         </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card p-6 sm:hidden">
+        <h2 className="mb-2 font-[family-name:var(--font-display)] text-xl font-semibold">
+          {dict.common.signOut}
+        </h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          {dict.common.signOut}
+        </p>
+        <form action={signOutAction}>
+          <Button type="submit" variant="outline" className="min-h-11 w-full">
+            {dict.common.signOut}
+          </Button>
+        </form>
       </section>
     </div>
   );
