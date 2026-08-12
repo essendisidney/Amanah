@@ -167,9 +167,7 @@ export default async function ProfilePage() {
         <h2 className="mb-2 font-[family-name:var(--font-display)] text-xl font-semibold">
           {dict.common.signOut}
         </h2>
-        <p className="mb-4 text-sm text-muted-foreground">
-          {dict.common.signOut}
-        </p>
+        <p className="mb-4 text-sm text-muted-foreground">{dict.common.signOutHint}</p>
         <form action={signOutAction}>
           <Button type="submit" variant="outline" className="min-h-11 w-full">
             {dict.common.signOut}

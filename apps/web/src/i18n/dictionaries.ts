@@ -9,6 +9,7 @@ export type Dictionary = {
     signIn: string;
     getStarted: string;
     signOut: string;
+    signOutHint: string;
     support: string;
     notifications: string;
     admin: string;
@@ -98,6 +99,7 @@ export const en: Dictionary = {
     signIn: 'Sign in',
     getStarted: 'Get started',
     signOut: 'Sign out',
+    signOutHint: 'End your session on this phone.',
     support: 'Support',
     notifications: 'Notifications',
     admin: 'Admin',
@@ -190,6 +192,7 @@ export const sw: Dictionary = {
     signIn: 'Ingia',
     getStarted: 'Anza sasa',
     signOut: 'Toka',
+    signOutHint: 'Maliza kikao chako kwenye simu hii.',
     support: 'Msaada',
     notifications: 'Arifa',
     admin: 'Usimamizi',
