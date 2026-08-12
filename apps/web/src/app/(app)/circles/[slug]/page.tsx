@@ -87,6 +87,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     redirect(`/phone?next=/circles/${slug}`);
   }
 
+  const { dict } = await getDictionary();
+
   const { data } = await supabase
     .from('jamiyas')
     .select(
@@ -787,6 +789,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             })}
           canApprove={canApproveLoans}
           qardCap={qardCap}
+          labels={dict.loans}
         />
       ) : null}
 
