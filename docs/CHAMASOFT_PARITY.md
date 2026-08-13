@@ -30,8 +30,7 @@ Amanah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, 
 
 ## Still later
 
-- Carrier/gateway-specific SMS adapters beyond AT/Twilio + Kenya parsers
-- Dedicated server-side PDF binary (browser print → PDF is live)
+- More carrier/gateway-specific SMS adapters beyond current Kenya bank set
 - EAS project id + Play Console submit credentials
 - Live Daraja STK / AT shortcode (ops secrets)
 

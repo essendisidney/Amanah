@@ -19,6 +19,8 @@ type AuditRow = {
 
 export default async function AdminAuditPage() {
   await requireAdminAccess('compliance');
+  const { getDictionary } = await import('@/i18n/get-dictionary');
+  const { dict } = await getDictionary();
   const supabase = await createClient();
   const { data } = await supabase
     .from('audit_logs')
@@ -32,7 +34,7 @@ export default async function AdminAuditPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Audit logs
+          {dict.admin.auditTitle}
         </h2>
         <ExportAuditButton />
       </div>

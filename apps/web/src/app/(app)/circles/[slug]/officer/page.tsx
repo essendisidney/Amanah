@@ -14,7 +14,9 @@ import {
   setCircleDualApprovalAction,
   setCirclePlanAction,
 } from '@/features/circles/actions/billing-actions';
+import { decideQardAction } from '@/features/finance/actions';
 import { Input, Label } from '@jamiya/ui';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = { title: 'Officer console' };
 export const dynamic = 'force-dynamic';
@@ -45,10 +47,20 @@ async function vouchFormAction(formData: FormData) {
   revalidatePath(`/circles/${slug}`);
 }
 
+async function decideQardFormAction(formData: FormData) {
+  'use server';
+  const slug = String(formData.get('slug') ?? '');
+  await decideQardAction(formData);
+  revalidatePath(`/circles/${slug}/officer`);
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath('/finance/qard');
+}
+
 type Props = { params: Promise<{ slug: string }> };
 
 export default async function OfficerConsolePage({ params }: Props) {
   const { slug } = await params;
+  const { dict } = await getDictionary();
   const supabase = await createClient();
   const {
     data: { user },
@@ -96,6 +108,8 @@ export default async function OfficerConsolePage({ params }: Props) {
     { data: planPack },
     { data: plans },
     { data: dualSettings },
+    { data: pendingLoans },
+    { data: pendingGuarantees },
   ] =
     await Promise.all([
       supabase
@@ -150,6 +164,19 @@ export default async function OfficerConsolePage({ params }: Props) {
         .select('dual_approval_enabled, dual_approval_threshold')
         .eq('id', jamiya.id)
         .maybeSingle(),
+      supabase
+        .from('qard_loans')
+        .select('id, amount, currency, status, purpose, borrower_id, created_at')
+        .eq('jamiya_id', jamiya.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(20),
+      supabase
+        .from('qard_guarantees')
+        .select('id, loan_id, status, guarantor_user_id')
+        .eq('jamiya_id', jamiya.id)
+        .eq('status', 'pending')
+        .limit(40),
     ]);
 
   const memberRows = (members ?? []) as Array<{
@@ -207,13 +234,29 @@ export default async function OfficerConsolePage({ params }: Props) {
     first_approver_id: string;
     created_at: string;
   }>;
+  const loanRows = (pendingLoans ?? []) as Array<{
+    id: string;
+    amount: number | string;
+    currency: string;
+    purpose: string | null;
+    created_at: string;
+  }>;
+  const guaranteeRows = (pendingGuarantees ?? []) as Array<{
+    id: string;
+    loan_id: string;
+    status: string;
+  }>;
+  const guaranteeCountByLoan = new Map<string, number>();
+  for (const g of guaranteeRows) {
+    guaranteeCountByLoan.set(g.loan_id, (guaranteeCountByLoan.get(g.loan_id) ?? 0) + 1);
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            Officer console
+            {dict.officer.title}
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiyaRow.name}
@@ -271,6 +314,18 @@ export default async function OfficerConsolePage({ params }: Props) {
             className="rounded-md border border-border px-3 py-1.5 text-sm"
           >
             Report
+          </Link>
+          <Link
+            href={`/circles/${slug}/arrears` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            {dict.circle.arrears}
+          </Link>
+          <Link
+            href={`/circles/${slug}/audit` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            {dict.circle.auditTrail}
           </Link>
         </div>
       </div>
@@ -360,6 +415,55 @@ export default async function OfficerConsolePage({ params }: Props) {
             </Button>
           </form>
         </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          {dict.officer.qardQueue}
+        </h2>
+        {!loanRows.length ? (
+          <p className="text-sm text-muted-foreground">{dict.officer.noPendingQard}</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {loanRows.map((loan) => (
+              <li
+                key={loan.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium">
+                    {formatCurrency(Number(loan.amount), loan.currency)} ·{' '}
+                    {loan.purpose ?? dict.loans.purpose}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDate(loan.created_at)}
+                    {(guaranteeCountByLoan.get(loan.id) ?? 0) > 0
+                      ? ` · ${dict.officer.kafalaPending}: ${guaranteeCountByLoan.get(loan.id)}`
+                      : ''}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <form action={decideQardFormAction}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="loanId" value={loan.id} />
+                    <input type="hidden" name="approve" value="true" />
+                    <Button type="submit" size="sm">
+                      {dict.officer.approveLoan}
+                    </Button>
+                  </form>
+                  <form action={decideQardFormAction}>
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="loanId" value={loan.id} />
+                    <input type="hidden" name="approve" value="false" />
+                    <Button type="submit" size="sm" variant="outline">
+                      {dict.officer.rejectLoan}
+                    </Button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {dualRows.length > 0 ? (

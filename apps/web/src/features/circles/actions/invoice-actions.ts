@@ -51,16 +51,24 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
     redirectWithCircleNotice(slug, error.message, 'error', '/invoices');
     return;
   }
-  const result = data as { ok?: boolean; reminded?: number; error?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    reminded?: number;
+    skipped_cooldown?: number;
+    error?: string;
+  } | null;
   if (!result?.ok) {
     redirectWithCircleNotice(slug, result?.error ?? 'Could not send reminders.', 'error', '/invoices');
     return;
   }
 
   revalidateInvoices(slug);
+  const skipped = result.skipped_cooldown ?? 0;
   redirectWithCircleNotice(
     slug,
-    `Sent ${result.reminded ?? 0} invoice reminder(s).`,
+    skipped > 0
+      ? `Sent ${result.reminded ?? 0} reminder(s); skipped ${skipped} (24h cooldown).`
+      : `Sent ${result.reminded ?? 0} invoice reminder(s).`,
     'success',
     '/invoices',
   );

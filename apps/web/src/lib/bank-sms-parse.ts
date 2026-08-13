@@ -1,5 +1,13 @@
 export type ParsedBankSms = {
-  provider: 'mpesa' | 'equity' | 'other';
+  provider:
+    | 'mpesa'
+    | 'equity'
+    | 'kcb'
+    | 'coop'
+    | 'absa'
+    | 'ncba'
+    | 'stanbic'
+    | 'other';
   amount: number | null;
   currency: string;
   direction: 'credit' | 'debit' | null;
@@ -22,24 +30,39 @@ export function parseBankSms(text: string): ParsedBankSms {
     provider = 'mpesa';
   } else if (/\bequity\b|\beazzy\b/.test(lower)) {
     provider = 'equity';
+  } else if (/\bkcb\b|\bkcb bank\b|\bkenya commercial\b/.test(lower)) {
+    provider = 'kcb';
+  } else if (/\bco-?op\b|\bcooperative bank\b|\bmco-?op\b/.test(lower)) {
+    provider = 'coop';
+  } else if (/\babsa\b|\bbarclays\b/.test(lower)) {
+    provider = 'absa';
+  } else if (/\bncba\b|\bnic bank\b/.test(lower)) {
+    provider = 'ncba';
+  } else if (/\bstanbic\b/.test(lower)) {
+    provider = 'stanbic';
   }
 
   let direction: ParsedBankSms['direction'] = null;
   if (
-    /\breceived\b|\bhave received\b|\bcredited\b|\bdeposit\b|\bfrom\b/.test(lower) &&
-    !/\bsent to\b|\bpaid to\b|\bdebited\b|\bwithdrawn\b/.test(lower)
+    /\breceived\b|\bhave received\b|\bcredited\b|\bdeposit\b|\binward\b|\bcr\b/.test(lower) &&
+    !/\bsent to\b|\bpaid to\b|\bdebited\b|\bwithdrawn\b|\bdr\b/.test(lower)
   ) {
     direction = 'credit';
-  } else if (/\bsent to\b|\bpaid to\b|\bdebited\b|\bwithdrawn\b|\bpurchase\b/.test(lower)) {
+  } else if (
+    /\bsent to\b|\bpaid to\b|\bdebited\b|\bwithdrawn\b|\bpurchase\b|\boutward\b|\btransfer to\b/.test(
+      lower,
+    )
+  ) {
     direction = 'debit';
-  } else if (/\breceived\b|\bcredited\b/.test(lower)) {
+  } else if (/\breceived\b|\bcredited\b|\binward\b/.test(lower)) {
     direction = 'credit';
   }
 
   let amount: number | null = null;
   const amountMatchers = [
     /(?:ksh|kes|ksh\.|kes\.)\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)/i,
-    /(?:amount|amt)[:\s]+(?:ksh|kes)?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)/i,
+    /(?:amount|amt|value)[:\s]+(?:ksh|kes)?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)/i,
+    /(?:cr|dr)\s*(?:ksh|kes)?\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)/i,
   ];
   for (const re of amountMatchers) {
     const m = body.match(re);
@@ -52,8 +75,9 @@ export function parseBankSms(text: string): ParsedBankSms {
   let externalRef: string | null = null;
   const refMatchers = [
     /\b([A-Z0-9]{10})\s+Confirmed/i,
-    /\b(?:Ref|Reference|Receipt|Code)[:\s#]*([A-Z0-9-]{6,})/i,
-    /\bTransaction\s+(?:ID|Code)[:\s]*([A-Z0-9-]{6,})/i,
+    /\b(?:Ref|Reference|Receipt|Code|RRN|FT)[:\s#]*([A-Z0-9-]{6,})/i,
+    /\bTransaction\s+(?:ID|Code|No\.?)[:\s]*([A-Z0-9-]{6,})/i,
+    /\b(?:Txn|TXN)\s*(?:ID|Ref)?[:\s#]*([A-Z0-9-]{6,})/i,
   ];
   for (const re of refMatchers) {
     const m = body.match(re);

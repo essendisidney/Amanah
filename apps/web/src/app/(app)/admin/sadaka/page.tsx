@@ -69,6 +69,8 @@ type Institution = {
 
 export default async function AdminSadakaPage() {
   await requireAdminAccess('compliance');
+  const { getDictionary } = await import('@/i18n/get-dictionary');
+  const { dict } = await getDictionary();
   const supabase = await createClient();
 
   const [{ data: campaigns }, { data: events }, { data: institutions }, { data: pendingDisbursements }] =
@@ -341,6 +343,15 @@ export default async function AdminSadakaPage() {
                     className="grid gap-3 rounded-lg border border-border/70 bg-muted/30 p-3 sm:grid-cols-2 lg:grid-cols-3"
                   >
                     <input type="hidden" name="campaignId" value={row.id} />
+                    <div className="sm:col-span-2 lg:col-span-3 rounded-md border border-accent/30 bg-background/80 px-3 py-2 text-sm">
+                      <p className="font-medium">{dict.admin.shariaBoardPanel}</p>
+                      <p className="mt-1 text-muted-foreground">{dict.admin.shariaBoardHint}</p>
+                      {!row.sharia_board_endorsed ? (
+                        <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+                          {dict.admin.decisionRefRequired}
+                        </p>
+                      ) : null}
+                    </div>
                     <div className="space-y-1">
                       <Label htmlFor={`mode-${row.id}`}>Fee mode</Label>
                       <select

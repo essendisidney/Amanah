@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/dispatch?job=sadaka",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/dispatch?job=auto-fines",
+      "schedule": "15 6 * * *"
     }
   ]
 }
