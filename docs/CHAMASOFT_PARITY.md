@@ -21,14 +21,17 @@ Amanah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, 
 | Journal / double-entry view | `/circles/[slug]/journal` via `circle_journal` |
 | Member invoices / reminders | `/circles/[slug]/invoices` + `issue_contribution_invoices` / `remind_contribution_invoices` |
 | Bank SMS webhook ingest | `POST /api/webhooks/bank-alerts` + `parseBankSms` → `ingest_bank_alert` |
-| Group communication | Existing announcements / community (SMS/WhatsApp still ops-gated) |
+| Group communication | Announcements + `remind_contribution_invoices` → SMS/WhatsApp outbox (`notify-dispatch`) |
 | E-wallet / M-Pesa | Personal wallet + simulated/Daraja path (live STK still secrets-gated) |
 | Android app install | Chrome PWA primary; Expo `eas.json` scaffold for APK/AAB |
+| Dual approval | Circle dual-approval settings + `dual_approval_requests` for payouts/Qard; platform withdrawals |
+| Group SaaS pricing | `/pricing` + `platform_plans` / `circle_subscriptions` (Free / Starter / Pro) |
+| Member statements | Branded print statements + loan/savings book summaries on statement/report |
 
 ## Still later
 
-- Carrier/gateway-specific SMS adapters beyond secret POST + Kenya parsers
-- Audited PDF templates (beyond browser print)
+- Carrier/gateway-specific SMS adapters beyond AT/Twilio + Kenya parsers
+- Dedicated server-side PDF binary (browser print → PDF is live)
 - EAS project id + Play Console submit credentials
 - Live Daraja STK / AT shortcode (ops secrets)
 
@@ -38,5 +41,6 @@ Amanah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, 
 - `supabase/migrations/20260813140000_chamasoft_gl_shares_wave.sql`
 - `supabase/migrations/20260813160000_chamasoft_settle_match_wave.sql`
 - `supabase/migrations/20260813180000_chamasoft_invoices_webhooks_wave.sql`
+- `supabase/migrations/20260813200000_ops_gap_close_wave.sql`
 
-RPCs include: `pay_circle_dividend`, `match_bank_alerts`, `set_bank_alert_status`, `circle_journal`, `issue_contribution_invoices`, `remind_contribution_invoices`, `ingest_bank_alert`.
+RPCs include: `pay_circle_dividend`, `match_bank_alerts`, `set_bank_alert_status`, `circle_journal`, `issue_contribution_invoices`, `remind_contribution_invoices`, `ingest_bank_alert`, `propose_process_withdrawal`, `propose_settle_payout`, `propose_decide_qard`, `confirm_dual_approval`, `set_circle_plan`, `get_circle_plan`.

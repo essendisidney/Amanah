@@ -244,14 +244,26 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
   const loanId = String(formData.get('loanId') ?? '');
   const approve = String(formData.get('approve') ?? 'true') === 'true';
   if (!loanId) return { success: false, message: 'Missing loan.' };
-  const { data, error } = await callRpc('decide_qard', {
+  const { data, error } = await callRpc('propose_decide_qard', {
     p_loan_id: loanId,
     p_approve: approve,
   });
   if (error) return { success: false, message: error.message };
+  const raw = data as {
+    ok?: boolean;
+    error?: string;
+    pending_dual_approval?: boolean;
+  } | null;
+  if (raw?.pending_dual_approval) {
+    revalidatePath('/finance/qard');
+    return {
+      success: true,
+      message: 'Loan approval queued for a second officer (dual control).',
+    };
+  }
   const state = rpcState(data, 'Could not decide Qard request.');
   if (!state.success) {
-    const code = (data as { error?: string } | null)?.error;
+    const code = raw?.error;
     if (code === 'AGREEMENT_REQUIRED') {
       state.message = 'Borrower must accept the facility agreement first.';
     } else if (code === 'GUARANTEES_PENDING') {

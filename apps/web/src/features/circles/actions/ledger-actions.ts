@@ -118,21 +118,32 @@ export async function settlePayoutAction(formData: FormData): Promise<void> {
   const slug = String(formData.get('slug') ?? '');
   if (!payoutId) return;
 
-  const { data, error } = await callRpc('settle_payout', {
+  const { data, error } = await callRpc('propose_settle_payout', {
     p_payout_id: payoutId,
   });
 
   if (error) {
-    console.error('settle_payout', error.message);
+    console.error('propose_settle_payout', error.message);
     return;
   }
 
-  const result = data as { ok?: boolean; error?: string } | null;
-  if (!result?.ok) {
-    console.error('settle_payout', result?.error);
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    pending_dual_approval?: boolean;
+  } | null;
+  if (!result?.ok && !result?.pending_dual_approval) {
+    console.error('propose_settle_payout', result?.error);
   }
 
   revalidateCircle(slug || undefined);
+  if (slug && result?.pending_dual_approval) {
+    redirectWithCircleNotice(
+      slug,
+      'Payout queued for second officer approval (dual control).',
+      'success',
+    );
+  }
 }
 
 export async function settlePayoutToMpesaAction(formData: FormData): Promise<void> {

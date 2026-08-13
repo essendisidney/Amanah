@@ -77,7 +77,14 @@ export default async function CirclePrintReportPage({ params }: Props) {
     ).map((p) => [p.id, p]),
   );
 
-  const [{ data: contribs }, { data: snapRaw }, { data: glRaw }, { data: accounts }] =
+  const [
+    { data: contribs },
+    { data: snapRaw },
+    { data: glRaw },
+    { data: accounts },
+    { data: loanRows },
+    { data: pocketRows },
+  ] =
     await Promise.all([
       supabase.from('contributions').select('status, amount, currency').eq('jamiya_id', jamiya.id),
       callRpc('treasury_snapshot', { p_jamiya_id: jamiya.id }),
@@ -88,7 +95,40 @@ export default async function CirclePrintReportPage({ params }: Props) {
         .eq('jamiya_id', jamiya.id)
         .eq('is_active', true)
         .order('name'),
+      supabase
+        .from('qard_loans')
+        .select('id, purpose, status, amount, amount_repaid, currency, due_date')
+        .eq('jamiya_id', jamiya.id)
+        .order('created_at', { ascending: false })
+        .limit(40),
+      supabase
+        .from('savings_pockets')
+        .select('id, category, label, balance, target_amount, currency')
+        .eq('jamiya_id', jamiya.id)
+        .order('created_at', { ascending: false })
+        .limit(40),
     ]);
+  const loans = (loanRows ?? []) as Array<{
+    id: string;
+    purpose: string;
+    status: string;
+    amount: number | string;
+    amount_repaid: number | string;
+    currency: string;
+    due_date: string | null;
+  }>;
+  const pockets = (pocketRows ?? []) as Array<{
+    id: string;
+    category: string;
+    label: string | null;
+    balance: number | string;
+    target_amount: number | string | null;
+    currency: string;
+  }>;
+  const loanBookOutstanding = loans.reduce((sum, l) => {
+    return sum + Math.max(Number(l.amount) - Number(l.amount_repaid), 0);
+  }, 0);
+  const savingsBookTotal = pockets.reduce((sum, p) => sum + Number(p.balance), 0);
   const contribRows = (contribs ?? []) as unknown as Array<{
     status: string;
     amount: number | string;
@@ -147,7 +187,9 @@ export default async function CirclePrintReportPage({ params }: Props) {
         </div>
       </div>
       <header className="border-b border-border pb-4">
-        <p className="text-sm uppercase tracking-wide text-muted-foreground">Amanah circle report</p>
+        <p className="text-sm uppercase tracking-wide text-muted-foreground">
+          Amanah · Branded circle report
+        </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold">
           {jamiya.name}
         </h1>
@@ -156,7 +198,31 @@ export default async function CirclePrintReportPage({ params }: Props) {
           {formatCurrency(Number(jamiya.contribution_amount), jamiya.currency)} contribution ·{' '}
           {jamiya.member_count} members · Generated {formatDate(new Date().toISOString())}
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Use Print / Save PDF for a letterhead-ready archive copy.
+        </p>
       </header>
+
+      <section className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-border p-4 print:rounded-none">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Loan book</p>
+          <p className="mt-2 text-2xl font-semibold">
+            {formatCurrency(loanBookOutstanding, jamiya.currency)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Outstanding across {loans.length} loan(s)
+          </p>
+        </div>
+        <div className="rounded-xl border border-border p-4 print:rounded-none">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Savings book</p>
+          <p className="mt-2 text-2xl font-semibold">
+            {formatCurrency(savingsBookTotal, jamiya.currency)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Across {pockets.length} savings pocket(s)
+          </p>
+        </div>
+      </section>
 
       <section className="mt-6">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
@@ -310,6 +376,51 @@ export default async function CirclePrintReportPage({ params }: Props) {
           </section>
         </>
       ) : null}
+
+      <section className="mt-8">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Loan summary
+        </h2>
+        {loans.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">No Qard loans recorded.</p>
+        ) : (
+          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+            {loans.map((loan) => (
+              <li key={loan.id}>
+                {loan.purpose} · {loan.status} ·{' '}
+                {formatCurrency(Number(loan.amount), loan.currency)}
+                {' · remaining '}
+                {formatCurrency(
+                  Math.max(Number(loan.amount) - Number(loan.amount_repaid), 0),
+                  loan.currency,
+                )}
+                {loan.due_date ? ` · due ${formatDate(loan.due_date)}` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="mt-8">
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          Savings summary
+        </h2>
+        {pockets.length === 0 ? (
+          <p className="mt-2 text-sm text-muted-foreground">No savings pockets recorded.</p>
+        ) : (
+          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+            {pockets.map((pocket) => (
+              <li key={pocket.id}>
+                {pocket.label || pocket.category} ·{' '}
+                {formatCurrency(Number(pocket.balance), pocket.currency)}
+                {pocket.target_amount
+                  ? ` · target ${formatCurrency(Number(pocket.target_amount), pocket.currency)}`
+                  : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="mt-8">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">

@@ -9,6 +9,12 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import {
+  confirmCircleDualApprovalAction,
+  setCircleDualApprovalAction,
+  setCirclePlanAction,
+} from '@/features/circles/actions/billing-actions';
+import { Input, Label } from '@jamiya/ui';
 
 export const metadata: Metadata = { title: 'Officer console' };
 export const dynamic = 'force-dynamic';
@@ -49,12 +55,20 @@ export default async function OfficerConsolePage({ params }: Props) {
   } = await supabase.auth.getUser();
   if (!user) redirect(`/login?next=/circles/${slug}/officer`);
 
-  const { data: jamiya } = await supabase
+  const { data: jamiyaData } = await supabase
     .from('jamiyas')
     .select('id, name, slug, currency, contribution_amount')
     .eq('slug', slug)
     .maybeSingle();
-  if (!jamiya) notFound();
+  if (!jamiyaData) notFound();
+
+  const jamiya = jamiyaData as unknown as {
+    id: string;
+    name: string;
+    slug: string;
+    currency: string;
+    contribution_amount: number | string;
+  };
 
   const { data: membership } = await supabase
     .from('members')
@@ -68,7 +82,21 @@ export default async function OfficerConsolePage({ params }: Props) {
     redirect(`/circles/${slug}`);
   }
 
-  const [{ data: lateDues }, { data: grace }, { data: payouts }, { data: members }, { data: cases }] =
+  // Ops gap tables/columns may lag generated Database types.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+
+  const [
+    { data: lateDues },
+    { data: grace },
+    { data: payouts },
+    { data: members },
+    { data: cases },
+    { data: dualPending },
+    { data: planPack },
+    { data: plans },
+    { data: dualSettings },
+  ] =
     await Promise.all([
       supabase
         .from('contributions')
@@ -104,6 +132,24 @@ export default async function OfficerConsolePage({ params }: Props) {
         .in('status', ['open', 'contacted', 'promised', 'partially_paid'])
         .order('days_overdue', { ascending: false })
         .limit(20),
+      db
+        .from('dual_approval_requests')
+        .select('id, kind, entity_id, amount, currency, status, first_approver_id, created_at')
+        .eq('jamiya_id', jamiya.id)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(30),
+      callRpc('get_circle_plan', { p_jamiya_id: jamiya.id }),
+      db
+        .from('platform_plans')
+        .select('id, name, price_kes, max_members')
+        .eq('active', true)
+        .order('sort_order', { ascending: true }),
+      db
+        .from('jamiyas')
+        .select('dual_approval_enabled, dual_approval_threshold')
+        .eq('id', jamiya.id)
+        .maybeSingle(),
     ]);
 
   const memberRows = (members ?? []) as Array<{
@@ -133,6 +179,35 @@ export default async function OfficerConsolePage({ params }: Props) {
       }
     | undefined;
 
+  const dualMeta = dualSettings as {
+    dual_approval_enabled?: boolean;
+    dual_approval_threshold?: number | string;
+  } | null;
+  const jamiyaRow = {
+    ...jamiya,
+    dual_approval_enabled: Boolean(dualMeta?.dual_approval_enabled),
+    dual_approval_threshold: dualMeta?.dual_approval_threshold ?? 10000,
+  };
+  const planInfo = planPack as {
+    ok?: boolean;
+    plan_id?: string;
+    plan?: { name?: string; price_kes?: number; max_members?: number };
+  } | null;
+  const planRows = (plans ?? []) as Array<{
+    id: string;
+    name: string;
+    price_kes: number | string;
+    max_members: number;
+  }>;
+  const dualRows = (dualPending ?? []) as Array<{
+    id: string;
+    kind: string;
+    amount: number | string;
+    currency: string;
+    first_approver_id: string;
+    created_at: string;
+  }>;
+
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -141,10 +216,11 @@ export default async function OfficerConsolePage({ params }: Props) {
             Officer console
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
-            {jamiya.name}
+            {jamiyaRow.name}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Role: {(membership as { role: string }).role.replaceAll('_', ' ')}
+            {planInfo?.plan_id ? ` · Plan ${planInfo.plan?.name ?? planInfo.plan_id}` : ''}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -208,8 +284,127 @@ export default async function OfficerConsolePage({ params }: Props) {
         nextPayoutAmount={
           nextPayout ? Number(nextPayout.amount) : null
         }
-        currency={jamiya.currency}
+        currency={jamiyaRow.currency}
       />
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Circle plan
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Current:{' '}
+            <span className="font-medium text-foreground">
+              {planInfo?.plan?.name ?? 'Free'}
+            </span>
+            . See{' '}
+            <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
+              pricing
+            </Link>
+            .
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {planRows.map((plan) => (
+              <form key={plan.id} action={setCirclePlanAction}>
+                <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="planId" value={plan.id} />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant={planInfo?.plan_id === plan.id ? 'default' : 'outline'}
+                >
+                  {plan.name}
+                  {Number(plan.price_kes) > 0
+                    ? ` · ${formatCurrency(Number(plan.price_kes), 'KES')}`
+                    : ''}
+                </Button>
+              </form>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Dual approval
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Require a second officer for payouts and loan approvals at/above the threshold.
+          </p>
+          <form action={setCircleDualApprovalAction} className="space-y-3">
+            <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="enabled" value="false" />
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="enabled"
+                value="true"
+                defaultChecked={Boolean(jamiyaRow.dual_approval_enabled)}
+              />
+              Enable dual approval
+            </label>
+            <div className="space-y-1">
+              <Label htmlFor="threshold">Threshold ({jamiyaRow.currency})</Label>
+              <Input
+                id="threshold"
+                name="threshold"
+                type="number"
+                min={0}
+                step={100}
+                defaultValue={Number(jamiyaRow.dual_approval_threshold ?? 10000)}
+              />
+            </div>
+            <Button type="submit" size="sm">
+              Save dual-approval settings
+            </Button>
+          </form>
+        </div>
+      </section>
+
+      {dualRows.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Awaiting second officer
+          </h2>
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {dualRows.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
+                <div>
+                  <p className="text-sm font-medium capitalize">
+                    {row.kind.replaceAll('_', ' ')} ·{' '}
+                    {formatCurrency(Number(row.amount), row.currency)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    First: {row.first_approver_id.slice(0, 8)}… · {formatDate(row.created_at)}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <form action={confirmCircleDualApprovalAction}>
+                    <input type="hidden" name="requestId" value={row.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="approve" value="true" />
+                    <Button type="submit" size="sm">
+                      Second approve
+                    </Button>
+                  </form>
+                  <form action={confirmCircleDualApprovalAction}>
+                    <input type="hidden" name="requestId" value={row.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="approve" value="false" />
+                    <Button type="submit" size="sm" variant="outline">
+                      Reject
+                    </Button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
