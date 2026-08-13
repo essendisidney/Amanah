@@ -41,6 +41,7 @@ import {
 } from '@/features/circles/components/circle-fund-loans';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -597,17 +598,18 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         .eq('status', 'pending')
     : { count: 0 };
 
+  const circleLabels = dict.circle;
   const segmentLabel =
     jamiya.segment === 'womens_circle'
-      ? 'Women’s circle'
+      ? circleLabels.womensCircle
       : jamiya.segment === 'boda_stage'
-        ? 'Boda / tuktuk stage'
+        ? circleLabels.bodaStage
         : null;
   const segmentBlurb =
     jamiya.segment === 'womens_circle'
-      ? 'Community gatekeeping and welfare support for women’s savings circles.'
+      ? circleLabels.womensBlurb
       : jamiya.segment === 'boda_stage'
-        ? 'Stage-based savings with welfare emphasis for riders and operators.'
+        ? circleLabels.bodaBlurb
         : null;
 
   return (
@@ -640,32 +642,32 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         ) : null}
         <div className="flex flex-wrap gap-2 pt-2">
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/community` as Route}>Meetings & chat</Link>
+            <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/elections` as Route}>Elections</Link>
+            <Link href={`/circles/${slug}/elections` as Route}>{circleLabels.elections}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/registration` as Route}>Circle KYC</Link>
+            <Link href={`/circles/${slug}/registration` as Route}>{circleLabels.circleKyc}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+            <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/shares` as Route}>Shares</Link>
+            <Link href={`/circles/${slug}/shares` as Route}>{circleLabels.shares}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
+            <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/invoices` as Route}>Invoices</Link>
+            <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
+            <Link href={`/circles/${slug}/statement` as Route}>{circleLabels.myStatement}</Link>
           </Button>
           {canManageMembers ? (
             <Button asChild variant="outline" size="sm">
-              <Link href={`/circles/${slug}/officer` as Route}>Officer console</Link>
+              <Link href={`/circles/${slug}/officer` as Route}>{circleLabels.officerConsole}</Link>
             </Button>
           ) : null}
         </div>
@@ -701,39 +703,49 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
       <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Contribution</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+            {circleLabels.contribution}
+          </dt>
           <dd className="mt-2 text-lg font-semibold">
             {formatCurrency(amount, jamiya.currency)}
           </dd>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Members</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+            {circleLabels.members}
+          </dt>
           <dd className="mt-2 text-lg font-semibold">
             {jamiya.member_count}/{jamiya.max_members}
           </dd>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Cycle</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+            {circleLabels.cycle}
+          </dt>
           <dd className="mt-2 text-lg font-semibold">
             {jamiya.current_cycle}/{jamiya.cycle_count}
           </dd>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Frequency</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+            {circleLabels.frequency}
+          </dt>
           <dd className="mt-2 text-lg font-semibold">
-            Every {jamiya.contribution_frequency_days} days
+            {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
           </dd>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Start date</dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
+            {circleLabels.startDate}
+          </dt>
           <dd className="mt-2 text-lg font-semibold">
-            {jamiya.start_date ? formatDate(jamiya.start_date) : 'Not set'}
+            {jamiya.start_date ? formatDate(jamiya.start_date) : circleLabels.notSet}
           </dd>
         </div>
         {creditRating ? (
           <div className="rounded-xl border border-border bg-card p-5">
             <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-              Your credit snapshot
+              {circleLabels.creditSnapshot}
             </dt>
             <dd className="mt-2 text-lg font-semibold">{creditRating}</dd>
           </div>

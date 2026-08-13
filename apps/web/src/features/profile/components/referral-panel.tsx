@@ -7,12 +7,14 @@ import {
   syncPhoneFromAuthAction,
   type FinanceActionState,
 } from '@/features/finance/actions';
+import type { Dictionary } from '@/i18n/dictionaries';
 
 const initial: FinanceActionState = { success: false, message: '' };
 
 export function ReferralPanel({
   referralCode,
   referrals,
+  labels,
 }: {
   referralCode: string | null;
   referrals: Array<{
@@ -22,6 +24,7 @@ export function ReferralPanel({
     currency: string;
     created_at: string;
   }>;
+  labels: Dictionary['profile'];
 }) {
   const [applyState, applyAction, applyPending] = useActionState(
     applyReferralAction,
@@ -35,11 +38,11 @@ export function ReferralPanel({
   return (
     <section className="space-y-4">
       <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-        Referrals
+        {labels.referrals}
       </h2>
       <div className="space-y-4 rounded-xl border border-border bg-card p-6">
         <div>
-          <p className="text-sm text-muted-foreground">Your referral code</p>
+          <p className="text-sm text-muted-foreground">{labels.yourReferralCode}</p>
           <p className="mt-1 font-mono text-lg font-semibold">{referralCode ?? '—'}</p>
           {referralCode ? (
             <Button
@@ -49,17 +52,17 @@ export function ReferralPanel({
               className="mt-2"
               onClick={() => void navigator.clipboard.writeText(referralCode)}
             >
-              Copy code
+              {labels.copyCode}
             </Button>
           ) : null}
         </div>
         <form action={applyAction} className="flex flex-wrap items-end gap-2">
           <div className="space-y-1">
-            <Label htmlFor="referralCode">Apply someone’s code</Label>
+            <Label htmlFor="referralCode">{labels.applySomeoneCode}</Label>
             <Input id="referralCode" name="referralCode" placeholder="ABC12345" />
           </div>
           <Button type="submit" size="sm" disabled={applyPending}>
-            {applyPending ? 'Applying…' : 'Apply'}
+            {applyPending ? labels.applying : labels.apply}
           </Button>
         </form>
         {applyState.message ? (
@@ -67,9 +70,7 @@ export function ReferralPanel({
             {applyState.message}
           </p>
         ) : null}
-        <p className="text-xs text-muted-foreground">
-          Referral qualifies after your first paid contribution. Rewards are marked by admin.
-        </p>
+        <p className="text-xs text-muted-foreground">{labels.referralHint}</p>
         {referrals.length > 0 ? (
           <ul className="divide-y divide-border border-t border-border">
             {referrals.map((row) => (

@@ -4,9 +4,11 @@ import { useActionState } from 'react';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
 import { updateProfileAction } from '../actions/profile-actions';
 import { initialProfileActionState } from '../lib/state';
+import type { Dictionary } from '@/i18n/dictionaries';
 
 export function ProfileForm({
   defaultValues,
+  labels,
 }: {
   defaultValues: {
     fullName: string;
@@ -14,6 +16,7 @@ export function ProfileForm({
     bio: string;
     countryCode: string;
   };
+  labels: Dictionary['profile'];
 }) {
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
@@ -30,7 +33,7 @@ export function ProfileForm({
 
       <form action={formAction} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName">Full name</Label>
+          <Label htmlFor="fullName">{labels.fullName}</Label>
           <Input
             id="fullName"
             name="fullName"
@@ -42,7 +45,7 @@ export function ProfileForm({
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{labels.phone}</Label>
           <Input
             id="phone"
             name="phone"
@@ -55,7 +58,7 @@ export function ProfileForm({
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="countryCode">Country code</Label>
+          <Label htmlFor="countryCode">{labels.countryCode}</Label>
           <Input
             id="countryCode"
             name="countryCode"
@@ -68,14 +71,14 @@ export function ProfileForm({
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bio">Bio</Label>
+          <Label htmlFor="bio">{labels.bio}</Label>
           <Textarea id="bio" name="bio" defaultValue={defaultValues.bio} />
           {state.fieldErrors?.bio?.[0] ? (
             <p className="text-sm text-destructive">{state.fieldErrors.bio[0]}</p>
           ) : null}
         </div>
         <Button type="submit" disabled={pending}>
-          {pending ? 'Saving…' : 'Save profile'}
+          {pending ? labels.saving : labels.saveProfile}
         </Button>
       </form>
     </div>

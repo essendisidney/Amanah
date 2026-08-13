@@ -17,6 +17,7 @@ export type Dictionary = {
     viewAll: string;
     createCircle: string;
     backToDashboard: string;
+    home: string;
     members: string;
     cycle: string;
     starts: string;
@@ -160,6 +161,26 @@ export type Dictionary = {
     historyTitle: string;
     historyEmpty: string;
   };
+  walletForms: {
+    amount: string;
+    mpesaPhone: string;
+    paystackHint: string;
+    bankHint: string;
+    simulatedHint: string;
+    processing: string;
+    payMpesa: string;
+    payPaystack: string;
+    startBank: string;
+    topUpWallet: string;
+    bank: string;
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+    submitting: string;
+    requestWithdrawal: string;
+    retry: string;
+    retrying: string;
+  };
   finance: {
     eyebrow: string;
     title: string;
@@ -175,6 +196,86 @@ export type Dictionary = {
     welfareOverview: string;
     circleFallback: string;
     noWelfare: string;
+  };
+  profile: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    personalDetails: string;
+    email: string;
+    mpesaLinkage: string;
+    kycDocuments: string;
+    uploadedFiles: string;
+    noDocuments: string;
+    fullName: string;
+    phone: string;
+    countryCode: string;
+    bio: string;
+    saving: string;
+    saveProfile: string;
+    mpesaNumber: string;
+    mpesaHint: string;
+    linking: string;
+    linkMpesa: string;
+    documentType: string;
+    fileHint: string;
+    uploading: string;
+    uploadDocument: string;
+    nationalId: string;
+    passport: string;
+    drivingLicense: string;
+    proofOfAddress: string;
+    selfie: string;
+    other: string;
+    referrals: string;
+    yourReferralCode: string;
+    copyCode: string;
+    applySomeoneCode: string;
+    applying: string;
+    apply: string;
+    referralHint: string;
+  };
+  notificationsPage: {
+    eyebrow: string;
+    title: string;
+    unreadOne: string;
+    unreadMany: string;
+    upToDate: string;
+    markAllRead: string;
+    markRead: string;
+    emptyTitle: string;
+    emptyDesc: string;
+  };
+  support: {
+    eyebrow: string;
+    title: string;
+    body: string;
+    tipLabel: string;
+    phoneOptional: string;
+    submit: string;
+  };
+  circle: {
+    meetingsChat: string;
+    elections: string;
+    circleKyc: string;
+    treasury: string;
+    shares: string;
+    journal: string;
+    invoices: string;
+    myStatement: string;
+    officerConsole: string;
+    contribution: string;
+    members: string;
+    cycle: string;
+    frequency: string;
+    everyDays: string;
+    startDate: string;
+    notSet: string;
+    creditSnapshot: string;
+    womensCircle: string;
+    bodaStage: string;
+    womensBlurb: string;
+    bodaBlurb: string;
   };
   install: {
     title: string;
@@ -207,6 +308,7 @@ export const en: Dictionary = {
     viewAll: 'View all',
     createCircle: 'Create circle',
     backToDashboard: 'Back to dashboard',
+    home: 'Home',
     members: 'members',
     cycle: 'Cycle',
     starts: 'Starts',
@@ -357,6 +459,28 @@ export const en: Dictionary = {
     historyEmpty:
       'No ledger entries yet. Top-ups, contributions, and payouts will appear here.',
   },
+  walletForms: {
+    amount: 'Amount ({currency})',
+    mpesaPhone: 'M-Pesa phone',
+    paystackHint:
+      'Pay with Paystack Checkout (card, M-Pesa mobile money, bank). You will be redirected to complete payment securely.',
+    bankHint: 'Bank top-up creates a pending intent for settlement against your bank flow.',
+    simulatedHint:
+      'Instant demo wallet credit (no M-Pesa). Use this to pay dues, fund pockets, and repay loans while testing.',
+    processing: 'Processing…',
+    payMpesa: 'Pay with M-Pesa',
+    payPaystack: 'Pay with Paystack',
+    startBank: 'Start bank top-up',
+    topUpWallet: 'Top up wallet',
+    bank: 'Bank',
+    bankName: 'Bank name',
+    accountName: 'Account name',
+    accountNumber: 'Account number',
+    submitting: 'Submitting…',
+    requestWithdrawal: 'Request withdrawal',
+    retry: 'Retry',
+    retrying: 'Retrying…',
+  },
   finance: {
     eyebrow: 'Circle finance',
     title: 'Finance',
@@ -372,6 +496,87 @@ export const en: Dictionary = {
     welfareOverview: 'Welfare overview',
     circleFallback: 'Circle',
     noWelfare: 'Your circles have no welfare funds yet.',
+  },
+  profile: {
+    eyebrow: 'Account',
+    title: 'Profile',
+    subtitle: 'Keep your details current and submit KYC documents for compliance review.',
+    personalDetails: 'Personal details',
+    email: 'Email: {email}',
+    mpesaLinkage: 'M-Pesa linkage',
+    kycDocuments: 'KYC documents',
+    uploadedFiles: 'Uploaded files',
+    noDocuments: 'No documents uploaded yet.',
+    fullName: 'Full name',
+    phone: 'Phone',
+    countryCode: 'Country code',
+    bio: 'Bio',
+    saving: 'Saving…',
+    saveProfile: 'Save profile',
+    mpesaNumber: 'M-Pesa number',
+    mpesaHint: 'Used for STK top-ups and payout cash-out queues.',
+    linking: 'Linking…',
+    linkMpesa: 'Link M-Pesa',
+    documentType: 'Document type',
+    fileHint: 'File (JPEG, PNG, WebP, or PDF · max 10MB)',
+    uploading: 'Uploading…',
+    uploadDocument: 'Upload document',
+    nationalId: 'National ID',
+    passport: 'Passport',
+    drivingLicense: 'Driving license',
+    proofOfAddress: 'Proof of address',
+    selfie: 'Selfie',
+    other: 'Other',
+    referrals: 'Referrals',
+    yourReferralCode: 'Your referral code',
+    copyCode: 'Copy code',
+    applySomeoneCode: 'Apply someone’s code',
+    applying: 'Applying…',
+    apply: 'Apply',
+    referralHint:
+      'Referral qualifies after your first paid contribution. Rewards are marked by admin.',
+  },
+  notificationsPage: {
+    eyebrow: 'Inbox',
+    title: 'Notifications',
+    unreadOne: '{count} unread message',
+    unreadMany: '{count} unread messages',
+    upToDate: 'You are up to date.',
+    markAllRead: 'Mark all as read',
+    markRead: 'Mark read',
+    emptyTitle: 'No notifications yet',
+    emptyDesc: 'Circle invites, contribution reminders, and payout updates will appear here.',
+  },
+  support: {
+    eyebrow: 'Keep Amanah growing',
+    title: 'Support the Amanah platform',
+    body: "This is a voluntary tip to sustain Amanah's technology, support, and community operations. It is not sadaka and does not fund a charity campaign.",
+    tipLabel: 'Platform tip (KES)',
+    phoneOptional: 'Phone (optional)',
+    submit: 'Support Amanah',
+  },
+  circle: {
+    meetingsChat: 'Meetings & chat',
+    elections: 'Elections',
+    circleKyc: 'Circle KYC',
+    treasury: 'Treasury',
+    shares: 'Shares',
+    journal: 'Journal',
+    invoices: 'Invoices',
+    myStatement: 'My statement',
+    officerConsole: 'Officer console',
+    contribution: 'Contribution',
+    members: 'Members',
+    cycle: 'Cycle',
+    frequency: 'Frequency',
+    everyDays: 'Every {days} days',
+    startDate: 'Start date',
+    notSet: 'Not set',
+    creditSnapshot: 'Your credit snapshot',
+    womensCircle: 'Women’s circle',
+    bodaStage: 'Boda / tuktuk stage',
+    womensBlurb: 'Community gatekeeping and welfare support for women’s savings circles.',
+    bodaBlurb: 'Stage-based savings with welfare emphasis for riders and operators.',
   },
   install: {
     title: 'Add Amanah to your device',
@@ -405,6 +610,7 @@ export const sw: Dictionary = {
     viewAll: 'Angalia zote',
     createCircle: 'Unda mduara',
     backToDashboard: 'Rudi dashibodi',
+    home: 'Nyumbani',
     members: 'wanachama',
     cycle: 'Mzunguko',
     starts: 'Inaanza',
@@ -557,6 +763,28 @@ export const sw: Dictionary = {
     historyEmpty:
       'Bado hakuna rekodi. Ongezeko, michango, na malipo yataonekana hapa.',
   },
+  walletForms: {
+    amount: 'Kiasi ({currency})',
+    mpesaPhone: 'Simu ya M-Pesa',
+    paystackHint:
+      'Lipa kwa Paystack Checkout (kadi, M-Pesa, benki). Utaelekezwa kukamilisha malipo salama.',
+    bankHint: 'Ongezeko la benki linaunda ombi linalosubiri kuthibitishwa katika mtiririko wa benki.',
+    simulatedHint:
+      'Salio la majaribio papo hapo (bila M-Pesa). Tumia kulipa michango, kujaza hazina, na kulipa mikopo wakati wa majaribio.',
+    processing: 'Inashughulikia…',
+    payMpesa: 'Lipa kwa M-Pesa',
+    payPaystack: 'Lipa kwa Paystack',
+    startBank: 'Anza ongezeko la benki',
+    topUpWallet: 'Ongeza pesa kwenye pochi',
+    bank: 'Benki',
+    bankName: 'Jina la benki',
+    accountName: 'Jina la akaunti',
+    accountNumber: 'Nambari ya akaunti',
+    submitting: 'Inawasilisha…',
+    requestWithdrawal: 'Omba kutoa pesa',
+    retry: 'Jaribu tena',
+    retrying: 'Inajaribu tena…',
+  },
   finance: {
     eyebrow: 'Fedha za mduara',
     title: 'Fedha',
@@ -572,6 +800,87 @@ export const sw: Dictionary = {
     welfareOverview: 'Muhtasari wa ustawi',
     circleFallback: 'Mduara',
     noWelfare: 'Miduara yako bado haina hazina za ustawi.',
+  },
+  profile: {
+    eyebrow: 'Akaunti',
+    title: 'Wasifu',
+    subtitle: 'Weka taarifa zako sawa na wasilisha hati za KYC kwa ukaguzi wa uzingatiaji.',
+    personalDetails: 'Taarifa binafsi',
+    email: 'Barua pepe: {email}',
+    mpesaLinkage: 'Uunganishaji wa M-Pesa',
+    kycDocuments: 'Hati za KYC',
+    uploadedFiles: 'Faili zilizopakiwa',
+    noDocuments: 'Bado hakuna hati zilizopakiwa.',
+    fullName: 'Jina kamili',
+    phone: 'Simu',
+    countryCode: 'Msimbo wa nchi',
+    bio: 'Wasifu mfupi',
+    saving: 'Inahifadhi…',
+    saveProfile: 'Hifadhi wasifu',
+    mpesaNumber: 'Nambari ya M-Pesa',
+    mpesaHint: 'Hutumika kwa STK za ongezeko na foleni za kutoa malipo.',
+    linking: 'Inaunganisha…',
+    linkMpesa: 'Unganisha M-Pesa',
+    documentType: 'Aina ya hati',
+    fileHint: 'Faili (JPEG, PNG, WebP, au PDF · max 10MB)',
+    uploading: 'Inapakia…',
+    uploadDocument: 'Pakia hati',
+    nationalId: 'Kitambulisho cha taifa',
+    passport: 'Pasipoti',
+    drivingLicense: 'Leseni ya udereva',
+    proofOfAddress: 'Uthibitisho wa anwani',
+    selfie: 'Picha ya uso',
+    other: 'Nyingine',
+    referrals: 'Rufaa',
+    yourReferralCode: 'Msimbo wako wa rufaa',
+    copyCode: 'Nakili msimbo',
+    applySomeoneCode: 'Tumia msimbo wa mtu mwingine',
+    applying: 'Inatumia…',
+    apply: 'Tumia',
+    referralHint:
+      'Rufaa inastahiki baada ya mchango wako wa kwanza uliolipwa. Zawadi huwekwa alama na msimamizi.',
+  },
+  notificationsPage: {
+    eyebrow: 'Kikasha',
+    title: 'Arifa',
+    unreadOne: 'Ujumbe {count} haujasomwa',
+    unreadMany: 'Ujumbe {count} haujasomwa',
+    upToDate: 'Uko sawa.',
+    markAllRead: 'Weka zote kama zimesomwa',
+    markRead: 'Weka imesomwa',
+    emptyTitle: 'Bado hakuna arifa',
+    emptyDesc: 'Mialiko ya miduara, vikumbusho vya michango, na sasisho za malipo vitaonekana hapa.',
+  },
+  support: {
+    eyebrow: 'Saidia Amanah kukua',
+    title: 'Saidia jukwaa la Amanah',
+    body: 'Hii ni tipu ya hiari kuendeleza teknolojia, msaada, na shughuli za jamii za Amanah. Si sadaka na haifadhili kampeni ya hisani.',
+    tipLabel: 'Tipu ya jukwaa (KES)',
+    phoneOptional: 'Simu (si lazima)',
+    submit: 'Saidia Amanah',
+  },
+  circle: {
+    meetingsChat: 'Mikutano na gumzo',
+    elections: 'Uchaguzi',
+    circleKyc: 'KYC ya mduara',
+    treasury: 'Hazina',
+    shares: 'Hisa',
+    journal: 'Jarida',
+    invoices: 'Ankara',
+    myStatement: 'Taarifa yangu',
+    officerConsole: 'Dashibodi ya ofisa',
+    contribution: 'Mchango',
+    members: 'Wanachama',
+    cycle: 'Mzunguko',
+    frequency: 'Marudio',
+    everyDays: 'Kila baada ya siku {days}',
+    startDate: 'Tarehe ya kuanza',
+    notSet: 'Haijawekwa',
+    creditSnapshot: 'Muhtasari wa mkopo wako',
+    womensCircle: 'Mduara wa wanawake',
+    bodaStage: 'Stage ya boda / tuktuk',
+    womensBlurb: 'Ulinzi wa jamii na msaada wa ustawi kwa miduara ya akiba ya wanawake.',
+    bodaBlurb: 'Akiba ya stage yenye msisitizo wa ustawi kwa waendesha na waendeshaji.',
   },
   install: {
     title: 'Ongeza Amanah kwenye kifaa chako',

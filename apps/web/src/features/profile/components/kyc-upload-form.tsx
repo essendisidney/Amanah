@@ -4,21 +4,22 @@ import { useActionState } from 'react';
 import { Alert, AlertDescription, Button, Label } from '@jamiya/ui';
 import { uploadKycDocumentAction } from '../actions/profile-actions';
 import { initialProfileActionState } from '../lib/state';
+import type { Dictionary } from '@/i18n/dictionaries';
 
-const DOCUMENT_TYPES = [
-  { value: 'national_id', label: 'National ID' },
-  { value: 'passport', label: 'Passport' },
-  { value: 'driving_license', label: 'Driving license' },
-  { value: 'proof_of_address', label: 'Proof of address' },
-  { value: 'selfie', label: 'Selfie' },
-  { value: 'other', label: 'Other' },
-] as const;
-
-export function KycUploadForm() {
+export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
   const [state, formAction, pending] = useActionState(
     uploadKycDocumentAction,
     initialProfileActionState,
   );
+
+  const documentTypes = [
+    { value: 'national_id', label: labels.nationalId },
+    { value: 'passport', label: labels.passport },
+    { value: 'driving_license', label: labels.drivingLicense },
+    { value: 'proof_of_address', label: labels.proofOfAddress },
+    { value: 'selfie', label: labels.selfie },
+    { value: 'other', label: labels.other },
+  ] as const;
 
   return (
     <div className="space-y-4">
@@ -30,7 +31,7 @@ export function KycUploadForm() {
 
       <form action={formAction} className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="documentType">Document type</Label>
+          <Label htmlFor="documentType">{labels.documentType}</Label>
           <select
             id="documentType"
             name="documentType"
@@ -38,7 +39,7 @@ export function KycUploadForm() {
             className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             defaultValue="national_id"
           >
-            {DOCUMENT_TYPES.map((item) => (
+            {documentTypes.map((item) => (
               <option key={item.value} value={item.value}>
                 {item.label}
               </option>
@@ -46,7 +47,7 @@ export function KycUploadForm() {
           </select>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="file">File (JPEG, PNG, WebP, or PDF · max 10MB)</Label>
+          <Label htmlFor="file">{labels.fileHint}</Label>
           <input
             id="file"
             name="file"
@@ -57,7 +58,7 @@ export function KycUploadForm() {
           />
         </div>
         <Button type="submit" disabled={pending}>
-          {pending ? 'Uploading…' : 'Upload document'}
+          {pending ? labels.uploading : labels.uploadDocument}
         </Button>
       </form>
     </div>

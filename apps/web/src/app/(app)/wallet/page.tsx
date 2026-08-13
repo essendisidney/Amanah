@@ -170,6 +170,7 @@ export default async function WalletPage({ searchParams }: Props) {
           <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
             <TopUpForm
               currency={primaryCurrency}
+              labels={dict.walletForms}
               provider={
                 ['mpesa', 'bank', 'paystack'].includes(
                   (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase(),
@@ -189,7 +190,7 @@ export default async function WalletPage({ searchParams }: Props) {
             {labels.withdraw}
           </h2>
           <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
-            <WithdrawalForm currency={primaryCurrency} />
+            <WithdrawalForm currency={primaryCurrency} labels={dict.walletForms} />
           </div>
         </section>
       </div>
@@ -244,7 +245,7 @@ export default async function WalletPage({ searchParams }: Props) {
                     {intent.error_message ? ` · ${intent.error_message}` : ''}
                   </p>
                 </div>
-                <RetryIntentButton intentId={intent.id} />
+                <RetryIntentButton intentId={intent.id} labels={dict.walletForms} />
               </li>
             ))}
           </ul>

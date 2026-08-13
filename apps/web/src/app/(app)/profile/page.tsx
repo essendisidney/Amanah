@@ -10,6 +10,7 @@ import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 import { ReferralPanel } from '@/features/profile/components/referral-panel';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -49,6 +50,7 @@ export default async function ProfilePage() {
   }
 
   const { dict } = await getDictionary();
+  const labels = dict.profile;
 
   const [{ data: profileData }, { data: docsData }, { data: referralData }] = await Promise.all([
     supabase
@@ -85,13 +87,13 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-10">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Account</p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-          Profile
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Keep your details current and submit KYC documents for compliance review.
+        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+          {labels.eyebrow}
         </p>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
+          {labels.title}
+        </h1>
+        <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <StatusBadge status={profile?.platform_role ?? 'member'} />
           <StatusBadge status={profile?.kyc_status ?? 'not_started'} />
@@ -104,12 +106,13 @@ export default async function ProfilePage() {
       <section className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-            Personal details
+            {labels.personalDetails}
           </h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Email: {profile?.email ?? user.email ?? '—'}
+            {t(labels.email, { email: profile?.email ?? user.email ?? '—' })}
           </p>
           <ProfileForm
+            labels={labels}
             defaultValues={{
               fullName: profile?.full_name ?? '',
               phone: profile?.phone ?? '',
@@ -121,27 +124,34 @@ export default async function ProfilePage() {
 
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-            M-Pesa linkage
+            {labels.mpesaLinkage}
           </h2>
-          <MpesaLinkForm defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''} />
+          <MpesaLinkForm
+            labels={labels}
+            defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
+          />
         </div>
 
-        <ReferralPanel referralCode={profile?.referral_code ?? null} referrals={referrals} />
+        <ReferralPanel
+          labels={labels}
+          referralCode={profile?.referral_code ?? null}
+          referrals={referrals}
+        />
 
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-              KYC documents
+              {labels.kycDocuments}
             </h2>
-            <KycUploadForm />
+            <KycUploadForm labels={labels} />
           </div>
 
           <div className="rounded-xl border border-border bg-card p-6">
             <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-              Uploaded files
+              {labels.uploadedFiles}
             </h2>
             {docs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+              <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
             ) : (
               <ul className="divide-y divide-border">
                 {docs.map((doc) => (

@@ -6,10 +6,17 @@ import {
   retryPaymentIntentAction,
   type WalletActionState,
 } from '../actions/wallet-actions';
+import type { Dictionary } from '@/i18n/dictionaries';
 
 const initial: WalletActionState = { success: false, message: '' };
 
-export function RetryIntentButton({ intentId }: { intentId: string }) {
+export function RetryIntentButton({
+  intentId,
+  labels,
+}: {
+  intentId: string;
+  labels: Pick<Dictionary['walletForms'], 'retry' | 'retrying'>;
+}) {
   const [state, action, pending] = useActionState(
     async (_prev: WalletActionState, formData: FormData) =>
       retryPaymentIntentAction(_prev, formData),
@@ -20,7 +27,7 @@ export function RetryIntentButton({ intentId }: { intentId: string }) {
     <form action={action} className="space-y-2">
       <input type="hidden" name="intentId" value={intentId} />
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? 'Retrying…' : 'Retry'}
+        {pending ? labels.retrying : labels.retry}
       </Button>
       {state.message ? (
         <p className={`text-xs ${state.success ? 'text-primary' : 'text-destructive'}`}>
