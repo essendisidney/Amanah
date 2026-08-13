@@ -1,8 +1,12 @@
 ﻿import Link from 'next/link';
-import { APP_DESCRIPTION, APP_NAME, APP_TAGLINE } from '@jamiya/shared';
+import { APP_NAME } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { LanguageSwitcher } from '@/i18n/language-switcher';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { locale, dict } = await getDictionary();
+
   return (
     <div className="relative min-h-dvh overflow-hidden">
       <div
@@ -23,44 +27,45 @@ export default function LandingPage() {
           {APP_NAME}
         </span>
         <nav className="flex items-center gap-3">
+          <LanguageSwitcher locale={locale} label={dict.common.language} />
           <Button variant="ghost" asChild>
-            <Link href="/sadaka">Sadaka</Link>
+            <Link href="/sadaka">{dict.common.sadaka}</Link>
           </Button>
           <Button variant="ghost" asChild>
-            <Link href="/phone">Sign in</Link>
+            <Link href="/phone">{dict.common.signIn}</Link>
           </Button>
           <Button asChild>
-            <Link href="/phone">Get started</Link>
+            <Link href="/phone">{dict.common.getStarted}</Link>
           </Button>
         </nav>
       </header>
 
       <main className="relative z-10 mx-auto flex min-h-[calc(100dvh-5.5rem)] w-full max-w-6xl flex-col justify-center px-6 pb-24 pt-8">
         <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-accent">
-          {APP_TAGLINE}
+          {dict.brand.tagline}
         </p>
         <h1 className="max-w-3xl font-[family-name:var(--font-display)] text-5xl font-semibold leading-[1.08] tracking-tight text-foreground md:text-7xl">
           {APP_NAME}
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-          {APP_DESCRIPTION}
+          {dict.brand.description}
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-4">
           <Button size="lg" asChild>
-            <Link href="/phone">Start with phone</Link>
+            <Link href="/phone">{dict.landing.startWithPhone}</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/phone">Join your circle</Link>
+            <Link href="/phone">{dict.landing.joinCircle}</Link>
           </Button>
         </div>
         <p className="mt-4 text-sm text-muted-foreground">
-          Prefer email?{' '}
+          {dict.landing.preferEmail}{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            {dict.common.signIn}
           </Link>
           {' · '}
           <Link href="/register" className="font-medium text-primary hover:underline">
-            Create account
+            {dict.landing.createAccount}
           </Link>
         </p>
       </main>

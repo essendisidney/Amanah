@@ -35,6 +35,10 @@ export async function requestQardAction(formData: FormData): Promise<FinanceActi
   const amount = Number(formData.get('amount'));
   const purpose = String(formData.get('purpose') ?? '').trim();
   const installments = Number(formData.get('installments') ?? 4);
+  const guarantorUserIds = formData
+    .getAll('guarantorUserIds')
+    .map((value) => String(value).trim())
+    .filter((value) => value.length > 0);
   if (!jamiyaId || !Number.isFinite(amount) || purpose.length < 5) {
     return { success: false, message: 'Select a circle and provide a valid amount and purpose.' };
   }
@@ -43,11 +47,18 @@ export async function requestQardAction(formData: FormData): Promise<FinanceActi
     p_amount: amount,
     p_purpose: purpose,
     p_installments: installments,
+    p_guarantor_user_ids: guarantorUserIds.length ? guarantorUserIds : null,
   });
   if (error) return { success: false, message: error.message };
   const state = rpcState(data, 'Could not submit Qard request.');
   if (state.success) {
-    state.message = 'Qard request submitted.';
+    const nominated = Number(
+      (data as { guarantors_nominated?: number } | null)?.guarantors_nominated ?? 0,
+    );
+    state.message =
+      nominated > 0
+        ? `Qard request submitted with ${nominated} guarantee request${nominated === 1 ? '' : 's'}.`
+        : 'Qard request submitted.';
     revalidatePath('/finance/qard');
   }
   return state;
@@ -243,6 +254,10 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
     const code = (data as { error?: string } | null)?.error;
     if (code === 'AGREEMENT_REQUIRED') {
       state.message = 'Borrower must accept the facility agreement first.';
+    } else if (code === 'GUARANTEES_PENDING') {
+      state.message = 'Wait until nominated guarantors accept or decline.';
+    } else if (code === 'GUARANTEE_REQUIRED') {
+      state.message = 'At least one accepted guarantor is required for this request.';
     }
   }
   if (state.success) {
@@ -251,6 +266,52 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
     revalidatePath('/wallet');
   }
   return state;
+}
+
+export async function respondQardGuaranteeAction(
+  formData: FormData,
+): Promise<FinanceActionState> {
+  const guaranteeId = String(formData.get('guaranteeId') ?? '');
+  const accept = String(formData.get('accept') ?? '') === 'true';
+  const notes = String(formData.get('notes') ?? '').trim();
+  if (!guaranteeId) return { success: false, message: 'Missing guarantee request.' };
+  const { data, error } = await callRpc('respond_qard_guarantee', {
+    p_guarantee_id: guaranteeId,
+    p_accept: accept,
+    p_notes: notes || null,
+  });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not respond to guarantee request.');
+  if (state.success) {
+    state.message = accept ? 'You are now a guarantor on this loan.' : 'Guarantee declined.';
+    revalidatePath('/finance/qard');
+  }
+  return state;
+}
+
+export async function respondQardGuaranteeFormAction(formData: FormData): Promise<void> {
+  const state = await respondQardGuaranteeAction(formData);
+  finishCircleFinance(formData, state);
+}
+
+export async function markQardDefaultedAction(
+  formData: FormData,
+): Promise<FinanceActionState> {
+  const loanId = String(formData.get('loanId') ?? '');
+  if (!loanId) return { success: false, message: 'Missing loan.' };
+  const { data, error } = await callRpc('mark_qard_defaulted', { p_loan_id: loanId });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not mark loan defaulted.');
+  if (state.success) {
+    state.message = 'Loan marked defaulted; accepted guarantors were notified.';
+    revalidatePath('/finance/qard');
+  }
+  return state;
+}
+
+export async function markQardDefaultedFormAction(formData: FormData): Promise<void> {
+  const state = await markQardDefaultedAction(formData);
+  finishCircleFinance(formData, state);
 }
 
 export async function decideQardFormAction(formData: FormData): Promise<void> {

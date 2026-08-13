@@ -22,6 +22,8 @@ export function mapMoneyError(code: string | undefined | null): string {
     NOT_FOUND: 'That item was not found.',
     UNAUTHENTICATED: 'Sign in again, then retry.',
     AGREEMENT_REQUIRED: 'Borrower must accept the facility agreement first.',
+    GUARANTEES_PENDING: 'Wait until nominated guarantors accept or decline.',
+    GUARANTEE_REQUIRED: 'At least one accepted guarantor is required for this request.',
   };
   if (!code) return 'Something went wrong. Please try again.';
   if (messages[code]) return messages[code];
