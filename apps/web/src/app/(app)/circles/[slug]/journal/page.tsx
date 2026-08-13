@@ -77,6 +77,9 @@ export default async function CircleJournalPage({ params }: Props) {
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
           </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/invoices` as Route}>Invoices</Link>
+          </Button>
           <PrintReportButton />
         </div>
       </div>

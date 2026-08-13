@@ -148,6 +148,9 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
           </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/invoices` as Route}>Invoices</Link>
+          </Button>
         </div>
       </div>
 
