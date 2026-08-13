@@ -31,7 +31,8 @@ export function mapMoneyError(code: string | undefined | null): string {
     GUARANTEE_REQUIRED: 'At least one accepted guarantor is required for this request.',
   };
   if (!code) return 'Something went wrong. Please try again.';
-  if (messages[code]) return messages[code];
+  const mapped = messages[code];
+  if (mapped) return mapped;
   if (code.toLowerCase().includes('insufficient')) {
     return messages.INSUFFICIENT_FUNDS;
   }
