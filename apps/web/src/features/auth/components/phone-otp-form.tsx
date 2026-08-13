@@ -110,14 +110,16 @@ export function PhoneOtpForm({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: rawPhone, otp: trimmed }),
+        credentials: 'same-origin',
       });
       const json = (await res.json().catch(() => ({}))) as {
         success?: boolean;
         error?: unknown;
+        cookies_set?: boolean;
         access_token?: string;
         refresh_token?: string;
       };
-      if (!res.ok || !json.success || !json.access_token || !json.refresh_token) {
+      if (!res.ok || !json.success) {
         setError(readApiError(json, 'Invalid or expired code. Request a new one.'));
         // Prevent auto-retry loops on the same failed code.
         lastVerifiedToken.current = trimmed;
@@ -126,21 +128,45 @@ export function PhoneOtpForm({
 
       lastVerifiedToken.current = trimmed;
 
-      const supabase = createClient();
-      const { error: sessionError } = await supabase.auth.setSession({
-        access_token: json.access_token,
-        refresh_token: json.refresh_token,
-      });
-      if (sessionError) {
-        setError(sessionError.message || 'Signed in, but session failed. Try again.');
-        lastVerifiedToken.current = null;
-        return false;
+      // Server should have Set-Cookie'd the session. Fall back to client setSession
+      // when cookies were not written (older deploys / restricted cookie contexts).
+      if (!json.cookies_set) {
+        if (!json.access_token || !json.refresh_token) {
+          setError('Signed in, but session cookies were missing. Try again.');
+          lastVerifiedToken.current = null;
+          return false;
+        }
+        try {
+          const supabase = createClient();
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: json.access_token,
+            refresh_token: json.refresh_token,
+          });
+          if (sessionError) {
+            setError(sessionError.message || 'Signed in, but session failed. Try again.');
+            lastVerifiedToken.current = null;
+            return false;
+          }
+        } catch (sessionErr) {
+          const msg =
+            sessionErr instanceof Error && sessionErr.message
+              ? sessionErr.message
+              : 'Signed in, but session failed. Try again.';
+          setError(msg);
+          lastVerifiedToken.current = null;
+          return false;
+        }
       }
+
       router.replace(next);
       router.refresh();
       return true;
-    } catch {
-      setError('Something went wrong. Please try again.');
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.message.trim()
+          ? err.message.trim()
+          : 'Something went wrong. Please try again.';
+      setError(msg);
       return false;
     } finally {
       verifyingRef.current = false;

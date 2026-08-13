@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isValidKeMobile, normalizePhone254 } from '@jamiya/shared';
+import { createClient as createCookieClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -131,7 +132,9 @@ async function createSessionForEmail(
 
 export async function POST(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  // Prefer legacy JWT anon for Auth /verify; publishable keys are fine as fallback.
   const anon =
+    process.env.SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -144,8 +147,12 @@ export async function POST(req: NextRequest) {
 
   const releaseOtp = async () => {
     if (!claimedOtpId) return;
-    await admin.from('otp_codes').update({ used: false }).eq('id', claimedOtpId);
+    const id = claimedOtpId;
     claimedOtpId = null;
+    const { error } = await admin.from('otp_codes').update({ used: false }).eq('id', id);
+    if (error) {
+      console.error('[auth/phone/verify] otp release', error);
+    }
   };
 
   try {
@@ -325,9 +332,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: session.error }, { status: 500 });
     }
 
+    // Persist auth cookies on the response so the browser does not rely on
+    // client-only setSession (which can throw in some WebViews / PWA shells).
+    let cookiesSet = false;
+    try {
+      const cookieClient = await createCookieClient();
+      const { error: cookieErr } = await cookieClient.auth.setSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+      if (cookieErr) {
+        console.error('[auth/phone/verify] cookie session', cookieErr);
+      } else {
+        cookiesSet = true;
+      }
+    } catch (cookieSetErr) {
+      console.error('[auth/phone/verify] cookie session threw', cookieSetErr);
+    }
+
     claimedOtpId = null;
     return NextResponse.json({
       success: true,
+      cookies_set: cookiesSet,
       access_token: session.access_token,
       refresh_token: session.refresh_token,
       expires_in: session.expires_in,
@@ -336,8 +362,13 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error('[auth/phone/verify]', err);
     await releaseOtp();
+    const detail = err instanceof Error ? err.message : null;
     return NextResponse.json(
-      { error: 'Something went wrong. Please try again.' },
+      {
+        error: detail && detail.length < 180
+          ? detail
+          : 'Something went wrong. Please try again.',
+      },
       { status: 500 },
     );
   }
