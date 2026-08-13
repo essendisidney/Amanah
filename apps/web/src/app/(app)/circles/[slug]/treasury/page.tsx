@@ -58,6 +58,7 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
     { data: invData },
     { data: membersData },
     { data: entriesData },
+    { data: alertsData },
   ] = await Promise.all([
     callRpc('treasury_snapshot', { p_jamiya_id: jamiya.id }),
     supabase
@@ -96,6 +97,14 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
       .eq('jamiya_id', jamiya.id)
       .order('effective_date', { ascending: false })
       .limit(30),
+    canManage
+      ? supabase
+          .from('circle_bank_alerts')
+          .select('id, provider, amount, currency, direction, status, alert_text, created_at')
+          .eq('jamiya_id', jamiya.id)
+          .order('created_at', { ascending: false })
+          .limit(15)
+      : Promise.resolve({ data: [] as never[] }),
   ]);
 
   const snap = snapData as Record<string, unknown> | null;
@@ -155,7 +164,10 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
             <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/report` as Route}>Reports</Link>
+            <Link href={`/circles/${slug}/shares` as Route}>Shares</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
           </Button>
           {canManage ? (
             <form action={ensureTreasuryAction}>
@@ -218,6 +230,16 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           currency: String(e.currency),
           effectiveDate: String(e.effective_date),
           notes: (e.notes as string | null) ?? null,
+        }))}
+        bankAlerts={((alertsData ?? []) as Array<Record<string, unknown>>).map((a) => ({
+          id: String(a.id),
+          provider: String(a.provider),
+          amount: a.amount == null ? null : Number(a.amount),
+          currency: String(a.currency),
+          direction: (a.direction as string | null) ?? null,
+          status: String(a.status),
+          alertText: (a.alert_text as string | null) ?? null,
+          createdAt: String(a.created_at),
         }))}
       />
     </div>

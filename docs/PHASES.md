@@ -141,10 +141,20 @@ See `docs/PHASE_14.md`.
 
 See `docs/CHAMASOFT_PARITY.md`.
 
+## Chamasoft GL + shares (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| G1 | `circle_gl_pack` income / cash flow / balance sheet on report | Complete |
+| G2 | Share capital lots + par value | Complete |
+| G3 | Pro‑rata dividend allocation | Complete |
+| G4 | Bank SMS alert queue scaffold | Complete |
+| G5 | Expo `eas.json` Android preview/production profiles | Complete |
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
-- Expo Router / EAS store packaging
-- Full GL / formal balance-sheet PDF pack; bank SMS auto-reconcile; share capital/dividends
+- Expo Router + EAS project id / Play submit credentials
+- Bank SMS auto-match; dividend wallet payout; audited PDF templates
