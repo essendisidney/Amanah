@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
+import { dispatchSmsOutboxViaTaifa } from '@/lib/notifications/dispatch-sms-taifa';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * Vercel Cron → Supabase Edge fan-out.
+ * Vercel Cron → local Taifa SMS + Supabase Edge fan-out.
  * Auth: Bearer CRON_SECRET, or Vercel cron header + CRON_SECRET query.
  */
 async function invokeEdge(fn: string, cronSecret: string) {
@@ -51,6 +52,9 @@ export async function GET(request: Request) {
       results.reminders = await invokeEdge('reminders', secret);
     }
     if (job === 'all' || job === 'notify') {
+      // SMS uses the same Taifa keys as phone OTP (Vercel env).
+      results.notify_sms_taifa = await dispatchSmsOutboxViaTaifa(50);
+      // Edge still handles email / WhatsApp / push (and SMS fallback if any remain).
       results.notify = await invokeEdge('notify-dispatch', secret);
     }
     if (job === 'all' || job === 'collections') {
