@@ -91,22 +91,14 @@ export async function POST(request: Request) {
   }
 
   if (provider === 'paystack') {
-    const email =
-      user.email
-      ?? (body.phone ? `${body.phone.replace(/^\+/, '')}@amanah.paystack.local` : null);
-    if (!email) {
-      return NextResponse.json(
-        { ok: false, error: 'EMAIL_REQUIRED', intent_id: created.intent_id },
-        { status: 400 },
-      );
-    }
     const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
     const init = await initializePaystackTransaction({
       intentId: created.intent_id,
       amount: body.amount,
       currency: (body.currency ?? 'KES').toUpperCase(),
-      email,
-      phone: body.phone ?? null,
+      email: user.email,
+      phone: body.phone ?? user.phone ?? null,
+      userId: user.id,
       metadata: { kind: 'wallet_top_up', source: 'api_v1' },
     });
     if (!init.ok) {

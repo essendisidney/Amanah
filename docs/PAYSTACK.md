@@ -38,6 +38,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 Use Paystack test cards / test mobile money from their docs. Amounts are sent in subunits (KES × 100).
 
+Phone OTP accounts use synthetic emails (`…@amanah.internal`). Paystack rejects those, so Amanah maps them to `{phoneDigits}@customers.amanah.app` (or `user-{id}@…`) before Checkout initialize.
+
 ## Schema
 
 `supabase/migrations/20260813190000_paystack_payment_provider.sql` adds enum value `paystack`.

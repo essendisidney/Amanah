@@ -135,25 +135,14 @@ async function initiateAndSettleCharityPayment(input: {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const email =
-      user?.email
-      ?? (input.phone
-        ? `${input.phone.replace(/^\+/, '')}@amanah.paystack.local`
-        : null);
-    if (!email) {
-      return {
-        success: false,
-        message: 'Paystack needs a signed-in account email (or phone).',
-        intentId: created.intent_id,
-      };
-    }
     const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
     const init = await initializePaystackTransaction({
       intentId: created.intent_id,
       amount: input.amount,
       currency: 'KES',
-      email,
-      phone: input.phone || null,
+      email: user?.email,
+      phone: input.phone || user?.phone || null,
+      userId: user?.id,
       callbackPath: '/api/payments/paystack/callback',
       metadata: { kind: input.kind, ...input.metadata },
     });

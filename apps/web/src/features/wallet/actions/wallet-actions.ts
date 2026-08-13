@@ -162,24 +162,15 @@ export async function topUpWalletAction(
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const email =
-      user?.email
-      ?? (phone ? `${phone.replace(/^\+/, '')}@amanah.paystack.local` : null);
-    if (!email) {
-      return {
-        success: false,
-        message: 'Paystack needs a signed-in account email (or phone).',
-        intentId: created.intent_id,
-      };
-    }
 
     const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
     const init = await initializePaystackTransaction({
       intentId: created.intent_id,
       amount,
       currency,
-      email,
-      phone: phone || null,
+      email: user?.email,
+      phone: phone || user?.phone || null,
+      userId: user?.id,
       metadata: { kind: 'wallet_top_up' },
     });
     if (!init.ok) {
@@ -290,24 +281,13 @@ export async function retryPaymentIntentAction(
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const email =
-      user?.email
-      ?? (created.phone
-        ? `${String(created.phone).replace(/^\+/, '')}@amanah.paystack.local`
-        : null);
-    if (!email) {
-      return {
-        success: false,
-        message: 'Paystack retry needs an account email.',
-        intentId: created.intent_id,
-      };
-    }
     const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
     const init = await initializePaystackTransaction({
       intentId: created.intent_id,
       amount: Number(created.amount ?? 0),
-      email,
-      phone: created.phone ?? null,
+      email: user?.email,
+      phone: created.phone ?? user?.phone ?? null,
+      userId: user?.id,
       metadata: { kind: 'wallet_top_up', retry: true },
     });
     if (!init.ok) {

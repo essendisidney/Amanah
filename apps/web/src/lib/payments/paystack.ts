@@ -55,6 +55,46 @@ export function toPaystackAmount(amount: number): number {
   return Math.round(Number(amount) * 100);
 }
 
+/**
+ * Paystack rejects phone-OTP synthetic emails (`*@amanah.internal`) and `.local`.
+ * Map those to a valid customer email while keeping phone in metadata.
+ */
+export function resolvePaystackCustomerEmail(input: {
+  email?: string | null;
+  phone?: string | null;
+  userId?: string | null;
+}): string | null {
+  const candidate = (input.email ?? '').trim().toLowerCase();
+  if (candidate && isPaystackAcceptableEmail(candidate)) {
+    return candidate;
+  }
+
+  const phoneDigits = (input.phone ?? '').replace(/\D/g, '');
+  if (phoneDigits.length >= 9) {
+    return `${phoneDigits}@customers.amanah.app`;
+  }
+
+  const internalMatch = candidate.match(/^(\d{9,15})@amanah\.internal$/);
+  if (internalMatch) {
+    return `${internalMatch[1]}@customers.amanah.app`;
+  }
+
+  const userId = (input.userId ?? '').replace(/-/g, '');
+  if (userId.length >= 8) {
+    return `user-${userId.slice(0, 16)}@customers.amanah.app`;
+  }
+
+  return null;
+}
+
+function isPaystackAcceptableEmail(email: string): boolean {
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) return false;
+  if (email.endsWith('.internal') || email.endsWith('.local')) return false;
+  if (email.includes('@amanah.internal')) return false;
+  if (email.includes('@amanah.paystack.local')) return false;
+  return true;
+}
+
 export function verifyPaystackSignature(rawBody: string, signature: string | null): boolean {
   const key = secretKey();
   if (!key || !signature) return false;
@@ -72,13 +112,26 @@ export async function initializePaystackTransaction(input: {
   intentId: string;
   amount: number;
   currency?: string;
-  email: string;
+  email?: string | null;
   phone?: string | null;
+  userId?: string | null;
   callbackPath?: string;
   metadata?: Record<string, unknown>;
 }): Promise<PaystackInitResult> {
   const key = secretKey();
   if (!key) return { ok: false, error: 'PAYSTACK_SECRET_KEY is not configured.' };
+
+  const email = resolvePaystackCustomerEmail({
+    email: input.email,
+    phone: input.phone,
+    userId: input.userId,
+  });
+  if (!email) {
+    return {
+      ok: false,
+      error: 'A valid customer email or phone is required for Paystack.',
+    };
+  }
 
   const reference = paystackReferenceForIntent(input.intentId);
   const callbackUrl = `${appBaseUrl()}${input.callbackPath ?? '/api/payments/paystack/callback'}`;
@@ -90,7 +143,7 @@ export async function initializePaystackTransaction(input: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      email: input.email,
+      email,
       amount: toPaystackAmount(input.amount),
       currency: (input.currency ?? 'KES').toUpperCase(),
       reference,
