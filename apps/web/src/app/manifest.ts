@@ -8,14 +8,17 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: APP_NAME,
     description: APP_DESCRIPTION,
     lang: 'en',
-    start_url: '/dashboard?source=pwa',
+    // Prefer an always-public entry so Android Chrome install criteria stay green
+    // even when the session cookie is missing on first launch from the home screen.
+    start_url: '/?source=pwa',
     scope: '/',
     display: 'standalone',
     display_override: ['standalone', 'minimal-ui'],
-    orientation: 'portrait-primary',
+    orientation: 'any',
     background_color: '#fbfcfa',
     theme_color: '#047857',
     categories: ['finance', 'business'],
+    prefer_related_applications: false,
     icons: [
       {
         src: '/icons/icon-192.png',

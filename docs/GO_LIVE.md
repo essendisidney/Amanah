@@ -70,6 +70,16 @@ Repo currently deploys via Vercel CLI. For git-based deploys:
 3. `git push -u origin master`
 4. Vercel → Project → Settings → Git → Connect repository
 
-## 5. Smoke test
+## 5. Android install (members)
+
+Prefer the **PWA** on Chrome — not Expo Go — for real Android phones:
+
+1. Open https://amanah-liart.vercel.app in **Chrome** (not WhatsApp/Facebook in-app browsers).
+2. Menu (⋮) → **Install app** or **Add to Home screen**.
+3. If Install is missing, browse a few pages over HTTPS and retry; Chrome withholds the prompt until engagement heuristics pass.
+
+Expo Go remains for engineers only (SDK 53 sandbox). Play Store / EAS APK packaging is still deferred — see `apps/mobile/README.md`.
+
+## 6. Smoke test
 
 See [SMOKE_TEST.md](./SMOKE_TEST.md).

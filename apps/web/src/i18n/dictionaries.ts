@@ -176,6 +176,15 @@ export type Dictionary = {
     circleFallback: string;
     noWelfare: string;
   };
+  install: {
+    title: string;
+    detailNative: string;
+    detailIos: string;
+    detailAndroid: string;
+    install: string;
+    opening: string;
+    notNow: string;
+  };
 };
 
 export const en: Dictionary = {
@@ -363,6 +372,16 @@ export const en: Dictionary = {
     welfareOverview: 'Welfare overview',
     circleFallback: 'Circle',
     noWelfare: 'Your circles have no welfare funds yet.',
+  },
+  install: {
+    title: 'Add Amanah to your device',
+    detailNative: 'Install Amanah for quick access on your phone or desktop.',
+    detailIos: 'Share → Add to Home Screen for one-tap access to your circles and wallet.',
+    detailAndroid:
+      'Chrome may hide Install until you visit a few times. Use the menu (⋮) → Install app or Add to Home screen. Open in Chrome (not in-app browsers).',
+    install: 'Install',
+    opening: 'Opening…',
+    notNow: 'Not now',
   },
 };
 
@@ -553,6 +572,17 @@ export const sw: Dictionary = {
     welfareOverview: 'Muhtasari wa ustawi',
     circleFallback: 'Mduara',
     noWelfare: 'Miduara yako bado haina hazina za ustawi.',
+  },
+  install: {
+    title: 'Ongeza Amanah kwenye kifaa chako',
+    detailNative: 'Sakinisha Amanah kwa ufikiaji wa haraka kwenye simu au kompyuta.',
+    detailIos:
+      'Shiriki → Ongeza kwenye Skrini ya Nyumbani kwa kufungua miduara na pochi kwa mguso mmoja.',
+    detailAndroid:
+      'Chrome inaweza kuficha Sakinisha hadi utembelee mara kadhaa. Tumia menyu (⋮) → Sakinisha programu au Ongeza kwenye skrini ya nyumbani. Fungua katika Chrome (si kivinjari cha ndani ya programu).',
+    install: 'Sakinisha',
+    opening: 'Inafungua…',
+    notNow: 'Si sasa',
   },
 };
 
