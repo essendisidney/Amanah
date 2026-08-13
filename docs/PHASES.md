@@ -128,9 +128,23 @@ See `docs/PHASE_13.md`.
 
 See `docs/PHASE_14.md`.
 
+## Chamasoft-style treasury (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| T1 | Circle bank/cash accounts + income/expense categories | Complete |
+| T2 | Cashbook RPC + treasury UI `/circles/[slug]/treasury` | Complete |
+| T3 | Fine categories + levy onto member statement | Complete |
+| T4 | Investments/projects tracking | Complete |
+| T5 | Member statement + report pack summaries | Complete |
+| T6 | CSV backdating import UI | Complete |
+
+See `docs/CHAMASOFT_PARITY.md`.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router / EAS store packaging
+- Full GL / formal balance-sheet PDF pack; bank SMS auto-reconcile; share capital/dividends

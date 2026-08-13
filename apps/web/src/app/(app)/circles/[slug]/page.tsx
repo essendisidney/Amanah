@@ -648,6 +648,12 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/registration` as Route}>Circle KYC</Link>
           </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
+          </Button>
           {canManageMembers ? (
             <Button asChild variant="outline" size="sm">
               <Link href={`/circles/${slug}/officer` as Route}>Officer console</Link>
