@@ -2,6 +2,14 @@
 
 Phase 13 client: Home, Circles, Dues, **Wallet**, **Finance**, **Officer**, Invites, KYC — backed by `/api/v1`.
 
+## Android install — what to use
+
+| Audience | Path | Notes |
+|----------|------|--------|
+| Members / field testers | **Web PWA** at https://amanah-liart.vercel.app | Open in **Chrome** → menu (⋮) → **Install app** / **Add to Home screen**. |
+| Engineers | This Expo app via **Expo Go** (SDK 53) | Sandbox limits apply. |
+| Store APK / AAB | Scaffolded | `eas.json` (`preview` APK, `production` AAB). Needs Expo/EAS login + Play Console. |
+
 ## Setup
 
 ```bash
@@ -12,7 +20,7 @@ pnpm install
 pnpm start
 ```
 
-For production API base use your Vercel URL, e.g. `https://amanah-liart.vercel.app`.
+For a **physical Android device**, do not leave the API on `127.0.0.1`. Use production `https://amanah-liart.vercel.app` or `npx expo start --tunnel`.
 
 ### API surface used
 
@@ -24,3 +32,14 @@ For production API base use your Vercel URL, e.g. `https://amanah-liart.vercel.a
 | Officer | `GET\|POST /api/v1/circles/[id]/officer` |
 
 Top-up follows web `PAYMENT_PROVIDER` (`simulated` or `bank`). Live Daraja remains deferred.
+
+## EAS / Play Store (scaffold)
+
+```bash
+cd apps/mobile
+npx eas-cli login
+npx eas build -p android --profile preview   # internal APK
+npx eas build -p android --profile production # Play AAB
+```
+
+Requires an Expo project id in `app.json` (`extra.eas.projectId`) and Google Play credentials for submit.

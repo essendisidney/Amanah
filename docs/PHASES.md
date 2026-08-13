@@ -128,9 +128,49 @@ See `docs/PHASE_13.md`.
 
 See `docs/PHASE_14.md`.
 
+## Chamasoft-style treasury (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| T1 | Circle bank/cash accounts + income/expense categories | Complete |
+| T2 | Cashbook RPC + treasury UI `/circles/[slug]/treasury` | Complete |
+| T3 | Fine categories + levy onto member statement | Complete |
+| T4 | Investments/projects tracking | Complete |
+| T5 | Member statement + report pack summaries | Complete |
+| T6 | CSV backdating import UI | Complete |
+
+See `docs/CHAMASOFT_PARITY.md`.
+
+## Chamasoft GL + shares (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| G1 | `circle_gl_pack` income / cash flow / balance sheet on report | Complete |
+| G2 | Share capital lots + par value | Complete |
+| G3 | Pro‑rata dividend allocation | Complete |
+| G4 | Bank SMS alert queue scaffold | Complete |
+| G5 | Expo `eas.json` Android preview/production profiles | Complete |
+
+## Chamasoft settle + match (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| S1 | Pay dividends to member wallets from circle cash | Complete |
+| S2 | Auto-match bank alerts to cashbook | Complete |
+| S3 | Debit/credit journal view | Complete |
+
+## Chamasoft invoices + bank webhooks (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| I1 | Contribution invoices + remind RPC + `/circles/[slug]/invoices` | Complete |
+| I2 | Bank alert webhook (`/api/webhooks/bank-alerts`) + SMS parsers | Complete |
+| I3 | `ingest_bank_alert` for service_role / officers | Complete |
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
-- Expo Router / EAS store packaging
+- Expo Router + EAS project id / Play submit credentials
+- Carrier-specific SMS adapters; audited PDF templates

@@ -161,6 +161,36 @@ export default async function OfficerConsolePage({ params }: Props) {
             Community
           </Link>
           <Link
+            href={`/circles/${slug}/treasury` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            Treasury
+          </Link>
+          <Link
+            href={`/circles/${slug}/shares` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            Shares
+          </Link>
+          <Link
+            href={`/circles/${slug}/journal` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            Journal
+          </Link>
+          <Link
+            href={`/circles/${slug}/invoices` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            Invoices
+          </Link>
+          <Link
+            href={`/circles/${slug}/statement` as Route}
+            className="rounded-md border border-border px-3 py-1.5 text-sm"
+          >
+            Statements
+          </Link>
+          <Link
             href={`/circles/${slug}/report` as Route}
             className="rounded-md border border-border px-3 py-1.5 text-sm"
           >
