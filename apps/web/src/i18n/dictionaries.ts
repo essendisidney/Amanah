@@ -14,6 +14,15 @@ export type Dictionary = {
     notifications: string;
     admin: string;
     language: string;
+    viewAll: string;
+    createCircle: string;
+    backToDashboard: string;
+    members: string;
+    cycle: string;
+    starts: string;
+    perCycle: string;
+    pay: string;
+    left: string;
   };
   nav: {
     dashboard: string;
@@ -85,6 +94,88 @@ export type Dictionary = {
     activeOfficer: string;
     markDefaulted: string;
   };
+  dashboard: {
+    eyebrow: string;
+    greeting: string;
+    subtitle: string;
+    completeProfileHint: string;
+    signedInAs: string;
+    createCircle: string;
+    myCircles: string;
+    completeProfile: string;
+    activeCircles: string;
+    membershipsHint: string;
+    membershipsHintOne: string;
+    pendingContributions: string;
+    dueOrOverdue: string;
+    upcomingPayouts: string;
+    scheduledForYou: string;
+    wallet: string;
+    availableHint: string;
+    noWalletYet: string;
+    contributionsTitle: string;
+    contributionsDesc: string;
+    contributionsEmptyTitle: string;
+    contributionsEmptyDesc: string;
+    cycleDue: string;
+    paid: string;
+    amountPlaceholder: string;
+    myCirclesTitle: string;
+    myCirclesDesc: string;
+    noCirclesTitle: string;
+    noCirclesDesc: string;
+    createACircle: string;
+    position: string;
+    payoutsTitle: string;
+    payoutsDesc: string;
+    payoutsEmptyTitle: string;
+    payoutsEmptyDesc: string;
+    cycleScheduled: string;
+    notificationsTitle: string;
+    unread: string;
+    notificationsDesc: string;
+    notificationsEmptyTitle: string;
+    notificationsEmptyDesc: string;
+  };
+  circles: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    createCircle: string;
+    emptyTitle: string;
+    emptyDesc: string;
+    createACircle: string;
+  };
+  wallet: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    emptyTitle: string;
+    emptyDesc: string;
+    totalBalance: string;
+    topUp: string;
+    withdraw: string;
+    paymentsInProgress: string;
+    failedPayments: string;
+    historyTitle: string;
+    historyEmpty: string;
+  };
+  finance: {
+    eyebrow: string;
+    title: string;
+    subtitle: string;
+    welfareTitle: string;
+    welfareDesc: string;
+    qardTitle: string;
+    qardDesc: string;
+    tawarruqTitle: string;
+    tawarruqDesc: string;
+    goalsTitle: string;
+    goalsDesc: string;
+    welfareOverview: string;
+    circleFallback: string;
+    noWelfare: string;
+  };
 };
 
 export const en: Dictionary = {
@@ -104,6 +195,15 @@ export const en: Dictionary = {
     notifications: 'Notifications',
     admin: 'Admin',
     language: 'Language',
+    viewAll: 'View all',
+    createCircle: 'Create circle',
+    backToDashboard: 'Back to dashboard',
+    members: 'members',
+    cycle: 'Cycle',
+    starts: 'Starts',
+    perCycle: 'per cycle',
+    pay: 'Pay',
+    left: 'left',
   },
   nav: {
     dashboard: 'Dashboard',
@@ -178,6 +278,92 @@ export const en: Dictionary = {
     activeOfficer: 'Active loans (officer)',
     markDefaulted: 'Mark defaulted',
   },
+  dashboard: {
+    eyebrow: 'Member home',
+    greeting: 'Assalamu alaikum',
+    subtitle: 'Track circles, dues, and payout turns.',
+    completeProfileHint: ' Complete your profile to unlock invitations and KYC.',
+    signedInAs: 'Signed in as {who}',
+    createCircle: 'Create circle',
+    myCircles: 'My circles',
+    completeProfile: 'Complete profile',
+    activeCircles: 'Active circles',
+    membershipsHint: '{count} total memberships',
+    membershipsHintOne: '{count} total membership',
+    pendingContributions: 'Pending contributions',
+    dueOrOverdue: 'Due or overdue',
+    upcomingPayouts: 'Upcoming payouts',
+    scheduledForYou: 'Scheduled for you',
+    wallet: 'Wallet',
+    availableHint: '{currency} available',
+    noWalletYet: 'No wallet yet',
+    contributionsTitle: 'Upcoming contributions',
+    contributionsDesc: 'Dues that are pending or late across your circles.',
+    contributionsEmptyTitle: 'Nothing due right now',
+    contributionsEmptyDesc:
+      'When cycles open, your contribution schedule will appear here.',
+    cycleDue: 'Cycle {cycle} · Due {date}',
+    paid: 'Paid',
+    amountPlaceholder: 'Amount (blank = full)',
+    myCirclesTitle: 'My circles',
+    myCirclesDesc: 'Circles you belong to as a member or circle admin.',
+    noCirclesTitle: 'No circles yet',
+    noCirclesDesc:
+      'Create a circle or accept an invitation to start saving with your community.',
+    createACircle: 'Create a circle',
+    position: 'Position #{n}',
+    payoutsTitle: 'Payout schedule',
+    payoutsDesc: 'Your upcoming or in-progress payout turns.',
+    payoutsEmptyTitle: 'No payouts scheduled',
+    payoutsEmptyDesc:
+      'Once the circle assigns payout order and cycles begin, your turns will show here.',
+    cycleScheduled: 'Cycle {cycle} · Scheduled {date}',
+    notificationsTitle: 'Notifications',
+    unread: '{count} unread',
+    notificationsDesc: 'Recent activity from your circles.',
+    notificationsEmptyTitle: "You're all caught up",
+    notificationsEmptyDesc: 'Invites, dues, and payout updates will land here.',
+  },
+  circles: {
+    eyebrow: 'Circles',
+    title: 'My circles',
+    subtitle: 'All rotating savings circles linked to your account.',
+    createCircle: 'Create circle',
+    emptyTitle: 'You have not joined a circle yet',
+    emptyDesc: 'Create a new circle or wait for an invitation from your community.',
+    createACircle: 'Create a circle',
+  },
+  wallet: {
+    eyebrow: 'Balances',
+    title: 'Wallet',
+    subtitle: 'Top up to pay contributions. Payouts credit here when cycles settle.',
+    emptyTitle: 'No wallet found',
+    emptyDesc: 'A default wallet is created automatically when your profile is provisioned.',
+    totalBalance: 'Total balance {amount}',
+    topUp: 'Top up',
+    withdraw: 'Withdraw',
+    paymentsInProgress: 'Payments in progress',
+    failedPayments: 'Failed payments — retry',
+    historyTitle: 'Transaction history',
+    historyEmpty:
+      'No ledger entries yet. Top-ups, contributions, and payouts will appear here.',
+  },
+  finance: {
+    eyebrow: 'Circle finance',
+    title: 'Finance',
+    subtitle: 'Manage Sharia-conscious finance tools connected to your circles.',
+    welfareTitle: 'Welfare fund',
+    welfareDesc: 'Medical, funeral, and accident support for your circle.',
+    qardTitle: 'Qard Hassan',
+    qardDesc: 'Request and repay interest-free circle loans.',
+    tawarruqTitle: 'Tawarruq',
+    tawarruqDesc: 'Apply for partner-facilitated Sharia-compliant finance.',
+    goalsTitle: 'Savings goals',
+    goalsDesc: 'Save for Hajj, Umra, Udhiyah, or any personal target.',
+    welfareOverview: 'Welfare overview',
+    circleFallback: 'Circle',
+    noWelfare: 'Your circles have no welfare funds yet.',
+  },
 };
 
 export const sw: Dictionary = {
@@ -197,6 +383,15 @@ export const sw: Dictionary = {
     notifications: 'Arifa',
     admin: 'Usimamizi',
     language: 'Lugha',
+    viewAll: 'Angalia zote',
+    createCircle: 'Unda mduara',
+    backToDashboard: 'Rudi dashibodi',
+    members: 'wanachama',
+    cycle: 'Mzunguko',
+    starts: 'Inaanza',
+    perCycle: 'kwa mzunguko',
+    pay: 'Lipa',
+    left: 'imebaki',
   },
   nav: {
     dashboard: 'Dashibodi',
@@ -271,6 +466,93 @@ export const sw: Dictionary = {
     repay: 'Lipa',
     activeOfficer: 'Mikopo hai (ofisa)',
     markDefaulted: 'Weka kama imeshindwa',
+  },
+  dashboard: {
+    eyebrow: 'Nyumbani kwa mwanachama',
+    greeting: 'Assalamu alaikum',
+    subtitle: 'Fuatilia miduara, michango, na zamu za malipo.',
+    completeProfileHint: ' Kamilisha wasifu wako ili kufungua mialiko na KYC.',
+    signedInAs: 'Umeingia kama {who}',
+    createCircle: 'Unda mduara',
+    myCircles: 'Miduara yangu',
+    completeProfile: 'Kamilisha wasifu',
+    activeCircles: 'Miduara hai',
+    membershipsHint: 'Uanachama {count} kwa jumla',
+    membershipsHintOne: 'Uanachama {count} kwa jumla',
+    pendingContributions: 'Michango inayosubiri',
+    dueOrOverdue: 'Iliyofika au imechelewa',
+    upcomingPayouts: 'Malipo yanayokuja',
+    scheduledForYou: 'Yaliyoratibiwa kwako',
+    wallet: 'Pochi',
+    availableHint: '{currency} inayopatikana',
+    noWalletYet: 'Bado hakuna pochi',
+    contributionsTitle: 'Michango inayokuja',
+    contributionsDesc: 'Michango inayosubiri au iliyochelewa katika miduara yako.',
+    contributionsEmptyTitle: 'Hakuna kinachodaiwa sasa',
+    contributionsEmptyDesc:
+      'Mizunguko ikifunguliwa, ratiba yako ya michango itaonekana hapa.',
+    cycleDue: 'Mzunguko {cycle} · Inadaiwa {date}',
+    paid: 'Imelipwa',
+    amountPlaceholder: 'Kiasi (tupu = kamili)',
+    myCirclesTitle: 'Miduara yangu',
+    myCirclesDesc: 'Miduara uliyojiunga kama mwanachama au msimamizi.',
+    noCirclesTitle: 'Bado hakuna miduara',
+    noCirclesDesc:
+      'Unda mduara au kubali mwaliko ili kuanza kuokoa na jamii yako.',
+    createACircle: 'Unda mduara',
+    position: 'Nafasi #{n}',
+    payoutsTitle: 'Ratiba ya malipo',
+    payoutsDesc: 'Zamu zako za malipo zinazokuja au zinazoendelea.',
+    payoutsEmptyTitle: 'Hakuna malipo yaliyoratibiwa',
+    payoutsEmptyDesc:
+      'Mduara ukipanga mpangilio wa malipo na mizunguko kuanza, zamu zako zitaonekana hapa.',
+    cycleScheduled: 'Mzunguko {cycle} · Imepangwa {date}',
+    notificationsTitle: 'Arifa',
+    unread: '{count} hazijasomwa',
+    notificationsDesc: 'Shughuli za hivi karibuni kutoka miduara yako.',
+    notificationsEmptyTitle: 'Umesoma zote',
+    notificationsEmptyDesc: 'Mialiko, michango, na sasisho za malipo zitaonekana hapa.',
+  },
+  circles: {
+    eyebrow: 'Miduara',
+    title: 'Miduara yangu',
+    subtitle: 'Miduara yote ya akiba inayozunguka iliyounganishwa na akaunti yako.',
+    createCircle: 'Unda mduara',
+    emptyTitle: 'Bado hujajiunga na mduara',
+    emptyDesc: 'Unda mduara mpya au subiri mwaliko kutoka jamii yako.',
+    createACircle: 'Unda mduara',
+  },
+  wallet: {
+    eyebrow: 'Salio',
+    title: 'Pochi',
+    subtitle:
+      'Ongeza pesa kulipa michango. Malipo ya mizunguko yanawekwa hapa yanapokamilika.',
+    emptyTitle: 'Hakuna pochi',
+    emptyDesc: 'Pochi chaguomsingi inaundwa kiotomatiki wasifu wako unapoundwa.',
+    totalBalance: 'Salio jumla {amount}',
+    topUp: 'Ongeza pesa',
+    withdraw: 'Toa',
+    paymentsInProgress: 'Malipo yanayoendelea',
+    failedPayments: 'Malipo yaliyoshindikana — jaribu tena',
+    historyTitle: 'Historia ya miamala',
+    historyEmpty:
+      'Bado hakuna rekodi. Ongezeko, michango, na malipo yataonekana hapa.',
+  },
+  finance: {
+    eyebrow: 'Fedha za mduara',
+    title: 'Fedha',
+    subtitle: 'Simamia zana za fedha zinazofuata sheria za Kiislamu katika miduara yako.',
+    welfareTitle: 'Hazina ya ustawi',
+    welfareDesc: 'Msaada wa matibabu, mazishi, na ajali kwa mduara wako.',
+    qardTitle: 'Qard Hassan',
+    qardDesc: 'Omba na lipa mikopo ya mduara bila riba.',
+    tawarruqTitle: 'Tawarruq',
+    tawarruqDesc: 'Omba fedha zinazofuata Sharia kupitia washirika.',
+    goalsTitle: 'Malengo ya akiba',
+    goalsDesc: 'Okoa kwa Hajj, Umra, Udhiyah, au lengo lolote la kibinafsi.',
+    welfareOverview: 'Muhtasari wa ustawi',
+    circleFallback: 'Mduara',
+    noWelfare: 'Miduara yako bado haina hazina za ustawi.',
   },
 };
 

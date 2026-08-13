@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { DashboardView, getDashboardData } from '@/features/dashboard';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -19,7 +20,17 @@ export default async function DashboardPage() {
     redirect('/login?next=/dashboard');
   }
 
-  const data = await getDashboardData(user.id);
+  const [{ dict }, data] = await Promise.all([
+    getDictionary(),
+    getDashboardData(user.id),
+  ]);
 
-  return <DashboardView data={data} email={user.email} />;
+  return (
+    <DashboardView
+      data={data}
+      email={user.email}
+      labels={dict.dashboard}
+      common={dict.common}
+    />
+  );
 }

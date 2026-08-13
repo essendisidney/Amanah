@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'My circles',
@@ -45,10 +46,12 @@ export default async function MyCirclesPage() {
     redirect('/login?next=/circles');
   }
 
-  const { data } = await supabase
-    .from('members')
-    .select(
-      `
+  const [{ dict }, { data }] = await Promise.all([
+    getDictionary(),
+    supabase
+      .from('members')
+      .select(
+        `
       id,
       role,
       status,
@@ -68,35 +71,38 @@ export default async function MyCirclesPage() {
         start_date
       )
     `,
-    )
-    .eq('user_id', user.id)
-    .in('status', ['active', 'invited', 'suspended'])
-    .order('created_at', { ascending: false });
+      )
+      .eq('user_id', user.id)
+      .in('status', ['active', 'invited', 'suspended'])
+      .order('created_at', { ascending: false }),
+  ]);
 
+  const labels = dict.circles;
+  const common = dict.common;
   const rows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
 
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Circles</p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-            My circles
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            All rotating savings circles linked to your account.
+          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+            {labels.eyebrow}
           </p>
+          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
+            {labels.title}
+          </h1>
+          <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
         </div>
         <Button asChild>
-          <Link href={'/circles/new' as Route}>Create circle</Link>
+          <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
         </Button>
       </div>
 
       {rows.length === 0 ? (
         <EmptyState
-          title="You have not joined a circle yet"
-          description="Create a new circle or wait for an invitation from your community."
-          actionLabel="Create a circle"
+          title={labels.emptyTitle}
+          description={labels.emptyDesc}
+          actionLabel={labels.createACircle}
           actionHref={'/circles/new' as Route}
         />
       ) : (
@@ -124,15 +130,17 @@ export default async function MyCirclesPage() {
                       ) : null}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {jamiya.member_count}/{jamiya.max_members} members · Cycle{' '}
-                      {jamiya.current_cycle}/{jamiya.cycle_count}
-                      {jamiya.start_date ? ` · Starts ${formatDate(jamiya.start_date)}` : ''}
+                      {jamiya.member_count}/{jamiya.max_members} {common.members} ·{' '}
+                      {common.cycle} {jamiya.current_cycle}/{jamiya.cycle_count}
+                      {jamiya.start_date
+                        ? ` · ${common.starts} ${formatDate(jamiya.start_date)}`
+                        : ''}
                     </p>
                   </div>
                   <div className="text-sm font-semibold text-foreground sm:text-right">
                     {formatCurrency(amount, jamiya.currency)}
                     <span className="block text-xs font-normal text-muted-foreground">
-                      per cycle
+                      {common.perCycle}
                       {row.payout_position ? ` · #${row.payout_position}` : ''}
                     </span>
                   </div>
