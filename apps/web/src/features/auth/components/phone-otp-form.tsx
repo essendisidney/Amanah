@@ -100,7 +100,11 @@ export function PhoneOtpForm({
   async function verifyCode(rawPhone: string, code: string) {
     const trimmed = code.trim();
     if (verifyingRef.current) return false;
-    if (lastVerifiedToken.current === trimmed) return false;
+    if (lastVerifiedToken.current === trimmed) {
+      // Same code already tried (often already consumed). Do not silent-no-op.
+      setError('This code was already used or failed. Request a new code.');
+      return false;
+    }
 
     verifyingRef.current = true;
     setError(null);
@@ -121,45 +125,51 @@ export function PhoneOtpForm({
       };
       if (!res.ok || !json.success) {
         setError(readApiError(json, 'Invalid or expired code. Request a new one.'));
-        // Prevent auto-retry loops on the same failed code.
+        // Prevent auto-retry loops on the same failed/consumed code.
         lastVerifiedToken.current = trimmed;
         return false;
       }
 
       lastVerifiedToken.current = trimmed;
 
-      // Server should have Set-Cookie'd the session. Fall back to client setSession
-      // when cookies were not written (older deploys / restricted cookie contexts).
-      if (!json.cookies_set) {
-        if (!json.access_token || !json.refresh_token) {
-          setError('Signed in, but session cookies were missing. Try again.');
-          lastVerifiedToken.current = null;
-          return false;
-        }
+      // Always mirror tokens into the browser client when present. Server cookies
+      // alone are not enough in some WebViews / PWA shells.
+      if (json.access_token && json.refresh_token) {
         try {
           const supabase = createClient();
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: json.access_token,
             refresh_token: json.refresh_token,
           });
-          if (sessionError) {
+          if (sessionError && !json.cookies_set) {
             setError(sessionError.message || 'Signed in, but session failed. Try again.');
             lastVerifiedToken.current = null;
             return false;
           }
+          if (sessionError) {
+            console.warn('[phone-otp] setSession warning', sessionError.message);
+          }
         } catch (sessionErr) {
-          const msg =
-            sessionErr instanceof Error && sessionErr.message
-              ? sessionErr.message
-              : 'Signed in, but session failed. Try again.';
-          setError(msg);
-          lastVerifiedToken.current = null;
-          return false;
+          if (!json.cookies_set) {
+            const msg =
+              sessionErr instanceof Error && sessionErr.message
+                ? sessionErr.message
+                : 'Signed in, but session failed. Try again.';
+            setError(msg);
+            lastVerifiedToken.current = null;
+            return false;
+          }
+          console.warn('[phone-otp] setSession threw; relying on server cookies', sessionErr);
         }
+      } else if (!json.cookies_set) {
+        setError('Signed in, but session cookies were missing. Try again.');
+        lastVerifiedToken.current = null;
+        return false;
       }
 
-      router.replace(next);
-      router.refresh();
+      // Full navigation avoids App Router refresh races after auth cookie writes.
+      const dest = next.startsWith('/') ? next : '/dashboard';
+      window.location.assign(dest);
       return true;
     } catch (err) {
       const msg =
