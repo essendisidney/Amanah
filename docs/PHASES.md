@@ -186,7 +186,7 @@ See `docs/PAYSTACK.md`. Set Vercel secrets to go live.
 | O3 | Branded print statements + loan/savings summaries | Complete |
 | O4 | Group SaaS plans (`/pricing`, Free/Starter/Pro) | Complete |
 
-Ops: set `AT_*` and/or `TWILIO_*` (+ optional `TWILIO_WHATSAPP_FROM`) on Edge for real SMS/WhatsApp.
+Ops: set Edge `TAIFA_API_KEY` (+ optional `TAIFA_SENDER_ID`) for SMS; `TWILIO_*` (+ optional `TWILIO_WHATSAPP_FROM`) for WhatsApp; optional `AT_*` fallback.
 
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)

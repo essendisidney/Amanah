@@ -81,7 +81,7 @@ Full ROSCA schema remains Phase 1.3.
 2. Copy `apps/web/.env.example` → `.env.local` with project URL + anon key
 3. Supabase Auth → URL config: Site URL `http://localhost:3000`, redirect `http://localhost:3000/auth/callback`
 4. Enable **Google** provider with Client ID/Secret
-5. Phone OTP (Kenya): set `TAIFA_API_KEY` + `TAIFA_SENDER_ID` (e.g. `SIDNET`). Apply `otp_codes` migration. Supabase Phone/Twilio **not** required. Use `SMS_BYPASS=true` only in local dev.
+5. Phone OTP (Kenya): set `TAIFA_API_KEY` + `TAIFA_SENDER_ID` (e.g. `SIDNET`) on **Vercel**. Apply `otp_codes` migration. Supabase Phone/Twilio **not** required. Use `SMS_BYPASS=true` only in local dev. Mirror the same `TAIFA_*` secrets on **Supabase Edge** so invoice/reminder SMS (`notify-dispatch`) uses Taifa too.
 
 ## Security notes
 

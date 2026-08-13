@@ -11,7 +11,7 @@ Continues after Phase 13 **without Daraja**.
 
 ## 14 — Phone-first
 
-- `notify-dispatch`: SMS via Africa’s Talking (`AT_USERNAME` / `AT_API_KEY`) with Twilio fallback; `SMS_PROVIDER=auto|africastalking|twilio`
+- `notify-dispatch`: SMS via **Taifa** by default (`TAIFA_API_KEY` / `TAIFA_SENDER_ID`, same as phone OTP), then Africa’s Talking / Twilio; `SMS_PROVIDER=taifa|auto|africastalking|twilio`
 - USSD menu: Balance, Circles, Dues, **Next payout**, **Grace**, Help
 - Vercel crons → `/api/cron/dispatch?job=reminders|notify|collections|tawarruq` (requires `CRON_SECRET`)
 
