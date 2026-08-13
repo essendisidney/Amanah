@@ -6,15 +6,19 @@ import {
   topUpWalletAction,
   type WalletActionState,
 } from '../actions/wallet-actions';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 
 const initial: WalletActionState = { success: false, message: '' };
 
 export function TopUpForm({
   currency = 'KES',
   provider = 'simulated',
+  labels,
 }: {
   currency?: string;
   provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack';
+  labels: Dictionary['walletForms'];
 }) {
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
 
@@ -22,7 +26,7 @@ export function TopUpForm({
     <form action={action} className="space-y-4">
       <input type="hidden" name="currency" value={currency} />
       <div className="space-y-2">
-        <Label htmlFor="amount">Amount ({currency})</Label>
+        <Label htmlFor="amount">{t(labels.amount, { currency })}</Label>
         <Input
           id="amount"
           name="amount"
@@ -37,7 +41,7 @@ export function TopUpForm({
       </div>
       {provider === 'mpesa' ? (
         <div className="space-y-2">
-          <Label htmlFor="phone">M-Pesa phone</Label>
+          <Label htmlFor="phone">{labels.mpesaPhone}</Label>
           <Input
             id="phone"
             name="phone"
@@ -49,19 +53,11 @@ export function TopUpForm({
           />
         </div>
       ) : provider === 'paystack' ? (
-        <p className="text-xs text-muted-foreground">
-          Pay with Paystack Checkout (card, M-Pesa mobile money, bank). You will be redirected to
-          complete payment securely.
-        </p>
+        <p className="text-xs text-muted-foreground">{labels.paystackHint}</p>
       ) : provider === 'bank' ? (
-        <p className="text-xs text-muted-foreground">
-          Bank top-up creates a pending intent for settlement against your bank flow.
-        </p>
+        <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
       ) : (
-        <p className="text-xs text-muted-foreground">
-          Instant demo wallet credit (no M-Pesa). Use this to pay dues, fund pockets, and repay
-          loans while testing.
-        </p>
+        <p className="text-xs text-muted-foreground">{labels.simulatedHint}</p>
       )}
       {state.message ? (
         <p
@@ -75,14 +71,14 @@ export function TopUpForm({
       ) : null}
       <Button type="submit" className="min-h-11 w-full" disabled={pending}>
         {pending
-          ? 'Processing…'
+          ? labels.processing
           : provider === 'mpesa'
-            ? 'Pay with M-Pesa'
+            ? labels.payMpesa
             : provider === 'paystack'
-              ? 'Pay with Paystack'
+              ? labels.payPaystack
               : provider === 'bank'
-                ? 'Start bank top-up'
-                : 'Top up wallet'}
+                ? labels.startBank
+                : labels.topUpWallet}
       </Button>
     </form>
   );

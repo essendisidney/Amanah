@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import { setLocaleAction } from './set-locale-action';
 import type { Locale } from './config';
 
@@ -12,21 +13,29 @@ export function LanguageSwitcher({
   label: string;
 }) {
   const pathname = usePathname() || '/';
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
   const other: Locale = locale === 'en' ? 'sw' : 'en';
   const otherLabel = other === 'sw' ? 'Kiswahili' : 'English';
 
   return (
-    <form action={setLocaleAction} className="inline-flex items-center">
-      <input type="hidden" name="locale" value={other} />
-      <input type="hidden" name="path" value={pathname} />
-      <button
-        type="submit"
-        className="rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        aria-label={`${label}: ${otherLabel}`}
-        title={`${label}: ${otherLabel}`}
-      >
-        {other === 'sw' ? 'SW' : 'EN'}
-      </button>
-    </form>
+    <button
+      type="button"
+      disabled={pending}
+      className="rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-60"
+      aria-label={`${label}: ${otherLabel}`}
+      title={`${label}: ${otherLabel}`}
+      onClick={() => {
+        startTransition(async () => {
+          const fd = new FormData();
+          fd.set('locale', other);
+          fd.set('path', pathname);
+          await setLocaleAction(fd);
+          router.refresh();
+        });
+      }}
+    >
+      {other === 'sw' ? 'SW' : 'EN'}
+    </button>
   );
 }

@@ -6,7 +6,12 @@ import { formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
-import { markNotificationReadAction, markAllNotificationsReadAction } from '@/features/dashboard/actions/notification-actions';
+import {
+  markNotificationReadAction,
+  markAllNotificationsReadAction,
+} from '@/features/dashboard/actions/notification-actions';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Notifications',
@@ -33,6 +38,9 @@ export default async function NotificationsPage() {
     redirect('/login?next=/notifications');
   }
 
+  const { dict } = await getDictionary();
+  const labels = dict.notificationsPage;
+
   const { data } = await supabase
     .from('notifications')
     .select('id, title, body, type, read_at, created_at')
@@ -47,20 +55,24 @@ export default async function NotificationsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Inbox</p>
+          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+            {labels.eyebrow}
+          </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-            Notifications
+            {labels.title}
           </h1>
           <p className="mt-2 text-muted-foreground">
             {unreadCount > 0
-              ? `${unreadCount} unread message${unreadCount === 1 ? '' : 's'}`
-              : 'You are up to date.'}
+              ? t(unreadCount === 1 ? labels.unreadOne : labels.unreadMany, {
+                  count: unreadCount,
+                })
+              : labels.upToDate}
           </p>
         </div>
         {unreadCount > 0 ? (
           <form action={markAllNotificationsReadAction}>
             <Button type="submit" variant="outline" size="sm">
-              Mark all as read
+              {labels.markAllRead}
             </Button>
           </form>
         ) : null}
@@ -68,9 +80,9 @@ export default async function NotificationsPage() {
 
       {notifications.length === 0 ? (
         <EmptyState
-          title="No notifications yet"
-          description="Circle invites, contribution reminders, and payout updates will appear here."
-          actionLabel="Back to dashboard"
+          title={labels.emptyTitle}
+          description={labels.emptyDesc}
+          actionLabel={dict.common.backToDashboard}
           actionHref={'/dashboard' as Route}
         />
       ) : (
@@ -93,7 +105,7 @@ export default async function NotificationsPage() {
                 <form action={markNotificationReadAction}>
                   <input type="hidden" name="notificationId" value={item.id} />
                   <Button type="submit" size="sm" variant="ghost">
-                    Mark read
+                    {labels.markRead}
                   </Button>
                 </form>
               ) : null}
@@ -103,7 +115,7 @@ export default async function NotificationsPage() {
       )}
 
       <Button asChild variant="outline">
-        <Link href={'/dashboard' as Route}>Back to dashboard</Link>
+        <Link href={'/dashboard' as Route}>{dict.common.backToDashboard}</Link>
       </Button>
     </div>
   );

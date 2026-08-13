@@ -4,8 +4,15 @@ import { useActionState } from 'react';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { linkMpesaPhoneAction } from '../actions/profile-actions';
 import { initialProfileActionState } from '../lib/state';
+import type { Dictionary } from '@/i18n/dictionaries';
 
-export function MpesaLinkForm({ defaultPhone }: { defaultPhone: string }) {
+export function MpesaLinkForm({
+  defaultPhone,
+  labels,
+}: {
+  defaultPhone: string;
+  labels: Dictionary['profile'];
+}) {
   const [state, formAction, pending] = useActionState(
     linkMpesaPhoneAction,
     initialProfileActionState,
@@ -20,7 +27,7 @@ export function MpesaLinkForm({ defaultPhone }: { defaultPhone: string }) {
       ) : null}
       <form action={formAction} className="space-y-3">
         <div className="space-y-2">
-          <Label htmlFor="mpesaPhone">M-Pesa number</Label>
+          <Label htmlFor="mpesaPhone">{labels.mpesaNumber}</Label>
           <Input
             id="mpesaPhone"
             name="mpesaPhone"
@@ -29,12 +36,10 @@ export function MpesaLinkForm({ defaultPhone }: { defaultPhone: string }) {
             defaultValue={defaultPhone}
             required
           />
-          <p className="text-xs text-muted-foreground">
-            Used for STK top-ups and payout cash-out queues.
-          </p>
+          <p className="text-xs text-muted-foreground">{labels.mpesaHint}</p>
         </div>
         <Button type="submit" disabled={pending} variant="outline">
-          {pending ? 'Linking…' : 'Link M-Pesa'}
+          {pending ? labels.linking : labels.linkMpesa}
         </Button>
       </form>
     </div>

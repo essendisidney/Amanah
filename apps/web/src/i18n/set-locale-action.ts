@@ -15,6 +15,10 @@ export async function setLocaleAction(formData: FormData): Promise<void> {
     sameSite: 'lax',
   });
 
-  const path = String(formData.get('path') ?? '/');
-  revalidatePath(path || '/');
+  // Bust the whole App Router tree so Soft Navigation does not keep stale EN RSC payloads.
+  revalidatePath('/', 'layout');
+  const path = String(formData.get('path') ?? '');
+  if (path && path !== '/') {
+    revalidatePath(path);
+  }
 }

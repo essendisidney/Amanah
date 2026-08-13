@@ -6,10 +6,18 @@ import {
   requestWithdrawalAction,
   type WithdrawalActionState,
 } from '../actions/withdrawal-actions';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 
 const initial: WithdrawalActionState = { success: false, message: '' };
 
-export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
+export function WithdrawalForm({
+  currency = 'KES',
+  labels,
+}: {
+  currency?: string;
+  labels: Dictionary['walletForms'];
+}) {
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
 
@@ -19,7 +27,7 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
       <input type="hidden" name="destinationType" value={destinationType} />
 
       <div className="space-y-2">
-        <Label htmlFor="withdraw-amount">Amount ({currency})</Label>
+        <Label htmlFor="withdraw-amount">{t(labels.amount, { currency })}</Label>
         <Input
           id="withdraw-amount"
           name="amount"
@@ -48,13 +56,13 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
           variant={destinationType === 'bank' ? 'default' : 'outline'}
           onClick={() => setDestinationType('bank')}
         >
-          Bank
+          {labels.bank}
         </Button>
       </div>
 
       {destinationType === 'mpesa' ? (
         <div className="space-y-2">
-          <Label htmlFor="phone">M-Pesa phone</Label>
+          <Label htmlFor="phone">{labels.mpesaPhone}</Label>
           <Input
             id="phone"
             name="phone"
@@ -68,15 +76,15 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
       ) : (
         <>
           <div className="space-y-2">
-            <Label htmlFor="bankName">Bank name</Label>
+            <Label htmlFor="bankName">{labels.bankName}</Label>
             <Input id="bankName" name="bankName" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bankAccountName">Account name</Label>
+            <Label htmlFor="bankAccountName">{labels.accountName}</Label>
             <Input id="bankAccountName" name="bankAccountName" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="bankAccountNumber">Account number</Label>
+            <Label htmlFor="bankAccountNumber">{labels.accountNumber}</Label>
             <Input id="bankAccountNumber" name="bankAccountNumber" required />
           </div>
         </>
@@ -93,7 +101,7 @@ export function WithdrawalForm({ currency = 'KES' }: { currency?: string }) {
       ) : null}
 
       <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
-        {pending ? 'Submitting…' : 'Request withdrawal'}
+        {pending ? labels.submitting : labels.requestWithdrawal}
       </Button>
     </form>
   );
