@@ -16,21 +16,24 @@ Amanah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, 
 | Reports (income / cash flow / balance sheet) | `/circles/[slug]/report` + `circle_gl_pack` (print → PDF) |
 | Share capital / dividends | `/circles/[slug]/shares` + `record_share_purchase` / `allocate_circle_dividend` |
 | Backdating | CSV import via `import_book_entries` |
-| Bank SMS reconcile | `circle_bank_alerts` queue (manual paste; auto-match later) |
+| Bank SMS reconcile | `circle_bank_alerts` + `match_bank_alerts` (amount/direction/date) |
+| Dividend payout | `pay_circle_dividend` credits member wallets from circle cash |
+| Journal / double-entry view | `/circles/[slug]/journal` via `circle_journal` |
 | Group communication | Existing announcements / community (SMS/WhatsApp still ops-gated) |
 | E-wallet / M-Pesa | Personal wallet + simulated/Daraja path (live STK still secrets-gated) |
 | Android app install | Chrome PWA primary; Expo `eas.json` scaffold for APK/AAB |
 
 ## Still later
 
-- Auto bank SMS reconciliation (provider webhooks / Equity-style parsers)
-- Formal audited PDF templates / double-entry journal UI
-- Dividend payout to wallets (allocation is recorded today)
+- Provider webhooks / SMS gateway parsers for bank alerts
+- Audited PDF templates (beyond browser print)
 - EAS project id + Play Console submit credentials
+- Live Daraja STK / AT shortcode (ops secrets)
 
 ## Schema
 
 - `supabase/migrations/20260813120000_chamasoft_treasury_wave.sql`
 - `supabase/migrations/20260813140000_chamasoft_gl_shares_wave.sql`
+- `supabase/migrations/20260813160000_chamasoft_settle_match_wave.sql`
 
-RPCs: `ensure_circle_treasury`, `record_treasury_entry`, `levy_member_fine`, `treasury_snapshot`, `member_circle_statement`, `circle_gl_pack`, `record_share_purchase`, `allocate_circle_dividend`.
+RPCs include: `pay_circle_dividend`, `match_bank_alerts`, `set_bank_alert_status`, `circle_journal`.

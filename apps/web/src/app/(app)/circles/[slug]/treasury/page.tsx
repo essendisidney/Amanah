@@ -167,6 +167,9 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
             <Link href={`/circles/${slug}/shares` as Route}>Shares</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
           </Button>
           {canManage ? (

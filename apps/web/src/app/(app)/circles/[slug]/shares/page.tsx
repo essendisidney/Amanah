@@ -9,6 +9,7 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import {
   allocateDividendAction,
+  payDividendAction,
   recordSharePurchaseAction,
   updateShareParValueAction,
 } from '@/features/circles/actions/shares-actions';
@@ -143,6 +144,9 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
           </Button>
         </div>
       </div>
@@ -369,19 +373,45 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {((divData ?? []) as Array<Record<string, unknown>>).map((d) => (
-              <li
-                key={String(d.id)}
-                className="flex flex-wrap items-center justify-between gap-2 px-5 py-3"
-              >
-                <div>
-                  <p className="font-medium">{String(d.label)}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {String(d.status)} · {formatDate(String(d.declared_at))}
+              <li key={String(d.id)} className="space-y-3 px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="font-medium">{String(d.label)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {String(d.status)} · {formatDate(String(d.declared_at))}
+                    </p>
+                  </div>
+                  <p className="font-semibold">
+                    {formatCurrency(Number(d.total_amount), String(d.currency))}
                   </p>
                 </div>
-                <p className="font-semibold">
-                  {formatCurrency(Number(d.total_amount), String(d.currency))}
-                </p>
+                {canManage && String(d.status) === 'allocated' ? (
+                  <form action={payDividendAction} className="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="dividendId" value={String(d.id)} />
+                    <div className="space-y-1">
+                      <Label htmlFor={`payAcct-${String(d.id)}`}>Pay from account</Label>
+                      <select
+                        id={`payAcct-${String(d.id)}`}
+                        name="bankAccountId"
+                        required
+                        className="h-10 min-w-[12rem] rounded-md border border-input bg-background px-3 text-sm"
+                        defaultValue={
+                          ((accountsData ?? []) as Array<{ id: string }>)[0]?.id ?? ''
+                        }
+                      >
+                        {((accountsData ?? []) as Array<{ id: string; name: string }>).map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <Button type="submit" size="sm">
+                      Pay to wallets
+                    </Button>
+                  </form>
+                ) : null}
               </li>
             ))}
           </ul>
