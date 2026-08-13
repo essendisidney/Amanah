@@ -1,11 +1,6 @@
 /* Amanah PWA — installability + light offline shell. */
-const SHELL = 'amanah-shell-v1';
-const RUNTIME = 'amanah-runtime-v1';
+const SHELL = 'amanah-shell-v3';
 const PRECACHE = [
-  '/',
-  '/login',
-  '/phone',
-  '/dashboard',
   '/manifest.webmanifest',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
@@ -26,16 +21,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.filter((k) => k !== SHELL && k !== RUNTIME).map((k) => caches.delete(k)),
-        ),
-      )
+      .then((keys) => Promise.all(keys.filter((k) => k !== SHELL).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
 
-function isAsset(url) {
+function isStaticAsset(url) {
   return (
     url.pathname.startsWith('/_next/static/') ||
     url.pathname.startsWith('/icons/') ||
@@ -54,47 +45,32 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
-  if (url.pathname.startsWith('/api/')) {
+  // Never cache API or auth HTML — stale /phone shells caused OTP verify bugs.
+  if (
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/phone') ||
+    url.pathname.startsWith('/login') ||
+    url.pathname.startsWith('/auth/')
+  ) {
+    event.respondWith(fetch(req));
+    return;
+  }
+
+  // Network-first for navigations and hashed static assets (avoid sticky old JS).
+  if (req.mode === 'navigate' || isStaticAsset(url)) {
     event.respondWith(
-      fetch(req).catch(
-        () =>
-          new Response(JSON.stringify({ error: 'Offline' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' },
-          }),
-      ),
+      fetch(req)
+        .then((res) => {
+          if (res.ok && isStaticAsset(url)) {
+            const copy = res.clone();
+            caches.open(SHELL).then((c) => c.put(req, copy));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || caches.match('/'))),
     );
     return;
   }
 
-  if (isAsset(url)) {
-    event.respondWith(
-      caches.match(req).then(
-        (hit) =>
-          hit ||
-          fetch(req).then((res) => {
-            if (res.ok) {
-              const copy = res.clone();
-              caches.open(SHELL).then((c) => c.put(req, copy));
-            }
-            return res;
-          }),
-      ),
-    );
-    return;
-  }
-
-  event.respondWith(
-    fetch(req)
-      .then((res) => {
-        if (res.ok && req.mode === 'navigate') {
-          const copy = res.clone();
-          caches.open(RUNTIME).then((c) => c.put(req, copy));
-        }
-        return res;
-      })
-      .catch(() =>
-        caches.match(req).then((hit) => hit || caches.match('/') || caches.match('/login')),
-      ),
-  );
+  event.respondWith(fetch(req).catch(() => caches.match(req)));
 });

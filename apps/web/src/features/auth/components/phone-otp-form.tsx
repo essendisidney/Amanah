@@ -35,6 +35,14 @@ function readApiError(json: unknown, fallback: string): string {
   return fallback;
 }
 
+/** Only allow same-origin relative paths for post-login redirects. */
+function safeNextPath(next: unknown): string {
+  if (typeof next !== 'string') return '/dashboard';
+  if (!next.startsWith('/') || next.startsWith('//')) return '/dashboard';
+  if (next.includes('\\') || next.includes('://')) return '/dashboard';
+  return next || '/dashboard';
+}
+
 export function PhoneOtpForm({
   next = '/dashboard',
   labels,
@@ -42,6 +50,7 @@ export function PhoneOtpForm({
   next?: string;
   labels: PhoneLabels;
 }) {
+  const dest = safeNextPath(next);
   const [phone, setPhone] = useState('');
   const [token, setToken] = useState('');
   const [step, setStep] = useState<Step>('request');
@@ -104,8 +113,18 @@ export function PhoneOtpForm({
       return false;
     }
 
+    // Lock immediately to prevent autofill + button double-submit races.
     verifyingRef.current = true;
+    lastVerifiedToken.current = trimmed;
     setError(null);
+
+    let json: {
+      success?: boolean;
+      error?: unknown;
+      cookies_set?: boolean;
+      access_token?: string;
+      refresh_token?: string;
+    } = {};
 
     try {
       const res = await fetch('/api/auth/phone/verify', {
@@ -113,72 +132,61 @@ export function PhoneOtpForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: rawPhone, otp: trimmed }),
         credentials: 'same-origin',
+        cache: 'no-store',
       });
-      const json = (await res.json().catch(() => ({}))) as {
-        success?: boolean;
-        error?: unknown;
-        cookies_set?: boolean;
-        access_token?: string;
-        refresh_token?: string;
-      };
+      json = (await res.json().catch(() => ({}))) as typeof json;
       if (!res.ok || !json.success) {
         setError(readApiError(json, 'Invalid or expired code. Request a new one.'));
-        // Prevent auto-retry loops on the same failed/consumed code.
-        lastVerifiedToken.current = trimmed;
         return false;
       }
-
-      lastVerifiedToken.current = trimmed;
-
-      // Always mirror tokens into the browser client when present. Server cookies
-      // alone are not enough in some WebViews / PWA shells.
-      if (json.access_token && json.refresh_token) {
-        try {
-          const supabase = createClient();
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: json.access_token,
-            refresh_token: json.refresh_token,
-          });
-          if (sessionError && !json.cookies_set) {
-            setError(sessionError.message || 'Signed in, but session failed. Try again.');
-            lastVerifiedToken.current = null;
-            return false;
-          }
-          if (sessionError) {
-            console.warn('[phone-otp] setSession warning', sessionError.message);
-          }
-        } catch (sessionErr) {
-          if (!json.cookies_set) {
-            const msg =
-              sessionErr instanceof Error && sessionErr.message
-                ? sessionErr.message
-                : 'Signed in, but session failed. Try again.';
-            setError(msg);
-            lastVerifiedToken.current = null;
-            return false;
-          }
-          console.warn('[phone-otp] setSession threw; relying on server cookies', sessionErr);
-        }
-      } else if (!json.cookies_set) {
-        setError('Signed in, but session cookies were missing. Try again.');
-        lastVerifiedToken.current = null;
-        return false;
-      }
-
-      // Full navigation avoids App Router refresh races after auth cookie writes.
-      const dest = next.startsWith('/') ? next : '/dashboard';
-      window.location.assign(dest);
-      return true;
     } catch (err) {
+      lastVerifiedToken.current = null;
       const msg =
         err instanceof Error && err.message.trim()
           ? err.message.trim()
-          : 'Something went wrong. Please try again.';
+          : 'Network error verifying code. Check connection and try again.';
       setError(msg);
       return false;
     } finally {
       verifyingRef.current = false;
     }
+
+    // Auth API succeeded (cookies usually already Set-Cookie'd). Navigate first;
+    // never let client setSession failures surface as a dead-end on this screen.
+    // Server logs showed login succeeding while the UI still showed a generic error.
+    if (json.access_token && json.refresh_token && !json.cookies_set) {
+      try {
+        const supabase = createClient();
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: json.access_token,
+          refresh_token: json.refresh_token,
+        });
+        if (sessionError) {
+          setError(sessionError.message || 'Signed in, but session failed. Try again.');
+          lastVerifiedToken.current = null;
+          return false;
+        }
+      } catch (sessionErr) {
+        const msg =
+          sessionErr instanceof Error && sessionErr.message
+            ? sessionErr.message
+            : 'Signed in, but session failed. Try again.';
+        setError(msg);
+        lastVerifiedToken.current = null;
+        return false;
+      }
+    } else if (json.access_token && json.refresh_token) {
+      // Best-effort mirror into client storage; ignore failures — cookies already set.
+      void createClient()
+        .auth.setSession({
+          access_token: json.access_token,
+          refresh_token: json.refresh_token,
+        })
+        .catch(() => undefined);
+    }
+
+    window.location.replace(dest);
+    return true;
   }
 
   useEffect(() => {
