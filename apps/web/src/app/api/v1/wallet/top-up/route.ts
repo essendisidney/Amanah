@@ -33,6 +33,7 @@ export async function POST(request: Request) {
     p_phone: body.phone ?? null,
     p_provider: provider,
     p_idempotency_key: `api-topup:${user.id}:${body.amount}:${Date.now()}`,
+    p_metadata: { kind: 'wallet_top_up', source: 'api_v1' },
   });
 
   if (error) {

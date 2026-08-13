@@ -66,6 +66,7 @@ export async function topUpWalletAction(
     p_phone: phone || null,
     p_provider: provider,
     p_idempotency_key: `topup:${provider}:${currency}:${amount}:${Date.now()}`,
+    p_metadata: { kind: 'wallet_top_up', source: 'wallet_ui' },
   });
 
   if (error) {
