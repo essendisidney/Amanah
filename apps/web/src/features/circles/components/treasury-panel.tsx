@@ -1,6 +1,10 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
-import { importBankAlertAction } from '../actions/shares-actions';
+import {
+  importBankAlertAction,
+  matchBankAlertsAction,
+  setBankAlertStatusAction,
+} from '../actions/shares-actions';
 import {
   createBankAccountAction,
   createFineCategoryAction,
@@ -539,8 +543,16 @@ export function TreasuryPanel({
             Bank SMS / alerts (scaffold)
           </h2>
           <p className="text-sm text-muted-foreground">
-            Paste Equity/M-Pesa style alerts for a pending queue. Auto-match to cashbook comes later.
+            Paste Equity/M-Pesa style alerts, then auto-match by amount, direction, account, and date
+            window (±3 days).
           </p>
+          <form action={matchBankAlertsAction} className="flex flex-wrap gap-2">
+            <input type="hidden" name="jamiyaId" value={jamiyaId} />
+            <input type="hidden" name="slug" value={slug} />
+            <Button type="submit" size="sm">
+              Auto-match pending alerts
+            </Button>
+          </form>
           <form
             action={importBankAlertAction}
             className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
@@ -607,18 +619,30 @@ export function TreasuryPanel({
           {bankAlerts.length > 0 ? (
             <ul className="divide-y divide-border rounded-xl border border-border bg-card">
               {bankAlerts.map((alert) => (
-                <li key={alert.id} className="px-5 py-3 text-sm">
-                  <p className="font-medium">
-                    {alert.direction ?? '—'}{' '}
-                    {alert.amount != null
-                      ? formatCurrency(alert.amount, alert.currency)
-                      : 'amount n/a'}{' '}
-                    · {alert.provider} · {alert.status}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDate(alert.createdAt)}
-                    {alert.alertText ? ` · ${alert.alertText}` : ''}
-                  </p>
+                <li key={alert.id} className="space-y-2 px-5 py-3 text-sm">
+                  <div>
+                    <p className="font-medium">
+                      {alert.direction ?? '—'}{' '}
+                      {alert.amount != null
+                        ? formatCurrency(alert.amount, alert.currency)
+                        : 'amount n/a'}{' '}
+                      · {alert.provider} · {alert.status}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDate(alert.createdAt)}
+                      {alert.alertText ? ` · ${alert.alertText}` : ''}
+                    </p>
+                  </div>
+                  {alert.status === 'pending' ? (
+                    <form action={setBankAlertStatusAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="alertId" value={alert.id} />
+                      <input type="hidden" name="status" value="ignored" />
+                      <Button type="submit" size="sm" variant="ghost">
+                        Ignore
+                      </Button>
+                    </form>
+                  ) : null}
                 </li>
               ))}
             </ul>

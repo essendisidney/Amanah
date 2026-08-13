@@ -151,10 +151,18 @@ See `docs/CHAMASOFT_PARITY.md`.
 | G4 | Bank SMS alert queue scaffold | Complete |
 | G5 | Expo `eas.json` Android preview/production profiles | Complete |
 
+## Chamasoft settle + match (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| S1 | Pay dividends to member wallets from circle cash | Complete |
+| S2 | Auto-match bank alerts to cashbook | Complete |
+| S3 | Debit/credit journal view | Complete |
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router + EAS project id / Play submit credentials
-- Bank SMS auto-match; dividend wallet payout; audited PDF templates
+- Bank SMS provider webhooks; audited PDF templates
