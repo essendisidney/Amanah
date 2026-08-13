@@ -14,7 +14,7 @@ export function TopUpForm({
   provider = 'simulated',
 }: {
   currency?: string;
-  provider?: 'simulated' | 'mpesa' | 'bank';
+  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack';
 }) {
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
 
@@ -48,6 +48,11 @@ export function TopUpForm({
             className="h-11 text-base sm:h-10 sm:text-sm"
           />
         </div>
+      ) : provider === 'paystack' ? (
+        <p className="text-xs text-muted-foreground">
+          Pay with Paystack Checkout (card, M-Pesa mobile money, bank). You will be redirected to
+          complete payment securely.
+        </p>
       ) : provider === 'bank' ? (
         <p className="text-xs text-muted-foreground">
           Bank top-up creates a pending intent for settlement against your bank flow.
@@ -73,9 +78,11 @@ export function TopUpForm({
           ? 'Processing…'
           : provider === 'mpesa'
             ? 'Pay with M-Pesa'
-            : provider === 'bank'
-              ? 'Start bank top-up'
-              : 'Top up wallet'}
+            : provider === 'paystack'
+              ? 'Pay with Paystack'
+              : provider === 'bank'
+                ? 'Start bank top-up'
+                : 'Top up wallet'}
       </Button>
     </form>
   );

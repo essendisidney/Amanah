@@ -174,7 +174,7 @@ export const topUpSchema = z.object({
   amount: z.coerce.number().min(100).max(10_000_000),
   currency: z.enum(SUPPORTED_CURRENCIES).default('KES'),
   phone: phoneSchema.optional().or(z.literal('')),
-  provider: z.enum(['simulated', 'mpesa']).default('simulated'),
+  provider: z.enum(['simulated', 'mpesa', 'bank', 'paystack']).default('simulated'),
 });
 
 export const openDisputeSchema = z.object({

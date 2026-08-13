@@ -20,10 +20,12 @@ export function shouldBlockSimulatedPayments(): boolean {
   return requireRealProviders();
 }
 
-export function assertProviderConfigured(provider: 'mpesa' | 'bank' | 'simulated'): void {
+export function assertProviderConfigured(
+  provider: 'mpesa' | 'bank' | 'paystack' | 'simulated',
+): void {
   if (provider === 'simulated' && shouldBlockSimulatedPayments()) {
     throw new Error(
-      'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank.',
+      'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank|paystack.',
     );
   }
   // Daraja credentials live on Edge Function `payments-mpesa`, not Next.js.
@@ -40,6 +42,14 @@ export function assertProviderConfigured(provider: 'mpesa' | 'bank' | 'simulated
   if (provider === 'bank' && requireRealProviders()) {
     if (!process.env.BANK_API_KEY || !process.env.BANK_API_URL) {
       throw new Error('Missing BANK_API_KEY / BANK_API_URL for real bank provider.');
+    }
+  }
+  if (provider === 'paystack') {
+    if (!(process.env.PAYSTACK_SECRET_KEY ?? '').trim()) {
+      throw new Error('Paystack requires PAYSTACK_SECRET_KEY on the web app.');
+    }
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error('Paystack requires SUPABASE_SERVICE_ROLE_KEY to settle payment intents.');
     }
   }
 }

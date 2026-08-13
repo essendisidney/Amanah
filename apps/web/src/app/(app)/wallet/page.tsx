@@ -19,6 +19,10 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
+type Props = {
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+};
+
 type WalletRow = {
   balance: number | string;
   available_balance: number | string;
@@ -37,7 +41,8 @@ type TxRow = {
   created_at: string;
 };
 
-export default async function WalletPage() {
+export default async function WalletPage({ searchParams }: Props) {
+  const notices = (await searchParams) ?? {};
   const supabase = await createClient();
   const {
     data: { user },
@@ -105,6 +110,19 @@ export default async function WalletPage() {
         <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
       </div>
 
+      {notices.notice ? (
+        <p
+          className={
+            notices.noticeType === 'error'
+              ? 'rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
+              : 'rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
+          }
+          role="status"
+        >
+          {notices.notice}
+        </p>
+      ) : null}
+
       {wallets.length === 0 ? (
         <EmptyState
           title={labels.emptyTitle}
@@ -153,12 +171,13 @@ export default async function WalletPage() {
             <TopUpForm
               currency={primaryCurrency}
               provider={
-                ['mpesa', 'bank'].includes(
+                ['mpesa', 'bank', 'paystack'].includes(
                   (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase(),
                 )
                   ? ((process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase() as
                       | 'mpesa'
-                      | 'bank')
+                      | 'bank'
+                      | 'paystack')
                   : 'simulated'
               }
             />

@@ -167,6 +167,16 @@ See `docs/CHAMASOFT_PARITY.md`.
 | I2 | Bank alert webhook (`/api/webhooks/bank-alerts`) + SMS parsers | Complete |
 | I3 | `ingest_bank_alert` for service_role / officers | Complete |
 
+## Paystack (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| P1 | `payment_provider` enum + `PAYSTACK_SECRET_KEY` Checkout init | Complete |
+| P2 | Webhook + browser callback → `complete_payment_intent` | Complete |
+| P3 | Wire wallet / API v1 / charity when `PAYMENT_PROVIDER=paystack` | Complete |
+
+See `docs/PAYSTACK.md`. Set Vercel secrets to go live.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
@@ -174,3 +184,4 @@ See `docs/CHAMASOFT_PARITY.md`.
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router + EAS project id / Play submit credentials
 - Carrier-specific SMS adapters; audited PDF templates
+- Paystack live keys + dashboard webhook (ops)

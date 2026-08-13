@@ -23,7 +23,9 @@ export async function POST(request: Request) {
 
   const providerEnv = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
   const provider =
-    providerEnv === 'mpesa' || providerEnv === 'bank' ? providerEnv : 'simulated';
+    providerEnv === 'mpesa' || providerEnv === 'bank' || providerEnv === 'paystack'
+      ? providerEnv
+      : 'simulated';
 
   const { data, error } = await supabase.rpc('create_payment_intent', {
     p_amount: body.amount,
@@ -84,6 +86,41 @@ export async function POST(request: Request) {
       provider,
       fallback: stk.fallback ?? null,
       checkout_request_id: stk.checkout_request_id ?? null,
+    });
+  }
+
+  if (provider === 'paystack') {
+    const email =
+      user.email
+      ?? (body.phone ? `${body.phone.replace(/^\+/, '')}@amanah.paystack.local` : null);
+    if (!email) {
+      return NextResponse.json(
+        { ok: false, error: 'EMAIL_REQUIRED', intent_id: created.intent_id },
+        { status: 400 },
+      );
+    }
+    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
+    const init = await initializePaystackTransaction({
+      intentId: created.intent_id,
+      amount: body.amount,
+      currency: (body.currency ?? 'KES').toUpperCase(),
+      email,
+      phone: body.phone ?? null,
+      metadata: { kind: 'wallet_top_up', source: 'api_v1' },
+    });
+    if (!init.ok) {
+      return NextResponse.json(
+        { ok: false, error: init.error, intent_id: created.intent_id },
+        { status: 502 },
+      );
+    }
+    return NextResponse.json({
+      ok: true,
+      intent_id: created.intent_id,
+      status: 'processing',
+      provider,
+      authorization_url: init.authorization_url,
+      reference: init.reference,
     });
   }
 

@@ -1,21 +1,17 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
+import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/observability';
+import { paymentProvider } from '@/lib/payments/provider';
 
 export type WalletActionState = {
   success: boolean;
   message: string;
   intentId?: string;
 };
-
-function paymentProvider(): 'simulated' | 'mpesa' | 'bank' {
-  const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
-  if (mode === 'mpesa') return 'mpesa';
-  if (mode === 'bank') return 'bank';
-  return 'simulated';
-}
 
 export async function topUpWalletAction(
   _prev: WalletActionState,
@@ -60,7 +56,7 @@ export async function topUpWalletAction(
   if (requireReal && provider === 'simulated') {
     return {
       success: false,
-      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|bank.',
+      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|bank|paystack.',
     };
   }
 
@@ -160,6 +156,42 @@ export async function topUpWalletAction(
     };
   }
 
+  if (provider === 'paystack') {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const email =
+      user?.email
+      ?? (phone ? `${phone.replace(/^\+/, '')}@amanah.paystack.local` : null);
+    if (!email) {
+      return {
+        success: false,
+        message: 'Paystack needs a signed-in account email (or phone).',
+        intentId: created.intent_id,
+      };
+    }
+
+    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
+    const init = await initializePaystackTransaction({
+      intentId: created.intent_id,
+      amount,
+      currency,
+      email,
+      phone: phone || null,
+      metadata: { kind: 'wallet_top_up' },
+    });
+    if (!init.ok) {
+      return {
+        success: false,
+        message: `Paystack failed: ${init.error}`,
+        intentId: created.intent_id,
+      };
+    }
+
+    redirect(init.authorization_url);
+  }
+
   // M-Pesa STK via Edge Function
   const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
   const stk = await invokeMpesaStk({
@@ -250,6 +282,41 @@ export async function retryPaymentIntentAction(
       message: stk.customer_message ?? 'M-Pesa prompt re-sent.',
       intentId: created.intent_id,
     };
+  }
+
+  if (created.provider === 'paystack') {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const email =
+      user?.email
+      ?? (created.phone
+        ? `${String(created.phone).replace(/^\+/, '')}@amanah.paystack.local`
+        : null);
+    if (!email) {
+      return {
+        success: false,
+        message: 'Paystack retry needs an account email.',
+        intentId: created.intent_id,
+      };
+    }
+    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
+    const init = await initializePaystackTransaction({
+      intentId: created.intent_id,
+      amount: Number(created.amount ?? 0),
+      email,
+      phone: created.phone ?? null,
+      metadata: { kind: 'wallet_top_up', retry: true },
+    });
+    if (!init.ok) {
+      return {
+        success: false,
+        message: init.error,
+        intentId: created.intent_id,
+      };
+    }
+    redirect(init.authorization_url);
   }
 
   if (created.provider === 'simulated') {

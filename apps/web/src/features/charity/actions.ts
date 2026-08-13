@@ -1,7 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
+import { createClient } from '@/lib/supabase/server';
+import { paymentProvider } from '@/lib/payments/provider';
 
 export type CharityActionState = {
   success: boolean;
@@ -9,13 +12,6 @@ export type CharityActionState = {
   intentId?: string;
   receiptCode?: string;
 };
-
-function paymentProvider(): 'simulated' | 'mpesa' | 'bank' {
-  const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
-  if (mode === 'mpesa') return 'mpesa';
-  if (mode === 'bank') return 'bank';
-  return 'simulated';
-}
 
 async function initiateAndSettleCharityPayment(input: {
   kind: 'sadaka' | 'platform_tip';
@@ -36,7 +32,7 @@ async function initiateAndSettleCharityPayment(input: {
   if (requireReal && provider === 'simulated') {
     return {
       success: false,
-      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa.',
+      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|paystack.',
     };
   }
 
@@ -132,6 +128,43 @@ async function initiateAndSettleCharityPayment(input: {
         'M-Pesa prompt sent. Confirm on your phone — receipt arrives when paid.',
       intentId: created.intent_id,
     };
+  }
+
+  if (provider === 'paystack') {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    const email =
+      user?.email
+      ?? (input.phone
+        ? `${input.phone.replace(/^\+/, '')}@amanah.paystack.local`
+        : null);
+    if (!email) {
+      return {
+        success: false,
+        message: 'Paystack needs a signed-in account email (or phone).',
+        intentId: created.intent_id,
+      };
+    }
+    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
+    const init = await initializePaystackTransaction({
+      intentId: created.intent_id,
+      amount: input.amount,
+      currency: 'KES',
+      email,
+      phone: input.phone || null,
+      callbackPath: '/api/payments/paystack/callback',
+      metadata: { kind: input.kind, ...input.metadata },
+    });
+    if (!init.ok) {
+      return {
+        success: false,
+        message: `Paystack failed: ${init.error}`,
+        intentId: created.intent_id,
+      };
+    }
+    redirect(init.authorization_url);
   }
 
   return {
