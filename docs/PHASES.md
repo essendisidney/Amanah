@@ -159,10 +159,18 @@ See `docs/CHAMASOFT_PARITY.md`.
 | S2 | Auto-match bank alerts to cashbook | Complete |
 | S3 | Debit/credit journal view | Complete |
 
+## Chamasoft invoices + bank webhooks (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| I1 | Contribution invoices + remind RPC + `/circles/[slug]/invoices` | Complete |
+| I2 | Bank alert webhook (`/api/webhooks/bank-alerts`) + SMS parsers | Complete |
+| I3 | `ingest_bank_alert` for service_role / officers | Complete |
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router + EAS project id / Play submit credentials
-- Bank SMS provider webhooks; audited PDF templates
+- Carrier-specific SMS adapters; audited PDF templates
