@@ -188,11 +188,21 @@ See `docs/PAYSTACK.md`. Set Vercel secrets to go live.
 
 Ops: reminder SMS uses Vercel `TAIFA_*` (same as login OTP) via cron; Edge still needs `TWILIO_*` for WhatsApp and optional `AT_*` fallback.
 
+## Trust & faith polish (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| T1 | Server PDF statements (`/api/circles/[slug]/statement.pdf`) | Complete |
+| T2 | Circle audit trail (dual-approval + treasury) | Complete |
+| T3 | Arrears aging + auto-fine schedules | Complete |
+| T4 | Broader Kenya bank SMS parsers (KCB/Coop/Absa/NCBA/Stanbic) | Complete |
+| T5 | Sharia board decision-reference required for endorsement | Complete |
+| T6 | Officer Qard/kafala queue + Swahili officer/admin strings | Complete |
+| T7 | OTP hourly/daily caps + invoice reminder 24h cooldown | Complete |
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
-- Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router + EAS project id / Play submit credentials
-- Carrier-specific SMS adapters; server-rendered PDF binaries
 - Paystack live keys + dashboard webhook (ops)

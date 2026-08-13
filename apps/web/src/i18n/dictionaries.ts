@@ -276,6 +276,49 @@ export type Dictionary = {
     bodaStage: string;
     womensBlurb: string;
     bodaBlurb: string;
+    arrears: string;
+    auditTrail: string;
+    downloadPdf: string;
+  };
+  officer: {
+    title: string;
+    auditEyebrow: string;
+    auditIntro: string;
+    dualApprovalTrail: string;
+    noDualRequests: string;
+    treasuryChanges: string;
+    noTreasuryAudit: string;
+    allCircleAudit: string;
+    arrearsEyebrow: string;
+    arrearsIntro: string;
+    bucketCurrent: string;
+    bucket17: string;
+    bucket830: string;
+    bucket3160: string;
+    bucket61: string;
+    bucketTotal: string;
+    autoFineTitle: string;
+    autoFineIntro: string;
+    autoFineEnable: string;
+    graceDays: string;
+    saveAutoFine: string;
+    runAutoFinesNow: string;
+    memberArrears: string;
+    noArrears: string;
+    openItems: string;
+    overdue: string;
+    qardQueue: string;
+    noPendingQard: string;
+    kafalaPending: string;
+    approveLoan: string;
+    rejectLoan: string;
+  };
+  admin: {
+    sadakaTitle: string;
+    shariaBoardPanel: string;
+    shariaBoardHint: string;
+    decisionRefRequired: string;
+    auditTitle: string;
   };
   install: {
     title: string;
@@ -577,6 +620,51 @@ export const en: Dictionary = {
     bodaStage: 'Boda / tuktuk stage',
     womensBlurb: 'Community gatekeeping and welfare support for women’s savings circles.',
     bodaBlurb: 'Stage-based savings with welfare emphasis for riders and operators.',
+    arrears: 'Arrears',
+    auditTrail: 'Audit trail',
+    downloadPdf: 'Download PDF',
+  },
+  officer: {
+    title: 'Officer console',
+    auditEyebrow: 'Audit trail',
+    auditIntro: 'Dual-approval history and treasury changes for this circle.',
+    dualApprovalTrail: 'Dual-approval requests',
+    noDualRequests: 'No dual-approval requests yet.',
+    treasuryChanges: 'Treasury & books changes',
+    noTreasuryAudit: 'No treasury audit rows yet.',
+    allCircleAudit: 'All circle audit events',
+    arrearsEyebrow: 'Arrears aging',
+    arrearsIntro: 'Outstanding dues by age bucket, plus auto-fine schedule.',
+    bucketCurrent: 'Current (not overdue)',
+    bucket17: '1–7 days',
+    bucket830: '8–30 days',
+    bucket3160: '31–60 days',
+    bucket61: '61+ days',
+    bucketTotal: 'Total outstanding',
+    autoFineTitle: 'Auto-fine schedule',
+    autoFineIntro:
+      'After the grace period, late contributions are marked late and penalties are assessed.',
+    autoFineEnable: 'Enable automatic late fines',
+    graceDays: 'Grace days after due date',
+    saveAutoFine: 'Save auto-fine settings',
+    runAutoFinesNow: 'Run auto-fines now',
+    memberArrears: 'Members in arrears',
+    noArrears: 'No open arrears.',
+    openItems: 'open items',
+    overdue: 'overdue',
+    qardQueue: 'Qard & kafala queue',
+    noPendingQard: 'No loans awaiting officer decision.',
+    kafalaPending: 'Guarantees pending',
+    approveLoan: 'Approve loan',
+    rejectLoan: 'Reject',
+  },
+  admin: {
+    sadakaTitle: 'Sadaka & Sharia fees',
+    shariaBoardPanel: 'Sharia board sign-off',
+    shariaBoardHint:
+      'Endorsing a campaign requires a board decision reference. Unendorsed campaigns stay marked pending.',
+    decisionRefRequired: 'Decision reference is required to endorse.',
+    auditTitle: 'Platform audit',
   },
   install: {
     title: 'Add Amanah to your device',
@@ -881,6 +969,51 @@ export const sw: Dictionary = {
     bodaStage: 'Stage ya boda / tuktuk',
     womensBlurb: 'Ulinzi wa jamii na msaada wa ustawi kwa miduara ya akiba ya wanawake.',
     bodaBlurb: 'Akiba ya stage yenye msisitizo wa ustawi kwa waendesha na waendeshaji.',
+    arrears: 'Malimbikizo',
+    auditTrail: 'Rekodi ya ukaguzi',
+    downloadPdf: 'Pakua PDF',
+  },
+  officer: {
+    title: 'Dashibodi ya ofisa',
+    auditEyebrow: 'Rekodi ya ukaguzi',
+    auditIntro: 'Historia ya idhini mbili na mabadiliko ya hazina kwa mduara huu.',
+    dualApprovalTrail: 'Maombi ya idhini mbili',
+    noDualRequests: 'Bado hakuna maombi ya idhini mbili.',
+    treasuryChanges: 'Mabadiliko ya hazina na vitabu',
+    noTreasuryAudit: 'Bado hakuna rekodi za hazina.',
+    allCircleAudit: 'Matukio yote ya ukaguzi wa mduara',
+    arrearsEyebrow: 'Umri wa malimbikizo',
+    arrearsIntro: 'Michango isiyolipwa kwa vipindi vya umri, pamoja na ratiba ya faini.',
+    bucketCurrent: 'Ya sasa (haijachelewa)',
+    bucket17: 'Siku 1–7',
+    bucket830: 'Siku 8–30',
+    bucket3160: 'Siku 31–60',
+    bucket61: 'Siku 61+',
+    bucketTotal: 'Jumla inayosubiri',
+    autoFineTitle: 'Ratiba ya faini otomatiki',
+    autoFineIntro:
+      'Baada ya siku za neema, michango iliyochelewa huwekwa late na faini hutathminiwa.',
+    autoFineEnable: 'Washa faini otomatiki za kuchelewa',
+    graceDays: 'Siku za neema baada ya tarehe ya kulipa',
+    saveAutoFine: 'Hifadhi mipangilio ya faini',
+    runAutoFinesNow: 'Endesha faini sasa',
+    memberArrears: 'Wanachama wenye malimbikizo',
+    noArrears: 'Hakuna malimbikizo yaliyo wazi.',
+    openItems: 'vipengele wazi',
+    overdue: 'zimechelewa',
+    qardQueue: 'Foleni ya Qard na kafala',
+    noPendingQard: 'Hakuna mikopo inayosubiri uamuzi wa ofisa.',
+    kafalaPending: 'Dhamana zinazosubiri',
+    approveLoan: 'Idhinisha mkopo',
+    rejectLoan: 'Kataa',
+  },
+  admin: {
+    sadakaTitle: 'Sadaka na ada za Sharia',
+    shariaBoardPanel: 'Idhini ya bodi ya Sharia',
+    shariaBoardHint:
+      'Kuidhinisha kampeni kunahitaji rejeleo la uamuzi wa bodi. Kampeni zisizoidhinishwa zinabaki kusubiri.',
+    decisionRefRequired: 'Rejeleo la uamuzi linahitajika ili kuidhinisha.',
+    auditTitle: 'Ukaguzi wa jukwaa',
   },
   install: {
     title: 'Ongeza Amanah kwenye kifaa chako',

@@ -51,6 +51,12 @@ export async function GET(request: Request) {
     if (job === 'all' || job === 'reminders') {
       results.reminders = await invokeEdge('reminders', secret);
     }
+    if (job === 'all' || job === 'auto-fines') {
+      const { createServiceRoleClient } = await import('@/lib/supabase/service');
+      const admin = createServiceRoleClient();
+      const { data, error } = await admin.rpc('run_auto_fines', { p_jamiya_id: null });
+      results.auto_fines = error ? { ok: false, error: error.message } : data;
+    }
     if (job === 'all' || job === 'notify') {
       // SMS uses the same Taifa keys as phone OTP (Vercel env).
       results.notify_sms_taifa = await dispatchSmsOutboxViaTaifa(50);

@@ -130,6 +130,15 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
+          <Button asChild size="sm">
+            <a
+              href={`/api/circles/${slug}/statement.pdf${
+                memberId !== me.id ? `?memberId=${memberId}` : ''
+              }`}
+            >
+              Download PDF
+            </a>
+          </Button>
           <PrintReportButton />
         </div>
       </div>

@@ -55,5 +55,40 @@ export async function confirmCircleDualApprovalAction(formData: FormData): Promi
   if (slug) {
     revalidatePath(`/circles/${slug}`);
     revalidatePath(`/circles/${slug}/officer`);
+    revalidatePath(`/circles/${slug}/audit`);
+  }
+}
+
+export async function setCircleAutoFineAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const enabledFlags = formData.getAll('enabled').map(String);
+  const enabled = enabledFlags.includes('true');
+  const graceDays = Number(formData.get('graceDays') ?? 3);
+  if (!jamiyaId) return;
+
+  await callRpc('set_circle_auto_fine', {
+    p_jamiya_id: jamiyaId,
+    p_enabled: enabled,
+    p_grace_days: Number.isFinite(graceDays) ? graceDays : 3,
+  });
+
+  if (slug) {
+    revalidatePath(`/circles/${slug}/arrears`);
+    revalidatePath(`/circles/${slug}/officer`);
+  }
+}
+
+export async function runAutoFinesAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  if (!jamiyaId) return;
+
+  await callRpc('run_auto_fines', { p_jamiya_id: jamiyaId });
+
+  if (slug) {
+    revalidatePath(`/circles/${slug}/arrears`);
+    revalidatePath(`/circles/${slug}/officer`);
+    revalidatePath(`/circles/${slug}`);
   }
 }

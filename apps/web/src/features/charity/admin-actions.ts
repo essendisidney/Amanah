@@ -36,7 +36,14 @@ export async function setCampaignFeePolicyAction(
   if (error) return { success: false, message: error.message };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Update failed.' };
+    const code = result?.error ?? 'Update failed.';
+    if (code === 'DECISION_REFERENCE_REQUIRED') {
+      return {
+        success: false,
+        message: 'Decision reference is required to mark Sharia board endorsed.',
+      };
+    }
+    return { success: false, message: code };
   }
 
   revalidatePath('/admin/sadaka');

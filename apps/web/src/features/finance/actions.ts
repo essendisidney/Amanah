@@ -256,6 +256,7 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
   } | null;
   if (raw?.pending_dual_approval) {
     revalidatePath('/finance/qard');
+    revalidatePath('/circles');
     return {
       success: true,
       message: 'Loan approval queued for a second officer (dual control).',
@@ -276,6 +277,7 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
     state.message = approve ? 'Loan approved and disbursed.' : 'Loan rejected.';
     revalidatePath('/finance/qard');
     revalidatePath('/wallet');
+    revalidatePath('/circles');
   }
   return state;
 }

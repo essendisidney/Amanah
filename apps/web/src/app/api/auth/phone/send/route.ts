@@ -6,6 +6,8 @@ import { createServiceRoleClient } from '@/lib/supabase/service';
 export const runtime = 'nodejs';
 
 const RESEND_COOLDOWN_SEC = 60;
+const MAX_OTP_PER_HOUR = 5;
+const MAX_OTP_PER_DAY = 15;
 
 /** Taifa Mobile SMS + otp_codes. */
 export async function POST(request: NextRequest) {
@@ -46,6 +48,40 @@ export async function POST(request: NextRequest) {
           { status: 429 },
         );
       }
+    }
+
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
+      admin
+        .from('otp_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('phone', normalized)
+        .gte('created_at', hourAgo),
+      admin
+        .from('otp_codes')
+        .select('id', { count: 'exact', head: true })
+        .eq('phone', normalized)
+        .gte('created_at', dayAgo),
+    ]);
+
+    if ((hourCount ?? 0) >= MAX_OTP_PER_HOUR) {
+      return NextResponse.json(
+        {
+          error: 'Too many codes requested this hour. Try again later.',
+          retry_after: 3600,
+        },
+        { status: 429 },
+      );
+    }
+    if ((dayCount ?? 0) >= MAX_OTP_PER_DAY) {
+      return NextResponse.json(
+        {
+          error: 'Daily OTP limit reached for this number. Try again tomorrow.',
+          retry_after: 86400,
+        },
+        { status: 429 },
+      );
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
