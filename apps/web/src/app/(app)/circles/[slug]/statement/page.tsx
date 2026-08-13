@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { PrintReportButton } from '@/features/circles/components/print-report-button';
 
 export const metadata: Metadata = { title: 'Member statement' };
 export const dynamic = 'force-dynamic';
@@ -99,9 +100,18 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     ),
   );
 
+  const loans = stmt.loans ?? [];
+  const pockets = stmt.savings_pockets ?? [];
+  const loanOutstanding = loans.reduce((sum, l) => {
+    const amount = Number(l.amount ?? 0);
+    const repaid = Number(l.amount_repaid ?? 0);
+    return sum + Math.max(amount - repaid, 0);
+  }, 0);
+  const savingsTotal = pockets.reduce((sum, s) => sum + Number(s.balance ?? 0), 0);
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-6 py-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <div className="mx-auto max-w-3xl space-y-8 px-6 py-10 print:px-0 print:py-0">
+      <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
             Member statement
@@ -120,8 +130,43 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
+          <PrintReportButton />
         </div>
       </div>
+
+      <header className="hidden border-b border-border pb-4 print:block">
+        <p className="text-sm uppercase tracking-wide text-muted-foreground">
+          Amanah · Member statement
+        </p>
+        <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold">
+          {jamiya.name}
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Member {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · Generated{' '}
+          {formatDate(new Date().toISOString())}
+        </p>
+      </header>
+
+      <section className="grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-4 print:rounded-none">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            Loan outstanding
+          </p>
+          <p className="mt-2 text-2xl font-semibold">
+            {formatCurrency(loanOutstanding, jamiya.currency)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{loans.length} loan row(s)</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 print:rounded-none">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            Savings pockets
+          </p>
+          <p className="mt-2 text-2xl font-semibold">
+            {formatCurrency(savingsTotal, jamiya.currency)}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{pockets.length} pocket(s)</p>
+        </div>
+      </section>
 
       {isOfficer && memberRows.length ? (
         <form className="flex flex-wrap items-end gap-2" method="get">

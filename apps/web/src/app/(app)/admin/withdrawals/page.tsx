@@ -4,6 +4,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import {
+  confirmDualApprovalAction,
   processPayoutCashoutAction,
   processWithdrawalAction,
 } from '@/features/wallet/actions/withdrawal-actions';
@@ -29,15 +30,34 @@ type Row = {
 export default async function AdminWithdrawalsPage() {
   await requireAdminAccess('compliance');
   const supabase = await createClient();
-  const { data } = await supabase
-    .from('withdrawal_requests')
-    .select(
-      'id, user_id, amount, currency, status, destination_type, destination_phone, bank_name, bank_account_number, created_at, metadata',
-    )
-    .order('created_at', { ascending: false })
-    .limit(100);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = supabase as any;
+  const [{ data }, { data: dualData }] = await Promise.all([
+    supabase
+      .from('withdrawal_requests')
+      .select(
+        'id, user_id, amount, currency, status, destination_type, destination_phone, bank_name, bank_account_number, created_at, metadata',
+      )
+      .order('created_at', { ascending: false })
+      .limit(100),
+    db
+      .from('dual_approval_requests')
+      .select('id, kind, entity_id, amount, currency, status, first_approver_id, created_at')
+      .eq('kind', 'withdrawal')
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(40),
+  ]);
 
   const rows = (data ?? []) as unknown as Row[];
+  const dualRows = (dualData ?? []) as unknown as Array<{
+    id: string;
+    entity_id: string;
+    amount: number | string;
+    currency: string;
+    first_approver_id: string;
+    created_at: string;
+  }>;
 
   return (
     <div className="space-y-4">
@@ -46,10 +66,52 @@ export default async function AdminWithdrawalsPage() {
           Withdrawals
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Payout cashouts auto-simulate until live Daraja B2C. Use Sim B2C for any remaining
-          pending payout rows.
+          Amounts at/above the platform dual-approval threshold need a second compliance
+          approver. Payout cashouts auto-simulate until live Daraja B2C.
         </p>
       </div>
+
+      {dualRows.length > 0 ? (
+        <section className="space-y-3">
+          <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            Awaiting second approval
+          </h3>
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {dualRows.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
+                <div>
+                  <p className="font-medium">
+                    {formatCurrency(Number(row.amount), row.currency)} · withdrawal
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    First approver {row.first_approver_id.slice(0, 8)}… ·{' '}
+                    {formatDate(row.created_at)}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <form action={confirmDualApprovalAction}>
+                    <input type="hidden" name="requestId" value={row.id} />
+                    <input type="hidden" name="approve" value="true" />
+                    <Button type="submit" size="sm">
+                      Second approve
+                    </Button>
+                  </form>
+                  <form action={confirmDualApprovalAction}>
+                    <input type="hidden" name="requestId" value={row.id} />
+                    <input type="hidden" name="approve" value="false" />
+                    <Button type="submit" size="sm" variant="destructive">
+                      Reject
+                    </Button>
+                  </form>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">No withdrawal requests yet.</p>
       ) : (

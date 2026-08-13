@@ -177,11 +177,22 @@ See `docs/CHAMASOFT_PARITY.md`.
 
 See `docs/PAYSTACK.md`. Set Vercel secrets to go live.
 
+## Ops gap close — reminders, dual approval, statements, pricing (2026-08)
+
+| Step | Deliverable | Status |
+|------|-------------|--------|
+| O1 | Invoice/reminder SMS + WhatsApp outbox + Twilio WhatsApp in `notify-dispatch` | Complete |
+| O2 | Dual approval for withdrawals / large payouts / Qard (`dual_approval_requests`) | Complete |
+| O3 | Branded print statements + loan/savings summaries | Complete |
+| O4 | Group SaaS plans (`/pricing`, Free/Starter/Pro) | Complete |
+
+Ops: set `AT_*` and/or `TWILIO_*` (+ optional `TWILIO_WHATSAPP_FROM`) on Edge for real SMS/WhatsApp.
+
 ## Later
 - Live Daraja STK + B2C cash-out (secrets + Edge deploy)
 - Partner bank OpenAPI credentials for live Tawarruq (scaffold ready)
 - Sharia board meeting → flip endorsement in `/admin/sadaka`
 - Production Africa’s Talking shortcode + SMS sender ID (ops)
 - Expo Router + EAS project id / Play submit credentials
-- Carrier-specific SMS adapters; audited PDF templates
+- Carrier-specific SMS adapters; server-rendered PDF binaries
 - Paystack live keys + dashboard webhook (ops)

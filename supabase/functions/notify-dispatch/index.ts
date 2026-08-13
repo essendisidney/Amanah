@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
  * Dispatches pending notification_outbox rows via Resend (email) /
- * Africa's Talking or Twilio (SMS) / Expo (push).
+ * Africa's Talking or Twilio (SMS) / Twilio WhatsApp / Expo (push).
  * Without provider credentials, marks rows as sent with metadata.skipped=true (dev).
  */
 
@@ -123,6 +123,39 @@ async function sendSms(to: string, body: string): Promise<void> {
   console.info("sms skipped (no AT or Twilio credentials)", { to });
 }
 
+/** Twilio WhatsApp (sandbox or live). From must be whatsapp:+… */
+async function sendWhatsApp(to: string, body: string): Promise<void> {
+  const sid = env("TWILIO_ACCOUNT_SID");
+  const token = env("TWILIO_AUTH_TOKEN");
+  const fromRaw = env("TWILIO_WHATSAPP_FROM") || env("TWILIO_FROM_NUMBER");
+  const requireReal = env("REQUIRE_REAL_PROVIDERS") === "true";
+
+  if (!sid || !token || !fromRaw) {
+    if (requireReal) throw new Error("WHATSAPP_NOT_CONFIGURED");
+    console.info("whatsapp skipped (Twilio WhatsApp not configured)", { to });
+    return;
+  }
+
+  const from = fromRaw.startsWith("whatsapp:") ? fromRaw : `whatsapp:${normalizeMsisdn(fromRaw)}`;
+  const dest = to.startsWith("whatsapp:") ? to : `whatsapp:${normalizeMsisdn(to)}`;
+  const auth = btoa(`${sid}:${token}`);
+  const params = new URLSearchParams({ To: dest, From: from, Body: body });
+  const res = await fetch(
+    `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Twilio WhatsApp ${res.status}: ${await res.text()}`);
+  }
+}
+
 async function sendExpoPush(
   to: string,
   title: string | null,
@@ -188,6 +221,8 @@ Deno.serve(async (req) => {
           await sendEmail(row.recipient, row.subject ?? "Amanah", row.body);
         } else if (row.channel === "sms") {
           await sendSms(row.recipient, row.body);
+        } else if (row.channel === "whatsapp") {
+          await sendWhatsApp(row.recipient, row.body);
         } else if (row.channel === "push") {
           await sendExpoPush(
             row.recipient,
@@ -195,6 +230,8 @@ Deno.serve(async (req) => {
             row.body,
             (row.metadata as Record<string, unknown> | null) ?? null,
           );
+        } else {
+          console.info("unknown channel skipped", { channel: row.channel, id: row.id });
         }
         await supabase.rpc("mark_outbox_sent", { p_id: row.id });
         sent += 1;

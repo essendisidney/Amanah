@@ -63,11 +63,25 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
   const approve = String(formData.get('approve') ?? 'true') === 'true';
   if (!withdrawalId) return;
 
-  await callRpc('process_withdrawal', {
+  await callRpc('propose_process_withdrawal', {
     p_withdrawal_id: withdrawalId,
     p_approve: approve,
     p_provider_reference: approve ? `manual:${withdrawalId}` : null,
     p_error_message: approve ? null : 'Rejected by admin',
+  });
+
+  revalidatePath('/admin/withdrawals');
+  revalidatePath('/wallet');
+}
+
+export async function confirmDualApprovalAction(formData: FormData): Promise<void> {
+  const requestId = String(formData.get('requestId') ?? '');
+  const approve = String(formData.get('approve') ?? 'true') === 'true';
+  if (!requestId) return;
+
+  await callRpc('confirm_dual_approval', {
+    p_request_id: requestId,
+    p_approve: approve,
   });
 
   revalidatePath('/admin/withdrawals');
