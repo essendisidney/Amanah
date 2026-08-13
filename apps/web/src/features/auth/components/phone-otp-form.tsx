@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { formatPhoneHint, isValidKeMobile } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
@@ -43,7 +42,6 @@ export function PhoneOtpForm({
   next?: string;
   labels: PhoneLabels;
 }) {
-  const router = useRouter();
   const [phone, setPhone] = useState('');
   const [token, setToken] = useState('');
   const [step, setStep] = useState<Step>('request');
