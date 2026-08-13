@@ -2,6 +2,8 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import type { DashboardContribution } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 import { StatusBadge } from './dashboard-stats';
@@ -9,20 +11,21 @@ import { payContributionAction } from '@/features/circles/actions/ledger-actions
 
 export function ContributionsSection({
   contributions,
+  labels,
+  common,
 }: {
   contributions: DashboardContribution[];
+  labels: Dictionary['dashboard'];
+  common: Dictionary['common'];
 }) {
   return (
     <section>
-      <SectionHeader
-        title="Upcoming contributions"
-        description="Dues that are pending or late across your circles."
-      />
+      <SectionHeader title={labels.contributionsTitle} description={labels.contributionsDesc} />
 
       {contributions.length === 0 ? (
         <EmptyState
-          title="Nothing due right now"
-          description="When cycles open, your contribution schedule will appear here."
+          title={labels.contributionsEmptyTitle}
+          description={labels.contributionsEmptyDesc}
         />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -42,9 +45,12 @@ export function ContributionsSection({
                   <StatusBadge status={item.status} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cycle {item.cycleNumber} · Due {formatDate(item.dueDate)}
+                  {t(labels.cycleDue, {
+                    cycle: item.cycleNumber,
+                    date: formatDate(item.dueDate),
+                  })}
                   {item.amountPaid > 0
-                    ? ` · Paid ${formatCurrency(item.amountPaid, item.currency)} · Left ${formatCurrency(Math.max(item.amount - item.amountPaid, 0), item.currency)}`
+                    ? ` · ${labels.paid} ${formatCurrency(item.amountPaid, item.currency)} · ${common.left} ${formatCurrency(Math.max(item.amount - item.amountPaid, 0), item.currency)}`
                     : null}
                 </p>
               </div>
@@ -53,7 +59,7 @@ export function ContributionsSection({
                   {formatCurrency(item.amount, item.currency)}
                   {item.amountPaid > 0 ? (
                     <span className="ml-2 font-normal text-muted-foreground">
-                      · left{' '}
+                      · {common.left}{' '}
                       {formatCurrency(
                         Math.max(item.amount - item.amountPaid, 0),
                         item.currency,
@@ -76,11 +82,11 @@ export function ContributionsSection({
                       inputMode="decimal"
                       min={1}
                       step="0.01"
-                      placeholder="Amount (blank = full)"
+                      placeholder={labels.amountPlaceholder}
                       className="h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:w-40 sm:text-sm"
                     />
                     <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                      Pay
+                      {common.pay}
                     </Button>
                   </form>
                 ) : null}

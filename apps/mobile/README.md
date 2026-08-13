@@ -6,11 +6,13 @@ Phase 13 client: Home, Circles, Dues, **Wallet**, **Finance**, **Officer**, Invi
 
 | Audience | Path | Notes |
 |----------|------|--------|
-| Members / field testers | **Web PWA** at https://amanah-liart.vercel.app | Open in **Chrome** → menu (⋮) → **Install app** / **Add to Home screen**. |
-| Engineers | This Expo app via **Expo Go** (SDK 53) | Sandbox limits apply. |
+| Members / field testers | **Web PWA** at https://amanah-liart.vercel.app | Open in **Chrome** → menu (⋮) → **Install app** / **Add to Home screen**. Avoid Facebook/WhatsApp in-app browsers — they block install. |
+| Engineers | This Expo app via **Expo Go** (SDK 53) | Not a Play Store APK. Expo Go has sandbox limits (custom native modules, branding, some push behavior). |
 | Store APK / AAB | Scaffolded | `eas.json` (`preview` APK, `production` AAB). Needs Expo/EAS login + Play Console. |
 
-## Setup
+If Chrome hides **Install**, visit the site a few times over HTTPS, then retry the menu path. The web app also shows Android install tips when the native prompt is withheld.
+
+## Setup (Expo)
 
 ```bash
 cd apps/mobile
@@ -20,7 +22,10 @@ pnpm install
 pnpm start
 ```
 
-For a **physical Android device**, do not leave the API on `127.0.0.1`. Use production `https://amanah-liart.vercel.app` or `npx expo start --tunnel`.
+For a **physical Android device**, do not leave the API on `127.0.0.1` — the phone cannot reach your laptop loopback. Use either:
+
+- Production: `EXPO_PUBLIC_API_BASE_URL=https://amanah-liart.vercel.app`
+- Local LAN / tunnel: `npx expo start --tunnel` (or your machine’s LAN IP + matching web `pnpm dev`)
 
 ### API surface used
 

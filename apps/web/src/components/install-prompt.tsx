@@ -2,18 +2,28 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@jamiya/ui';
+import type { Dictionary } from '@/i18n/dictionaries';
 
 const DISMISS_KEY = 'amanah-install-dismissed-at';
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
+const ANDROID_FALLBACK_MS = 3500;
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 };
 
+type InstallMode = 'native' | 'ios' | 'android';
+
 function isIos(): boolean {
   if (typeof navigator === 'undefined') return false;
   return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+/** Android phone/tablet UA — excludes desktop Chrome with "Request desktop site". */
+function isAndroid(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  return /android/i.test(navigator.userAgent);
 }
 
 function isStandalone(): boolean {
@@ -37,9 +47,14 @@ function wasDismissedRecently(): boolean {
   }
 }
 
-export function InstallPrompt() {
+/**
+ * Android Chrome often withholds `beforeinstallprompt` (engagement heuristics,
+ * WebView / in-app browsers, or prior dismiss). When that happens, show manual
+ * Install / Add to Home screen steps instead of staying silent.
+ */
+export function InstallPrompt({ labels }: { labels: Dictionary['install'] }) {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
-  const [mode, setMode] = useState<'native' | 'ios' | null>(null);
+  const [mode, setMode] = useState<InstallMode | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -57,7 +72,18 @@ export function InstallPrompt() {
       setMode('native');
     };
     window.addEventListener('beforeinstallprompt', onBip);
-    return () => window.removeEventListener('beforeinstallprompt', onBip);
+
+    let androidTimer: number | undefined;
+    if (isAndroid()) {
+      androidTimer = window.setTimeout(() => {
+        setMode((current) => current ?? 'android');
+      }, ANDROID_FALLBACK_MS);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBip);
+      if (androidTimer) window.clearTimeout(androidTimer);
+    };
   }, []);
 
   function dismiss() {
@@ -86,8 +112,10 @@ export function InstallPrompt() {
 
   const detail =
     mode === 'ios'
-      ? 'Share → Add to Home Screen for one-tap access to your circles and wallet.'
-      : 'Install Amanah for quick access on your phone or desktop.';
+      ? labels.detailIos
+      : mode === 'android'
+        ? labels.detailAndroid
+        : labels.detailNative;
 
   return (
     <div
@@ -101,18 +129,18 @@ export function InstallPrompt() {
             id="amanah-install-title"
             className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-foreground"
           >
-            Add Amanah to your device
+            {labels.title}
           </p>
           <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{detail}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {mode === 'native' && deferred ? (
             <Button type="button" size="sm" onClick={install} disabled={busy}>
-              {busy ? 'Opening…' : 'Install'}
+              {busy ? labels.opening : labels.install}
             </Button>
           ) : null}
           <Button type="button" size="sm" variant="ghost" onClick={dismiss}>
-            Not now
+            {labels.notNow}
           </Button>
         </div>
       </div>

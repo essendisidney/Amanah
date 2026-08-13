@@ -2,28 +2,38 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@jamiya/ui';
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import type { DashboardJamiya } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 import { StatusBadge } from './dashboard-stats';
 
-export function MyCirclesSection({ jamiyas }: { jamiyas: DashboardJamiya[] }) {
+export function MyCirclesSection({
+  jamiyas,
+  labels,
+  common,
+}: {
+  jamiyas: DashboardJamiya[];
+  labels: Dictionary['dashboard'];
+  common: Dictionary['common'];
+}) {
   return (
     <section>
       <SectionHeader
-        title="My circles"
-        description="Circles you belong to as a member or circle admin."
+        title={labels.myCirclesTitle}
+        description={labels.myCirclesDesc}
         action={
           <Button asChild size="sm" variant="outline">
-            <Link href={'/circles' as Route}>View all</Link>
+            <Link href={'/circles' as Route}>{common.viewAll}</Link>
           </Button>
         }
       />
 
       {jamiyas.length === 0 ? (
         <EmptyState
-          title="No circles yet"
-          description="Create a circle or accept an invitation to start saving with your community."
-          actionLabel="Create a circle"
+          title={labels.noCirclesTitle}
+          description={labels.noCirclesDesc}
+          actionLabel={labels.createACircle}
           actionHref={'/circles/new' as Route}
         />
       ) : (
@@ -41,18 +51,20 @@ export function MyCirclesSection({ jamiyas }: { jamiyas: DashboardJamiya[] }) {
                     <StatusBadge status={item.role} />
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {item.jamiya.memberCount}/{item.jamiya.maxMembers} members · Cycle{' '}
-                    {item.jamiya.currentCycle}/{item.jamiya.cycleCount}
+                    {item.jamiya.memberCount}/{item.jamiya.maxMembers} {common.members} ·{' '}
+                    {common.cycle} {item.jamiya.currentCycle}/{item.jamiya.cycleCount}
                     {item.jamiya.startDate
-                      ? ` · Starts ${formatDate(item.jamiya.startDate)}`
+                      ? ` · ${common.starts} ${formatDate(item.jamiya.startDate)}`
                       : ''}
                   </p>
                 </div>
                 <div className="shrink-0 text-sm font-medium text-foreground sm:text-right">
                   {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}
                   <span className="block text-xs font-normal text-muted-foreground">
-                    per cycle
-                    {item.payoutPosition ? ` · Position #${item.payoutPosition}` : ''}
+                    {common.perCycle}
+                    {item.payoutPosition
+                      ? ` · ${t(labels.position, { n: item.payoutPosition })}`
+                      : ''}
                   </span>
                 </div>
               </Link>

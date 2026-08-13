@@ -1,22 +1,27 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import type { DashboardPayout } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 import { StatusBadge } from './dashboard-stats';
 
-export function PayoutsSection({ payouts }: { payouts: DashboardPayout[] }) {
+export function PayoutsSection({
+  payouts,
+  labels,
+}: {
+  payouts: DashboardPayout[];
+  labels: Dictionary['dashboard'];
+}) {
   return (
     <section>
-      <SectionHeader
-        title="Payout schedule"
-        description="Your upcoming or in-progress payout turns."
-      />
+      <SectionHeader title={labels.payoutsTitle} description={labels.payoutsDesc} />
 
       {payouts.length === 0 ? (
         <EmptyState
-          title="No payouts scheduled"
-          description="Once the circle assigns payout order and cycles begin, your turns will show here."
+          title={labels.payoutsEmptyTitle}
+          description={labels.payoutsEmptyDesc}
         />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -36,7 +41,10 @@ export function PayoutsSection({ payouts }: { payouts: DashboardPayout[] }) {
                   <StatusBadge status={item.status} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Cycle {item.cycleNumber} · Scheduled {formatDate(item.scheduledDate)}
+                  {t(labels.cycleScheduled, {
+                    cycle: item.cycleNumber,
+                    date: formatDate(item.scheduledDate),
+                  })}
                 </p>
               </div>
               <p className="text-sm font-semibold text-foreground">

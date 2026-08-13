@@ -2,36 +2,42 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@jamiya/ui';
 import { formatRelativeTime } from '@jamiya/shared';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import type { DashboardNotification } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 
 export function NotificationsSection({
   notifications,
   unreadCount,
+  labels,
+  common,
 }: {
   notifications: DashboardNotification[];
   unreadCount: number;
+  labels: Dictionary['dashboard'];
+  common: Dictionary['common'];
 }) {
   return (
     <section>
       <SectionHeader
-        title="Notifications"
+        title={labels.notificationsTitle}
         description={
           unreadCount > 0
-            ? `${unreadCount} unread`
-            : 'Recent activity from your circles.'
+            ? t(labels.unread, { count: unreadCount })
+            : labels.notificationsDesc
         }
         action={
           <Button asChild size="sm" variant="outline">
-            <Link href={'/notifications' as Route}>View all</Link>
+            <Link href={'/notifications' as Route}>{common.viewAll}</Link>
           </Button>
         }
       />
 
       {notifications.length === 0 ? (
         <EmptyState
-          title="You're all caught up"
-          description="Invites, dues, and payout updates will land here."
+          title={labels.notificationsEmptyTitle}
+          description={labels.notificationsEmptyDesc}
         />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">

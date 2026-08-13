@@ -10,6 +10,8 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
+import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Wallet',
@@ -45,8 +47,8 @@ export default async function WalletPage() {
     redirect('/login?next=/wallet');
   }
 
-  const [{ data }, { data: txData }, { data: intentData }, { data: pendingData }] =
-    await Promise.all([
+  const [{ dict }, walletResult, txResult, intentResult, pendingResult] = await Promise.all([
+    getDictionary(),
     supabase
       .from('wallets')
       .select('balance, available_balance, currency, updated_at')
@@ -74,8 +76,9 @@ export default async function WalletPage() {
       .limit(10),
   ]);
 
-  const wallets = (data ?? []) as unknown as WalletRow[];
-  const transactions = (txData ?? []) as unknown as TxRow[];
+  const labels = dict.wallet;
+  const wallets = (walletResult.data ?? []) as unknown as WalletRow[];
+  const transactions = (txResult.data ?? []) as unknown as TxRow[];
   type IntentRow = {
     id: string;
     status: string;
@@ -86,27 +89,27 @@ export default async function WalletPage() {
     error_message: string | null;
     created_at: string;
   };
-  const failedIntents = (intentData ?? []) as unknown as IntentRow[];
-  const pendingIntents = (pendingData ?? []) as unknown as IntentRow[];
+  const failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
+  const pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
   const primaryCurrency = wallets[0]?.currency ?? 'KES';
 
   return (
     <div className="space-y-10">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Balances</p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-          Wallet
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Top up to pay contributions. Payouts credit here when cycles settle.
+        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+          {labels.eyebrow}
         </p>
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
+          {labels.title}
+        </h1>
+        <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
       </div>
 
       {wallets.length === 0 ? (
         <EmptyState
-          title="No wallet found"
-          description="A default wallet is created automatically when your profile is provisioned."
-          actionLabel="Back to dashboard"
+          title={labels.emptyTitle}
+          description={labels.emptyDesc}
+          actionLabel={dict.common.backToDashboard}
           actionHref={'/dashboard' as Route}
         />
       ) : (
@@ -131,7 +134,9 @@ export default async function WalletPage() {
                   {formatCurrency(available, wallet.currency)}
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Total balance {formatCurrency(balance, wallet.currency)}
+                  {t(labels.totalBalance, {
+                    amount: formatCurrency(balance, wallet.currency),
+                  })}
                 </p>
               </li>
             );
@@ -142,7 +147,7 @@ export default async function WalletPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <section className="space-y-4">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Top up
+            {labels.topUp}
           </h2>
           <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
             <TopUpForm
@@ -162,7 +167,7 @@ export default async function WalletPage() {
 
         <section className="space-y-4">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Withdraw
+            {labels.withdraw}
           </h2>
           <div className="rounded-xl border border-border bg-card p-5 sm:p-6">
             <WithdrawalForm currency={primaryCurrency} />
@@ -173,7 +178,7 @@ export default async function WalletPage() {
       {pendingIntents.length > 0 ? (
         <section className="space-y-4">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Payments in progress
+            {labels.paymentsInProgress}
           </h2>
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {pendingIntents.map((intent) => (
@@ -199,7 +204,7 @@ export default async function WalletPage() {
       {failedIntents.length > 0 ? (
         <section className="space-y-4">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Failed payments — retry
+            {labels.failedPayments}
           </h2>
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {failedIntents.map((intent) => (
@@ -229,12 +234,10 @@ export default async function WalletPage() {
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Transaction history
+          {labels.historyTitle}
         </h2>
         {transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No ledger entries yet. Top-ups, contributions, and payouts will appear here.
-          </p>
+          <p className="text-sm text-muted-foreground">{labels.historyEmpty}</p>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {transactions.map((tx) => {
@@ -274,7 +277,7 @@ export default async function WalletPage() {
       </section>
 
       <Button asChild variant="outline">
-        <Link href={'/dashboard' as Route}>Back to dashboard</Link>
+        <Link href={'/dashboard' as Route}>{dict.common.backToDashboard}</Link>
       </Button>
     </div>
   );

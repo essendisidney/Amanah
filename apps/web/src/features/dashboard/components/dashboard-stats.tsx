@@ -1,30 +1,45 @@
 import { Badge } from '@jamiya/ui';
 import { formatCurrency } from '@jamiya/shared';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
 
-export function DashboardStats({ data }: { data: DashboardData }) {
+export function DashboardStats({
+  data,
+  labels,
+}: {
+  data: DashboardData;
+  labels: Dictionary['dashboard'];
+}) {
+  const membershipHint =
+    data.jamiyas.length === 1
+      ? t(labels.membershipsHintOne, { count: data.jamiyas.length })
+      : t(labels.membershipsHint, { count: data.jamiyas.length });
+
   const items = [
     {
-      label: 'Active circles',
+      label: labels.activeCircles,
       value: String(data.stats.activeCircles),
-      hint: `${data.jamiyas.length} total membership${data.jamiyas.length === 1 ? '' : 's'}`,
+      hint: membershipHint,
     },
     {
-      label: 'Pending contributions',
+      label: labels.pendingContributions,
       value: String(data.stats.pendingContributions),
-      hint: 'Due or overdue',
+      hint: labels.dueOrOverdue,
     },
     {
-      label: 'Upcoming payouts',
+      label: labels.upcomingPayouts,
       value: String(data.stats.upcomingPayouts),
-      hint: 'Scheduled for you',
+      hint: labels.scheduledForYou,
     },
     {
-      label: 'Wallet',
+      label: labels.wallet,
       value: data.wallet
         ? formatCurrency(data.wallet.availableBalance, data.wallet.currency)
         : '—',
-      hint: data.wallet ? `${data.wallet.currency} available` : 'No wallet yet',
+      hint: data.wallet
+        ? t(labels.availableHint, { currency: data.wallet.currency })
+        : labels.noWalletYet,
     },
   ];
 
