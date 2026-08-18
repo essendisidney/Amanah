@@ -45,10 +45,31 @@ export async function POST(request: Request) {
     bankName?: string;
     bankAccountName?: string;
     bankAccountNumber?: string;
+    otp?: string;
   } | null;
 
   if (!body?.amount || body.amount <= 0 || !body.destinationType) {
     return NextResponse.json({ ok: false, error: 'INVALID_PAYLOAD' }, { status: 400 });
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('phone')
+    .eq('id', user.id)
+    .maybeSingle();
+  const { requireApiWalletStepUp } = await import('@/lib/wallet/step-up');
+  const stepUp = await requireApiWalletStepUp({
+    phoneRaw: String(
+      (profile as { phone?: string | null } | null)?.phone ??
+        user.phone ??
+        body.mpesaPhone ??
+        '',
+    ),
+    purpose: 'wallet_withdraw',
+    otp: body.otp,
+  });
+  if (!stepUp.ok) {
+    return NextResponse.json(stepUp.body, { status: stepUp.status });
   }
 
   const { data, error } = await supabase.rpc('request_withdrawal', {

@@ -114,13 +114,13 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            Member statement
+            ID report
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiya.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Code {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
+            Member ID {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

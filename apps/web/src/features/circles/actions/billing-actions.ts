@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
+import { mapMoneyError, redirectWithCircleNotice } from '@/features/circles/lib/circle-notice';
 
 export async function setCirclePlanAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
@@ -9,7 +10,7 @@ export async function setCirclePlanAction(formData: FormData): Promise<void> {
   const slug = String(formData.get('slug') ?? '');
   if (!jamiyaId || !planId) return;
 
-  await callRpc('set_circle_plan', {
+  const { data, error } = await callRpc('set_circle_plan', {
     p_jamiya_id: jamiyaId,
     p_plan_id: planId,
   });
@@ -19,6 +20,41 @@ export async function setCirclePlanAction(formData: FormData): Promise<void> {
     revalidatePath(`/circles/${slug}/officer`);
   }
   revalidatePath('/pricing');
+
+  if (!slug) return;
+
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message), 'error', '/officer');
+  }
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    already_active?: boolean;
+    price_kes?: number;
+  } | null;
+  if (!result?.ok) {
+    const code = result?.error ?? 'Could not update plan.';
+    if (code === 'MEMBER_LIMIT') {
+      redirectWithCircleNotice(
+        slug,
+        'This circle has more members than the plan allows. Reduce seats or pick Pro.',
+        'error',
+        '/officer',
+      );
+    }
+    redirectWithCircleNotice(slug, mapMoneyError(code), 'error', '/officer');
+  }
+  const charged = Number(result?.price_kes ?? 0) > 0;
+  redirectWithCircleNotice(
+    slug,
+    result?.already_active
+      ? 'That plan is already active.'
+      : charged
+        ? 'Plan paid from your wallet and activated for 30 days.'
+        : 'Plan updated.',
+    'success',
+    '/officer',
+  );
 }
 
 export async function setCircleDualApprovalAction(formData: FormData): Promise<void> {

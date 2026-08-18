@@ -134,13 +134,16 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
             {jamiya.name}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Register share purchases and allocate dividends pro‑rata — Chamasoft-style equity for
-            investment groups.
+            Register share purchases and allocate dividends, profits, and equity for investment
+            groups.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/statement` as Route}>ID reports</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>

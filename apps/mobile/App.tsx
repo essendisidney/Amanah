@@ -315,6 +315,7 @@ export default function App() {
         currency: 'KES',
         maxMembers,
         cycleCount,
+        challengeKind: 'savings',
         contributionFrequencyDays: 30,
         status: 'open',
       });

@@ -11,6 +11,7 @@ export type WalletActionState = {
   success: boolean;
   message: string;
   intentId?: string;
+  needsOtp?: boolean;
 };
 
 export async function topUpWalletAction(
@@ -26,6 +27,18 @@ export async function topUpWalletAction(
 
   if (!Number.isFinite(amount) || amount < 100) {
     return { success: false, message: 'Enter an amount of at least 100.' };
+  }
+
+  const otp = String(formData.get('otp') ?? '').trim();
+  const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
+    '@/lib/wallet/step-up'
+  );
+  if (!otp) {
+    return sendWalletStepUpOtp('wallet_top_up');
+  }
+  const stepUp = await consumeWalletStepUpOtp('wallet_top_up', otp);
+  if (!stepUp.ok) {
+    return { success: false, needsOtp: true, message: stepUp.error };
   }
 
   if (provider === 'mpesa' && !/^\+[1-9]\d{7,14}$/.test(phone)) {

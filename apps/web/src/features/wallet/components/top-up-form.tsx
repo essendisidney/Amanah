@@ -21,6 +21,7 @@ export function TopUpForm({
   labels: Dictionary['walletForms'];
 }) {
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
+  const needsOtp = Boolean(state.needsOtp);
 
   return (
     <form action={action} className="space-y-4">
@@ -59,6 +60,23 @@ export function TopUpForm({
       ) : (
         <p className="text-xs text-muted-foreground">{labels.simulatedHint}</p>
       )}
+      <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
+      {needsOtp ? (
+        <div className="space-y-2">
+          <Label htmlFor="otp">{labels.verificationCode}</Label>
+          <Input
+            id="otp"
+            name="otp"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            pattern="\d{6}"
+            required
+            autoFocus
+            className="h-11 tracking-[0.3em] text-base sm:h-10 sm:text-sm"
+          />
+        </div>
+      ) : null}
       {state.message ? (
         <p
           className={
@@ -72,13 +90,9 @@ export function TopUpForm({
       <Button type="submit" className="min-h-11 w-full" disabled={pending}>
         {pending
           ? labels.processing
-          : provider === 'mpesa'
-            ? labels.payMpesa
-            : provider === 'paystack'
-              ? labels.payPaystack
-              : provider === 'bank'
-                ? labels.startBank
-                : labels.topUpWallet}
+          : needsOtp
+            ? labels.confirmWithCode
+            : labels.sendCode}
       </Button>
     </form>
   );

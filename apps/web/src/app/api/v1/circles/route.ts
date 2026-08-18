@@ -91,6 +91,7 @@ export async function POST(request: Request) {
     joinFeeAmount: body.joinFeeAmount ?? body.join_fee_amount ?? 0,
     transactionFeeAmount: body.transactionFeeAmount ?? body.transaction_fee_amount ?? 0,
     gracePeriodDays: body.gracePeriodDays ?? body.grace_period_days ?? 3,
+    challengeKind: body.challengeKind ?? body.challenge_kind ?? 'savings',
   });
 
   if (!parsed.success) {
@@ -137,6 +138,7 @@ export async function POST(request: Request) {
       join_fee_amount: input.joinFeeAmount,
       transaction_fee_amount: input.transactionFeeAmount,
       grace_period_days: input.gracePeriodDays,
+      challenge_kind: input.challengeKind ?? 'savings',
     })
     .select('id, slug, name, status, contribution_amount, currency, max_members, cycle_count')
     .single();

@@ -71,6 +71,7 @@ export const createCircleSchema = z
       }),
     status: z.enum(['draft', 'open']),
     segment: z.enum(['general', 'womens_circle', 'boda_stage']).default('general'),
+    challengeKind: z.enum(['rotating', 'savings', 'share_dividend']).default('savings'),
     joinFeeAmount: z.coerce.number().min(0).max(1_000_000).default(0),
     transactionFeeAmount: z.coerce.number().min(0).max(100_000).default(0),
     gracePeriodDays: z.coerce.number().int().min(0).max(14).default(3),

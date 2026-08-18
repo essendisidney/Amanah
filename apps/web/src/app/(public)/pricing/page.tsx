@@ -59,8 +59,9 @@ export default async function PricingPage() {
         Pricing for your circle
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-        Pick a plan that matches your chama size. Officers can change the plan from the
-        officer console. SMS / WhatsApp need provider secrets on the server.
+        Pick a plan that matches your chama size. Officers change the plan from the
+        officer console. Starter and Pro collect fees from the officer&apos;s Amanah
+        wallet (top up with Paystack or M-Pesa when those providers are on).
       </p>
 
       <ul className="mt-12 grid gap-6 md:grid-cols-3">

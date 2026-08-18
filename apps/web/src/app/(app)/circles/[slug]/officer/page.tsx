@@ -17,6 +17,7 @@ import {
 import { decideQardAction } from '@/features/finance/actions';
 import { Input, Label } from '@jamiya/ui';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 
 export const metadata: Metadata = { title: 'Officer console' };
 export const dynamic = 'force-dynamic';
@@ -56,10 +57,14 @@ async function decideQardFormAction(formData: FormData) {
   revalidatePath('/finance/qard');
 }
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+};
 
-export default async function OfficerConsolePage({ params }: Props) {
+export default async function OfficerConsolePage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const notices = (await searchParams) ?? {};
   const { dict } = await getDictionary();
   const supabase = await createClient();
   const {
@@ -253,6 +258,7 @@ export default async function OfficerConsolePage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-6 py-10">
+      <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
@@ -307,13 +313,13 @@ export default async function OfficerConsolePage({ params }: Props) {
             href={`/circles/${slug}/statement` as Route}
             className="rounded-md border border-border px-3 py-1.5 text-sm"
           >
-            Statements
+            ID reports
           </Link>
           <Link
             href={`/circles/${slug}/report` as Route}
             className="rounded-md border border-border px-3 py-1.5 text-sm"
           >
-            Report
+            GL report
           </Link>
           <Link
             href={`/circles/${slug}/arrears` as Route}
@@ -352,7 +358,7 @@ export default async function OfficerConsolePage({ params }: Props) {
             <span className="font-medium text-foreground">
               {planInfo?.plan?.name ?? 'Free'}
             </span>
-            . See{' '}
+            . Starter and Pro charge the officer wallet in KES for 30 days. See{' '}
             <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
               pricing
             </Link>
@@ -631,6 +637,11 @@ export default async function OfficerConsolePage({ params }: Props) {
                   </p>
                 </div>
                 <div className="flex gap-2">
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/circles/${slug}/statement?memberId=${m.id}` as Route}>
+                      ID report
+                    </Link>
+                  </Button>
                   <form action={vouchFormAction}>
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="memberId" value={m.id} />

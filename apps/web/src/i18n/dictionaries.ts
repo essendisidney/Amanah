@@ -180,6 +180,10 @@ export type Dictionary = {
     requestWithdrawal: string;
     retry: string;
     retrying: string;
+    stepUpHint: string;
+    verificationCode: string;
+    sendCode: string;
+    confirmWithCode: string;
   };
   finance: {
     eyebrow: string;
@@ -263,6 +267,7 @@ export type Dictionary = {
     journal: string;
     invoices: string;
     myStatement: string;
+    idReport: string;
     officerConsole: string;
     contribution: string;
     members: string;
@@ -523,6 +528,11 @@ export const en: Dictionary = {
     requestWithdrawal: 'Request withdrawal',
     retry: 'Retry',
     retrying: 'Retrying…',
+    stepUpHint:
+      'Layer 2: we SMS a code to the phone on your profile before money can move.',
+    verificationCode: 'Verification code',
+    sendCode: 'Send verification code',
+    confirmWithCode: 'Confirm with code',
   },
   finance: {
     eyebrow: 'Circle finance',
@@ -607,6 +617,7 @@ export const en: Dictionary = {
     journal: 'Journal',
     invoices: 'Invoices',
     myStatement: 'My statement',
+    idReport: 'ID report',
     officerConsole: 'Officer console',
     contribution: 'Contribution',
     members: 'Members',
@@ -872,6 +883,11 @@ export const sw: Dictionary = {
     requestWithdrawal: 'Omba kutoa pesa',
     retry: 'Jaribu tena',
     retrying: 'Inajaribu tena…',
+    stepUpHint:
+      'Safu ya 2: tunatuma SMS ya nambari kwenye simu ya wasifu wako kabla pesa haijahanishwa.',
+    verificationCode: 'Nambari ya uthibitisho',
+    sendCode: 'Tuma nambari ya uthibitisho',
+    confirmWithCode: 'Thibitisha kwa nambari',
   },
   finance: {
     eyebrow: 'Fedha za mduara',
@@ -956,6 +972,7 @@ export const sw: Dictionary = {
     journal: 'Jarida',
     invoices: 'Ankara',
     myStatement: 'Taarifa yangu',
+    idReport: 'Ripoti ya kitambulisho',
     officerConsole: 'Dashibodi ya ofisa',
     contribution: 'Mchango',
     members: 'Wanachama',

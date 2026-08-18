@@ -15,10 +15,28 @@ export async function POST(request: Request) {
     amount?: number;
     currency?: string;
     phone?: string;
+    otp?: string;
   } | null;
 
   if (!body?.amount || body.amount < 100) {
     return NextResponse.json({ ok: false, error: 'INVALID_AMOUNT' }, { status: 400 });
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('phone')
+    .eq('id', user.id)
+    .maybeSingle();
+  const { requireApiWalletStepUp } = await import('@/lib/wallet/step-up');
+  const stepUp = await requireApiWalletStepUp({
+    phoneRaw: String(
+      (profile as { phone?: string | null } | null)?.phone ?? user.phone ?? body.phone ?? '',
+    ),
+    purpose: 'wallet_top_up',
+    otp: body.otp,
+  });
+  if (!stepUp.ok) {
+    return NextResponse.json(stepUp.body, { status: stepUp.status });
   }
 
   const providerEnv = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();

@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
       .select('id')
       .eq('phone', normalized)
       .eq('code', codeRaw)
+      .eq('purpose', 'auth')
       .eq('used', false)
       .gte('expires_at', now)
       .order('created_at', { ascending: false })

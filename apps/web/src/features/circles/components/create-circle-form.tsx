@@ -49,6 +49,7 @@ export function CreateCircleForm() {
       startDate: '',
       status: 'open',
       segment: 'general',
+      challengeKind: 'savings',
       joinFeeAmount: 0,
       transactionFeeAmount: 0,
       gracePeriodDays: 3,
@@ -58,8 +59,11 @@ export function CreateCircleForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = form;
+
+  const challengeKind = watch('challengeKind');
 
   const onValid = (values: FormValues) => {
     const fd = new FormData();
@@ -73,6 +77,7 @@ export function CreateCircleForm() {
     fd.set('startDate', values.startDate ?? '');
     fd.set('status', values.status);
     fd.set('segment', values.segment);
+    fd.set('challengeKind', values.challengeKind ?? 'savings');
     fd.set('joinFeeAmount', String(values.joinFeeAmount ?? 0));
     fd.set('transactionFeeAmount', String(values.transactionFeeAmount ?? 0));
     fd.set('gracePeriodDays', String(values.gracePeriodDays ?? 3));
@@ -173,6 +178,27 @@ export function CreateCircleForm() {
             </p>
             <FieldError message={fieldError('cycleCount')} />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="challengeKind">Challenge type</Label>
+          <select
+            id="challengeKind"
+            className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            {...register('challengeKind')}
+          >
+            <option value="savings">Savings challenge (no rotating payouts)</option>
+            <option value="share_dividend">Share / dividend group</option>
+            <option value="rotating">Rotating payouts (merry-go-round)</option>
+          </select>
+          <p className="text-xs text-muted-foreground">
+            {challengeKind === 'share_dividend'
+              ? 'Members buy shares and take dividends or profits. Activation will not create merry-go-round payouts.'
+              : challengeKind === 'rotating'
+                ? 'Classic rotating circle: one scheduled payout turn per cycle.'
+                : 'Contribution rounds only. Number of cycles is not the number of people.'}
+          </p>
+          <FieldError message={fieldError('challengeKind')} />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

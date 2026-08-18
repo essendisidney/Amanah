@@ -7,6 +7,7 @@ import { logger } from '@/lib/observability';
 export type WithdrawalActionState = {
   success: boolean;
   message: string;
+  needsOtp?: boolean;
 };
 
 export async function requestWithdrawalAction(
@@ -23,6 +24,18 @@ export async function requestWithdrawalAction(
 
   if (!Number.isFinite(amount) || amount < 100) {
     return { success: false, message: 'Enter an amount of at least 100.' };
+  }
+
+  const otp = String(formData.get('otp') ?? '').trim();
+  const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
+    '@/lib/wallet/step-up'
+  );
+  if (!otp) {
+    return sendWalletStepUpOtp('wallet_withdraw');
+  }
+  const stepUp = await consumeWalletStepUpOtp('wallet_withdraw', otp);
+  if (!stepUp.ok) {
+    return { success: false, needsOtp: true, message: stepUp.error };
   }
 
   const { data, error } = await callRpc('request_withdrawal', {

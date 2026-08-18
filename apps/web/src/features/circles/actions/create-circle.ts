@@ -29,6 +29,7 @@ function formDataToPayload(formData: FormData): Record<string, unknown> {
     joinFeeAmount: formData.get('joinFeeAmount') || 0,
     transactionFeeAmount: formData.get('transactionFeeAmount') || 0,
     gracePeriodDays: formData.get('gracePeriodDays') || 3,
+    challengeKind: formData.get('challengeKind') || 'savings',
   };
 }
 
@@ -91,6 +92,7 @@ export async function createCircleAction(
     join_fee_amount: input.joinFeeAmount,
     transaction_fee_amount: input.transactionFeeAmount,
     grace_period_days: input.gracePeriodDays,
+    challenge_kind: input.challengeKind ?? 'savings',
   };
 
   const { data: jamiya, error } = await supabase

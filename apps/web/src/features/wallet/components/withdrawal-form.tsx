@@ -20,6 +20,7 @@ export function WithdrawalForm({
 }) {
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
+  const needsOtp = Boolean(state.needsOtp);
 
   return (
     <form action={action} className="space-y-4">
@@ -100,8 +101,30 @@ export function WithdrawalForm({
         </p>
       ) : null}
 
+      <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
+      {needsOtp ? (
+        <div className="space-y-2">
+          <Label htmlFor="withdraw-otp">{labels.verificationCode}</Label>
+          <Input
+            id="withdraw-otp"
+            name="otp"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            pattern="\d{6}"
+            required
+            autoFocus
+            className="h-11 tracking-[0.3em] text-base sm:h-10 sm:text-sm"
+          />
+        </div>
+      ) : null}
+
       <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
-        {pending ? labels.submitting : labels.requestWithdrawal}
+        {pending
+          ? labels.submitting
+          : needsOtp
+            ? labels.confirmWithCode
+            : labels.sendCode}
       </Button>
     </form>
   );

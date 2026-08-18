@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
     const { error: insertError } = await admin.from('otp_codes').insert({
       phone: normalized,
       code,
+      purpose: 'auth',
       expires_at: expiresAt,
       used: false,
     });

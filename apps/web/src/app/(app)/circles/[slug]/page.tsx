@@ -69,6 +69,7 @@ type JamiyaRow = {
   late_loan_penalty_fixed?: number | string | null;
   late_loan_penalty_pct?: number | string | null;
   payout_compliance_mode?: string | null;
+  challenge_kind?: string | null;
 };
 
 type Props = {
@@ -98,7 +99,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       max_members, member_count, cycle_count, current_cycle,
       contribution_frequency_days, start_date,
       late_contribution_penalty, missed_contribution_penalty,
-      late_loan_penalty_fixed, late_loan_penalty_pct, payout_compliance_mode
+      late_loan_penalty_fixed, late_loan_penalty_pct, payout_compliance_mode,
+      challenge_kind
     `,
     )
     .eq('slug', slug)
@@ -640,6 +642,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             />
           </div>
         ) : null}
+        {jamiya.challenge_kind && jamiya.challenge_kind !== 'rotating' ? (
+          <p className="text-sm text-muted-foreground">
+            {jamiya.challenge_kind === 'share_dividend'
+              ? 'Share / dividend group — profits and equity, not rotating payouts.'
+              : 'Savings challenge — contribution rounds only, not a merry-go-round.'}
+          </p>
+        ) : null}
         <div className="flex flex-wrap gap-2 pt-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
@@ -663,7 +672,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/statement` as Route}>{circleLabels.myStatement}</Link>
+            <Link href={`/circles/${slug}/statement` as Route}>{circleLabels.idReport}</Link>
           </Button>
           {canManageMembers ? (
             <Button asChild variant="outline" size="sm">
