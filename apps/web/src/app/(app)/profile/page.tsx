@@ -7,6 +7,7 @@ import { signOutAction } from '@/features/auth';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
+import { IprsVerifyForm } from '@/features/profile/components/iprs-verify-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 import { ReferralPanel } from '@/features/profile/components/referral-panel';
 import { getDictionary } from '@/i18n/get-dictionary';
@@ -29,6 +30,8 @@ type ProfileRow = {
   kyc_status: string;
   profile_completed: boolean;
   referral_code: string | null;
+  national_id: string | null;
+  iprs_status: string | null;
 };
 
 type KycRow = {
@@ -56,7 +59,7 @@ export default async function ProfilePage() {
     supabase
       .from('profiles')
       .select(
-        'full_name, email, phone, mpesa_phone, bio, country_code, platform_role, kyc_status, profile_completed, referral_code',
+        'full_name, email, phone, mpesa_phone, bio, country_code, platform_role, kyc_status, profile_completed, referral_code, national_id, iprs_status',
       )
       .eq('id', user.id)
       .maybeSingle(),
@@ -137,6 +140,18 @@ export default async function ProfilePage() {
           referralCode={profile?.referral_code ?? null}
           referrals={referrals}
         />
+
+        <div className="rounded-xl border border-border bg-card p-6">
+          <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
+            IPRS identity (Kenya)
+          </h2>
+          <IprsVerifyForm
+            defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
+            defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
+            defaultNationalId={profile?.national_id ?? ''}
+            iprsStatus={profile?.iprs_status ?? 'not_checked'}
+          />
+        </div>
 
         <div className="space-y-6">
           <div className="rounded-xl border border-border bg-card p-6">

@@ -3,6 +3,7 @@
 import { updateProfileSchema, sanitizePlainText } from '@jamiya/shared';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mapProfileZodErrors, type ProfileActionState } from '../lib/state';
 
 export async function updateProfileAction(
@@ -168,4 +169,120 @@ export async function uploadKycDocumentAction(
 
   revalidatePath('/profile');
   return { success: true, message: 'Document uploaded for review.' };
+}
+
+export async function verifyIprsAction(
+  _prev: ProfileActionState,
+  formData: FormData,
+): Promise<ProfileActionState> {
+  const firstName = String(formData.get('firstName') ?? '').trim();
+  const lastName = String(formData.get('lastName') ?? '').trim();
+  const nationalId = String(formData.get('nationalId') ?? '').trim();
+  const dateOfBirth = String(formData.get('dateOfBirth') ?? '').trim() || null;
+
+  if (firstName.length < 2 || lastName.length < 2) {
+    return { success: false, message: 'Enter first and last name as on the National ID.' };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, message: 'Authentication required.' };
+  }
+
+  let service;
+  try {
+    service = createServiceRoleClient();
+  } catch {
+    return { success: false, message: 'Server is not configured for IPRS lookup.' };
+  }
+
+  const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count } = await service
+    .from('iprs_verifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('created_at', hourAgo);
+
+  if ((count ?? 0) >= 5) {
+    return { success: false, message: 'Too many IPRS checks this hour. Try again later.' };
+  }
+
+  const { lookupIprs, normalizeKenyaNationalId } = await import('@/lib/iprs/client');
+  const id = normalizeKenyaNationalId(nationalId);
+  if (!id) {
+    return { success: false, message: 'Enter an 8- or 9-digit Kenya National ID / Maisha Namba.' };
+  }
+
+  const result = await lookupIprs({
+    nationalId: id,
+    firstName,
+    lastName,
+    dateOfBirth,
+  });
+
+  await service.from('iprs_verifications').insert({
+    user_id: user.id,
+    national_id: id,
+    first_name: firstName,
+    last_name: lastName,
+    date_of_birth: dateOfBirth,
+    provider: result.provider,
+    outcome: result.outcome,
+    matched: result.matched,
+    response: result.raw,
+  } as never);
+
+  const iprsStatus = result.matched
+    ? 'matched'
+    : result.outcome === 'not_found'
+      ? 'not_found'
+      : result.outcome === 'error'
+        ? 'error'
+        : 'mismatch';
+
+  const profilePatch: Record<string, unknown> = {
+    national_id: id,
+    date_of_birth: dateOfBirth,
+    iprs_status: iprsStatus,
+    iprs_full_name: result.fullName ?? `${firstName} ${lastName}`,
+    iprs_verified_at: result.matched ? new Date().toISOString() : null,
+  };
+  if (result.matched) {
+    profilePatch.full_name = result.fullName ?? `${firstName} ${lastName}`;
+    profilePatch.kyc_status = 'approved';
+    profilePatch.profile_completed = true;
+  }
+
+  const { error: profileError } = await service
+    .from('profiles')
+    .update(profilePatch as never)
+    .eq('id', user.id);
+
+  if (profileError) {
+    return { success: false, message: profileError.message };
+  }
+
+  await service.from('audit_logs').insert({
+    actor_id: user.id,
+    action: 'kyc_update',
+    entity_type: 'profile',
+    entity_id: user.id,
+    metadata: {
+      source: 'iprs',
+      provider: result.provider,
+      outcome: result.outcome,
+      matched: result.matched,
+    },
+  } as never);
+
+  revalidatePath('/profile');
+  revalidatePath('/dashboard');
+
+  return {
+    success: result.matched,
+    message: result.message,
+  };
 }
