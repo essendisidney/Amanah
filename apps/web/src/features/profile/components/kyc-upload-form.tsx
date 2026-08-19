@@ -1,16 +1,16 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Alert, AlertDescription, Button, Label } from '@jamiya/ui';
-import { uploadKycDocumentAction } from '../actions/profile-actions';
-import { initialProfileActionState } from '../lib/state';
+import { registerKycDocumentAction } from '../actions/profile-actions';
+import { prepareKycUploadFile } from '../lib/prepare-kyc-file';
+import { initialProfileActionState, type ProfileActionState } from '../lib/state';
+import { createClient } from '@/lib/supabase/client';
 import type { Dictionary } from '@/i18n/dictionaries';
 
 export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
-  const [state, formAction, pending] = useActionState(
-    uploadKycDocumentAction,
-    initialProfileActionState,
-  );
+  const [state, setState] = useState<ProfileActionState>(initialProfileActionState);
+  const [pending, setPending] = useState(false);
 
   const documentTypes = [
     { value: 'national_id', label: labels.nationalId },
@@ -21,6 +21,75 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
     { value: 'other', label: labels.other },
   ] as const;
 
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const documentType = String(formData.get('documentType') ?? '');
+    const file = formData.get('file');
+
+    if (!(file instanceof File) || file.size === 0) {
+      setState({ success: false, message: 'Choose a file to upload.' });
+      return;
+    }
+
+    setPending(true);
+    setState(initialProfileActionState);
+    try {
+      const prepared = await prepareKycUploadFile(file);
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setState({ success: false, message: 'Authentication required.' });
+        return;
+      }
+
+      const documentId = crypto.randomUUID();
+      const safeName = prepared.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'id.jpg';
+      const storagePath = `${user.id}/${documentId}/${safeName}`;
+      const { error: uploadError } = await supabase.storage
+        .from('kyc-documents')
+        .upload(storagePath, prepared, {
+          contentType: prepared.type || 'image/jpeg',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        setState({ success: false, message: uploadError.message });
+        return;
+      }
+
+      const registerData = new FormData();
+      registerData.set('documentId', documentId);
+      registerData.set('documentType', documentType);
+      registerData.set('storagePath', storagePath);
+      registerData.set('fileName', prepared.name);
+      registerData.set('mimeType', prepared.type || 'image/jpeg');
+      registerData.set('fileSizeBytes', String(prepared.size));
+
+      const result = await registerKycDocumentAction(
+        initialProfileActionState,
+        registerData,
+      );
+      setState(result);
+      if (result.success) {
+        form.reset();
+      }
+    } catch (error) {
+      setState({
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'Could not upload that ID. Try a smaller JPEG photo.',
+      });
+    } finally {
+      setPending(false);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {state.message ? (
@@ -29,7 +98,7 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
         </Alert>
       ) : null}
 
-      <form action={formAction} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="documentType">{labels.documentType}</Label>
           <select
@@ -53,7 +122,7 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
             name="file"
             type="file"
             required
-            accept="image/jpeg,image/png,image/webp,application/pdf"
+            accept="image/*,image/heic,image/heif,application/pdf,.jpg,.jpeg,.png,.webp,.heic,.pdf"
             className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-2 file:text-sm file:font-medium"
           />
         </div>

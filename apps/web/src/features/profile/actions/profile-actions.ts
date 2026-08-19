@@ -91,91 +91,94 @@ export async function linkMpesaPhoneAction(
   return { success: true, message: 'M-Pesa number linked.' };
 }
 
-export async function uploadKycDocumentAction(
+const KYC_DOC_TYPES = [
+  'national_id',
+  'passport',
+  'driving_license',
+  'proof_of_address',
+  'selfie',
+  'other',
+];
+
+/** Register a KYC file after the browser uploads it to Storage (avoids Vercel body-size crashes). */
+export async function registerKycDocumentAction(
   _prev: ProfileActionState,
   formData: FormData,
 ): Promise<ProfileActionState> {
-  const documentType = String(formData.get('documentType') ?? '');
-  const file = formData.get('file');
+  try {
+    const documentType = String(formData.get('documentType') ?? '');
+    const documentId = String(formData.get('documentId') ?? '');
+    const storagePath = String(formData.get('storagePath') ?? '');
+    const fileName = String(formData.get('fileName') ?? 'document');
+    const mimeType = String(formData.get('mimeType') ?? 'application/octet-stream');
+    const fileSizeBytes = Number(formData.get('fileSizeBytes') ?? 0);
 
-  if (
-    !['national_id', 'passport', 'driving_license', 'proof_of_address', 'selfie', 'other'].includes(
-      documentType,
-    )
-  ) {
-    return { success: false, message: 'Select a valid document type.' };
+    if (!KYC_DOC_TYPES.includes(documentType)) {
+      return { success: false, message: 'Select a valid document type.' };
+    }
+    if (!/^[0-9a-f-]{36}$/i.test(documentId)) {
+      return { success: false, message: 'Upload failed. Try again.' };
+    }
+    if (!storagePath || fileSizeBytes <= 0) {
+      return { success: false, message: 'Choose a file to upload.' };
+    }
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, message: 'Authentication required.' };
+    }
+    if (!storagePath.startsWith(`${user.id}/`)) {
+      return { success: false, message: 'Upload failed. Try again.' };
+    }
+
+    const { error: insertError } = await supabase.from('kyc_documents').insert({
+      id: documentId,
+      user_id: user.id,
+      document_type: documentType,
+      status: 'uploaded',
+      storage_path: storagePath,
+      file_name: fileName,
+      mime_type: mimeType,
+      file_size_bytes: fileSizeBytes,
+    } as never);
+
+    if (insertError) {
+      return { success: false, message: insertError.message };
+    }
+
+    await supabase
+      .from('profiles')
+      .update({ kyc_status: 'under_review' } as never)
+      .eq('id', user.id)
+      .in('kyc_status', ['not_started', 'rejected', 'pending']);
+
+    await supabase.from('audit_logs').insert({
+      actor_id: user.id,
+      action: 'create',
+      entity_type: 'kyc_document',
+      entity_id: documentId,
+      metadata: { document_type: documentType },
+    } as never);
+
+    revalidatePath('/profile');
+    return { success: true, message: 'Document uploaded for review.' };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Could not save that ID document.',
+    };
   }
-
-  if (!(file instanceof File) || file.size === 0) {
-    return { success: false, message: 'Choose a file to upload.' };
-  }
-
-  if (file.size > 10 * 1024 * 1024) {
-    return { success: false, message: 'File must be 10MB or smaller.' };
-  }
-
-  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-  if (!allowed.includes(file.type)) {
-    return { success: false, message: 'Upload a JPEG, PNG, WebP, or PDF file.' };
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, message: 'Authentication required.' };
-  }
-
-  const documentId = crypto.randomUUID();
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const storagePath = `${user.id}/${documentId}/${safeName}`;
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const { error: uploadError } = await supabase.storage
-    .from('kyc-documents')
-    .upload(storagePath, buffer, {
-      contentType: file.type,
-      upsert: false,
-    });
-
-  if (uploadError) {
-    return { success: false, message: uploadError.message };
-  }
-
-  const { error: insertError } = await supabase.from('kyc_documents').insert({
-    id: documentId,
-    user_id: user.id,
-    document_type: documentType,
-    status: 'uploaded',
-    storage_path: storagePath,
-    file_name: file.name,
-    mime_type: file.type,
-    file_size_bytes: file.size,
-  } as never);
-
-  if (insertError) {
-    await supabase.storage.from('kyc-documents').remove([storagePath]);
-    return { success: false, message: insertError.message };
-  }
-
-  await supabase.from('audit_logs').insert({
-    actor_id: user.id,
-    action: 'create',
-    entity_type: 'kyc_document',
-    entity_id: documentId,
-    metadata: { document_type: documentType },
-  } as never);
-
-  revalidatePath('/profile');
-  return { success: true, message: 'Document uploaded for review.' };
 }
 
 export async function verifyIprsAction(
   _prev: ProfileActionState,
   formData: FormData,
 ): Promise<ProfileActionState> {
-  const firstName = String(formData.get('firstName') ?? '').trim();
+  try {
+    const firstName = String(formData.get('firstName') ?? '').trim();
   const lastName = String(formData.get('lastName') ?? '').trim();
   const nationalId = String(formData.get('nationalId') ?? '').trim();
   const dateOfBirth = String(formData.get('dateOfBirth') ?? '').trim() || null;
@@ -285,4 +288,10 @@ export async function verifyIprsAction(
     success: result.matched,
     message: result.message,
   };
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'IPRS lookup failed. Try again.',
+    };
+  }
 }
