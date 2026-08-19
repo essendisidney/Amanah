@@ -856,8 +856,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
           <section className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Add members
+              Add people (manual)
             </h2>
+            <p className="text-sm text-muted-foreground">
+              Create their Amanah account now. They get a join link and code to sign in.
+            </p>
             <div className="rounded-xl border border-border bg-card p-6">
               <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
             </div>
@@ -865,8 +868,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
           <section className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Invite only (link / code)
+              Join link / invite code
             </h2>
+            <p className="text-sm text-muted-foreground">
+              Share a WhatsApp link or short code. They open it, sign in with phone, and join.
+            </p>
             <div className="rounded-xl border border-border bg-card p-6">
               <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
             </div>

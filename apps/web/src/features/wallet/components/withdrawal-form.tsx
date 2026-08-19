@@ -101,7 +101,6 @@ export function WithdrawalForm({
         </p>
       ) : null}
 
-      <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
       {needsOtp ? (
         <div className="space-y-2">
           <Label htmlFor="withdraw-otp">{labels.verificationCode}</Label>
@@ -124,7 +123,7 @@ export function WithdrawalForm({
           ? labels.submitting
           : needsOtp
             ? labels.confirmWithCode
-            : labels.sendCode}
+            : labels.requestWithdrawal}
       </Button>
     </form>
   );

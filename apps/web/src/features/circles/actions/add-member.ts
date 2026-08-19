@@ -12,10 +12,7 @@ import {
   hashInvitationToken,
 } from '../lib/invitation-token';
 import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
-
-function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-}
+import { getSiteUrl } from '@/lib/site-url';
 
 async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;

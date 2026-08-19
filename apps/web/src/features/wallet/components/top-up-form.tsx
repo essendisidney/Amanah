@@ -35,7 +35,7 @@ export function TopUpForm({
           inputMode="decimal"
           min={100}
           step={100}
-          defaultValue={1000}
+          defaultValue={provider === 'simulated' ? 50000 : 1000}
           required
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
@@ -58,9 +58,14 @@ export function TopUpForm({
       ) : provider === 'bank' ? (
         <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
       ) : (
-        <p className="text-xs text-muted-foreground">{labels.simulatedHint}</p>
+        <p className="text-xs text-muted-foreground">
+          Demo credit — type 50000 to load test funds for contributions, payouts, and
+          withdrawals. No M-Pesa needed.
+        </p>
       )}
-      <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
+      {provider !== 'simulated' ? (
+        <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
+      ) : null}
       {needsOtp ? (
         <div className="space-y-2">
           <Label htmlFor="otp">{labels.verificationCode}</Label>
@@ -92,7 +97,9 @@ export function TopUpForm({
           ? labels.processing
           : needsOtp
             ? labels.confirmWithCode
-            : labels.sendCode}
+            : provider === 'simulated'
+              ? labels.topUpWallet
+              : labels.sendCode}
       </Button>
     </form>
   );

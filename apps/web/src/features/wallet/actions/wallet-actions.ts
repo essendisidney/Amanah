@@ -33,12 +33,15 @@ export async function topUpWalletAction(
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
-  if (!otp) {
-    return sendWalletStepUpOtp('wallet_top_up');
-  }
-  const stepUp = await consumeWalletStepUpOtp('wallet_top_up', otp);
-  if (!stepUp.ok) {
-    return { success: false, needsOtp: true, message: stepUp.error };
+  const skipStepUp = provider === 'simulated' && !requireReal;
+  if (!skipStepUp) {
+    if (!otp) {
+      return sendWalletStepUpOtp('wallet_top_up');
+    }
+    const stepUp = await consumeWalletStepUpOtp('wallet_top_up', otp);
+    if (!stepUp.ok) {
+      return { success: false, needsOtp: true, message: stepUp.error };
+    }
   }
 
   if (provider === 'mpesa' && !/^\+[1-9]\d{7,14}$/.test(phone)) {

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 import { logger } from '@/lib/observability';
+import { paymentProvider } from '@/lib/payments/provider';
 
 export type WithdrawalActionState = {
   success: boolean;
@@ -30,12 +31,16 @@ export async function requestWithdrawalAction(
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
-  if (!otp) {
-    return sendWalletStepUpOtp('wallet_withdraw');
-  }
-  const stepUp = await consumeWalletStepUpOtp('wallet_withdraw', otp);
-  if (!stepUp.ok) {
-    return { success: false, needsOtp: true, message: stepUp.error };
+  const skipStepUp =
+    paymentProvider() === 'simulated' && process.env.REQUIRE_REAL_PROVIDERS !== 'true';
+  if (!skipStepUp) {
+    if (!otp) {
+      return sendWalletStepUpOtp('wallet_withdraw');
+    }
+    const stepUp = await consumeWalletStepUpOtp('wallet_withdraw', otp);
+    if (!stepUp.ok) {
+      return { success: false, needsOtp: true, message: stepUp.error };
+    }
   }
 
   const { data, error } = await callRpc('request_withdrawal', {
