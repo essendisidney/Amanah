@@ -3,8 +3,8 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import { createClient } from '@/lib/supabase/server';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { getActivePlatformPlans } from '@/lib/platform-plans';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 
 export const metadata: Metadata = {
@@ -12,33 +12,10 @@ export const metadata: Metadata = {
   description: 'Clear group plans for Amanah circles — Free, Starter, and Pro.',
 };
 
-export const dynamic = 'force-dynamic';
-
-type Plan = {
-  id: string;
-  name: string;
-  description: string;
-  price_kes: number | string;
-  max_members: number;
-  sms_credits_month: number;
-  whatsapp_enabled: boolean;
-  dual_approval_included: boolean;
-  exports_included: boolean;
-};
+export const revalidate = 3600;
 
 export default async function PricingPage() {
-  const { locale, dict } = await getDictionary();
-  const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
-    .from('platform_plans')
-    .select(
-      'id, name, description, price_kes, max_members, sms_credits_month, whatsapp_enabled, dual_approval_included, exports_included',
-    )
-    .eq('active', true)
-    .order('sort_order', { ascending: true });
-
-  const plans = (data ?? []) as Plan[];
+  const [{ locale, dict }, plans] = await Promise.all([getDictionary(), getActivePlatformPlans()]);
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">

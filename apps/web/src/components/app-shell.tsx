@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   Bell,
@@ -18,6 +19,9 @@ import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { Locale } from '@/i18n/config';
+import { NOTIFICATION_INSERT_EVENT } from '@/lib/notification-events';
+
+type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
 type Tab = {
   href: Route;
@@ -44,9 +48,20 @@ export function AppShell({
   showAdmin: boolean;
   signOutAction: () => Promise<void>;
   locale: Locale;
-  dict: Dictionary;
+  dict: ShellDictionary;
 }) {
   const pathname = usePathname() || '';
+  const [liveUnread, setLiveUnread] = useState(unread);
+
+  useEffect(() => {
+    setLiveUnread(unread);
+  }, [unread]);
+
+  useEffect(() => {
+    const onInsert = () => setLiveUnread((count) => count + 1);
+    window.addEventListener(NOTIFICATION_INSERT_EVENT, onInsert);
+    return () => window.removeEventListener(NOTIFICATION_INSERT_EVENT, onInsert);
+  }, []);
 
   const tabs: Tab[] = [
     {
@@ -117,9 +132,9 @@ export function AppShell({
                   )}
                 >
                   {item.label}
-                  {item.href === '/notifications' && unread > 0 ? (
+                  {item.href === '/notifications' && liveUnread > 0 ? (
                     <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-                      {unread > 9 ? '9+' : unread}
+                      {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
                 </Link>
@@ -144,15 +159,15 @@ export function AppShell({
               href={'/notifications' as Route}
               className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
               aria-label={
-                unread > 0
-                  ? `${dict.common.notifications}, ${unread}`
+                liveUnread > 0
+                  ? `${dict.common.notifications}, ${liveUnread}`
                   : dict.common.notifications
               }
             >
               <Bell className="h-5 w-5" />
-              {unread > 0 ? (
+              {liveUnread > 0 ? (
                 <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                  {unread > 9 ? '9+' : unread}
+                  {liveUnread > 9 ? '9+' : liveUnread}
                 </span>
               ) : null}
             </Link>

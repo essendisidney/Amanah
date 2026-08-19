@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getUnreadNotificationCount } from '@/lib/supabase/auth';
 import type {
   DashboardContribution,
   DashboardData,
@@ -105,7 +106,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     profileResult,
     membershipsResult,
     notificationsResult,
-    unreadResult,
     walletResult,
   ] = await Promise.all([
     supabase
@@ -145,11 +145,6 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(6),
-    supabase
-      .from('notifications')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .is('read_at', null),
     supabase
       .from('wallets')
       .select('id, balance, available_balance, currency')
@@ -287,6 +282,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       }) satisfies DashboardNotification,
   );
 
+  const unreadNotificationCount = await getUnreadNotificationCount(userId);
+
   const walletRow = walletResult.data
     ? (walletResult.data as unknown as WalletRow)
     : null;
@@ -306,7 +303,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     payouts,
     notifications,
     wallet,
-    unreadNotificationCount: unreadResult.count ?? 0,
+    unreadNotificationCount,
     stats: {
       activeCircles: jamiyas.filter((item) => item.status === 'active').length,
       pendingContributions: contributions.length,

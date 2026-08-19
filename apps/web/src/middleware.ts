@@ -28,6 +28,22 @@ function isProtectedPath(pathname: string): boolean {
   );
 }
 
+function hasSupabaseAuthCookie(request: NextRequest): boolean {
+  return request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith('sb-') && cookie.name.includes('auth-token'));
+}
+
+/** Skip remote auth refresh on anonymous public hits (pricing, sadaka, home). */
+function needsSessionRefresh(request: NextRequest, pathname: string): boolean {
+  return (
+    isProtectedPath(pathname) ||
+    AUTH_ROUTES.has(pathname) ||
+    pathname.startsWith('/auth/') ||
+    hasSupabaseAuthCookie(request)
+  );
+}
+
 /** Permanent redirects: /jamiyas → /circles (and admin). */
 function legacyCircleRedirect(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
@@ -68,6 +84,10 @@ export async function middleware(request: NextRequest) {
 
   // Allow builds / misconfigured previews to compile; runtime still needs env.
   if (!hasSupabaseEnv) {
+    return NextResponse.next();
+  }
+
+  if (!needsSessionRefresh(request, pathname)) {
     return NextResponse.next();
   }
 

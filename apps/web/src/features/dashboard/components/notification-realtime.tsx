@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { dispatchNotificationInsert } from '@/lib/notification-events';
 
 type NotificationPayload = {
   id: string;
@@ -14,10 +15,17 @@ type NotificationPayload = {
 
 /**
  * Subscribes to in-app notification inserts for the signed-in user.
- * Shows a toast and refreshes server-rendered notification badges.
+ * Updates the nav badge locally; only refreshes list pages when needed.
  */
 export function NotificationRealtime({ userId }: { userId: string }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const pathnameRef = useRef(pathname);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -34,12 +42,27 @@ export function NotificationRealtime({ userId }: { userId: string }) {
         (payload: { new: NotificationPayload }) => {
           const row = payload.new;
           toast(row.title, { description: row.body });
-          router.refresh();
+          dispatchNotificationInsert();
+
+          const path = pathnameRef.current ?? '';
+          if (!path.startsWith('/notifications') && !path.startsWith('/dashboard')) {
+            return;
+          }
+
+          if (refreshTimerRef.current) {
+            clearTimeout(refreshTimerRef.current);
+          }
+          refreshTimerRef.current = setTimeout(() => {
+            router.refresh();
+          }, 1500);
         },
       )
       .subscribe();
 
     return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
       void supabase.removeChannel(channel);
     };
   }, [userId, router]);

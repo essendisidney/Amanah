@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import type { PlatformRole } from '@jamiya/types';
 import { isAdminRole, isComplianceRole } from '@jamiya/auth';
-import { createClient } from '@/lib/supabase/server';
+import { getAuthUser, getUserProfile } from '@/lib/supabase/auth';
 
 export type AdminAccess = {
   userId: string;
@@ -17,26 +17,13 @@ export type AdminAccess = {
 export async function requireAdminAccess(
   mode: 'admin' | 'compliance' = 'admin',
 ): Promise<AdminAccess> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { user } = await getAuthUser();
 
   if (!user) {
     redirect('/login?next=/admin');
   }
 
-  const { data } = await supabase
-    .from('profiles')
-    .select('platform_role, full_name, email')
-    .eq('id', user.id)
-    .maybeSingle();
-
-  const profile = data as unknown as {
-    platform_role: PlatformRole;
-    full_name: string | null;
-    email: string | null;
-  } | null;
+  const profile = await getUserProfile(user.id);
 
   const role = profile?.platform_role ?? 'member';
   const allowed = mode === 'compliance' ? isComplianceRole(role) : isAdminRole(role);
@@ -49,6 +36,12 @@ export async function requireAdminAccess(
     userId: user.id,
     email: user.email ?? null,
     role,
-    profile,
+    profile: profile
+      ? {
+          platform_role: profile.platform_role,
+          full_name: profile.full_name,
+          email: profile.email,
+        }
+      : null,
   };
 }

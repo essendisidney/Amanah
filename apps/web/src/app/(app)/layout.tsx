@@ -4,30 +4,25 @@ import { AppShell } from '@/components/app-shell';
 import { signOutAction } from '@/features/auth';
 import { NotificationRealtime } from '@/features/dashboard/components/notification-realtime';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { createClient } from '@/lib/supabase/server';
+import {
+  getAuthUser,
+  getUnreadNotificationCount,
+  getUserProfile,
+} from '@/lib/supabase/auth';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { locale, dict } = await getDictionary();
+  const [{ user }, { locale, dict }] = await Promise.all([getAuthUser(), getDictionary()]);
 
   let unread = 0;
   let showAdmin = false;
 
   if (user) {
-    const [{ count }, { data: profile }] = await Promise.all([
-      supabase
-        .from('notifications')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .is('read_at', null),
-      supabase.from('profiles').select('platform_role').eq('id', user.id).maybeSingle(),
+    const [count, profile] = await Promise.all([
+      getUnreadNotificationCount(user.id),
+      getUserProfile(user.id),
     ]);
-    unread = count ?? 0;
-    const role = ((profile as unknown as { platform_role?: PlatformRole } | null)
-      ?.platform_role ?? 'member') as PlatformRole;
+    unread = count;
+    const role = (profile?.platform_role ?? 'member') as PlatformRole;
     showAdmin = isComplianceRole(role);
   }
 
@@ -38,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         showAdmin={showAdmin}
         signOutAction={signOutAction}
         locale={locale}
-        dict={dict}
+        dict={{ nav: dict.nav, common: dict.common }}
       >
         {children}
       </AppShell>

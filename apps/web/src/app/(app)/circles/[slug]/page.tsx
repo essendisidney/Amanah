@@ -4,7 +4,7 @@ import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import { createClient } from '@/lib/supabase/server';
+import { getAuthUser } from '@/lib/supabase/auth';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { InviteMemberForm } from '@/features/circles/components/invite-member-form';
 import { AddMemberForm } from '@/features/circles/components/add-member-form';
@@ -80,16 +80,11 @@ type Props = {
 export default async function CircleDetailsPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const notices = (await searchParams) ?? {};
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [{ supabase, user }, { dict }] = await Promise.all([getAuthUser(), getDictionary()]);
 
   if (!user) {
     redirect(`/phone?next=/circles/${slug}`);
   }
-
-  const { dict } = await getDictionary();
 
   const { data } = await supabase
     .from('jamiyas')
@@ -117,7 +112,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const [
     { data: membersData },
     { data: invitesData },
-    { data: myMembership },
     { data: contribData },
     { data: payoutData },
     { data: bookData },
@@ -135,17 +129,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
     supabase
-      .from('members')
-      .select('id, role, status')
-      .eq('jamiya_id', jamiya.id)
-      .eq('user_id', user.id)
-      .maybeSingle(),
-    supabase
       .from('contributions')
       .select('id, cycle_number, amount, amount_paid, currency, status, due_date, member_id')
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
-      .limit(120),
+      .limit(48),
     supabase
       .from('payouts')
       .select(
@@ -153,7 +141,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       )
       .eq('jamiya_id', jamiya.id)
       .order('cycle_number', { ascending: true })
-      .limit(60),
+      .limit(36),
     supabase
       .from('book_entries')
       .select('id, entry_type, amount, currency, effective_date, notes')
@@ -168,21 +156,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .limit(10),
   ]);
 
-  const membership = myMembership as unknown as {
-    id: string;
-    role: string;
-    status: string;
-  } | null;
-  const canManageMembers =
-    membership?.status === 'active' &&
-    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
-  /** Chair/treasurer share ops: invites, penalties, books, announcements. */
-  const canManageOps = canManageMembers;
-  const canActivate =
-    canManageOps &&
-    (jamiya.status === 'draft' || jamiya.status === 'open') &&
-    jamiya.member_count >= 2;
-
   const memberRows = (membersData ?? []) as unknown as Array<{
     id: string;
     role: string;
@@ -192,6 +165,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     user_id: string;
     member_code: string | null;
   }>;
+
+  const membership = memberRows.find((row) => row.user_id === user.id) ?? null;
+  const canManageMembers =
+    membership?.status === 'active' &&
+    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
+  /** Chair/treasurer share ops: invites, penalties, books, announcements. */
+  const canManageOps = canManageMembers;
+  const canActivate =
+    canManageOps &&
+    (jamiya.status === 'draft' || jamiya.status === 'open') &&
+    jamiya.member_count >= 2;
 
   const userIds = memberRows.map((row) => row.user_id);
   const memberIds = memberRows.map((row) => row.id);
