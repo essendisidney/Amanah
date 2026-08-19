@@ -29,7 +29,7 @@ export type DashboardJamiya = {
     currency: string;
     maxMembers: number;
     memberCount: number;
-    cycleCount: number;
+    cycleCount: number | null;
     currentCycle: number;
     startDate: string | null;
   };

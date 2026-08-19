@@ -12,6 +12,7 @@ export type MemberListItem = {
   joinedAt: string | null;
   fullName: string | null;
   email: string | null;
+  phone?: string | null;
   memberCode?: string | null;
   vouchStatus?: string | null;
 };
@@ -48,7 +49,7 @@ export function MembersList({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium text-foreground">
-                  {member.fullName ?? member.email ?? 'Member'}
+                  {member.fullName ?? member.email ?? member.phone ?? 'Member'}
                 </p>
                 {member.memberCode ? (
                   <span className="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
@@ -60,7 +61,7 @@ export function MembersList({
                 {member.vouchStatus ? <StatusBadge status={`vouch:${member.vouchStatus}`} /> : null}
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                {member.email ?? '—'}
+                {member.email ?? member.phone ?? '—'}
                 {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
                 {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
               </p>

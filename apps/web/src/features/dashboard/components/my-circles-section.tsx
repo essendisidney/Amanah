@@ -52,7 +52,9 @@ export function MyCirclesSection({
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {item.jamiya.memberCount}/{item.jamiya.maxMembers} {common.members} ·{' '}
-                    {common.cycle} {item.jamiya.currentCycle}/{item.jamiya.cycleCount}
+                    {item.jamiya.cycleCount != null
+                      ? `${common.cycle} ${item.jamiya.currentCycle}/${item.jamiya.cycleCount}`
+                      : common.cycle}
                     {item.jamiya.startDate
                       ? ` · ${common.starts} ${formatDate(item.jamiya.startDate)}`
                       : ''}

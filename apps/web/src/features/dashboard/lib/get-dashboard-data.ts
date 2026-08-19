@@ -24,7 +24,7 @@ type MembershipRow = {
         currency: string;
         max_members: number;
         member_count: number;
-        cycle_count: number;
+        cycle_count: number | null;
         current_cycle: number;
         start_date: string | null;
       }
@@ -38,7 +38,7 @@ type MembershipRow = {
         currency: string;
         max_members: number;
         member_count: number;
-        cycle_count: number;
+        cycle_count: number | null;
         current_cycle: number;
         start_date: string | null;
       }>;

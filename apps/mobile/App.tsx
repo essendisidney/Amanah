@@ -171,7 +171,7 @@ export default function App() {
   const [newCircleName, setNewCircleName] = useState('');
   const [newCircleAmount, setNewCircleAmount] = useState('1000');
   const [newCircleMembers, setNewCircleMembers] = useState('5');
-  const [newCircleCycles, setNewCircleCycles] = useState('6');
+  const [newCircleCycles, setNewCircleCycles] = useState('');
   const [inviteJamiyaId, setInviteJamiyaId] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [invitePhone, setInvitePhone] = useState('');
@@ -284,7 +284,8 @@ export default function App() {
     const name = newCircleName.trim();
     const amount = Number(newCircleAmount);
     const maxMembers = Number(newCircleMembers);
-    const cycleCount = Number(newCircleCycles);
+    const cycleRaw = newCircleCycles.trim();
+    const cycleCount = cycleRaw ? Number(cycleRaw) : undefined;
     if (name.length < 3) {
       setError('Circle name must be at least 3 characters');
       return;
@@ -297,8 +298,8 @@ export default function App() {
       setError('Need at least 2 members');
       return;
     }
-    if (!Number.isFinite(cycleCount) || cycleCount < 2) {
-      setError('Need at least 2 cycles');
+    if (cycleCount != null && (!Number.isFinite(cycleCount) || cycleCount < 2)) {
+      setError('Cycles must be at least 2, or leave blank');
       return;
     }
     setLoading(true);
@@ -624,7 +625,7 @@ export default function App() {
                   keyboardType="numeric"
                   value={newCircleCycles}
                   onChangeText={setNewCircleCycles}
-                  placeholder="Number of cycles"
+                  placeholder="Cycles (optional)"
                 />
                 <Button
                   title="Create circle"

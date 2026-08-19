@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     contributionAmount: body.contributionAmount ?? body.contribution_amount,
     currency: body.currency ?? 'KES',
     maxMembers: body.maxMembers ?? body.max_members ?? 10,
-    cycleCount: body.cycleCount ?? body.cycle_count ?? 6,
+    cycleCount: body.cycleCount ?? body.cycle_count,
     contributionFrequencyDays:
       body.contributionFrequencyDays ?? body.contribution_frequency_days ?? 30,
     startDate: body.startDate ?? body.start_date ?? '',
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
       contribution_amount: input.contributionAmount,
       currency: input.currency,
       max_members: input.maxMembers,
-      cycle_count: input.cycleCount,
+      cycle_count: input.cycleCount ?? null,
       contribution_frequency_days: input.contributionFrequencyDays,
       start_date: input.startDate || null,
       segment: input.segment,

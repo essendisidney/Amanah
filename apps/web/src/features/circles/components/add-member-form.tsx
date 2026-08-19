@@ -21,7 +21,7 @@ export function AddMemberForm({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Existing Amanah users join immediately. New people get a reserved seat — use{' '}
+        Existing Amanah users join immediately. New people are added to the circle — use{' '}
         <strong className="font-medium text-foreground">phone only</strong> for members
         without email (they sign in with SMS OTP), or email if they have one.
       </p>

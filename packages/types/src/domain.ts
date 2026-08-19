@@ -28,7 +28,7 @@ export interface JamiyaSummary {
   status: JamiyaStatus;
   contributionAmount: number;
   currency: string;
-  cycleCount: number;
+  cycleCount: number | null;
   memberCount: number;
   maxMembers: number;
   createdAt: string;

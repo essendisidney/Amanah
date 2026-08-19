@@ -160,7 +160,7 @@ export type Database = {
           contribution_amount: number;
           currency: string;
           max_members: number;
-          cycle_count: number;
+          cycle_count: number | null;
           contribution_frequency_days: number;
           current_cycle: number;
           member_count: number;
@@ -196,7 +196,7 @@ export type Database = {
           contribution_amount?: number;
           currency?: string;
           max_members?: number;
-          cycle_count?: number;
+          cycle_count?: number | null;
           contribution_frequency_days?: number;
           current_cycle?: number;
           member_count?: number;

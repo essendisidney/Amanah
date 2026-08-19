@@ -44,7 +44,7 @@ export function CreateCircleForm() {
       contributionAmount: 5000,
       currency: DEFAULT_CURRENCY,
       maxMembers: 6,
-      cycleCount: 6,
+      cycleCount: undefined,
       contributionFrequencyDays: 30,
       startDate: '',
       status: 'open',
@@ -72,7 +72,9 @@ export function CreateCircleForm() {
     fd.set('contributionAmount', String(values.contributionAmount));
     fd.set('currency', values.currency);
     fd.set('maxMembers', String(values.maxMembers));
-    fd.set('cycleCount', String(values.cycleCount));
+    if (values.cycleCount != null) {
+      fd.set('cycleCount', String(values.cycleCount));
+    }
     fd.set('contributionFrequencyDays', String(values.contributionFrequencyDays));
     fd.set('startDate', values.startDate ?? '');
     fd.set('status', values.status);
@@ -165,16 +167,18 @@ export function CreateCircleForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cycleCount">Number of cycles</Label>
+            <Label htmlFor="cycleCount">Number of cycles (optional)</Label>
             <Input
               id="cycleCount"
               type="number"
               min={JAMIYA_CONSTRAINTS.minCycles}
               max={JAMIYA_CONSTRAINTS.maxCycles}
+              placeholder="Leave blank"
               {...register('cycleCount')}
             />
             <p className="text-xs text-muted-foreground">
-              How many contribution rounds this challenge runs. Independent of member count.
+              Leave blank unless this is a merry-go-round. Savings and share groups do not need a
+              fixed cycle count.
             </p>
             <FieldError message={fieldError('cycleCount')} />
           </div>

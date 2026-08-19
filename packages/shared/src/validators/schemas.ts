@@ -52,11 +52,15 @@ export const createCircleSchema = z
       .int()
       .min(JAMIYA_CONSTRAINTS.minMembers)
       .max(JAMIYA_CONSTRAINTS.maxMembers),
-    cycleCount: z.coerce
+    cycleCount: z.preprocess((value) => {
+      if (value === '' || value === null || value === undefined) return undefined;
+      return value;
+    }, z.coerce
       .number({ invalid_type_error: 'Enter a valid cycle count' })
       .int()
       .min(JAMIYA_CONSTRAINTS.minCycles)
-      .max(JAMIYA_CONSTRAINTS.maxCycles),
+      .max(JAMIYA_CONSTRAINTS.maxCycles)
+      .optional()),
     contributionFrequencyDays: z.coerce
       .number({ invalid_type_error: 'Enter a valid frequency' })
       .int()

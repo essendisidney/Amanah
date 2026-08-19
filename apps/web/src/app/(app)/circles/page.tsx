@@ -31,7 +31,7 @@ type MembershipRow = {
     member_count: number;
     max_members: number;
     current_cycle: number;
-    cycle_count: number;
+    cycle_count: number | null;
     start_date: string | null;
   } | null;
 };
@@ -131,7 +131,9 @@ export default async function MyCirclesPage() {
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {jamiya.member_count}/{jamiya.max_members} {common.members} ·{' '}
-                      {common.cycle} {jamiya.current_cycle}/{jamiya.cycle_count}
+                      {jamiya.cycle_count != null
+                        ? `${common.cycle} ${jamiya.current_cycle}/${jamiya.cycle_count}`
+                        : common.cycle}
                       {jamiya.start_date
                         ? ` · ${common.starts} ${formatDate(jamiya.start_date)}`
                         : ''}

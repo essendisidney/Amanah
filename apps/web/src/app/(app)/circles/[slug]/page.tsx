@@ -60,7 +60,7 @@ type JamiyaRow = {
   currency: string;
   max_members: number;
   member_count: number;
-  cycle_count: number;
+  cycle_count: number | null;
   current_cycle: number;
   contribution_frequency_days: number;
   start_date: string | null;
@@ -197,7 +197,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const memberIds = memberRows.map((row) => row.id);
   const [{ data: profileRows }, { data: vouchRows }] = await Promise.all([
     userIds.length > 0
-      ? supabase.from('profiles').select('id, full_name, email').in('id', userIds)
+      ? supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds)
       : Promise.resolve({ data: [] }),
     memberIds.length > 0
       ? supabase
@@ -213,6 +213,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       id: string;
       full_name: string | null;
       email: string | null;
+      phone: string | null;
     }>).map((row) => [row.id, row]),
   );
   const vouchByMember = new Map(
@@ -232,6 +233,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       joinedAt: row.joined_at,
       fullName: profile?.full_name ?? null,
       email: profile?.email ?? null,
+      phone: profile?.phone ?? null,
       memberCode: row.member_code,
       vouchStatus: vouchByMember.get(row.id) ?? null,
     };
@@ -732,7 +734,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             {circleLabels.cycle}
           </dt>
           <dd className="mt-2 text-lg font-semibold">
-            {jamiya.current_cycle}/{jamiya.cycle_count}
+            {jamiya.cycle_count != null
+              ? `${jamiya.current_cycle}/${jamiya.cycle_count}`
+              : 'Not set'}
           </dd>
         </div>
         <div className="rounded-xl border border-border bg-card p-5">

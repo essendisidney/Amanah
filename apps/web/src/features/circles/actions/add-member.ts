@@ -19,6 +19,7 @@ function getSiteUrl(): string {
 
 async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;
+  writer: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createServiceRoleClient>;
   jamiyaId: string;
   invitedBy: string;
   email: string | null;
@@ -33,15 +34,17 @@ async function createClaimInvitation(args: {
   const token = generateInvitationToken();
   const tokenHash = hashInvitationToken(token);
   let inviteCode = generateInviteCode(8);
+  const email = args.email || null;
+  const phone = args.phone || null;
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const { data, error } = await args.supabase
+    const { data, error } = await args.writer
       .from('invitations')
       .insert({
         jamiya_id: args.jamiyaId,
         invited_by: args.invitedBy,
-        email: args.email,
-        phone: args.phone,
+        email,
+        phone,
         invitee_user_id: args.inviteeUserId,
         token_hash: tokenHash,
         invite_code: inviteCode,
@@ -55,12 +58,12 @@ async function createClaimInvitation(args: {
       const invite = data as { id: string; invite_code: string };
       const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
 
-      await args.supabase.from('notifications').insert({
+      await args.writer.from('notifications').insert({
         user_id: args.inviteeUserId,
         type: 'invitation',
         channel: 'in_app',
         title: `Invitation to ${args.circleName}`,
-        body: 'Claim your reserved seat in this Amanah circle.',
+        body: 'You were added to this Amanah circle. Use the invite link or code to sign in.',
         data: {
           jamiya_id: args.jamiyaId,
           slug: args.slug,
@@ -273,19 +276,34 @@ export async function addMemberAction(
     await new Promise((r) => setTimeout(r, 150));
   }
 
-  await service
+  const { data: existingProfile } = await service
     .from('profiles')
-    .update({
-      ...(fullName ? { full_name: fullName } : {}),
-      ...(phone ? { phone } : {}),
-      ...(email ? { email } : {}),
-    })
-    .eq('id', newUserId);
+    .select('id')
+    .eq('id', newUserId)
+    .maybeSingle();
+
+  if (!existingProfile) {
+    await service.from('profiles').insert({
+      id: newUserId,
+      email: email || null,
+      phone,
+      full_name: fullName,
+    } as never);
+  } else {
+    await service
+      .from('profiles')
+      .update({
+        ...(fullName ? { full_name: fullName } : {}),
+        ...(phone ? { phone } : {}),
+        ...(email ? { email } : {}),
+      })
+      .eq('id', newUserId);
+  }
 
   const { data, error } = await callRpc('admin_add_circle_member', {
     p_jamiya_id: jamiyaId,
     p_user_id: newUserId,
-    p_status: 'invited',
+    p_status: 'active',
     p_email: null,
     p_phone: null,
   });
@@ -301,6 +319,7 @@ export async function addMemberAction(
 
   const claim = await createClaimInvitation({
     supabase,
+    writer: service,
     jamiyaId,
     invitedBy: user.id,
     email: email || null,
@@ -316,20 +335,19 @@ export async function addMemberAction(
   if ('error' in claim) {
     return {
       success: true,
-      mode: 'invited',
-      message:
-        'Account created and seat reserved, but claim link failed — share a new invite from Pending invitations.',
+      mode: 'added',
+      message: `Member added. Invite link could not be created (${claim.error}). Send a new invite from Pending invitations so they can sign in.`,
     };
   }
 
   const phoneHint = !email && phone
-    ? ' They can sign in with phone OTP on Amanah, then use the code or link.'
+    ? ' They can sign in with phone OTP on Amanah, then paste the code.'
     : '';
 
   return {
     success: true,
-    mode: 'invited',
-    message: `Seat reserved. Share the claim link or invite code.${phoneHint}`,
+    mode: 'added',
+    message: `Member added. Share the claim link or invite code so they can sign in.${phoneHint}`,
     inviteUrl: claim.inviteUrl,
     inviteCode: claim.inviteCode,
   };

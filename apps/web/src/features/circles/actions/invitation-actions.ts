@@ -4,6 +4,7 @@ import { createInvitationSchema } from '@jamiya/shared';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import {
   generateInvitationToken,
   generateInviteCode,
@@ -117,33 +118,65 @@ export async function createInvitationAction(
   let lastError: string | undefined;
 
   for (let attempt = 0; attempt < 5; attempt++) {
-    const { data: invitation, error } = await supabase
-      .from('invitations')
-      .insert({
-        jamiya_id: jamiyaId,
-        invited_by: user.id,
-        email: email || null,
-        phone: phone || null,
-        invitee_user_id: inviteeUserId,
-        token_hash: tokenHash,
-        invite_code: inviteCode,
-        status: 'pending',
-        expires_at: getInvitationExpiry(14),
-      } as never)
-      .select('id, invite_code')
-      .single();
+    const { data, error } = await callRpc('create_circle_invitation', {
+      p_jamiya_id: jamiyaId,
+      p_email: email || null,
+      p_phone: phone || null,
+      p_invitee_user_id: inviteeUserId,
+      p_token_hash: tokenHash,
+      p_invite_code: inviteCode,
+      p_expires_at: getInvitationExpiry(14),
+    });
 
-    if (!error && invitation) {
-      invite = invitation as unknown as { id: string; invite_code: string };
+    const result = data as { ok?: boolean; error?: string; id?: string; invite_code?: string } | null;
+
+    if (!error && result?.ok && result.id && result.invite_code) {
+      invite = { id: result.id, invite_code: result.invite_code };
       break;
     }
-    lastError = error?.message;
-    // Unique invite_code collision — retry with a new code.
-    if (error?.code === '23505' || /invite_code|unique/i.test(error?.message ?? '')) {
+
+    lastError = error?.message ?? result?.error;
+    if (lastError && /invite_code|unique|23505/i.test(lastError)) {
       inviteCode = generateInviteCode(8);
       continue;
     }
     break;
+  }
+
+  if (!invite) {
+    try {
+      const service = createServiceRoleClient();
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const { data: invitation, error } = await service
+          .from('invitations')
+          .insert({
+            jamiya_id: jamiyaId,
+            invited_by: user.id,
+            email: email || null,
+            phone: phone || null,
+            invitee_user_id: inviteeUserId,
+            token_hash: tokenHash,
+            invite_code: inviteCode,
+            status: 'pending',
+            expires_at: getInvitationExpiry(14),
+          } as never)
+          .select('id, invite_code')
+          .single();
+
+        if (!error && invitation) {
+          invite = invitation as unknown as { id: string; invite_code: string };
+          break;
+        }
+        lastError = error?.message ?? lastError;
+        if (error?.code === '23505' || /invite_code|unique/i.test(error?.message ?? '')) {
+          inviteCode = generateInviteCode(8);
+          continue;
+        }
+        break;
+      }
+    } catch {
+      // Service role unavailable — fall through to lastError.
+    }
   }
 
   if (!invite) {
