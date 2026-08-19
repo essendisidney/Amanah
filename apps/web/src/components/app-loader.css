@@ -1,0 +1,346 @@
+/* Amanah loading — trust ring, orbit, shimmer */
+
+@keyframes amanah-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes amanah-spin-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes amanah-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.92;
+  }
+}
+
+@keyframes amanah-glow {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes amanah-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+@keyframes amanah-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes amanah-mesh {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(4%, -3%) scale(1.04);
+  }
+  66% {
+    transform: translate(-3%, 2%) scale(0.98);
+  }
+}
+
+@keyframes amanah-dash {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes amanah-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.amanah-page-enter {
+  animation: amanah-page-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.amanah-boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0.55s;
+}
+
+.amanah-boot-splash--out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.amanah-loader {
+  position: relative;
+  display: flex;
+  min-height: min(72dvh, 640px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 2rem 1.5rem 2.5rem;
+  text-align: center;
+}
+
+.amanah-loader--fullscreen {
+  min-height: 100dvh;
+}
+
+.amanah-loader--compact {
+  min-height: 280px;
+  padding: 2rem 1rem;
+}
+
+.amanah-loader__mesh {
+  pointer-events: none;
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(circle at 30% 20%, rgb(5 150 105 / 0.22), transparent 42%),
+    radial-gradient(circle at 70% 75%, rgb(201 162 39 / 0.18), transparent 38%),
+    linear-gradient(165deg, #fbfcfa 0%, #eef5f0 48%, #f5ecd0 100%);
+  animation: amanah-mesh 9s ease-in-out infinite;
+}
+
+.amanah-loader__pattern {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23047857'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.amanah-loader__glow {
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 11rem;
+  width: 11rem;
+  margin: -5.5rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle, rgb(5 150 105 / 0.28) 0%, transparent 68%);
+  animation: amanah-glow 2.8s ease-in-out infinite;
+}
+
+.amanah-loader__stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.amanah-loader__emblem {
+  position: relative;
+  height: 7.5rem;
+  width: 7.5rem;
+}
+
+.amanah-loader__ring-outer {
+  position: absolute;
+  inset: 0;
+  animation: amanah-spin 14s linear infinite;
+}
+
+.amanah-loader__ring-inner {
+  position: absolute;
+  inset: 0.85rem;
+  animation: amanah-spin-reverse 9s linear infinite;
+}
+
+.amanah-loader__orbit {
+  position: absolute;
+  inset: 0;
+  animation: amanah-spin 5.5s linear infinite;
+}
+
+.amanah-loader__orbit-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 0.55rem;
+  width: 0.55rem;
+  margin: -0.275rem;
+  border-radius: 9999px;
+  background: #047857;
+  box-shadow: 0 0 12px rgb(5 150 105 / 0.55);
+  transform: rotate(calc(var(--orbit-i) * 120deg)) translateY(-2.35rem);
+}
+
+.amanah-loader__orbit-dot:nth-child(2) {
+  background: #059669;
+  animation: amanah-breathe 1.6s ease-in-out infinite 0.2s;
+}
+
+.amanah-loader__orbit-dot:nth-child(3) {
+  background: #c9a227;
+  animation: amanah-breathe 1.6s ease-in-out infinite 0.45s;
+}
+
+.amanah-loader__core {
+  position: absolute;
+  inset: 1.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, #047857 0%, #059669 55%, #065f46 100%);
+  box-shadow:
+    0 12px 32px rgb(4 120 87 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.22);
+  animation: amanah-breathe 2.4s ease-in-out infinite;
+}
+
+.amanah-loader__core-mark {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #f7faf8;
+}
+
+.amanah-loader__svg-ring {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.amanah-loader__svg-ring--a {
+  stroke: rgb(4 120 87 / 0.55);
+  stroke-dasharray: 120;
+  stroke-dashoffset: 120;
+  animation: amanah-dash 2.2s ease-out forwards;
+}
+
+.amanah-loader__svg-ring--b {
+  stroke: rgb(201 162 39 / 0.65);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: amanah-dash 2.2s ease-out 0.35s forwards;
+}
+
+.amanah-loader__svg-ring--c {
+  stroke: rgb(5 150 105 / 0.45);
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  animation: amanah-dash 2.2s ease-out 0.7s forwards;
+}
+
+.amanah-loader__title {
+  animation: amanah-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #047857;
+}
+
+.amanah-loader__tagline {
+  animation: amanah-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5c6b62;
+}
+
+.amanah-loader__message {
+  animation: amanah-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both;
+  max-width: 16rem;
+  font-size: 0.9375rem;
+  color: #5c6b62;
+}
+
+.amanah-loader__bar {
+  animation: amanah-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+  position: relative;
+  margin-top: 0.5rem;
+  height: 3px;
+  width: min(12rem, 70vw);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: rgb(4 120 87 / 0.12);
+}
+
+.amanah-loader__bar-shine {
+  position: absolute;
+  inset: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, #059669, #c9a227, transparent);
+  animation: amanah-shimmer 1.35s ease-in-out infinite;
+}
+
+.amanah-skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.amanah-skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.55),
+    transparent
+  );
+  animation: amanah-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amanah-loader__mesh,
+  .amanah-loader__glow,
+  .amanah-loader__ring-outer,
+  .amanah-loader__ring-inner,
+  .amanah-loader__orbit,
+  .amanah-loader__core,
+  .amanah-loader__orbit-dot,
+  .amanah-loader__bar-shine,
+  .amanah-page-enter,
+  .amanah-skeleton-shimmer::after {
+    animation: none !important;
+  }
+
+  .amanah-loader__svg-ring {
+    stroke-dashoffset: 0;
+  }
+}

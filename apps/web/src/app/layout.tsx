@@ -2,10 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Fraunces } from 'next/font/google';
 import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
 import { InstallPrompt } from '@/components/install-prompt';
+import { BootSplashMarkup } from '@/components/app-loader';
+import { BootSplash } from '@/components/boot-splash';
 import { Providers } from '@/components/providers';
 import { PwaRegister } from '@/components/pwa-register';
 import { getDictionary } from '@/i18n/get-dictionary';
 import './globals.css';
+import '@/components/app-loader.css';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -64,8 +67,10 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`${dmSans.variable} ${fraunces.variable}`}>
       <body className="min-h-dvh font-sans">
+        <BootSplashMarkup />
         <Providers>
           {children}
+          <BootSplash />
           <PwaRegister />
           <InstallPrompt labels={dict.install} />
         </Providers>
