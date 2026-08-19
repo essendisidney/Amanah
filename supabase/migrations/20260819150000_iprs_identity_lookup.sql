@@ -53,7 +53,7 @@ CREATE POLICY iprs_verifications_select_own
   ON public.iprs_verifications
   FOR SELECT
   TO authenticated
-  USING (user_id = auth.uid() OR private.is_platform_admin());
+  USING (user_id = auth.uid() OR private.is_compliance_or_admin());
 
 REVOKE INSERT, UPDATE, DELETE ON public.iprs_verifications FROM authenticated, anon;
 GRANT SELECT ON public.iprs_verifications TO authenticated;

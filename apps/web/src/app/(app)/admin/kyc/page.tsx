@@ -29,10 +29,22 @@ type CircleDocRow = {
   jamiyas: { name: string; slug: string } | null;
 };
 
+type IprsRow = {
+  id: string;
+  user_id: string;
+  national_id: string;
+  first_name: string;
+  last_name: string;
+  outcome: string;
+  matched: boolean;
+  provider: string;
+  created_at: string;
+};
+
 export default async function AdminKycPage() {
   await requireAdminAccess('compliance');
   const supabase = await createClient();
-  const [{ data }, { data: circleData }] = await Promise.all([
+  const [{ data }, { data: circleData }, { data: iprsData }] = await Promise.all([
     supabase
       .from('kyc_documents')
       .select('id, user_id, document_type, status, file_name, created_at')
@@ -43,13 +55,49 @@ export default async function AdminKycPage() {
       .select('id, jamiya_id, document_type, status, file_name, created_at, jamiyas(name, slug)')
       .order('created_at', { ascending: false })
       .limit(100),
+    supabase
+      .from('iprs_verifications')
+      .select(
+        'id, user_id, national_id, first_name, last_name, outcome, matched, provider, created_at',
+      )
+      .order('created_at', { ascending: false })
+      .limit(100),
   ]);
 
   const docs = (data ?? []) as unknown as DocRow[];
   const circleDocs = (circleData ?? []) as unknown as CircleDocRow[];
+  const iprsRows = (iprsData ?? []) as unknown as IprsRow[];
 
   return (
     <div className="space-y-10">
+      <section className="space-y-4">
+        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          IPRS / National ID lookups
+        </h2>
+        {iprsRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No IPRS checks yet.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {iprsRows.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
+                <div>
+                  <p className="font-medium">
+                    {row.first_name} {row.last_name} · ID {row.national_id}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {row.provider} · {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}…
+                  </p>
+                </div>
+                <StatusBadge status={row.outcome} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
           Personal KYC
