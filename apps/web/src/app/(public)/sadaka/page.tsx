@@ -77,12 +77,12 @@ export default async function SadakaPage({ searchParams }: Props) {
       : 'Sign in to start a campaign';
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-12">
+    <main className="py-6 sm:py-10">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent sm:text-sm sm:tracking-[0.16em]">
           Give with care
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight">
+        <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight sm:text-5xl">
           Sadaka
         </h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">

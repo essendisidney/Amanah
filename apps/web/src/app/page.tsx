@@ -1,14 +1,18 @@
 ﻿import Link from 'next/link';
+import type { Route } from 'next';
 import { APP_NAME } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { PublicSiteHeader } from '@/components/public-site-header';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { LanguageSwitcher } from '@/i18n/language-switcher';
 
 export default async function LandingPage() {
   const { locale, dict } = await getDictionary();
 
   return (
-    <div className="relative min-h-dvh overflow-hidden">
+    <div
+      className="relative min-h-dvh overflow-x-hidden bg-[#fbfcfa] text-foreground [color-scheme:light]"
+      style={{ colorScheme: 'light' }}
+    >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#d1fae5_0%,_transparent_55%),linear-gradient(160deg,_#fbfcfa_0%,_#eef5f0_45%,_#f5ecd0_100%)]"
@@ -22,43 +26,38 @@ export default async function LandingPage() {
         }}
       />
 
-      <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
-        <span className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-primary">
-          {APP_NAME}
-        </span>
-        <nav className="flex items-center gap-3">
-          <LanguageSwitcher locale={locale} label={dict.common.language} />
-          <Button variant="ghost" asChild>
-            <Link href="/sadaka">{dict.common.sadaka}</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="/phone">{dict.common.signIn}</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/phone">{dict.common.getStarted}</Link>
-          </Button>
-        </nav>
-      </header>
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-6">
+        <PublicSiteHeader
+          locale={locale}
+          languageLabel={dict.common.language}
+          links={[
+            { href: '/sadaka' as Route, label: dict.common.sadaka },
+            { href: '/pricing' as Route, label: 'Pricing' },
+            { href: '/phone' as Route, label: dict.common.signIn, variant: 'ghost' },
+          ]}
+          cta={{ href: '/phone' as Route, label: dict.common.getStarted }}
+        />
+      </div>
 
-      <main className="relative z-10 mx-auto flex min-h-[calc(100dvh-5.5rem)] w-full max-w-6xl flex-col justify-center px-6 pb-24 pt-8">
-        <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-accent">
+      <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col justify-center px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6 sm:min-h-[calc(100dvh-5.5rem)] sm:px-6 sm:pb-24 sm:pt-8">
+        <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-accent sm:mb-4 sm:text-sm sm:tracking-[0.2em]">
           {dict.brand.tagline}
         </p>
-        <h1 className="max-w-3xl font-[family-name:var(--font-display)] text-5xl font-semibold leading-[1.08] tracking-tight text-foreground md:text-7xl">
+        <h1 className="max-w-3xl font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-5xl md:text-7xl">
           {APP_NAME}
         </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground md:text-xl">
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground sm:mt-6 sm:text-lg md:text-xl">
           {dict.brand.description}
         </p>
-        <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Button size="lg" asChild>
+        <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:mt-10 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+          <Button size="lg" className="min-h-12 w-full sm:w-auto" asChild>
             <Link href="/phone">{dict.landing.startWithPhone}</Link>
           </Button>
-          <Button size="lg" variant="outline" asChild>
+          <Button size="lg" variant="outline" className="min-h-12 w-full sm:w-auto" asChild>
             <Link href="/phone">{dict.landing.joinCircle}</Link>
           </Button>
         </div>
-        <p className="mt-4 text-sm text-muted-foreground">
+        <p className="mt-4 max-w-md text-sm leading-relaxed text-muted-foreground">
           {dict.landing.preferEmail}{' '}
           <Link href="/login" className="font-medium text-primary hover:underline">
             {dict.common.signIn}

@@ -17,8 +17,8 @@ export default async function SupportPage() {
   const labels = dict.support;
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <div className="mb-8 flex flex-wrap items-center gap-3">
+    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
+      <div className="mb-6 flex flex-wrap items-center gap-2 sm:mb-8 sm:gap-3">
         <Button asChild variant="outline" size="sm">
           <Link href={'/dashboard' as Route}>{dict.common.backToDashboard}</Link>
         </Button>
@@ -31,7 +31,7 @@ export default async function SupportPage() {
       <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
         {labels.eyebrow}
       </p>
-      <h1 className="mt-2 font-[family-name:var(--font-display)] text-5xl font-semibold tracking-tight">
+      <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight sm:text-5xl">
         {labels.title}
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">{labels.body}</p>

@@ -7,6 +7,7 @@ import { usePathname } from 'next/navigation';
 import {
   Bell,
   CircleDollarSign,
+  Heart,
   Home,
   LayoutGrid,
   LogOut,
@@ -107,17 +108,17 @@ export function AppShell({
   }
 
   return (
-    <div className="min-h-dvh bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5f0_100%)]">
+    <div className="min-h-dvh overflow-x-hidden bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5f0_100%)]">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-16 md:px-6">
           <Link
             href={'/dashboard' as Route}
-            className="font-[family-name:var(--font-display)] text-lg font-semibold text-primary md:text-xl"
+            className="min-w-0 shrink font-[family-name:var(--font-display)] text-lg font-semibold text-primary md:text-xl"
           >
             {APP_NAME}
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
             {desktopLinks.map((item) => {
               const active = pathActive(pathname, item.href);
               return (
@@ -142,18 +143,20 @@ export function AppShell({
             })}
           </nav>
 
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <LanguageSwitcher locale={locale} label={dict.common.language} />
             <Link
               href={'/sadaka' as Route}
               className={cn(
-                'rounded-md px-2.5 py-2 text-sm font-medium md:hidden',
+                'inline-flex h-11 w-11 items-center justify-center rounded-md lg:hidden',
                 pathActive(pathname, '/sadaka')
                   ? 'text-primary'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground',
               )}
+              aria-label={dict.common.sadaka}
+              title={dict.common.sadaka}
             >
-              {dict.common.sadaka}
+              <Heart className="h-5 w-5" />
             </Link>
             <Link
               href={'/notifications' as Route}
@@ -190,7 +193,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:px-6 md:py-10 md:pb-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:py-6 md:px-6 md:py-10 md:pb-10">
         {children}
       </main>
 
