@@ -84,7 +84,7 @@ export default async function AdminObservabilityPage() {
     },
     {
       label: 'payments-mpesa health',
-      value: mpesa.ok ? 'ok' : mpesa.error ?? 'down',
+      value: mpesa.ok ? 'ok' : `${mpesa.error ?? 'down'}${provider === 'mpesa' ? '' : ' (info)'}`,
     },
     {
       label: 'Daraja configured',
@@ -123,9 +123,15 @@ export default async function AdminObservabilityPage() {
             </div>
           ))}
         </dl>
-        {mpesa.hint ? (
+        {mpesa.hint && provider === 'mpesa' ? (
           <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {mpesa.hint}
+          </p>
+        ) : mpesa.hint && provider !== 'mpesa' ? (
+          <p className="rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+            Edge probe: {mpesa.error ?? 'not ready'}. App is on {provider}, so wallet top-ups do not
+            depend on Daraja until you switch <code className="text-xs">PAYMENT_PROVIDER=mpesa</code>.
+            {mpesa.hint ? ` ${mpesa.hint}` : ''}
           </p>
         ) : provider === 'paystack' && !mpesa.daraja_configured ? (
           <p className="text-sm text-muted-foreground">

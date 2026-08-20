@@ -41,7 +41,8 @@ npx supabase functions deploy payments-bank --project-ref vzpnixfqkvovbniaoudx
 npx supabase functions deploy notify-dispatch --project-ref vzpnixfqkvovbniaoudx
 ```
 
-Health: `GET /api/v1/payments/mpesa-health`
+Health: `GET /api/v1/payments/mpesa-health`  
+Edge deploy steps: [DEPLOY_PAYMENTS_MPESA.md](./DEPLOY_PAYMENTS_MPESA.md)
 
 ## 3b. Tawarruq partner + USSD (Phase 13)
 

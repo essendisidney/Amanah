@@ -10,21 +10,29 @@ import {
 export async function GET() {
   const health = await mpesaHealth();
   const payment_provider = paymentProvider();
+  const mpesaRequired = payment_provider === 'mpesa';
+
   const body = {
-    ok: health.ok,
+    ok: mpesaRequired ? health.ok : true,
     service: 'amanah-mpesa',
     daraja_configured: health.daraja_configured ?? false,
     b2c_configured: health.b2c_configured ?? false,
     payment_provider,
     require_real: requireRealProviders(),
     simulated_blocked: shouldBlockSimulatedPayments(),
+    mpesa_edge_ok: health.ok,
     error: health.error ?? null,
     hint: health.hint ?? null,
+    note: mpesaRequired
+      ? null
+      : `App provider is ${payment_provider}; Daraja Edge probe is informational until PAYMENT_PROVIDER=mpesa.`,
     timestamp: new Date().toISOString(),
   };
 
-  // Structured probe: 200 when the Edge answers (even if Daraja is off);
-  // 503 only when the function/auth path itself is broken.
-  const authBroken = health.error === 'UNAUTHORIZED' || health.error === 'Missing Supabase env';
-  return NextResponse.json(body, { status: authBroken || !health.ok ? 503 : 200 });
+  // 503 only when live M-Pesa is selected and the Edge auth/path is broken.
+  if (mpesaRequired && (health.error === 'UNAUTHORIZED' || health.error === 'Missing Supabase env' || !health.ok)) {
+    return NextResponse.json(body, { status: 503 });
+  }
+
+  return NextResponse.json(body, { status: 200 });
 }
