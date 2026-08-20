@@ -6,6 +6,8 @@ import {
   payContributionAction,
   payContributionAheadAction,
 } from '@/features/circles/actions/ledger-actions';
+import type { Dictionary } from '@/i18n/dictionaries';
+import { t } from '@/i18n/dictionaries';
 
 type Props = {
   contributionId: string;
@@ -20,6 +22,7 @@ type Props = {
   circleName?: string;
   /** When false, omit id="pay" (use for stacked lists). Default true. */
   showAnchor?: boolean;
+  labels: Dictionary['contributionCard'];
 };
 
 export function NextContributionCard({
@@ -34,6 +37,7 @@ export function NextContributionCard({
   walletCurrency,
   circleName,
   showAnchor = true,
+  labels,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
   const ahead = new Date(dueDate) > new Date(new Date().toISOString().slice(0, 10));
@@ -50,6 +54,17 @@ export function NextContributionCard({
       ? Math.min(remaining, walletAvailable)
       : remaining;
 
+  const dueMeta = [
+    circleName,
+    `${labels.due} ${formatDate(dueDate)}`,
+    status === 'late' ? labels.overdue : ahead ? labels.payAheadAvailable : null,
+    amountPaid > 0
+      ? t(labels.alreadyPaid, { amount: formatCurrency(amountPaid, currency) })
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <section
       id={showAnchor ? 'pay' : undefined}
@@ -58,24 +73,17 @@ export function NextContributionCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Your next contribution
+            {labels.nextTitle}
           </p>
           <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">
             {formatCurrency(remaining, currency)}
           </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {circleName ? `${circleName} · ` : ''}
-            Due {formatDate(dueDate)}
-            {status === 'late' ? ' · overdue' : ahead ? ' · pay ahead available' : ''}
-            {amountPaid > 0
-              ? ` · ${formatCurrency(amountPaid, currency)} already paid`
-              : ''}
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">{dueMeta}</p>
         </div>
         {walletAvailable != null ? (
           <div className="rounded-xl bg-secondary/70 px-3 py-2 text-right">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Money available
+              {labels.moneyAvailable}
             </p>
             <p className="mt-0.5 text-sm font-semibold">
               {formatCurrency(walletAvailable, walletCurrency)}
@@ -87,14 +95,11 @@ export function NextContributionCard({
       {!canCover ? (
         <p className="text-sm text-muted-foreground">
           {walletAvailable == null
-            ? 'Add money to your wallet, then pay this contribution.'
-            : `You need about ${formatCurrency(shortfall, currency)} more to pay in full.`}
+            ? labels.needWallet
+            : t(labels.needMore, { amount: formatCurrency(shortfall, currency) })}
         </p>
       ) : (
-        <p className="text-sm text-muted-foreground">
-          Pays from your Amanah balance into this circle. Leave amount blank for the full
-          remaining balance.
-        </p>
+        <p className="text-sm text-muted-foreground">{labels.paysFromBalance}</p>
       )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
@@ -106,7 +111,7 @@ export function NextContributionCard({
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
             <label className="block text-xs text-muted-foreground">
-              Amount (optional)
+              {labels.amountOptional}
               <input
                 name="amount"
                 type="number"
@@ -119,7 +124,7 @@ export function NextContributionCard({
               />
             </label>
             <Button type="submit" className="min-h-11 w-full sm:w-auto">
-              {ahead ? 'Pay ahead' : 'Pay'}
+              {ahead ? labels.payAhead : labels.pay}
             </Button>
           </form>
         ) : (
@@ -129,7 +134,7 @@ export function NextContributionCard({
                 `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
               }
             >
-              {walletAvailable == null ? 'Add money' : 'Add money to pay'}
+              {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}
             </Link>
           </Button>
         )}
@@ -142,7 +147,7 @@ export function NextContributionCard({
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
             <label className="block text-xs text-muted-foreground">
-              Partial amount
+              {labels.partialAmount}
               <input
                 name="amount"
                 type="number"
@@ -155,13 +160,13 @@ export function NextContributionCard({
               />
             </label>
             <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-              Pay partial
+              {labels.payPartial}
             </Button>
           </form>
         ) : null}
 
         <Button asChild variant="ghost" size="sm" className="min-h-11">
-          <Link href="#calendar">Calendar</Link>
+          <Link href="#calendar">{labels.calendar}</Link>
         </Button>
       </div>
     </section>

@@ -12,40 +12,43 @@ import {
   X,
 } from 'lucide-react';
 import { AmanahLogo } from '@/components/amanah-logo';
+import type { Dictionary } from '@/i18n/dictionaries';
 import { cn } from '@/lib/utils';
 
-const ACTIONS = [
-  {
-    href: '/wallet#withdraw' as Route,
-    label: 'Withdraw',
-    hint: 'To M-Pesa or bank',
-    icon: ArrowUpFromLine,
-    tint: 'amanah-tint-withdraw',
-  },
-  {
-    href: '/circles' as Route,
-    label: 'Pay a circle',
-    hint: 'Contribution dues',
-    icon: LayoutGrid,
-    tint: 'amanah-tint-pay',
-  },
-  {
-    href: '/finance/goals' as Route,
-    label: 'Goals',
-    hint: 'Hajj, Umra, and more',
-    icon: Target,
-    tint: 'amanah-tint-send',
-  },
-] as const;
+type PayLabels = Dictionary['paySheet'];
 
 /** Pay — liquid-glass launcher into real money destinations (no dead ends). */
-export function PaySheet() {
+export function PaySheet({ labels }: { labels: PayLabels }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => setReady(true));
     return () => window.cancelAnimationFrame(id);
   }, []);
+
+  const actions = [
+    {
+      href: '/wallet#withdraw' as Route,
+      label: labels.withdraw,
+      hint: labels.withdrawHint,
+      icon: ArrowUpFromLine,
+      tint: 'amanah-tint-withdraw',
+    },
+    {
+      href: '/circles' as Route,
+      label: labels.payCircle,
+      hint: labels.payCircleHint,
+      icon: LayoutGrid,
+      tint: 'amanah-tint-pay',
+    },
+    {
+      href: '/finance/goals' as Route,
+      label: labels.goals,
+      hint: labels.goalsHint,
+      icon: Target,
+      tint: 'amanah-tint-send',
+    },
+  ] as const;
 
   return (
     <div
@@ -65,17 +68,15 @@ export function PaySheet() {
             <AmanahLogo href={'/dashboard' as Route} size="sm" tone="brand" />
             <div>
               <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">
-                Move money
+                {labels.title}
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Straight to add, withdraw, or pay a circle.
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{labels.subtitle}</p>
             </div>
           </div>
           <Link
             href={'/dashboard' as Route}
             className="amanah-glass-pill inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground"
-            aria-label="Close"
+            aria-label={labels.close}
           >
             <X className="h-4 w-4" strokeWidth={1.75} />
           </Link>
@@ -98,12 +99,14 @@ export function PaySheet() {
           <span className="relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
             <Plus className="h-7 w-7" strokeWidth={1.5} />
           </span>
-          <span className="relative text-[15px] font-semibold tracking-tight">Add money</span>
-          <span className="relative text-xs text-white/70">Top up your balance</span>
+          <span className="relative text-[15px] font-semibold tracking-tight">
+            {labels.addMoney}
+          </span>
+          <span className="relative text-xs text-white/70">{labels.addMoneyHint}</span>
         </Link>
 
         <ul className="overflow-hidden rounded-[1.35rem] bg-white/55 dark:bg-white/[0.04]">
-          {ACTIONS.map((action) => {
+          {actions.map((action) => {
             const Icon = action.icon;
             return (
               <li

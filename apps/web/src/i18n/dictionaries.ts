@@ -117,6 +117,10 @@ export type Dictionary = {
   dashboard: {
     eyebrow: string;
     greeting: string;
+    greetingMorning: string;
+    greetingAfternoon: string;
+    greetingEvening: string;
+    nameFallback: string;
     subtitle: string;
     completeProfileHint: string;
     signedInAs: string;
@@ -131,6 +135,7 @@ export type Dictionary = {
     upcomingPayouts: string;
     scheduledForYou: string;
     wallet: string;
+    available: string;
     availableHint: string;
     noWalletYet: string;
     contributionsTitle: string;
@@ -156,6 +161,48 @@ export type Dictionary = {
     notificationsDesc: string;
     notificationsEmptyTitle: string;
     notificationsEmptyDesc: string;
+    quickAdd: string;
+    quickPayDue: string;
+    quickCircles: string;
+    quickWithdraw: string;
+    quickMoney: string;
+    duePrefix: string;
+    recent: string;
+    activity: string;
+    nothingYet: string;
+    addPhone: string;
+  };
+  paySheet: {
+    title: string;
+    subtitle: string;
+    addMoney: string;
+    addMoneyHint: string;
+    withdraw: string;
+    withdrawHint: string;
+    payCircle: string;
+    payCircleHint: string;
+    goals: string;
+    goalsHint: string;
+    close: string;
+  };
+  contributionCard: {
+    nextTitle: string;
+    moneyAvailable: string;
+    due: string;
+    overdue: string;
+    payAheadAvailable: string;
+    alreadyPaid: string;
+    needWallet: string;
+    needMore: string;
+    paysFromBalance: string;
+    amountOptional: string;
+    pay: string;
+    payAhead: string;
+    addMoney: string;
+    addMoneyToPay: string;
+    partialAmount: string;
+    payPartial: string;
+    calendar: string;
   };
   circles: {
     eyebrow: string;
@@ -186,6 +233,23 @@ export type Dictionary = {
     failedPayments: string;
     historyTitle: string;
     historyEmpty: string;
+    availableLabel: string;
+    quickSave: string;
+    quickInsights: string;
+    moreTitle: string;
+    moreDesc: string;
+    moreGoals: string;
+    moreGoalsDesc: string;
+    moreQard: string;
+    moreQardDesc: string;
+    moreSadakaDesc: string;
+    moreZakat: string;
+    moreZakatDesc: string;
+    phoneBannerTitle: string;
+    phoneBannerBody: string;
+    addPhone: string;
+    payContributionCta: string;
+    memberMoney: string;
   };
   walletForms: {
     amount: string;
@@ -218,6 +282,16 @@ export type Dictionary = {
     eyebrow: string;
     title: string;
     subtitle: string;
+    moneyAvailable: string;
+    openDuesOne: string;
+    openDuesMany: string;
+    noOpenDues: string;
+    addMoney: string;
+    payDues: string;
+    goalsCta: string;
+    insightsTitle: string;
+    insightsDesc: string;
+    shariaCta: string;
     welfareTitle: string;
     welfareDesc: string;
     qardTitle: string;
@@ -254,6 +328,27 @@ export type Dictionary = {
     eyebrow: string;
     title: string;
     subtitle: string;
+    youFallback: string;
+    amanahScore: string;
+    scoreExcellent: string;
+    scoreStrong: string;
+    scoreBuilding: string;
+    appearance: string;
+    linkMoney: string;
+    linkGoals: string;
+    linkVerification: string;
+    linkZakat: string;
+    linkSupport: string;
+    onboardingEyebrow: string;
+    onboardingTitle: string;
+    onboardingBody: string;
+    onboardingStepName: string;
+    onboardingStepPhone: string;
+    onboardingStepKyc: string;
+    onboardingHome: string;
+    onboardingAddName: string;
+    onboardingAddPhone: string;
+    onboardingVerification: string;
     personalDetails: string;
     email: string;
     mpesaLinkage: string;
@@ -522,6 +617,10 @@ export const en: Dictionary = {
   dashboard: {
     eyebrow: 'Member home',
     greeting: 'Assalamu alaikum',
+    greetingMorning: 'Good morning',
+    greetingAfternoon: 'Good afternoon',
+    greetingEvening: 'Good evening',
+    nameFallback: 'there',
     subtitle: 'Circles, dues, and payouts.',
     completeProfileHint: ' Complete your profile to unlock invitations and verification.',
     signedInAs: 'Signed in as {who}',
@@ -536,6 +635,7 @@ export const en: Dictionary = {
     upcomingPayouts: 'Upcoming payouts',
     scheduledForYou: 'Scheduled for you',
     wallet: 'Wallet',
+    available: 'Available',
     availableHint: '{currency} available',
     noWalletYet: 'No wallet yet',
     contributionsTitle: 'Upcoming contributions',
@@ -564,6 +664,49 @@ export const en: Dictionary = {
     notificationsDesc: 'Recent activity from your circles.',
     notificationsEmptyTitle: "You're all caught up",
     notificationsEmptyDesc: 'Invites, dues, and payout updates will land here.',
+    quickAdd: 'Add',
+    quickPayDue: 'Pay due',
+    quickCircles: 'Circles',
+    quickWithdraw: 'Withdraw',
+    quickMoney: 'Money',
+    duePrefix: 'Due',
+    recent: 'Recent',
+    activity: 'Activity',
+    nothingYet: 'Nothing yet',
+    addPhone: 'Add phone',
+  },
+  paySheet: {
+    title: 'Move money',
+    subtitle: 'Straight to add, withdraw, or pay a circle.',
+    addMoney: 'Add money',
+    addMoneyHint: 'Top up your balance',
+    withdraw: 'Withdraw',
+    withdrawHint: 'To M-Pesa or bank',
+    payCircle: 'Pay a circle',
+    payCircleHint: 'Contribution dues',
+    goals: 'Goals',
+    goalsHint: 'Hajj, Umra, and more',
+    close: 'Close',
+  },
+  contributionCard: {
+    nextTitle: 'Your next contribution',
+    moneyAvailable: 'Money available',
+    due: 'Due',
+    overdue: 'overdue',
+    payAheadAvailable: 'pay ahead available',
+    alreadyPaid: '{amount} already paid',
+    needWallet: 'Add money to your wallet, then pay this contribution.',
+    needMore: 'You need about {amount} more to pay in full.',
+    paysFromBalance:
+      'Pays from your Amanah balance into this circle. Leave amount blank for the full remaining balance.',
+    amountOptional: 'Amount (optional)',
+    pay: 'Pay',
+    payAhead: 'Pay ahead',
+    addMoney: 'Add money',
+    addMoneyToPay: 'Add money to pay',
+    partialAmount: 'Partial amount',
+    payPartial: 'Pay partial',
+    calendar: 'Calendar',
   },
   circles: {
     eyebrow: 'Circles',
@@ -597,6 +740,23 @@ export const en: Dictionary = {
     historyTitle: 'History',
     historyEmpty:
       'Top-ups, contributions, and payouts will appear here.',
+    availableLabel: 'Available',
+    quickSave: 'Save',
+    quickInsights: 'Insights',
+    moreTitle: 'More',
+    moreDesc: 'Lending, goals, and giving.',
+    moreGoals: 'Goals',
+    moreGoalsDesc: 'Hajj, Umra, and personal saves',
+    moreQard: 'Qard Hassan',
+    moreQardDesc: 'Interest-free circle loans',
+    moreSadakaDesc: 'Give to endorsed campaigns',
+    moreZakat: 'Zakat',
+    moreZakatDesc: 'Estimate what you owe',
+    phoneBannerTitle: 'Add a Kenya mobile',
+    phoneBannerBody: 'Money verification SMS and withdrawals need a +254 number on your profile.',
+    addPhone: 'Add phone',
+    payContributionCta: 'Pay contribution',
+    memberMoney: 'Member Money',
   },
   walletForms: {
     amount: 'Amount ({currency})',
@@ -633,6 +793,16 @@ export const en: Dictionary = {
     eyebrow: 'Finance',
     title: 'Finance',
     subtitle: 'Goals, welfare, and interest-free lending.',
+    moneyAvailable: 'Money available',
+    openDuesOne: '{count} open due · {amount} left',
+    openDuesMany: '{count} open dues · {amount} left',
+    noOpenDues: 'No open contribution dues',
+    addMoney: 'Add money',
+    payDues: 'Pay dues',
+    goalsCta: 'Goals',
+    insightsTitle: 'Insights',
+    insightsDesc: 'This month’s inflow, on-time rate, and upcoming dues.',
+    shariaCta: 'Shariah',
     welfareTitle: 'Welfare fund',
     welfareDesc: 'Medical, funeral, and accident support.',
     qardTitle: 'Qard Hassan',
@@ -674,6 +844,28 @@ export const en: Dictionary = {
     eyebrow: 'You',
     title: 'You',
     subtitle: 'Name, phone, and verification.',
+    youFallback: 'You',
+    amanahScore: 'Amanah Score',
+    scoreExcellent: 'Excellent',
+    scoreStrong: 'Strong',
+    scoreBuilding: 'Building',
+    appearance: 'Appearance',
+    linkMoney: 'Money',
+    linkGoals: 'Goals',
+    linkVerification: 'Verification',
+    linkZakat: 'Zakat',
+    linkSupport: 'Support',
+    onboardingEyebrow: 'Almost ready',
+    onboardingTitle: 'Welcome to Amanah',
+    onboardingBody:
+      'Add your name and Kenya mobile for secure money moves. Verification is recommended before larger transfers.',
+    onboardingStepName: 'Save your full name',
+    onboardingStepPhone: 'Add a Kenya mobile (+254…)',
+    onboardingStepKyc: 'Upload a verification document (optional)',
+    onboardingHome: 'Home',
+    onboardingAddName: 'Add your name',
+    onboardingAddPhone: 'Add your phone',
+    onboardingVerification: 'Verification',
     personalDetails: 'Personal details',
     email: 'Email: {email}',
     mpesaLinkage: 'M-Pesa',
@@ -947,6 +1139,10 @@ export const sw: Dictionary = {
   dashboard: {
     eyebrow: 'Nyumbani kwa mwanachama',
     greeting: 'Assalamu alaikum',
+    greetingMorning: 'Habari za asubuhi',
+    greetingAfternoon: 'Habari za mchana',
+    greetingEvening: 'Habari za jioni',
+    nameFallback: 'rafiki',
     subtitle: 'Fuatilia miduara, michango, na zamu za malipo.',
     completeProfileHint: ' Kamilisha wasifu wako ili kufungua mialiko na KYC.',
     signedInAs: 'Umeingia kama {who}',
@@ -961,6 +1157,7 @@ export const sw: Dictionary = {
     upcomingPayouts: 'Malipo yanayokuja',
     scheduledForYou: 'Yaliyoratibiwa kwako',
     wallet: 'Pochi',
+    available: 'Inayopatikana',
     availableHint: '{currency} inayopatikana',
     noWalletYet: 'Bado hakuna pochi',
     contributionsTitle: 'Michango inayokuja',
@@ -989,6 +1186,49 @@ export const sw: Dictionary = {
     notificationsDesc: 'Shughuli za hivi karibuni kutoka miduara yako.',
     notificationsEmptyTitle: 'Umesoma zote',
     notificationsEmptyDesc: 'Mialiko, michango, na sasisho za malipo zitaonekana hapa.',
+    quickAdd: 'Ongeza',
+    quickPayDue: 'Lipa',
+    quickCircles: 'Miduara',
+    quickWithdraw: 'Toa',
+    quickMoney: 'Pesa',
+    duePrefix: 'Inadaiwa',
+    recent: 'Hivi karibuni',
+    activity: 'Shughuli',
+    nothingYet: 'Bado hakuna',
+    addPhone: 'Ongeza simu',
+  },
+  paySheet: {
+    title: 'Hamisha pesa',
+    subtitle: 'Moja kwa moja ongeza, toa, au lipa mduara.',
+    addMoney: 'Ongeza pesa',
+    addMoneyHint: 'Jaza salio lako',
+    withdraw: 'Toa',
+    withdrawHint: 'Kwenda M-Pesa au benki',
+    payCircle: 'Lipa mduara',
+    payCircleHint: 'Michango inayodaiwa',
+    goals: 'Malengo',
+    goalsHint: 'Hajj, Umra, na zaidi',
+    close: 'Funga',
+  },
+  contributionCard: {
+    nextTitle: 'Mchango wako unaofuata',
+    moneyAvailable: 'Pesa inayopatikana',
+    due: 'Inadaiwa',
+    overdue: 'imechelewa',
+    payAheadAvailable: 'unaweza kulipa mapema',
+    alreadyPaid: '{amount} tayari imelipwa',
+    needWallet: 'Ongeza pesa kwenye pochi yako, kisha lipa mchango huu.',
+    needMore: 'Unahitaji takriban {amount} zaidi ili kulipa kamili.',
+    paysFromBalance:
+      'Hulipwa kutoka salio lako la Amanah kwenda mduara. Acha kiasi tupu kwa salio lote lililobaki.',
+    amountOptional: 'Kiasi (si lazima)',
+    pay: 'Lipa',
+    payAhead: 'Lipa mapema',
+    addMoney: 'Ongeza pesa',
+    addMoneyToPay: 'Ongeza pesa ili kulipa',
+    partialAmount: 'Kiasi cha sehemu',
+    payPartial: 'Lipa sehemu',
+    calendar: 'Kalenda',
   },
   circles: {
     eyebrow: 'Miduara',
@@ -1022,6 +1262,23 @@ export const sw: Dictionary = {
     historyTitle: 'Historia',
     historyEmpty:
       'Ongezeko, michango, na malipo yataonekana hapa.',
+    availableLabel: 'Inayopatikana',
+    quickSave: 'Okoa',
+    quickInsights: 'Ufahamu',
+    moreTitle: 'Zaidi',
+    moreDesc: 'Mikopo, malengo, na kuchangia.',
+    moreGoals: 'Malengo',
+    moreGoalsDesc: 'Hajj, Umra, na akiba binafsi',
+    moreQard: 'Qard Hassan',
+    moreQardDesc: 'Mikopo ya mduara bila riba',
+    moreSadakaDesc: 'Changia kampeni zilizoidhinishwa',
+    moreZakat: 'Zakat',
+    moreZakatDesc: 'Kadiria unachodaiwa',
+    phoneBannerTitle: 'Ongeza simu ya Kenya',
+    phoneBannerBody: 'SMS za uthibitisho wa pesa na utoaji zinahitaji nambari ya +254 kwenye wasifu.',
+    addPhone: 'Ongeza simu',
+    payContributionCta: 'Lipa mchango',
+    memberMoney: 'Pesa ya mwanachama',
   },
   walletForms: {
     amount: 'Kiasi ({currency})',
@@ -1059,6 +1316,16 @@ export const sw: Dictionary = {
     title: 'Fedha',
     subtitle:
       'Zana za pochi ya kibinafsi na fedha za miduara zinazofuata sheria — malengo, ustawi, Qard, na zaidi.',
+    moneyAvailable: 'Pesa inayopatikana',
+    openDuesOne: 'Deni {count} wazi · {amount} imebaki',
+    openDuesMany: 'Madeni {count} wazi · {amount} yamebaki',
+    noOpenDues: 'Hakuna michango inayodaiwa',
+    addMoney: 'Ongeza pesa',
+    payDues: 'Lipa madeni',
+    goalsCta: 'Malengo',
+    insightsTitle: 'Ufahamu',
+    insightsDesc: 'Mapato ya mwezi, kiwango cha kulipa kwa wakati, na madeni yanayokuja.',
+    shariaCta: 'Shariah',
     welfareTitle: 'Hazina ya ustawi',
     welfareDesc: 'Msaada wa matibabu, mazishi, na ajali kwa mduara wako.',
     qardTitle: 'Qard Hassan',
@@ -1100,6 +1367,28 @@ export const sw: Dictionary = {
     eyebrow: 'Wewe',
     title: 'Wewe',
     subtitle: 'Jina, simu, na uthibitisho.',
+    youFallback: 'Wewe',
+    amanahScore: 'Alama ya Amanah',
+    scoreExcellent: 'Bora',
+    scoreStrong: 'Imara',
+    scoreBuilding: 'Inajengwa',
+    appearance: 'Muonekano',
+    linkMoney: 'Pesa',
+    linkGoals: 'Malengo',
+    linkVerification: 'Uthibitisho',
+    linkZakat: 'Zakat',
+    linkSupport: 'Msaada',
+    onboardingEyebrow: 'Karibu tayari',
+    onboardingTitle: 'Karibu Amanah',
+    onboardingBody:
+      'Ongeza jina na simu ya Kenya kwa uhamishaji salama wa pesa. Uthibitisho unapendekezwa kabla ya uhamishaji mkubwa.',
+    onboardingStepName: 'Hifadhi jina lako kamili',
+    onboardingStepPhone: 'Ongeza simu ya Kenya (+254…)',
+    onboardingStepKyc: 'Pakia hati ya uthibitisho (si lazima)',
+    onboardingHome: 'Nyumbani',
+    onboardingAddName: 'Ongeza jina lako',
+    onboardingAddPhone: 'Ongeza simu yako',
+    onboardingVerification: 'Uthibitisho',
     personalDetails: 'Taarifa binafsi',
     email: 'Barua pepe: {email}',
     mpesaLinkage: 'M-Pesa',

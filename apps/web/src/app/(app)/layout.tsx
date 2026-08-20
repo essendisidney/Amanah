@@ -4,7 +4,7 @@ import { AppShell } from '@/components/app-shell';
 import { signOutAction } from '@/features/auth';
 import { NotificationRealtime } from '@/features/dashboard/components/notification-realtime';
 import { DEFAULT_LOCALE, type Locale } from '@/i18n/config';
-import { dictionaries, type Dictionary } from '@/i18n/dictionaries';
+import { dictionaries } from '@/i18n/dictionaries';
 import { getDictionary } from '@/i18n/get-dictionary';
 import {
   getAuthUser,
@@ -14,16 +14,18 @@ import {
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   let user: Awaited<ReturnType<typeof getAuthUser>>['user'] = null;
-  let locale: Locale = DEFAULT_LOCALE;
-  let dict: Dictionary = dictionaries[DEFAULT_LOCALE];
+
+  // Always resolve locale independently so auth hiccups never force English chrome.
+  const { locale, dict } = await getDictionary().catch(() => ({
+    locale: DEFAULT_LOCALE as Locale,
+    dict: dictionaries[DEFAULT_LOCALE],
+  }));
 
   try {
-    const [auth, dictionary] = await Promise.all([getAuthUser(), getDictionary()]);
+    const auth = await getAuthUser();
     user = auth.user;
-    locale = dictionary.locale;
-    dict = dictionary.dict;
   } catch {
-    /* Keep shell usable if auth/dictionary hiccups during a tab change. */
+    /* Keep shell usable if auth hiccups during a tab change. */
   }
 
   let unread = 0;

@@ -118,21 +118,30 @@ export default async function ProfilePage({ searchParams }: Props) {
       Math.min(docs.length, 3) * 15,
   );
   const scoreLabel =
-    amanahScore >= 750 ? 'Excellent' : amanahScore >= 680 ? 'Strong' : 'Building';
+    amanahScore >= 750
+      ? labels.scoreExcellent
+      : amanahScore >= 680
+        ? labels.scoreStrong
+        : labels.scoreBuilding;
 
   const youLinks: Array<{ href: Route; title: string; meta: string | null }> = [
-    { href: '/wallet', title: 'Money', meta: null },
-    { href: '/finance/goals', title: 'Goals', meta: null },
-    { href: '/profile#kyc-documents' as Route, title: 'Verification', meta: profile?.kyc_status ?? null },
-    { href: '/sadaka', title: 'Sadaka', meta: null },
-    { href: '/zakat', title: 'Zakat', meta: null },
-    { href: '/support', title: 'Support', meta: null },
+    { href: '/wallet', title: labels.linkMoney, meta: null },
+    { href: '/finance/goals', title: labels.linkGoals, meta: null },
+    {
+      href: '/profile#kyc-documents' as Route,
+      title: labels.linkVerification,
+      meta: profile?.kyc_status ?? null,
+    },
+    { href: '/sadaka', title: dict.common.sadaka, meta: null },
+    { href: '/zakat', title: labels.linkZakat, meta: null },
+    { href: '/support', title: labels.linkSupport, meta: null },
   ];
 
   return (
     <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-2xl">
       {onboarding ? (
         <ProfileOnboardingBanner
+          labels={labels}
           continueHref={continueHref}
           profileCompleted={Boolean(profile?.profile_completed && profile?.full_name?.trim())}
           hasPhone={hasPhone}
@@ -142,7 +151,7 @@ export default async function ProfilePage({ searchParams }: Props) {
 
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {profile?.full_name?.trim() || 'You'}
+          {profile?.full_name?.trim() || labels.youFallback}
         </h1>
         <p className="text-sm text-muted-foreground">
           {profile?.phone || profile?.email || user.email || '—'}
@@ -154,7 +163,7 @@ export default async function ProfilePage({ searchParams }: Props) {
         className="amanah-forest block rounded-[1.5rem] px-5 py-5 transition-transform active:scale-[0.99]"
       >
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
-          Amanah Score
+          {labels.amanahScore}
         </p>
         <div className="mt-2 flex items-end justify-between gap-3">
           <p className="amanah-money text-4xl font-bold tracking-tight text-primary">{amanahScore}</p>
@@ -179,7 +188,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       </ul>
 
       <section className="flex items-center justify-between gap-3 py-1">
-        <p className="text-sm text-muted-foreground">Appearance</p>
+        <p className="text-sm text-muted-foreground">{labels.appearance}</p>
         <ThemeToggle variant="segmented" />
       </section>
 

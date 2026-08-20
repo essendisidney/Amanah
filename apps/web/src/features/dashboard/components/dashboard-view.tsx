@@ -10,10 +10,10 @@ import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/sha
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
 
-function greetingForHour(hour: number) {
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+function greetingForHour(hour: number, labels: Dictionary['dashboard']) {
+  if (hour < 12) return labels.greetingMorning;
+  if (hour < 17) return labels.greetingAfternoon;
+  return labels.greetingEvening;
 }
 
 export function DashboardView({
@@ -30,8 +30,8 @@ export function DashboardView({
   const firstName =
     data.profile?.full_name?.split(/\s+/)[0] ||
     email?.split('@')[0] ||
-    'there';
-  const greeting = greetingForHour(new Date().getHours());
+    labels.nameFallback;
+  const greeting = greetingForHour(new Date().getHours(), labels);
   const currency = data.wallet?.currency ?? 'KES';
   const available = data.wallet?.availableBalance ?? data.wallet?.balance ?? 0;
   const nextDue = data.contributions[0];
@@ -40,41 +40,51 @@ export function DashboardView({
     !isValidKeMobile(String(data.profile?.phone ?? '').trim());
   const needsProfile = Boolean(data.profile && !data.profile.profile_completed);
 
-  const quickActions = [
-    { href: '/wallet#top-up' as Route, label: 'Add', icon: Plus, tint: 'amanah-tint-add' },
+  const withDue = [
+    { href: '/wallet#top-up' as Route, label: labels.quickAdd, icon: Plus, tint: 'amanah-tint-add' },
     {
-      href: (nextDue
-        ? `/circles/${nextDue.jamiyaSlug}#pay`
-        : '/circles') as Route,
-      label: nextDue ? 'Pay due' : 'Circles',
+      href: `/circles/${nextDue!.jamiyaSlug}#pay` as Route,
+      label: labels.quickPayDue,
       icon: CircleDollarSign,
       tint: 'amanah-tint-pay',
     },
-    { href: '/circles' as Route, label: 'Circles', icon: LayoutGrid, tint: 'amanah-tint-send' },
+    {
+      href: '/circles' as Route,
+      label: labels.quickCircles,
+      icon: LayoutGrid,
+      tint: 'amanah-tint-send',
+    },
     {
       href: '/wallet#withdraw' as Route,
-      label: 'Withdraw',
+      label: labels.quickWithdraw,
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
     },
   ] as const;
 
-  // Avoid two identical Circles tiles when there is no due.
-  const actions =
-    nextDue != null
-      ? quickActions
-      : ([
-          quickActions[0],
-          {
-            href: '/wallet' as Route,
-            label: 'Money',
-            icon: CircleDollarSign,
-            tint: 'amanah-tint-pay',
-          },
-          quickActions[2],
-          quickActions[3],
-        ] as const);
+  const withoutDue = [
+    { href: '/wallet#top-up' as Route, label: labels.quickAdd, icon: Plus, tint: 'amanah-tint-add' },
+    {
+      href: '/wallet' as Route,
+      label: labels.quickMoney,
+      icon: CircleDollarSign,
+      tint: 'amanah-tint-pay',
+    },
+    {
+      href: '/circles' as Route,
+      label: labels.quickCircles,
+      icon: LayoutGrid,
+      tint: 'amanah-tint-send',
+    },
+    {
+      href: '/wallet#withdraw' as Route,
+      label: labels.quickWithdraw,
+      icon: ArrowUpFromLine,
+      tint: 'amanah-tint-withdraw',
+    },
+  ] as const;
 
+  const actions = nextDue != null ? withDue : withoutDue;
   const circle = data.jamiyas[0] ?? null;
   const recent = data.activity.slice(0, 3);
 
@@ -95,7 +105,7 @@ export function DashboardView({
               }
               className="inline-block text-sm font-medium text-primary"
             >
-              {needsPhone ? 'Add phone' : labels.completeProfile}
+              {needsPhone ? labels.addPhone : labels.completeProfile}
             </Link>
           )}
         </header>
@@ -108,7 +118,7 @@ export function DashboardView({
           <p className="amanah-money relative text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
             {formatCurrency(available, currency)}
           </p>
-          <p className="relative text-sm text-muted-foreground">Available</p>
+          <p className="relative text-sm text-muted-foreground">{labels.available}</p>
         </section>
 
         <section className="flex items-start justify-between gap-2 px-1">
@@ -133,7 +143,7 @@ export function DashboardView({
 
         {nextDue ? (
           <p className="text-sm text-muted-foreground">
-            Due{' '}
+            {labels.duePrefix}{' '}
             <Link
               href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}
               className="font-semibold text-foreground"
@@ -150,7 +160,7 @@ export function DashboardView({
         ) : null}
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">Circles</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">{labels.quickCircles}</h2>
 
           {!circle ? (
             <Link
@@ -192,26 +202,26 @@ export function DashboardView({
 
         <section className="space-y-3 md:hidden">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">{labels.recent}</h2>
             <Link
               href={'/notifications' as Route}
               className="text-sm font-medium text-primary"
             >
-              Activity
+              {labels.activity}
             </Link>
           </div>
-          <RecentList rows={recent} />
+          <RecentList rows={recent} emptyLabel={labels.nothingYet} />
         </section>
       </div>
 
       <aside className="hidden space-y-6 md:block">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
+          <h2 className="text-sm font-medium text-muted-foreground">{labels.recent}</h2>
           <Link href={'/notifications' as Route} className="text-sm font-medium text-primary">
-            Activity
+            {labels.activity}
           </Link>
         </div>
-        <RecentList rows={recent} />
+        <RecentList rows={recent} emptyLabel={labels.nothingYet} />
       </aside>
     </div>
   );
@@ -219,11 +229,13 @@ export function DashboardView({
 
 function RecentList({
   rows,
+  emptyLabel,
 }: {
   rows: DashboardData['activity'];
+  emptyLabel: string;
 }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-muted-foreground">Nothing yet</p>;
+    return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
 
   return (

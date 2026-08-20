@@ -185,7 +185,7 @@ export default async function WalletPage({ searchParams }: Props) {
           </p>
           {returnPath && notices.noticeType !== 'error' ? (
             <Button asChild className="min-h-11">
-              <Link href={returnPath as Route}>Pay contribution</Link>
+              <Link href={returnPath as Route}>{labels.payContributionCta}</Link>
             </Button>
           ) : null}
         </div>
@@ -200,14 +200,12 @@ export default async function WalletPage({ searchParams }: Props) {
       {!hasPhone ? (
         <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-foreground">Add a Kenya mobile</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Money verification SMS and withdrawals need a +254 number on your profile.
-            </p>
+            <p className="text-sm font-semibold text-foreground">{labels.phoneBannerTitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{labels.phoneBannerBody}</p>
           </div>
           <Button asChild className="min-h-11 shrink-0">
             <Link href={'/profile?onboarding=1&next=/wallet#personal-details' as Route}>
-              Add phone
+              {labels.addPhone}
             </Link>
           </Button>
         </div>
@@ -217,13 +215,13 @@ export default async function WalletPage({ searchParams }: Props) {
         <EmptyState
           title={labels.emptyTitle}
           description={labels.emptyDesc}
-          actionLabel="Add money"
+          actionLabel={labels.topUp}
           actionHref={'#top-up' as Route}
         />
       ) : (
         <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-            Available
+            {labels.availableLabel}
           </p>
           <p className="amanah-money mt-2 text-4xl font-bold tracking-tight md:text-5xl">
             {formatCurrency(available, primaryCurrency)}
@@ -238,10 +236,10 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="grid grid-cols-4 gap-2 sm:gap-3">
         {[
-          { href: '#top-up', label: 'Add', icon: Plus },
-          { href: '/finance/goals', label: 'Save', icon: CamelIcon },
-          { href: '/finance/insights', label: 'Insights', icon: ChartNoAxesCombined },
-          { href: '#withdraw', label: 'Withdraw', icon: ArrowUpRight },
+          { href: '#top-up', label: labels.topUp, icon: Plus },
+          { href: '/finance/goals', label: labels.quickSave, icon: CamelIcon },
+          { href: '/finance/insights', label: labels.quickInsights, icon: ChartNoAxesCombined },
+          { href: '#withdraw', label: labels.withdraw, icon: ArrowUpRight },
         ].map((action) => {
           const Icon = action.icon;
           return (
@@ -261,33 +259,33 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">More</h2>
-          <p className="text-sm text-muted-foreground">Lending, goals, and giving.</p>
+          <h2 className="text-lg font-bold tracking-tight">{labels.moreTitle}</h2>
+          <p className="text-sm text-muted-foreground">{labels.moreDesc}</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {[
             {
               href: '/finance/goals',
-              title: 'Goals',
-              desc: 'Hajj, Umra, and personal saves',
+              title: labels.moreGoals,
+              desc: labels.moreGoalsDesc,
               icon: TrendingUp,
             },
             {
               href: '/finance/qard',
-              title: 'Qard Hassan',
-              desc: 'Interest-free circle loans',
+              title: labels.moreQard,
+              desc: labels.moreQardDesc,
               icon: Landmark,
             },
             {
               href: '/sadaka',
               title: dict.common.sadaka,
-              desc: 'Give to endorsed campaigns',
+              desc: labels.moreSadakaDesc,
               icon: HandHeart,
             },
             {
               href: '/zakat',
-              title: 'Zakat',
-              desc: 'Estimate what you owe',
+              title: labels.moreZakat,
+              desc: labels.moreZakatDesc,
               icon: Calculator,
             },
           ].map((item) => {
@@ -322,7 +320,7 @@ export default async function WalletPage({ searchParams }: Props) {
         </p>
         <p className="mt-6 text-sm font-semibold tracking-wide">{displayName.toUpperCase()}</p>
         <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/55">
-          Member Money
+          {labels.memberMoney}
         </p>
       </section>
 

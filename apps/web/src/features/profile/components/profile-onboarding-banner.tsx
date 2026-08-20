@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@jamiya/ui';
 import { isValidKeMobile } from '@jamiya/shared';
+import type { Dictionary } from '@/i18n/dictionaries';
 
 function safeContinuePath(next: string | undefined): Route {
   if (!next || !next.startsWith('/') || next.startsWith('//')) {
@@ -14,11 +15,13 @@ function safeContinuePath(next: string | undefined): Route {
 }
 
 export function ProfileOnboardingBanner({
+  labels,
   continueHref,
   profileCompleted,
   hasPhone,
   hasKycDoc,
 }: {
+  labels: Dictionary['profile'];
   continueHref?: string;
   profileCompleted: boolean;
   hasPhone: boolean;
@@ -34,13 +37,10 @@ export function ProfileOnboardingBanner({
     <section className="amanah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          Almost ready
+          {labels.onboardingEyebrow}
         </p>
-        <h2 className="mt-1 text-xl font-bold tracking-tight">Welcome to Amanah</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Add your name and Kenya mobile for secure money moves. Verification is recommended
-          before larger transfers.
-        </p>
+        <h2 className="mt-1 text-xl font-bold tracking-tight">{labels.onboardingTitle}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{labels.onboardingBody}</p>
       </div>
 
       <ol className="space-y-2 text-sm">
@@ -55,7 +55,7 @@ export function ProfileOnboardingBanner({
             {nameDone ? '✓' : '1'}
           </span>
           <span className={nameDone ? 'text-muted-foreground line-through' : 'font-medium'}>
-            Save your full name
+            {labels.onboardingStepName}
           </span>
         </li>
         <li className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export function ProfileOnboardingBanner({
             {phoneDone ? '✓' : '2'}
           </span>
           <span className={phoneDone ? 'text-muted-foreground line-through' : 'font-medium'}>
-            Add a Kenya mobile (+254…)
+            {labels.onboardingStepPhone}
           </span>
         </li>
         <li className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export function ProfileOnboardingBanner({
             {kycDone ? '✓' : '3'}
           </span>
           <span className={kycDone ? 'text-muted-foreground line-through' : 'font-medium'}>
-            Upload a KYC document (optional)
+            {labels.onboardingStepKyc}
           </span>
         </li>
       </ol>
@@ -91,18 +91,18 @@ export function ProfileOnboardingBanner({
       <div className="flex flex-col gap-2 sm:flex-row">
         {ready ? (
           <Button asChild className="min-h-11">
-            <Link href={dest}>Home</Link>
+            <Link href={dest}>{labels.onboardingHome}</Link>
           </Button>
         ) : (
           <Button asChild variant="outline" className="min-h-11">
             <a href="#personal-details">
-              {!nameDone ? 'Add your name' : 'Add your phone'}
+              {!nameDone ? labels.onboardingAddName : labels.onboardingAddPhone}
             </a>
           </Button>
         )}
         {!kycDone ? (
           <Button asChild variant="ghost" className="min-h-11">
-            <a href="#kyc-documents">Verification</a>
+            <a href="#kyc-documents">{labels.onboardingVerification}</a>
           </Button>
         ) : null}
       </div>

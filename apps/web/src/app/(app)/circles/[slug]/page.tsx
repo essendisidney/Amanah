@@ -461,6 +461,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               : null
           }
           walletCurrency={walletCurrency}
+          labels={dict.contributionCard}
         />
       ) : null}
 

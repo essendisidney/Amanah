@@ -6,6 +6,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getDashboardData } from '@/features/dashboard';
+import { t } from '@/i18n/dictionaries';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,9 +42,10 @@ export default async function FinancePage() {
     0,
   );
   const currency = wallet?.currency ?? 'KES';
+  const openDueAmount = formatCurrency(openDueTotal, currency);
 
   const items = [
-    ['Insights', 'This month’s inflow, on-time rate, and upcoming dues.', '/finance/insights'],
+    [labels.insightsTitle, labels.insightsDesc, '/finance/insights'],
     [labels.investTitle, labels.investDesc, '/finance/invest'],
     [labels.welfareTitle, labels.welfareDesc, '/finance/welfare'],
     [labels.qardTitle, labels.qardDesc, '/finance/qard'],
@@ -66,20 +68,23 @@ export default async function FinancePage() {
       <section className="amanah-surface flex flex-col gap-4 border-primary/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Money available
+            {labels.moneyAvailable}
           </p>
           <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">
             {formatCurrency(wallet?.availableBalance ?? 0, currency)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {openDues > 0
-              ? `${openDues} open due${openDues === 1 ? '' : 's'} · ${formatCurrency(openDueTotal, currency)} left`
-              : 'No open contribution dues'}
+              ? t(openDues === 1 ? labels.openDuesOne : labels.openDuesMany, {
+                  count: openDues,
+                  amount: openDueAmount,
+                })
+              : labels.noOpenDues}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button asChild className="min-h-11">
-            <Link href={'/wallet#top-up' as Route}>Add money</Link>
+            <Link href={'/wallet#top-up' as Route}>{labels.addMoney}</Link>
           </Button>
           {openDues > 0 && dashboard.contributions[0] ? (
             <Button asChild variant="outline" className="min-h-11">
@@ -88,12 +93,12 @@ export default async function FinancePage() {
                   `/circles/${dashboard.contributions[0].jamiyaSlug}#pay` as Route
                 }
               >
-                Pay dues
+                {labels.payDues}
               </Link>
             </Button>
           ) : (
             <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/finance/goals' as Route}>Goals</Link>
+              <Link href={'/finance/goals' as Route}>{labels.goalsCta}</Link>
             </Button>
           )}
         </div>
@@ -126,7 +131,7 @@ export default async function FinancePage() {
           {labels.shariaLead}
         </p>
         <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/#shariah' as Route}>Shariah</Link>
+          <Link href={'/#shariah' as Route}>{labels.shariaCta}</Link>
         </Button>
       </section>
 

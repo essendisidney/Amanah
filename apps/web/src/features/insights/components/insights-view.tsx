@@ -5,8 +5,21 @@ import { Button } from '@jamiya/ui';
 import type { InsightsData } from '../lib/get-insights-data';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
+import type { Dictionary } from '@/i18n/dictionaries';
 
-export function InsightsView({ data }: { data: InsightsData }) {
+export function InsightsView({
+  data,
+  contributionLabels,
+  financeBack,
+  moneyCta,
+  circlesCta,
+}: {
+  data: InsightsData;
+  contributionLabels: Dictionary['contributionCard'];
+  financeBack: string;
+  moneyCta: string;
+  circlesCta: string;
+}) {
   const { dashboard, monthInflow, monthOutflow, currency, onTimeRate, openDueTotal } = data;
   const name = dashboard.profile?.full_name?.split(' ')[0] ?? 'there';
 
@@ -15,7 +28,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
           <Link href={'/finance' as Route} className="hover:text-primary">
-            Finance
+            {financeBack}
           </Link>
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Your money story</h1>
@@ -24,10 +37,10 @@ export function InsightsView({ data }: { data: InsightsData }) {
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/finance' as Route}>Back to Finance</Link>
+            <Link href={'/finance' as Route}>{financeBack}</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
+            <Link href={'/wallet#top-up' as Route}>{moneyCta}</Link>
           </Button>
         </div>
       </div>
@@ -88,7 +101,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
             <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
           </div>
           <Button asChild size="sm" variant="ghost">
-            <Link href={'/circles' as Route}>Circles</Link>
+            <Link href={'/circles' as Route}>{circlesCta}</Link>
           </Button>
         </div>
         {dashboard.contributions.length === 0 ? (
@@ -111,6 +124,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
                 walletCurrency={dashboard.wallet?.currency ?? item.currency}
                 circleName={item.jamiyaName}
                 showAnchor={index === 0}
+                labels={contributionLabels}
               />
             ))}
           </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useTransition } from 'react';
 import { setLocaleAction } from './set-locale-action';
 import type { Locale } from './config';
@@ -13,7 +13,6 @@ export function LanguageSwitcher({
   label: string;
 }) {
   const pathname = usePathname() || '/';
-  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const other: Locale = locale === 'en' ? 'sw' : 'en';
   const otherLabel = other === 'sw' ? 'Kiswahili' : 'English';
@@ -31,7 +30,8 @@ export function LanguageSwitcher({
           fd.set('locale', other);
           fd.set('path', pathname);
           await setLocaleAction(fd);
-          router.refresh();
+          // Full reload so every page remounts in the selected locale.
+          window.location.assign(pathname);
         });
       }}
     >
