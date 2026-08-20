@@ -3,40 +3,43 @@
 /*
   Amanah design tokens — premium Islamic fintech / African community finance
   Deep emerald · warm off-white · near-black · restrained gold
+
+  Theme colors use intermediate CSS variables so .dark / :root can swap at runtime.
+  (Putting hex values only in @theme breaks class-based light/dark toggling.)
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
+@theme inline {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
-  --color-background: #f7f5f0;
-  --color-foreground: #121816;
-  --color-muted: #efece4;
-  --color-muted-foreground: #5a655e;
-  --color-border: #e0dbd0;
-  --color-ring: #0f6b4c;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
 
-  --color-card: #fffcf7;
-  --color-card-foreground: #121816;
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
 
-  --color-primary: #0b5c42;
-  --color-primary-foreground: #f7faf8;
-  --color-primary-hover: #084834;
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
 
-  --color-secondary: #e6efe9;
-  --color-secondary-foreground: #121816;
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-  --color-accent: #b8922a;
-  --color-accent-foreground: #121816;
-  --color-accent-muted: #f3e8c8;
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-muted: var(--accent-muted);
 
-  --color-destructive: #9f1d1d;
-  --color-destructive-foreground: #fef2f2;
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
 
-  --color-success: #0f766e;
-  --color-warning: #a16207;
-  --color-info: #0e5a8a;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -44,34 +47,64 @@
   --radius-xl: 1.25rem;
 }
 
+:root {
+  --background: #f7f5f0;
+  --foreground: #121816;
+  --muted: #efece4;
+  --muted-foreground: #5a655e;
+  --border: #e0dbd0;
+  --ring: #0f6b4c;
+
+  --card: #fffcf7;
+  --card-foreground: #121816;
+
+  --primary: #0b5c42;
+  --primary-foreground: #f7faf8;
+  --primary-hover: #084834;
+
+  --secondary: #e6efe9;
+  --secondary-foreground: #121816;
+
+  --accent: #b8922a;
+  --accent-foreground: #121816;
+  --accent-muted: #f3e8c8;
+
+  --destructive: #9f1d1d;
+  --destructive-foreground: #fef2f2;
+
+  --success: #0f766e;
+  --warning: #a16207;
+  --info: #0e5a8a;
+}
+
 .dark {
-  --color-background: #0c100e;
-  --color-foreground: #e8ebe8;
-  --color-muted: #171c19;
-  --color-muted-foreground: #9aa59e;
-  --color-border: #2a332e;
-  --color-ring: #2d9a6e;
+  --background: #0c100e;
+  --foreground: #e8ebe8;
+  --muted: #171c19;
+  --muted-foreground: #9aa59e;
+  --border: #2a332e;
+  --ring: #2d9a6e;
 
-  --color-card: #131916;
-  --color-card-foreground: #e8ebe8;
+  --card: #131916;
+  --card-foreground: #e8ebe8;
 
-  --color-primary: #2d9a6e;
-  --color-primary-foreground: #06140f;
-  --color-primary-hover: #3cb884;
+  --primary: #2d9a6e;
+  --primary-foreground: #06140f;
+  --primary-hover: #3cb884;
 
-  --color-secondary: #1a2420;
-  --color-secondary-foreground: #e8ebe8;
+  --secondary: #1a2420;
+  --secondary-foreground: #e8ebe8;
 
-  --color-accent: #d4a84b;
-  --color-accent-foreground: #121816;
-  --color-accent-muted: #2a2414;
+  --accent: #d4a84b;
+  --accent-foreground: #121816;
+  --accent-muted: #2a2414;
 
-  --color-destructive: #ef6b6b;
-  --color-destructive-foreground: #2a0f0f;
+  --destructive: #ef6b6b;
+  --destructive-foreground: #2a0f0f;
 
-  --color-success: #2dd4bf;
-  --color-warning: #eab308;
-  --color-info: #38bdf8;
+  --success: #2dd4bf;
+  --warning: #eab308;
+  --info: #38bdf8;
 }
 
 @layer base {

@@ -149,7 +149,7 @@ export default async function ProfilePage({ searchParams }: Props) {
           <p className="text-sm font-semibold">Appearance</p>
           <p className="text-xs text-muted-foreground">Light or dark on this device</p>
         </div>
-        <ThemeToggle />
+        <ThemeToggle variant="segmented" />
       </section>
 
       <section className="space-y-3">
