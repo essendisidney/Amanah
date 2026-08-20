@@ -1,5 +1,5 @@
-import { AppLoader } from '@/components/app-loader';
+import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function DashboardLoading() {
-  return <AppLoader message="Preparing your dashboard…" variant="compact" showBrand={false} />;
+  return <PageLoadingSkeleton message="Preparing your dashboard…" />;
 }

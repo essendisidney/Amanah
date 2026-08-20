@@ -2,20 +2,17 @@
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { AppLoader } from '@/components/app-loader';
 
-const HOLD_MS = 750;
-const FADE_MS = 520;
+const HOLD_MS = 280;
+const DONE_MS = 220;
 
 /**
- * Soft overlay while moving between tabs/pages so loading feels continuous
- * instead of flashing a bare skeleton.
+ * Thin top progress only — no full-page loader overlay.
+ * Route `loading.tsx` skeletons handle content; stacking AppLoader on top felt like a double load.
  */
 export function SmoothRouteTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const prevPath = useRef(pathname);
-  const [visible, setVisible] = useState(false);
-  const [leaving, setLeaving] = useState(false);
   const [progress, setProgress] = useState<'idle' | 'active' | 'done'>('idle');
   const timers = useRef<number[]>([]);
 
@@ -26,19 +23,12 @@ export function SmoothRouteTransition({ children }: { children: ReactNode }) {
     timers.current.forEach((id) => window.clearTimeout(id));
     timers.current = [];
 
-    setLeaving(false);
-    setVisible(true);
     setProgress('active');
 
     const hold = window.setTimeout(() => {
-      setLeaving(true);
       setProgress('done');
-      const fade = window.setTimeout(() => {
-        setVisible(false);
-        setLeaving(false);
-        setProgress('idle');
-      }, FADE_MS);
-      timers.current.push(fade);
+      const clear = window.setTimeout(() => setProgress('idle'), DONE_MS);
+      timers.current.push(clear);
     }, HOLD_MS);
 
     timers.current.push(hold);
@@ -61,23 +51,7 @@ export function SmoothRouteTransition({ children }: { children: ReactNode }) {
             .join(' ')}
         />
       </div>
-
       {children}
-
-      {visible ? (
-        <div
-          className={['amanah-route-overlay', leaving && 'amanah-route-overlay--leaving']
-            .filter(Boolean)
-            .join(' ')}
-          aria-hidden={!visible}
-        >
-          <AppLoader
-            message="Opening…"
-            variant="inline"
-            showBrand={false}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

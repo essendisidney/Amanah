@@ -2,9 +2,9 @@
 
 import { useEffect } from 'react';
 
-const MIN_SPLASH_MS = 1600;
-const FADE_MS = 900;
-const FAILSAFE_MS = 4500;
+const MIN_SPLASH_MS = 420;
+const FADE_MS = 380;
+const FAILSAFE_MS = 2800;
 
 function hideSplash() {
   const splash = document.getElementById('boot-splash');
@@ -15,7 +15,7 @@ function hideSplash() {
   }, FADE_MS);
 }
 
-/** Holds the branded splash long enough to feel smooth, then fades out. */
+/** Brief first-paint splash — keep short so route skeletons don’t feel like a second load. */
 export function BootSplash() {
   useEffect(() => {
     const splash = document.getElementById('boot-splash');
@@ -36,7 +36,6 @@ export function BootSplash() {
       dismiss();
     } else {
       window.addEventListener('load', dismiss, { once: true });
-      // Still show a full beat even if load fires early.
       timeoutId = window.setTimeout(dismiss, MIN_SPLASH_MS);
     }
 
