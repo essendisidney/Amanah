@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { toE164Kenya } from '@jamiya/shared';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/observability';
@@ -20,7 +21,8 @@ export async function topUpWalletAction(
 ): Promise<WalletActionState> {
   const amountRaw = String(formData.get('amount') ?? '');
   const currency = String(formData.get('currency') ?? 'KES').toUpperCase();
-  const phone = String(formData.get('phone') ?? '').trim();
+  const phoneRaw = String(formData.get('phone') ?? '').trim();
+  const phone = phoneRaw ? toE164Kenya(phoneRaw) ?? phoneRaw : '';
   const amount = Number(amountRaw);
   const provider = paymentProvider();
   const requireReal = process.env.REQUIRE_REAL_PROVIDERS === 'true';
@@ -29,6 +31,13 @@ export async function topUpWalletAction(
 
   if (!Number.isFinite(amount) || amount < 100) {
     return { success: false, message: 'Enter an amount of at least 100.' };
+  }
+
+  if (provider === 'mpesa' && phoneRaw && !toE164Kenya(phoneRaw)) {
+    return {
+      success: false,
+      message: 'Use a Kenya mobile, e.g. 0712345678 or +254712345678.',
+    };
   }
 
   const otp = String(formData.get('otp') ?? '').trim();

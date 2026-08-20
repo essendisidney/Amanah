@@ -131,7 +131,7 @@ export async function settlePayoutAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    console.error('propose_settle_payout', error.message);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
     return;
   }
 
@@ -140,25 +140,49 @@ export async function settlePayoutAction(formData: FormData): Promise<void> {
     error?: string;
     pending_dual_approval?: boolean;
   } | null;
-  if (!result?.ok && !result?.pending_dual_approval) {
-    console.error('propose_settle_payout', result?.error);
-  }
 
   revalidateCircle(slug || undefined);
+
   if (slug && result?.pending_dual_approval) {
     redirectWithCircleNotice(
       slug,
       'Payout queued for second officer approval (dual control).',
-      'success',
+      'info',
     );
   }
+
+  if (!result?.ok) {
+    if (slug) {
+      redirectWithCircleNotice(
+        slug,
+        mapMoneyError(result?.error) || result?.error || 'Could not settle payout.',
+        'error',
+      );
+    }
+    return;
+  }
+
+  if (slug) redirectWithCircleNotice(slug, 'Payout settled to member wallet.', 'success');
 }
 
 export async function settlePayoutToMpesaAction(formData: FormData): Promise<void> {
   const payoutId = String(formData.get('payoutId') ?? '');
   const slug = String(formData.get('slug') ?? '');
-  const phone = String(formData.get('phone') ?? '').trim();
+  const phoneRaw = String(formData.get('phone') ?? '').trim();
+  const { toE164Kenya } = await import('@jamiya/shared');
+  const phone = phoneRaw ? toE164Kenya(phoneRaw) ?? phoneRaw : '';
   if (!payoutId) return;
+
+  if (phoneRaw && !toE164Kenya(phoneRaw)) {
+    if (slug) {
+      redirectWithCircleNotice(
+        slug,
+        'Use a Kenya mobile, e.g. 0712345678 or +254712345678.',
+        'error',
+      );
+    }
+    return;
+  }
 
   const { data, error } = await callRpc('settle_payout_to_mpesa', {
     p_payout_id: payoutId,
@@ -166,16 +190,25 @@ export async function settlePayoutToMpesaAction(formData: FormData): Promise<voi
   });
 
   if (error) {
-    console.error('settle_payout_to_mpesa', error.message);
+    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
     return;
   }
 
   const result = data as { ok?: boolean; error?: string } | null;
-  if (!result?.ok) {
-    console.error('settle_payout_to_mpesa', result?.error);
-  }
-
   revalidateCircle(slug || undefined);
   revalidatePath('/admin/withdrawals');
   revalidatePath('/wallet');
+
+  if (!result?.ok) {
+    if (slug) {
+      redirectWithCircleNotice(
+        slug,
+        mapMoneyError(result?.error) || result?.error || 'Could not cash out payout.',
+        'error',
+      );
+    }
+    return;
+  }
+
+  if (slug) redirectWithCircleNotice(slug, 'Payout cash-out queued to M-Pesa.', 'success');
 }

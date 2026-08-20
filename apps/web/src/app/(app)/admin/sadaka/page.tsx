@@ -70,7 +70,7 @@ type Institution = {
 };
 
 export default async function AdminSadakaPage() {
-  await requireAdminAccess('compliance');
+  await requireAdminAccess('compliance', '/admin/sadaka');
   const { getDictionary } = await import('@/i18n/get-dictionary');
   const { dict } = await getDictionary();
   const supabase = await createClient();

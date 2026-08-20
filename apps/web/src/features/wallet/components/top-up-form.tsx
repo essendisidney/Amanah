@@ -59,7 +59,7 @@ export function TopUpForm({
             name="phone"
             type="tel"
             inputMode="tel"
-            placeholder="0712 345 678"
+            placeholder="0712345678 or +254712345678"
             required
             className="h-11 text-base sm:h-10 sm:text-sm"
           />

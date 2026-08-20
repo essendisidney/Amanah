@@ -95,11 +95,17 @@ export function LoginForm({
 
       <AuthFormMessage>
         New to Amanah?{' '}
-        <Link href={'/phone' as Route} className="font-medium text-primary hover:underline">
+        <Link
+          href={`/phone?next=${encodeURIComponent(next)}` as Route}
+          className="font-medium text-primary hover:underline"
+        >
           Start with phone
         </Link>
         {' · '}
-        <Link href={'/register' as Route} className="font-medium text-primary hover:underline">
+        <Link
+          href={`/register?next=${encodeURIComponent(next)}` as Route}
+          className="font-medium text-primary hover:underline"
+        >
           Email account
         </Link>
       </AuthFormMessage>

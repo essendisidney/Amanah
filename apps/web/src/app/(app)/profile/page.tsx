@@ -55,18 +55,24 @@ type Props = {
 };
 
 export default async function ProfilePage({ searchParams }: Props) {
+  const params = (await searchParams) ?? {};
+  const onboarding = params.onboarding === '1';
+  const continueHref = params.next;
+
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/phone?next=/profile');
+    const nextBits = new URLSearchParams();
+    if (onboarding) nextBits.set('onboarding', '1');
+    if (continueHref) nextBits.set('next', continueHref);
+    const profilePath = nextBits.toString()
+      ? `/profile?${nextBits.toString()}`
+      : '/profile';
+    redirect(`/phone?next=${encodeURIComponent(profilePath)}`);
   }
-
-  const params = (await searchParams) ?? {};
-  const onboarding = params.onboarding === '1';
-  const continueHref = params.next;
 
   const { dict } = await getDictionary();
   const labels = dict.profile;

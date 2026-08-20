@@ -47,6 +47,7 @@ export function ProfileForm({
 
       <form action={formAction} className="space-y-4">
         {requirePhone ? <input type="hidden" name="requirePhone" value="1" /> : null}
+        {next ? <input type="hidden" name="next" value={next} /> : null}
         <div className="space-y-2">
           <Label htmlFor="fullName">{labels.fullName}</Label>
           <Input

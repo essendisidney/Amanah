@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { JAMIYA_CONSTRAINTS, SUPPORTED_CURRENCIES } from '../constants';
+import { toE164Kenya } from '../utils/phone';
 
 export const emailSchema = z
   .string()
@@ -16,10 +17,18 @@ export const passwordSchema = z
   .regex(/[a-z]/, 'Include at least one lowercase letter')
   .regex(/[0-9]/, 'Include at least one number');
 
-export const phoneSchema = z
-  .string()
-  .trim()
-  .regex(/^\+[1-9]\d{7,14}$/, 'Use E.164 format, e.g. +254712345678');
+/** Accepts +254…, 07…, or 254… and stores E.164. */
+export const phoneSchema = z.preprocess(
+  (val) => {
+    if (typeof val !== 'string') return val;
+    const trimmed = val.trim();
+    if (!trimmed) return trimmed;
+    return toE164Kenya(trimmed) ?? trimmed;
+  },
+  z
+    .string()
+    .regex(/^\+[1-9]\d{7,14}$/, 'Use a Kenya mobile, e.g. 0712345678 or +254712345678'),
+);
 
 export const paginationSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),

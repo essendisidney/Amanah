@@ -16,11 +16,16 @@ export type AdminAccess = {
 
 export async function requireAdminAccess(
   mode: 'admin' | 'compliance' = 'admin',
+  returnTo = '/admin',
 ): Promise<AdminAccess> {
   const { user } = await getAuthUser();
 
   if (!user) {
-    redirect('/phone?next=/admin');
+    const dest =
+      returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')
+        ? returnTo
+        : '/admin';
+    redirect(`/phone?next=${encodeURIComponent(dest)}`);
   }
 
   const profile = await getUserProfile(user.id);

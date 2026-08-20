@@ -44,7 +44,7 @@ type IprsRow = {
 };
 
 export default async function AdminKycPage() {
-  await requireAdminAccess('compliance');
+  await requireAdminAccess('compliance', '/admin/kyc');
   const supabase = await createClient();
   const [{ data }, { data: circleData }, { data: iprsData }] = await Promise.all([
     supabase

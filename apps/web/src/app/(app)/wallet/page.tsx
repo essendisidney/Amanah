@@ -76,7 +76,11 @@ export default async function WalletPage({ searchParams }: Props) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/phone?next=/wallet');
+    const q = new URLSearchParams();
+    if (notices.next) q.set('next', notices.next);
+    if (notices.amount) q.set('amount', notices.amount);
+    const walletNext = q.toString() ? `/wallet?${q.toString()}` : '/wallet';
+    redirect(`/phone?next=${encodeURIComponent(walletNext)}`);
   }
 
   const [{ dict }, walletResult, txResult, intentResult, pendingResult, profileResult] =
@@ -213,8 +217,8 @@ export default async function WalletPage({ searchParams }: Props) {
         <EmptyState
           title={labels.emptyTitle}
           description={labels.emptyDesc}
-          actionLabel={dict.common.backToDashboard}
-          actionHref={'/dashboard' as Route}
+          actionLabel="Add money"
+          actionHref={'#top-up' as Route}
         />
       ) : (
         <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white md:p-7">

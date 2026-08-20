@@ -30,7 +30,7 @@ type Row = {
 };
 
 export default async function AdminWithdrawalsPage() {
-  await requireAdminAccess('compliance');
+  await requireAdminAccess('compliance', '/admin/withdrawals');
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const db = supabase as any;

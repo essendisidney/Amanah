@@ -41,7 +41,7 @@ export function InviteMemberForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+254712345678"
+            placeholder="+254712345678 or 0712345678"
             autoComplete="tel"
           />
           {state.fieldErrors?.phone?.[0] ? (

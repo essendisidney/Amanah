@@ -1,9 +1,11 @@
 'use server';
 
-import { updateProfileSchema, phoneSchema, sanitizePlainText, isValidKeMobile } from '@jamiya/shared';
+import { updateProfileSchema, phoneSchema, sanitizePlainText, isValidKeMobile, toE164Kenya } from '@jamiya/shared';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { getSafeRedirectPath } from '@/features/auth/lib/types';
 import { mapProfileZodErrors, type ProfileActionState } from '../lib/state';
 
 export async function updateProfileAction(
@@ -11,6 +13,7 @@ export async function updateProfileAction(
   formData: FormData,
 ): Promise<ProfileActionState> {
   const requirePhone = String(formData.get('requirePhone') ?? '') === '1';
+  const continueNext = getSafeRedirectPath(String(formData.get('next') ?? ''), '');
   const parsed = updateProfileSchema.safeParse({
     fullName: formData.get('fullName'),
     phone: formData.get('phone') || '',
@@ -26,15 +29,18 @@ export async function updateProfileAction(
     };
   }
 
-  if (requirePhone || parsed.data.phone) {
-    const phoneRaw = parsed.data.phone || '';
-    const phoneCheck = phoneSchema.safeParse(phoneRaw);
-    if (!phoneCheck.success || !isValidKeMobile(phoneRaw)) {
+  const phoneNormalized = parsed.data.phone
+    ? toE164Kenya(parsed.data.phone) ?? parsed.data.phone
+    : '';
+
+  if (requirePhone || phoneNormalized) {
+    const phoneCheck = phoneSchema.safeParse(phoneNormalized || parsed.data.phone);
+    if (!phoneCheck.success || !isValidKeMobile(phoneNormalized || parsed.data.phone)) {
       return {
         success: false,
         message: 'Please fix the errors below.',
         fieldErrors: {
-          phone: ['Use a Kenya mobile in E.164 form, e.g. +254712345678.'],
+          phone: ['Use a Kenya mobile, e.g. 0712345678 or +254712345678.'],
         },
       };
     }
@@ -50,7 +56,7 @@ export async function updateProfileAction(
 
   const fullName = sanitizePlainText(parsed.data.fullName, 120);
   const bio = parsed.data.bio ? sanitizePlainText(parsed.data.bio, 500) : null;
-  const phone = parsed.data.phone || null;
+  const phone = phoneNormalized || null;
   const countryCode = parsed.data.countryCode || null;
 
   const { error } = await supabase
@@ -78,8 +84,14 @@ export async function updateProfileAction(
 
   revalidatePath('/profile');
   revalidatePath('/dashboard');
+  revalidatePath('/circles');
+  revalidatePath('/wallet');
 
-  return { success: true, message: 'Profile updated.' };
+  if (continueNext && continueNext !== '/dashboard') {
+    redirect(continueNext);
+  }
+
+  return { success: true, message: 'Profile saved.' };
 }
 
 export async function linkMpesaPhoneAction(
@@ -87,15 +99,17 @@ export async function linkMpesaPhoneAction(
   formData: FormData,
 ): Promise<ProfileActionState> {
   const phone = String(formData.get('mpesaPhone') ?? '').trim();
-  if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+  const { toE164Kenya } = await import('@jamiya/shared');
+  const normalized = toE164Kenya(phone);
+  if (!normalized) {
     return {
       success: false,
-      message: 'Enter M-Pesa phone in E.164 form, e.g. +254712345678.',
+      message: 'Use a Kenya mobile, e.g. 0712345678 or +254712345678.',
     };
   }
 
   const { callRpc } = await import('@/lib/supabase/rpc');
-  const { data, error } = await callRpc('link_mpesa_phone', { p_phone: phone });
+  const { data, error } = await callRpc('link_mpesa_phone', { p_phone: normalized });
   if (error) return { success: false, message: error.message };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
@@ -178,7 +192,32 @@ export async function registerKycDocumentAction(
       metadata: { document_type: documentType },
     } as never);
 
+    try {
+      const service = createServiceRoleClient();
+      const { data: admins } = await service
+        .from('profiles')
+        .select('id')
+        .in('platform_role', ['platform_admin', 'super_admin', 'compliance_officer']);
+      const rows = ((admins ?? []) as Array<{ id: string }>).map((row) => ({
+        user_id: row.id,
+        type: 'admin',
+        channel: 'in_app',
+        title: 'KYC document pending review',
+        body: 'A member uploaded identity documents for approval.',
+        data: {
+          document_id: documentId,
+          href: '/admin/kyc',
+        },
+      }));
+      if (rows.length > 0) {
+        await service.from('notifications').insert(rows as never);
+      }
+    } catch {
+      // Non-fatal — document is already queued for review.
+    }
+
     revalidatePath('/profile');
+    revalidatePath('/notifications');
     return { success: true, message: 'Document uploaded for review.' };
   } catch (error) {
     return {
