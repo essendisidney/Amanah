@@ -92,10 +92,13 @@ Keep **simulated** for UAT demos. Flip live only when Daraja/Paystack secrets ar
 |------|--------|
 | 1 | Confirm `GET /api/v1/payments/mpesa-health` shows expected provider flags |
 | 2 | Wallet page shows **Payment mode** banner (simulated vs mpesa/paystack) |
-| 3 | Officer → Circle plan: buy Starter/Pro from wallet; renews_at shows |
-| 4 | Cron `plan-renewals` (06:45 UTC) auto-debits or marks `past_due` |
-| 5 | Arrears → **Remind** / **Remind all (SMS)** for open invoices |
-| 6 | When ready: `PAYMENT_PROVIDER=mpesa|paystack`, Edge Daraja secrets, then `REQUIRE_REAL_PROVIDERS=true` and remove `ALLOW_SIMULATED_IN_PROD` |
+| 3 | Admin → Observability → **Payment cutover** panel matches Vercel + Edge |
+| 4 | Officer → Circle plan: buy Starter/Pro from wallet; renews_at shows |
+| 5 | Cron `plan-renewals` (06:45 UTC) auto-debits or marks `past_due` |
+| 6 | Arrears → **Remind** / **Remind all (SMS)** for open invoices |
+| 7 | When ready: `PAYMENT_PROVIDER=mpesa|paystack`, Edge Daraja secrets, then `REQUIRE_REAL_PROVIDERS=true` and remove `ALLOW_SIMULATED_IN_PROD` |
+
+If health returns `UNAUTHORIZED`, Vercel `SUPABASE_SERVICE_ROLE_KEY` is out of sync with the Supabase project service role. Copy the current service role key into Vercel and redeploy before flipping M-Pesa.
 
 Light concurrency smoke (public routes only):
 

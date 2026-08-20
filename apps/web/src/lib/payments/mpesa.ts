@@ -28,6 +28,7 @@ export async function invokeMpesaStk(input: {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -74,31 +75,47 @@ export async function invokeMpesaStk(input: {
 export async function mpesaHealth(): Promise<{
   ok: boolean;
   daraja_configured?: boolean;
+  b2c_configured?: boolean;
   error?: string;
+  hint?: string;
 }> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!baseUrl || !serviceKey) {
-    return { ok: false, error: 'Missing Supabase env' };
+    return {
+      ok: false,
+      error: 'Missing Supabase env',
+      hint: 'Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on Vercel.',
+    };
   }
   try {
     const res = await fetch(`${baseUrl}/functions/v1/payments-mpesa`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ action: 'health' }),
     });
-    const json = (await res.json()) as {
+    const json = (await res.json().catch(() => ({}))) as {
       ok?: boolean;
       daraja_configured?: boolean;
+      b2c_configured?: boolean;
       error?: string;
     };
+    if (res.status === 401 || json.error === 'UNAUTHORIZED') {
+      return {
+        ok: false,
+        error: 'UNAUTHORIZED',
+        hint: 'Vercel SUPABASE_SERVICE_ROLE_KEY does not match the Edge project key. Sync the service role key, then redeploy.',
+      };
+    }
     return {
       ok: Boolean(json.ok),
       daraja_configured: json.daraja_configured,
+      b2c_configured: json.b2c_configured,
       error: json.error,
     };
   } catch (err) {

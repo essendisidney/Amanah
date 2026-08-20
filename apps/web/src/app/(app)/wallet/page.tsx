@@ -9,6 +9,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
+import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 import { paymentProvider } from '@/lib/payments/provider';
@@ -144,6 +145,12 @@ export default async function WalletPage({ searchParams }: Props) {
         </p>
       ) : null}
 
+      <PaymentModeBanner
+        provider={provider}
+        requireReal={requireReal}
+        simulatedBlocked={liveLocked}
+      />
+
       {wallets.length === 0 ? (
         <EmptyState
           title={labels.emptyTitle}
@@ -163,12 +170,6 @@ export default async function WalletPage({ searchParams }: Props) {
             {t(labels.totalBalance, {
               amount: formatCurrency(balance, primaryCurrency),
             })}
-          </p>
-          <p className="mt-4 text-[11px] text-white/60">
-            Mode: {provider}
-            {provider === 'simulated' ? ' · demo UAT credit' : ''}
-            {requireReal ? ' · live required' : ''}
-            {liveLocked ? ' · simulated blocked' : ''}
           </p>
         </section>
       )}
