@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
-import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
+import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
