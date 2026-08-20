@@ -17,6 +17,7 @@ const PROTECTED_PREFIXES = [
   '/circles',
   '/jamiyas', // legacy → redirected below, still auth-gated
   '/wallet',
+  '/pay',
   '/admin',
   '/invitations',
   '/finance',

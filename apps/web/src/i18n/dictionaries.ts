@@ -32,6 +32,8 @@ export type Dictionary = {
     circlesShort: string;
     wallet: string;
     walletShort: string;
+    pay: string;
+    payShort: string;
     finance: string;
     financeShort: string;
     activity: string;
@@ -427,11 +429,13 @@ export const en: Dictionary = {
     circlesShort: 'Circles',
     wallet: 'Money',
     walletShort: 'Money',
+    pay: 'Pay',
+    payShort: 'Pay',
     finance: 'Finance',
     financeShort: 'Finance',
     activity: 'Activity',
     activityShort: 'Activity',
-    profile: 'Profile',
+    profile: 'You',
     profileShort: 'You',
   },
   landing: {
@@ -850,11 +854,13 @@ export const sw: Dictionary = {
     circlesShort: 'Miduara',
     wallet: 'Pesa',
     walletShort: 'Pesa',
+    pay: 'Lipa',
+    payShort: 'Lipa',
     finance: 'Fedha',
     financeShort: 'Fedha',
     activity: 'Shughuli',
     activityShort: 'Shughuli',
-    profile: 'Wasifu',
+    profile: 'Wewe',
     profileShort: 'Wewe',
   },
   landing: {

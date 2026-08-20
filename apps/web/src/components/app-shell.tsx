@@ -9,13 +9,11 @@ import {
   Bell,
   Home,
   LayoutGrid,
-  LogOut,
+  QrCode,
   Shield,
   UserRound,
-  Wallet,
 } from 'lucide-react';
 import { APP_NAME } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -35,12 +33,14 @@ type Tab = {
   label: string;
   short: string;
   icon: ComponentType<{ className?: string }>;
+  center?: boolean;
 };
 
 function pathActive(pathname: string, href: string) {
   if (href === '/dashboard') return pathname === '/dashboard';
-  if (href === '/wallet') {
+  if (href === '/pay') {
     return (
+      pathname === '/pay' ||
       pathname === '/wallet' ||
       pathname.startsWith('/wallet/') ||
       pathname.startsWith('/finance') ||
@@ -49,11 +49,11 @@ function pathActive(pathname: string, href: string) {
       pathname.startsWith('/support')
     );
   }
-  if (href === '/finance') {
-    return pathname === '/finance' || pathname.startsWith('/finance/');
-  }
   if (href === '/notifications') {
     return pathname === '/notifications' || pathname.startsWith('/notifications/');
+  }
+  if (href === '/profile') {
+    return pathname === '/profile' || pathname.startsWith('/profile/');
   }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -112,10 +112,11 @@ export function AppShell({
       icon: LayoutGrid,
     },
     {
-      href: '/wallet' as Route,
-      label: dict.nav.wallet,
-      short: dict.nav.walletShort,
-      icon: Wallet,
+      href: '/pay' as Route,
+      label: dict.nav.pay,
+      short: dict.nav.payShort,
+      icon: QrCode,
+      center: true,
     },
     {
       href: '/notifications' as Route,
@@ -134,11 +135,7 @@ export function AppShell({
   const desktopLinks: Array<{ href: Route; label: string }> = [
     { href: '/dashboard' as Route, label: dict.nav.dashboard },
     { href: '/circles' as Route, label: dict.nav.circles },
-    { href: '/wallet' as Route, label: dict.nav.wallet },
-    { href: '/finance' as Route, label: dict.nav.finance },
-    { href: '/finance/goals' as Route, label: 'Goals' },
-    { href: '/finance/insights' as Route, label: 'Insights' },
-    { href: '/sadaka' as Route, label: dict.common.sadaka },
+    { href: '/pay' as Route, label: dict.nav.pay },
     { href: '/notifications' as Route, label: dict.nav.activity },
     { href: '/profile' as Route, label: dict.nav.profile },
   ];
@@ -147,9 +144,9 @@ export function AppShell({
   }
 
   return (
-    <div className="amanah-geo min-h-dvh overflow-x-hidden bg-background">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-card/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-16 md:px-6">
+    <div className="amanah-ambient min-h-dvh overflow-x-hidden">
+      <header className="sticky top-0 z-40 border-b border-white/30 bg-white/40 pt-[env(safe-area-inset-top)] backdrop-blur-xl dark:border-white/10 dark:bg-[#131916]/55">
+        <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-3 px-4 md:h-16 md:max-w-5xl md:px-6">
           <Link
             href={'/dashboard' as Route}
             className="min-w-0 shrink text-lg font-bold tracking-tight text-primary md:text-xl"
@@ -157,7 +154,7 @@ export function AppShell({
             {APP_NAME}
           </Link>
 
-          <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
             {desktopLinks.map((item) => {
               const active = pathActive(pathname, item.href);
               return (
@@ -165,15 +162,15 @@ export function AppShell({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
                     active
                       ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                      : 'text-muted-foreground hover:bg-white/40 hover:text-foreground dark:hover:bg-white/5',
                   )}
                 >
                   {item.label}
                   {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-md bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                       {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
@@ -189,21 +186,20 @@ export function AppShell({
               <Link
                 href={'/admin' as Route}
                 className={cn(
-                  'inline-flex h-11 items-center justify-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold xl:hidden',
+                  'inline-flex h-11 w-11 items-center justify-center rounded-full md:hidden',
                   pathname.startsWith('/admin')
                     ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    : 'text-muted-foreground hover:bg-white/40 dark:hover:bg-white/5',
                 )}
                 aria-label={dict.common.admin}
                 title={dict.common.admin}
               >
                 <Shield className="h-5 w-5" />
-                <span className="hidden sm:inline">{dict.common.admin}</span>
               </Link>
             ) : null}
             <Link
               href={'/notifications' as Route}
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-white/40 dark:hover:bg-white/5"
               aria-label={
                 liveUnread > 0
                   ? `${dict.common.notifications}, ${liveUnread}`
@@ -212,43 +208,59 @@ export function AppShell({
             >
               <Bell className="h-5 w-5" />
               {liveUnread > 0 ? (
-                <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-md bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
                   {liveUnread > 9 ? '9+' : liveUnread}
                 </span>
               ) : null}
             </Link>
-            <form action={signOutAction} className="hidden sm:block">
-              <Button type="submit" variant="outline" size="sm">
-                {dict.common.signOut}
-              </Button>
-            </form>
-            <form action={signOutAction} className="sm:hidden">
-              <button
-                type="submit"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label={dict.common.signOut}
-                title={dict.common.signOut}
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
+            <form action={signOutAction} className="hidden">
+              <button type="submit">{dict.common.signOut}</button>
             </form>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:py-6 md:px-6 md:py-8 md:pb-10">
+      <main className="mx-auto w-full max-w-3xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:max-w-5xl md:px-6 md:py-8 md:pb-10">
         <SmoothRouteTransition>{children}</SmoothRouteTransition>
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/35 bg-white/55 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-white/10 dark:bg-[#131916]/70 md:hidden"
         aria-label="Mobile primary"
       >
-        <ul className="mx-auto grid max-w-lg grid-cols-5">
+        <ul className="mx-auto grid max-w-lg grid-cols-5 items-end px-1">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
             const showBadge = item.href === '/notifications' && liveUnread > 0;
+            if (item.center) {
+              return (
+                <li key={item.href} className="relative -mt-5 flex justify-center">
+                  <Link
+                    href={item.href}
+                    className="flex flex-col items-center gap-1"
+                    aria-label={item.label}
+                  >
+                    <span
+                      className={cn(
+                        'inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(11,92,66,0.35)] transition-transform active:scale-95',
+                        active && 'ring-4 ring-primary/20',
+                      )}
+                    >
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span
+                      className={cn(
+                        'text-[11px] font-semibold',
+                        active ? 'text-primary' : 'text-muted-foreground',
+                      )}
+                    >
+                      {item.short}
+                    </span>
+                  </Link>
+                </li>
+              );
+            }
             return (
               <li key={item.href}>
                 <Link
