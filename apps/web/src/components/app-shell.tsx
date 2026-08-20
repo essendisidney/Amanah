@@ -163,7 +163,7 @@ export function AppShell({
                   className={cn(
                     'whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(7,183,141,0.35)]'
+                      ? 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(19,205,144,0.35)]'
                       : 'text-muted-foreground hover:text-foreground',
                   )}
                 >

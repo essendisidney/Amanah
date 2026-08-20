@@ -44,8 +44,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#07b78d' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a231c' },
+    { media: '(prefers-color-scheme: light)', color: '#f4f4fc' },
+    { media: '(prefers-color-scheme: dark)', color: '#062213' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -63,7 +63,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='auto';try{localStorage.setItem('amanah-theme','auto')}catch(e){}}var h=(new Date()).getHours();var d=t==='dark'||(t==='auto'&&(h<6||h>=18));var r=document.documentElement;if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
+            __html: `(function(){try{var r=document.documentElement;if(!localStorage.getItem('amanah-palette-v3')){localStorage.setItem('amanah-theme','light');localStorage.setItem('amanah-palette-v3','1')}var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='light';localStorage.setItem('amanah-theme','light')}var h=(new Date()).getHours();var d=t==='dark'||(t==='auto'&&(h<6||h>=18));if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
           }}
         />
       </head>

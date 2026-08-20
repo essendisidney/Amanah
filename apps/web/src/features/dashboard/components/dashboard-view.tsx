@@ -213,8 +213,8 @@ function RecentList({
             <p
               className={
                 inflow
-                  ? 'amanah-money text-[15px] font-semibold text-primary'
-                  : 'amanah-money text-[15px] font-semibold text-destructive'
+                  ? 'amanah-money amanah-money-in text-[15px] font-semibold'
+                  : 'amanah-money amanah-money-out text-[15px] font-semibold'
               }
             >
               {inflow ? '+' : '−'}

@@ -9,7 +9,7 @@ export default async function LandingPage() {
   const { locale, dict } = await getDictionary();
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-background text-foreground">
+    <div className="amanah-geo relative min-h-dvh overflow-x-hidden text-foreground">
       <div
         aria-hidden
         className="amanah-geo pointer-events-none absolute inset-0 opacity-90"

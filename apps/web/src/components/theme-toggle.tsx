@@ -84,12 +84,12 @@ export function ThemeToggle({
   /** `icon` for header; `segmented` for profile settings */
   variant?: 'icon' | 'segmented';
 }) {
-  const [preference, setPreference] = useState<ThemePreference>('auto');
+  const [preference, setPreference] = useState<ThemePreference>('light');
   const [appearance, setAppearance] = useState<ThemeAppearance>('light');
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const initial = getStoredPreference() ?? 'auto';
+    const initial = getStoredPreference() ?? 'light';
     setPreference(initial);
     setAppearance(applyPreference(initial));
     setReady(true);
@@ -130,7 +130,7 @@ export function ThemeToggle({
     };
     const onVisibility = () => {
       if (document.visibilityState !== 'visible') return;
-      const pref = getStoredPreference() ?? 'auto';
+      const pref = getStoredPreference() ?? 'light';
       if (pref === 'auto') {
         setAppearance(applyPreference('auto'));
         scheduleAutoRefresh('auto');

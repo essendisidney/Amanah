@@ -121,7 +121,7 @@ export default async function NotificationsPage() {
                   </div>
                   <p
                     className={`amanah-money text-[15px] font-semibold ${
-                      signed < 0 ? 'text-destructive' : 'text-primary'
+                      signed < 0 ? 'amanah-money-out' : 'amanah-money-in'
                     }`}
                   >
                     {signed < 0 ? '−' : '+'}

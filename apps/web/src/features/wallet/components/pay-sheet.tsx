@@ -83,12 +83,13 @@ export function PaySheet() {
           <button
             type="button"
             disabled
-            className="amanah-pay-glow mb-4 flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-primary px-6 py-12 text-primary-foreground"
+            className="amanah-forest amanah-pay-glow mb-4 flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] px-6 py-12 text-white"
           >
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/18">
+            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
               <QrCode className="h-7 w-7" strokeWidth={1.5} />
             </span>
             <span className="text-[15px] font-semibold">Scan</span>
+            <span className="text-xs text-white/70">Tap to open camera</span>
           </button>
 
           <ul className="overflow-hidden rounded-[1.25rem] bg-black/[0.03] dark:bg-white/[0.04]">
