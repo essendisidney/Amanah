@@ -12,14 +12,9 @@ export type ThemeAppearance = 'light' | 'dark';
 const STORAGE_KEY = 'amanah-theme';
 const THEME_EVENT = 'amanah-theme-change';
 
-/** Auto follows the OS — not clock time (night Auto was forcing dark on mobile). */
+/** Auto stays light — liquid glass is light-first; only explicit Dark enables dark. */
 export function themeFromSystem(): ThemeAppearance {
-  if (typeof window === 'undefined') return 'light';
-  try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  } catch {
-    return 'light';
-  }
+  return 'light';
 }
 
 export function getStoredPreference(): ThemePreference | null {
@@ -33,8 +28,7 @@ export function getStoredPreference(): ThemePreference | null {
 }
 
 export function resolveAppearance(preference: ThemePreference): ThemeAppearance {
-  if (preference === 'auto') return themeFromSystem();
-  return preference;
+  return preference === 'dark' ? 'dark' : 'light';
 }
 
 export function applyAppearance(appearance: ThemeAppearance) {
@@ -107,16 +101,14 @@ export function ThemeToggle({
     };
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const onSystem = () => {
+      // Auto no longer tracks OS dark — liquid glass stays light unless Dark is chosen.
       const pref = getStoredPreference() ?? 'light';
-      if (pref === 'auto') {
-        setAppearance(applyPreference('auto'));
-      }
+      setAppearance(applyPreference(pref));
     };
 
     window.addEventListener(THEME_EVENT, onTheme);
     window.addEventListener('storage', onStorage);
     mq.addEventListener?.('change', onSystem);
-    // Safari < 14
     mq.addListener?.(onSystem);
 
     return () => {
@@ -181,7 +173,7 @@ export function ThemeToggle({
 
   const label =
     preference === 'auto'
-      ? `Auto · ${appearance === 'dark' ? 'system dark' : 'system light'} (tap to change)`
+      ? 'Auto · light (tap to change)'
       : preference === 'dark'
         ? 'Dark mode (tap for Auto)'
         : 'Light mode (tap for Auto)';

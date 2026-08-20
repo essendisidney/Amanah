@@ -1,5 +1,5 @@
 /* Amanah PWA — installability + light offline shell. */
-const SHELL = 'amanah-shell-v3';
+const SHELL = 'amanah-shell-v5';
 const PRECACHE = [
   '/manifest.webmanifest',
   '/icons/icon-192.png',
@@ -22,7 +22,14 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== SHELL).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
+      .then(() =>
+        self.clients.matchAll({ type: 'window' }).then((clients) => {
+          for (const client of clients) {
+            client.postMessage({ type: 'AMANAH_SW_UPDATED', shell: SHELL });
+          }
+        }),
+      ),
   );
 });
 

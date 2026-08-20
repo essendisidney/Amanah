@@ -6,6 +6,23 @@ import { useEffect } from 'react';
 export function PwaRegister() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'AMANAH_SW_UPDATED') {
+        // New shell is active — reload once so theme/boot scripts aren't stale.
+        const key = 'amanah-sw-reload-v5';
+        try {
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
+            window.location.reload();
+          }
+        } catch {
+          window.location.reload();
+        }
+      }
+    };
+    navigator.serviceWorker.addEventListener('message', onMessage);
+
     const register = () => {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
@@ -18,6 +35,10 @@ export function PwaRegister() {
     };
     if (document.readyState === 'complete') register();
     else window.addEventListener('load', register, { once: true });
+
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', onMessage);
+    };
   }, []);
 
   return null;
