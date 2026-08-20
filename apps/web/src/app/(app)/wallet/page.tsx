@@ -96,7 +96,11 @@ export default async function WalletPage({ searchParams }: Props) {
         .in('status', ['pending', 'processing'])
         .order('created_at', { ascending: false })
         .limit(10),
-      supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
+      supabase
+        .from('profiles')
+        .select('full_name, phone, mpesa_phone')
+        .eq('id', user.id)
+        .maybeSingle(),
     ]);
 
   const labels = dict.wallet;
@@ -131,6 +135,11 @@ export default async function WalletPage({ searchParams }: Props) {
   const requireReal = requireRealProviders();
   const displayName =
     (profileResult.data as { full_name?: string | null } | null)?.full_name ?? 'Member';
+  const withdrawPhone =
+    (profileResult.data as { mpesa_phone?: string | null; phone?: string | null } | null)
+      ?.mpesa_phone ??
+    (profileResult.data as { phone?: string | null } | null)?.phone ??
+    '';
 
   return (
     <div className="space-y-8">
@@ -252,7 +261,11 @@ export default async function WalletPage({ searchParams }: Props) {
         <section id="withdraw" className="space-y-4">
           <h2 className="text-lg font-bold tracking-tight">{labels.withdraw}</h2>
           <div className="amanah-surface p-5">
-            <WithdrawalForm currency={primaryCurrency} labels={dict.walletForms} />
+            <WithdrawalForm
+              currency={primaryCurrency}
+              labels={dict.walletForms}
+              defaultPhone={withdrawPhone}
+            />
           </div>
         </section>
       </div>

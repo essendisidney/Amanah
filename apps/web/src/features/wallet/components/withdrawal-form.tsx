@@ -14,9 +14,11 @@ const initial: WithdrawalActionState = { success: false, message: '' };
 export function WithdrawalForm({
   currency = 'KES',
   labels,
+  defaultPhone = '',
 }: {
   currency?: string;
   labels: Dictionary['walletForms'];
+  defaultPhone?: string;
 }) {
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
@@ -70,6 +72,7 @@ export function WithdrawalForm({
             type="tel"
             inputMode="tel"
             placeholder="0712 345 678"
+            defaultValue={defaultPhone}
             required
             className="h-11 text-base sm:h-10 sm:text-sm"
           />

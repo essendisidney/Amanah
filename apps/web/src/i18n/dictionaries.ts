@@ -259,6 +259,9 @@ export type Dictionary = {
     markRead: string;
     emptyTitle: string;
     emptyDesc: string;
+    recentMoney: string;
+    openMoney: string;
+    openItem: string;
   };
   support: {
     eyebrow: string;
@@ -627,6 +630,9 @@ export const en: Dictionary = {
     markRead: 'Mark read',
     emptyTitle: 'No activity yet',
     emptyDesc: 'Circle invites, contribution reminders, and payout updates will appear here.',
+    recentMoney: 'Recent money',
+    openMoney: 'Open Money',
+    openItem: 'Open',
   },
   support: {
     eyebrow: 'Keep Amanah growing',
@@ -999,6 +1005,9 @@ export const sw: Dictionary = {
     markRead: 'Weka imesomwa',
     emptyTitle: 'Bado hakuna shughuli',
     emptyDesc: 'Mialiko ya miduara, vikumbusho vya michango, na sasisho za malipo vitaonekana hapa.',
+    recentMoney: 'Pesa za hivi karibuni',
+    openMoney: 'Fungua Pesa',
+    openItem: 'Fungua',
   },
   support: {
     eyebrow: 'Saidia Amanah kukua',

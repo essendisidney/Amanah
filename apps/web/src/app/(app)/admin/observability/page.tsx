@@ -26,6 +26,8 @@ export default async function AdminObservabilityPage() {
     outboxPending,
     outboxFailed,
     bankJobs,
+    pendingIntents,
+    failedIntents,
     mpesa,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
@@ -59,6 +61,14 @@ export default async function AdminObservabilityPage() {
       .from('bank_transfer_jobs')
       .select('id', { count: 'exact', head: true })
       .in('status', ['queued', 'submitted']),
+    supabase
+      .from('payment_intents')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['pending', 'processing']),
+    supabase
+      .from('payment_intents')
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['failed', 'expired', 'cancelled']),
     mpesaHealth(),
   ]);
 
@@ -72,6 +82,8 @@ export default async function AdminObservabilityPage() {
     { label: 'Outbox pending', value: outboxPending.count ?? 0 },
     { label: 'Outbox failed', value: outboxFailed.count ?? 0 },
     { label: 'Bank jobs in flight', value: bankJobs.count ?? 0 },
+    { label: 'Payment intents in flight', value: pendingIntents.count ?? 0 },
+    { label: 'Payment intents failed', value: failedIntents.count ?? 0 },
   ];
 
   const provider = paymentProvider();

@@ -23,6 +23,7 @@ import {
 } from '@/features/circles/components/schedule-panel';
 import { OpenDisputeForm } from '@/features/circles/components/open-dispute-form';
 import { ExportCircleReportButtons } from '@/features/circles/components/export-circle-report';
+import { paymentProvider } from '@/lib/payments/provider';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { NextPayoutBoard } from '@/features/circles/components/circle-ops-panel';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
@@ -533,6 +534,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           payouts={payouts}
           slug={jamiya.slug}
           isCircleAdmin={Boolean(canManageOps)}
+          paymentProvider={paymentProvider()}
         />
       </section>
 

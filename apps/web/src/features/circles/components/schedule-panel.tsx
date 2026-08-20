@@ -149,10 +149,12 @@ export function PayoutSchedule({
   payouts,
   slug,
   isCircleAdmin,
+  paymentProvider = 'simulated',
 }: {
   payouts: SchedulePayout[];
   slug: string;
   isCircleAdmin: boolean;
+  paymentProvider?: 'simulated' | 'mpesa' | 'bank' | 'paystack';
 }) {
   if (payouts.length === 0) {
     return (
@@ -161,6 +163,13 @@ export function PayoutSchedule({
       </p>
     );
   }
+
+  const phoneSettleLabel =
+    paymentProvider === 'mpesa'
+      ? 'Settle → M-Pesa'
+      : paymentProvider === 'paystack'
+        ? 'Settle → phone (demo)'
+        : 'Settle → M-Pesa (sim)';
 
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -202,7 +211,7 @@ export function PayoutSchedule({
                     className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
                   />
                   <Button type="submit" size="sm">
-                    Settle → M-Pesa (sim)
+                    {phoneSettleLabel}
                   </Button>
                 </form>
               </>
