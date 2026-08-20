@@ -20,7 +20,17 @@ import {
   requireRealProviders,
   shouldBlockSimulatedPayments,
 } from '@/lib/production-cutover';
-import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, HandHeart, Landmark, PiggyBank, Plus } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  ChartNoAxesCombined,
+  HandHeart,
+  Landmark,
+  Calculator,
+  Plus,
+  TrendingUp,
+} from 'lucide-react';
+import { CamelIcon } from '@/components/camel-icon';
 
 export const metadata: Metadata = {
   title: 'Money',
@@ -225,7 +235,7 @@ export default async function WalletPage({ searchParams }: Props) {
       <section className="grid grid-cols-4 gap-2 sm:gap-3">
         {[
           { href: '#top-up', label: 'Add', icon: Plus },
-          { href: '/finance/goals', label: 'Save', icon: PiggyBank },
+          { href: '/finance/goals', label: 'Save', icon: CamelIcon },
           { href: '/finance/insights', label: 'Insights', icon: ChartNoAxesCombined },
           { href: '#withdraw', label: 'Withdraw', icon: ArrowUpRight },
         ].map((action) => {
@@ -261,6 +271,12 @@ export default async function WalletPage({ searchParams }: Props) {
               icon: Landmark,
             },
             {
+              href: '/finance/invest',
+              title: 'Investments',
+              desc: 'Shares, treasury projects, Tawarruq',
+              icon: TrendingUp,
+            },
+            {
               href: '/sadaka',
               title: dict.common.sadaka,
               desc: 'Give to endorsed campaigns',
@@ -270,7 +286,7 @@ export default async function WalletPage({ searchParams }: Props) {
               href: '/zakat',
               title: 'Zakat',
               desc: 'Calculator for your dues',
-              icon: PiggyBank,
+              icon: Calculator,
             },
             {
               href: '/support',

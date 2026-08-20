@@ -44,6 +44,7 @@ export default async function FinancePage() {
 
   const items = [
     ['Insights', 'This month’s inflow, on-time rate, and upcoming dues.', '/finance/insights'],
+    [labels.investTitle, labels.investDesc, '/finance/invest'],
     [labels.welfareTitle, labels.welfareDesc, '/finance/welfare'],
     [labels.qardTitle, labels.qardDesc, '/finance/qard'],
     [labels.tawarruqTitle, labels.tawarruqDesc, '/finance/tawarruq'],
@@ -109,6 +110,20 @@ export default async function FinancePage() {
           </Link>
         ))}
       </div>
+
+      <section className="amanah-surface space-y-3 border-primary/15 px-4 py-5 md:px-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">Shariah</p>
+        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          {labels.shariaTitle}
+        </h2>
+        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">
+          {labels.shariaLead}
+        </p>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={'/#shariah' as Route}>Read the Shariah overview</Link>
+        </Button>
+      </section>
+
       <section>
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
           {labels.welfareOverview}

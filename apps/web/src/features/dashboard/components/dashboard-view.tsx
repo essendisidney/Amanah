@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import type { Route } from 'next';
+import type { LucideIcon } from 'lucide-react';
 import {
   ArrowDownLeft,
   ArrowUpRight,
   HandHeart,
   Landmark,
-  PiggyBank,
   Plus,
 } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { CamelIcon } from '@/components/camel-icon';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
@@ -93,11 +94,11 @@ export function DashboardView({
   const quickActions: Array<{
     href: Route;
     label: string;
-    icon: typeof Plus;
+    icon: LucideIcon | typeof CamelIcon;
   }> = [
     { href: '/wallet' as Route, label: 'Add money', icon: Plus },
     { href: '/finance' as Route, label: 'Finance', icon: Landmark },
-    { href: '/finance/goals' as Route, label: 'Save', icon: PiggyBank },
+    { href: '/finance/goals' as Route, label: 'Save', icon: CamelIcon },
     { href: '/sadaka' as Route, label: 'Sadaka', icon: HandHeart },
   ];
 

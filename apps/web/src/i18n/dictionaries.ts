@@ -42,6 +42,16 @@ export type Dictionary = {
     joinCircle: string;
     preferEmail: string;
     createAccount: string;
+    shariaEyebrow: string;
+    shariaTitle: string;
+    shariaLead: string;
+    shariaNoRibaTitle: string;
+    shariaNoRibaBody: string;
+    shariaMutualTitle: string;
+    shariaMutualBody: string;
+    shariaGivingTitle: string;
+    shariaGivingBody: string;
+    shariaDisclaimer: string;
   };
   phoneAuth: {
     phoneLabel: string;
@@ -212,6 +222,10 @@ export type Dictionary = {
     tawarruqDesc: string;
     goalsTitle: string;
     goalsDesc: string;
+    investTitle: string;
+    investDesc: string;
+    shariaTitle: string;
+    shariaLead: string;
     welfareOverview: string;
     circleFallback: string;
     noWelfare: string;
@@ -405,6 +419,21 @@ export const en: Dictionary = {
     joinCircle: 'Explore Amanah',
     preferEmail: 'Prefer email?',
     createAccount: 'Create account',
+    shariaEyebrow: 'Shariah',
+    shariaTitle: 'How Amanah stays Shariah-conscious',
+    shariaLead:
+      'Amanah is built for communities that want money tools without riba at the centre — with clear records and mutual support.',
+    shariaNoRibaTitle: 'No interest in your circles',
+    shariaNoRibaBody:
+      'Circle contributions, payouts, and Qard Hassan are designed without charging interest between members.',
+    shariaMutualTitle: 'Mutual aid & transparency',
+    shariaMutualBody:
+      'Welfare funds, dual approval, and audit trails keep shared money visible and accountable.',
+    shariaGivingTitle: 'Giving that fits faith practice',
+    shariaGivingBody:
+      'Sadaka campaigns and a Zakat calculator sit alongside savings goals for Hajj, Umra, and Udhiyah.',
+    shariaDisclaimer:
+      'This is product guidance, not a fatwa. Ask a scholar you trust for personal rulings.',
   },
   phoneAuth: {
     phoneLabel: 'Phone number',
@@ -589,6 +618,11 @@ export const en: Dictionary = {
     tawarruqDesc: 'Apply for partner-facilitated Sharia-compliant finance.',
     goalsTitle: 'Savings goals',
     goalsDesc: 'Save for Hajj, Umra, Udhiyah, or any personal target.',
+    investTitle: 'Investments',
+    investDesc: 'Circle shares, treasury projects, and partner finance options.',
+    shariaTitle: 'Shariah on Amanah',
+    shariaLead:
+      'Circles avoid riba between members. Qard is interest-free. Welfare and giving support mutual care. Partner Tawarruq is offered as a separate Sharia finance path — not a fatwa.',
     welfareOverview: 'Welfare overview',
     circleFallback: 'Circle',
     noWelfare: 'Your circles have no welfare funds yet.',
@@ -786,6 +820,21 @@ export const sw: Dictionary = {
     joinCircle: 'Gundua Amanah',
     preferEmail: 'Unapendelea barua pepe?',
     createAccount: 'Fungua akaunti',
+    shariaEyebrow: 'Shariah',
+    shariaTitle: 'Jinsi Amanah inavyofuata Shariah',
+    shariaLead:
+      'Amanah imeundwa kwa jamii zinazotaka zana za fedha bila riba kuwa kiini — na rekodi wazi na msaada wa pamoja.',
+    shariaNoRibaTitle: 'Hakuna riba katika miduara yako',
+    shariaNoRibaBody:
+      'Michango, malipo, na Qard Hassan zimeundwa bila kutoza riba kati ya wanachama.',
+    shariaMutualTitle: 'Msaada wa pamoja na uwazi',
+    shariaMutualBody:
+      'Hazina za ustawi, idhini mbili, na rekodi za ukaguzi huweka fedha za pamoja wazi na zinazowajibika.',
+    shariaGivingTitle: 'Kutoa kunakofaa imani',
+    shariaGivingBody:
+      'Kampeni za Sadaka na kikokotoo cha Zakat pamoja na malengo ya Hajj, Umra, na Udhiyah.',
+    shariaDisclaimer:
+      'Hii ni mwongozo wa bidhaa, si fatwa. Uliza msomi unayemwamini kwa hukumu binafsi.',
   },
   phoneAuth: {
     phoneLabel: 'Nambari ya simu',
@@ -971,6 +1020,11 @@ export const sw: Dictionary = {
     tawarruqDesc: 'Omba fedha zinazofuata Sharia kupitia washirika.',
     goalsTitle: 'Malengo ya akiba',
     goalsDesc: 'Okoa kwa Hajj, Umra, Udhiyah, au lengo lolote la kibinafsi.',
+    investTitle: 'Uwekezaji',
+    investDesc: 'Hisa za mduara, miradi ya hazina, na chaguo za fedha za washirika.',
+    shariaTitle: 'Shariah kwenye Amanah',
+    shariaLead:
+      'Miduara huepuka riba kati ya wanachama. Qard haina riba. Ustawi na kutoa huunga mkono utunzaji wa pamoja. Tawarruq ya washirika ni njia tofauti ya fedha za Sharia — si fatwa.',
     welfareOverview: 'Muhtasari wa ustawi',
     circleFallback: 'Mduara',
     noWelfare: 'Miduara yako bado haina hazina za ustawi.',

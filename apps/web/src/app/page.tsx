@@ -126,6 +126,47 @@ export default async function LandingPage() {
           ))}
         </div>
       </section>
+
+      <section
+        id="shariah"
+        className="relative z-10 border-t border-border/60 bg-[linear-gradient(180deg,rgba(11,92,66,0.06)_0%,transparent_55%)]"
+      >
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            {dict.landing.shariaEyebrow}
+          </p>
+          <h2 className="mt-3 max-w-2xl font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight sm:text-4xl">
+            {dict.landing.shariaTitle}
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-muted-foreground">
+            {dict.landing.shariaLead}
+          </p>
+          <div className="mt-10 grid gap-8 md:grid-cols-3">
+            {[
+              {
+                title: dict.landing.shariaNoRibaTitle,
+                body: dict.landing.shariaNoRibaBody,
+              },
+              {
+                title: dict.landing.shariaMutualTitle,
+                body: dict.landing.shariaMutualBody,
+              },
+              {
+                title: dict.landing.shariaGivingTitle,
+                body: dict.landing.shariaGivingBody,
+              },
+            ].map((item) => (
+              <div key={item.title}>
+                <h3 className="text-lg font-bold tracking-tight">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            {dict.landing.shariaDisclaimer}
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
