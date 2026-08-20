@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
+import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 
 const DOC_TYPES = [
   'certificate_of_registration',
@@ -91,6 +92,7 @@ export async function uploadJamiyaKycDocumentAction(
 }
 
 export async function reviewJamiyaKycAction(formData: FormData): Promise<void> {
+  await requireAdminAccess('compliance');
   const documentId = String(formData.get('documentId') ?? '');
   const status = String(formData.get('status') ?? '');
   const notes = String(formData.get('notes') ?? '');
@@ -101,4 +103,7 @@ export async function reviewJamiyaKycAction(formData: FormData): Promise<void> {
     p_notes: notes || null,
   });
   revalidatePath('/admin/kyc');
+  revalidatePath('/admin');
+  revalidatePath('/notifications');
+  revalidatePath('/circles');
 }

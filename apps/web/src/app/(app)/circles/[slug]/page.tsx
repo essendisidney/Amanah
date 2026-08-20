@@ -24,21 +24,7 @@ import {
 import { OpenDisputeForm } from '@/features/circles/components/open-dispute-form';
 import { ExportCircleReportButtons } from '@/features/circles/components/export-circle-report';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
-import {
-  CircleOpsPanel,
-  NextPayoutBoard,
-  type AnnouncementRow,
-  type BookEntryRow,
-  type MemberOption,
-  type PenaltySettings,
-  type SavingsPocketRow,
-  type TableBankingFund,
-} from '@/features/circles/components/circle-ops-panel';
-import {
-  CircleFundLoans,
-  type CircleLoanRow,
-  type PendingGuaranteeRequest,
-} from '@/features/circles/components/circle-fund-loans';
+import { NextPayoutBoard } from '@/features/circles/components/circle-ops-panel';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
@@ -114,8 +100,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: invitesData },
     { data: contribData },
     { data: payoutData },
-    { data: bookData },
-    { data: announcementData },
+    graceResult,
   ] = await Promise.all([
     supabase
       .from('members')
@@ -133,7 +118,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .select('id, cycle_number, amount, amount_paid, currency, status, due_date, member_id')
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
-      .limit(48),
+      .limit(24),
     supabase
       .from('payouts')
       .select(
@@ -141,20 +126,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       )
       .eq('jamiya_id', jamiya.id)
       .order('cycle_number', { ascending: true })
-      .limit(36),
+      .limit(24),
     supabase
-      .from('book_entries')
-      .select('id, entry_type, amount, currency, effective_date, notes')
+      .from('grace_period_requests')
+      .select('id', { count: 'exact', head: true })
       .eq('jamiya_id', jamiya.id)
-      .order('effective_date', { ascending: false })
-      .limit(20),
-    supabase
-      .from('announcements')
-      .select('id, title, body, created_at')
-      .eq('jamiya_id', jamiya.id)
-      .order('created_at', { ascending: false })
-      .limit(10),
+      .eq('status', 'pending'),
   ]);
+
+  const pendingGraceCount = graceResult.count ?? 0;
 
   const memberRows = (membersData ?? []) as unknown as Array<{
     id: string;
@@ -295,279 +275,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     };
   });
 
-  const bookEntries: BookEntryRow[] = (
-    (bookData ?? []) as unknown as Array<{
-      id: string;
-      entry_type: string;
-      amount: number | string;
-      currency: string;
-      effective_date: string;
-      notes: string | null;
-    }>
-  ).map((row) => ({
-    id: row.id,
-    entryType: row.entry_type,
-    amount: Number(row.amount),
-    currency: row.currency,
-    effectiveDate: row.effective_date,
-    notes: row.notes,
-  }));
-
-  const announcements: AnnouncementRow[] = (
-    (announcementData ?? []) as unknown as Array<{
-      id: string;
-      title: string;
-      body: string;
-      created_at: string;
-    }>
-  ).map((row) => ({
-    id: row.id,
-    title: row.title,
-    body: row.body,
-    createdAt: row.created_at,
-  }));
-
-  const memberOptions: MemberOption[] = members.map((m) => ({
-    id: m.id,
-    label: m.fullName ?? m.email ?? m.id.slice(0, 8),
-    memberCode: m.memberCode ?? null,
-  }));
-
-  const penaltySettings: PenaltySettings = {
-    lateContributionPenalty: Number(jamiya.late_contribution_penalty ?? 0),
-    missedContributionPenalty: Number(jamiya.missed_contribution_penalty ?? 0),
-    lateLoanPenaltyFixed: Number(jamiya.late_loan_penalty_fixed ?? 0),
-    lateLoanPenaltyPct: Number(jamiya.late_loan_penalty_pct ?? 0),
-    payoutComplianceMode: jamiya.payout_compliance_mode ?? 'block',
-  };
-
-  let fund: TableBankingFund | null = null;
-  let creditRating: string | null = null;
-  let pockets: SavingsPocketRow[] = [];
-  let myLoans: CircleLoanRow[] = [];
-  let pendingApprovals: CircleLoanRow[] = [];
-  let officerActiveLoans: CircleLoanRow[] = [];
-  let pendingGuaranteeRequests: PendingGuaranteeRequest[] = [];
-  let qardCap: number | null = null;
-  const canApproveLoans =
-    membership?.status === 'active' &&
-    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
-
-  if (membership?.status === 'active') {
-    const [
-      { data: fundData },
-      { data: creditData },
-      { data: pocketData },
-      { data: myLoanData },
-      { data: pendingLoanData },
-      { data: activeLoanData },
-      { data: myPendingGuaranteeData },
-      { data: capData },
-    ] = await Promise.all([
-      supabase.rpc('table_banking_fund', { p_jamiya_id: jamiya.id }),
-      membership.id
-        ? supabase.rpc('member_credit_snapshot', { p_member_id: membership.id })
-        : Promise.resolve({ data: null }),
-      membership.id
-        ? supabase
-            .from('savings_pockets')
-            .select('id, category, label, balance, target_amount, duration_months, currency')
-            .eq('jamiya_id', jamiya.id)
-            .eq('member_id', membership.id)
-            .order('created_at', { ascending: false })
-        : Promise.resolve({ data: [] }),
-      supabase
-        .from('qard_loans')
-        .select(
-          'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
-        )
-        .eq('jamiya_id', jamiya.id)
-        .eq('borrower_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20),
-      canApproveLoans
-        ? supabase
-            .from('qard_loans')
-            .select(
-              'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
-            )
-            .eq('jamiya_id', jamiya.id)
-            .eq('status', 'requested')
-            .order('created_at', { ascending: false })
-            .limit(20)
-        : Promise.resolve({ data: [] }),
-      canApproveLoans
-        ? supabase
-            .from('qard_loans')
-            .select(
-              'id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
-            )
-            .eq('jamiya_id', jamiya.id)
-            .eq('status', 'active')
-            .order('created_at', { ascending: false })
-            .limit(20)
-        : Promise.resolve({ data: [] }),
-      supabase
-        .from('qard_guarantees')
-        .select(
-          'id, loan_id, status, loan:qard_loans(id, borrower_id, amount, currency, purpose, status)',
-        )
-        .eq('jamiya_id', jamiya.id)
-        .eq('guarantor_user_id', user.id)
-        .eq('status', 'pending')
-        .limit(20),
-      supabase.rpc('qard_cap_for_jamiya', { p_jamiya_id: jamiya.id }),
-    ]);
-    const f = fundData as Record<string, unknown> | null;
-    if (f?.ok) {
-      fund = {
-        memberContributions: Number(f.member_contributions ?? 0),
-        penaltiesReceived: Number(f.penalties_received ?? 0),
-        lentOut: Number(f.lent_out ?? 0),
-        repaid: Number(f.repaid ?? 0),
-        outstanding: Number(f.outstanding ?? 0),
-        overdue: Number(f.overdue ?? 0),
-        availableToLend: Number(f.available_to_lend ?? 0),
-        portfolioAtRiskPct: Number(f.portfolio_at_risk_pct ?? 0),
-      };
-    }
-    const c = creditData as { ok?: boolean; rating?: string; repayment_rate?: number } | null;
-    if (c?.ok && c.rating) {
-      creditRating = `${c.rating} (${c.repayment_rate ?? 0}% on-time)`;
-    }
-    pockets = (
-      (pocketData ?? []) as unknown as Array<{
-        id: string;
-        category: string;
-        label: string | null;
-        balance: number | string;
-        target_amount: number | string | null;
-        duration_months: number | null;
-        currency: string;
-      }>
-    ).map((row) => ({
-      id: row.id,
-      category: row.category,
-      label: row.label,
-      balance: Number(row.balance ?? 0),
-      targetAmount: row.target_amount != null ? Number(row.target_amount) : null,
-      durationMonths: row.duration_months,
-      currency: row.currency,
-    }));
-
-    type LoanDbRow = {
-      id: string;
-      borrower_id: string;
-      amount: number | string;
-      amount_repaid: number | string;
-      currency: string;
-      purpose: string;
-      status: string;
-      due_date: string | null;
-      agreement_accepted_at: string | null;
-      agreement_signer_name: string | null;
-    };
-
-    const loanRowsForGuarantees = [
-      ...((myLoanData ?? []) as unknown as LoanDbRow[]),
-      ...((pendingLoanData ?? []) as unknown as LoanDbRow[]),
-      ...((activeLoanData ?? []) as unknown as LoanDbRow[]),
-    ];
-    const loanIds = [...new Set(loanRowsForGuarantees.map((row) => row.id))];
-    const { data: guaranteeRows } =
-      loanIds.length > 0
-        ? await supabase
-            .from('qard_guarantees')
-            .select('id, loan_id, guarantor_user_id, status')
-            .in('loan_id', loanIds)
-        : { data: [] as Array<{ id: string; loan_id: string; guarantor_user_id: string; status: string }> };
-
-    const guaranteesByLoan = new Map<
-      string,
-      Array<{ id: string; guarantorUserId: string; guarantorName: string; status: string }>
-    >();
-    for (const row of (guaranteeRows ?? []) as unknown as Array<{
-      id: string;
-      loan_id: string;
-      guarantor_user_id: string;
-      status: string;
-    }>) {
-      const profile = profilesById.get(row.guarantor_user_id);
-      const list = guaranteesByLoan.get(row.loan_id) ?? [];
-      list.push({
-        id: row.id,
-        guarantorUserId: row.guarantor_user_id,
-        guarantorName: profile?.full_name || profile?.email || 'Member',
-        status: row.status,
-      });
-      guaranteesByLoan.set(row.loan_id, list);
-    }
-
-    const mapLoan = (row: LoanDbRow): CircleLoanRow => ({
-      id: row.id,
-      borrowerId: row.borrower_id,
-      amount: Number(row.amount),
-      amountRepaid: Number(row.amount_repaid),
-      currency: row.currency,
-      purpose: row.purpose,
-      status: row.status,
-      dueDate: row.due_date,
-      agreementAcceptedAt: row.agreement_accepted_at,
-      agreementSignerName: row.agreement_signer_name,
-      guarantees: guaranteesByLoan.get(row.id) ?? [],
-    });
-
-    myLoans = ((myLoanData ?? []) as unknown as LoanDbRow[]).map(mapLoan);
-    pendingApprovals = ((pendingLoanData ?? []) as unknown as LoanDbRow[])
-      .map(mapLoan)
-      .filter((loan) => loan.borrowerId !== user.id);
-    officerActiveLoans = ((activeLoanData ?? []) as unknown as LoanDbRow[])
-      .map(mapLoan)
-      .filter((loan) => loan.borrowerId !== user.id);
-
-    pendingGuaranteeRequests = (
-      (myPendingGuaranteeData ?? []) as unknown as Array<{
-        id: string;
-        loan_id: string;
-        loan:
-          | {
-              id: string;
-              borrower_id: string;
-              amount: number | string;
-              currency: string;
-              purpose: string;
-              status: string;
-            }
-          | Array<{
-              id: string;
-              borrower_id: string;
-              amount: number | string;
-              currency: string;
-              purpose: string;
-              status: string;
-            }>
-          | null;
-      }>
-    )
-      .map((row) => {
-        const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
-        if (!loan || loan.status !== 'requested') return null;
-        const borrower = profilesById.get(loan.borrower_id);
-        return {
-          id: row.id,
-          loanId: loan.id,
-          borrowerName: borrower?.full_name || borrower?.email || 'Member',
-          amount: Number(loan.amount),
-          currency: loan.currency,
-          purpose: loan.purpose,
-        } satisfies PendingGuaranteeRequest;
-      })
-      .filter((row): row is PendingGuaranteeRequest => row != null);
-
-    const cap = capData as { ok?: boolean; cap?: number } | null;
-    if (cap?.ok) qardCap = Number(cap.cap ?? 0);
-  }
-
   const lateCount = contributions.filter((c) => c.status === 'late').length;
   const nextPayout = payouts.find(
     (p) => p.status === 'scheduled' || p.status === 'processing',
@@ -578,13 +285,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const nextMember = nextPayoutRaw
     ? memberRows.find((m) => m.id === nextPayoutRaw.member_id)
     : null;
-  const { count: pendingGraceCount } = canManageMembers
-    ? await supabase
-        .from('grace_period_requests')
-        .select('id', { count: 'exact', head: true })
-        .eq('jamiya_id', jamiya.id)
-        .eq('status', 'pending')
-    : { count: 0 };
 
   const circleLabels = dict.circle;
   const segmentLabel =
@@ -739,14 +439,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             {jamiya.start_date ? formatDate(jamiya.start_date) : circleLabels.notSet}
           </dd>
         </div>
-        {creditRating ? (
-          <div className="rounded-xl border border-border bg-card p-5">
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-              {circleLabels.creditSnapshot}
-            </dt>
-            <dd className="mt-2 text-lg font-semibold">{creditRating}</dd>
-          </div>
-        ) : null}
       </dl>
 
       <section className="space-y-4">
@@ -794,50 +486,48 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ) : null}
 
       {membership?.status === 'active' ? (
-        <CircleFundLoans
-          jamiyaId={jamiya.id}
-          slug={jamiya.slug}
-          currency={jamiya.currency}
-          myLoans={myLoans}
-          pendingApprovals={pendingApprovals}
-          pendingGuaranteeRequests={pendingGuaranteeRequests}
-          officerActiveLoans={officerActiveLoans}
-          guarantorCandidates={memberRows
-            .filter((row) => row.status === 'active' && row.user_id !== user.id)
-            .map((row) => {
-              const profile = profilesById.get(row.user_id);
-              return {
-                userId: row.user_id,
-                label: profile?.full_name || profile?.email || 'Member',
-              };
-            })}
-          canApprove={canApproveLoans}
-          qardCap={qardCap}
-          labels={dict.loans}
-        />
+        <section className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+              Qard & table banking
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Request or repay circle loans, and review guarantees, without loading the whole book
+              on this page.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild size="sm">
+                <Link href={'/finance/qard' as Route}>Open Qard</Link>
+              </Button>
+              {canManageMembers ? (
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/circles/${slug}/officer` as Route}>Officer loan queue</Link>
+                </Button>
+              ) : null}
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+              Treasury & books
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Bank accounts, journal, fines, and savings pockets live on dedicated pages for a
+              faster hub.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       ) : null}
 
       {canManageOps ? (
         <>
-          <section className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Circle operations
-            </h2>
-            <CircleOpsPanel
-              jamiyaId={jamiya.id}
-              slug={jamiya.slug}
-              currency={jamiya.currency}
-              settings={penaltySettings}
-              fund={fund}
-              bookEntries={bookEntries}
-              announcements={announcements}
-              members={memberOptions}
-              myMemberId={membership?.id ?? null}
-              pockets={pockets}
-              canManage
-            />
-          </section>
-
           <section className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
               Add people (manual)
@@ -873,23 +563,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             />
           </section>
         </>
-      ) : membership?.status === 'active' &&
-        (fund || announcements.length || pockets.length || membership.id) ? (
-        <section className="space-y-4">
-          <CircleOpsPanel
-            jamiyaId={jamiya.id}
-            slug={jamiya.slug}
-            currency={jamiya.currency}
-            settings={penaltySettings}
-            fund={fund}
-            bookEntries={[]}
-            announcements={announcements}
-            members={memberOptions}
-            myMemberId={membership.id}
-            pockets={pockets}
-            canManage={false}
-          />
-        </section>
       ) : null}
 
       <Button asChild variant="outline">

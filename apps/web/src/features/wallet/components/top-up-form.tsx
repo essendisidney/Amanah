@@ -58,9 +58,10 @@ export function TopUpForm({
       ) : provider === 'bank' ? (
         <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
       ) : (
-        <p className="text-xs text-muted-foreground">
-          Demo credit — type 50000 to load test funds for contributions, payouts, and
-          withdrawals. No M-Pesa needed.
+        <p className="rounded-md border border-accent/30 bg-accent-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground">
+          <span className="font-semibold text-accent">Demo credit (UAT)</span>
+          {' — '}
+          {labels.simulatedHint} Default amount is KES 50,000 for testing. Not real M-Pesa money.
         </p>
       )}
       {provider !== 'simulated' ? (

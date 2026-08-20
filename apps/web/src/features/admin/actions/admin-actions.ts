@@ -53,6 +53,7 @@ export async function reviewKycDocumentAction(formData: FormData): Promise<void>
   revalidatePath('/admin/kyc');
   revalidatePath('/admin');
   revalidatePath('/profile');
+  revalidatePath('/notifications');
 }
 
 export async function setJamiyaStatusAction(formData: FormData): Promise<void> {

@@ -40,6 +40,7 @@ type KycRow = {
   status: string;
   file_name: string;
   created_at: string;
+  rejection_reason: string | null;
 };
 
 export default async function ProfilePage() {
@@ -65,7 +66,7 @@ export default async function ProfilePage() {
       .maybeSingle(),
     supabase
       .from('kyc_documents')
-      .select('id, document_type, status, file_name, created_at')
+      .select('id, document_type, status, file_name, created_at, rejection_reason')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20),
@@ -171,13 +172,18 @@ export default async function ProfilePage() {
               <ul className="divide-y divide-border">
                 {docs.map((doc) => (
                   <li key={doc.id} className="flex items-center justify-between gap-3 py-3">
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm font-medium capitalize">
                         {doc.document_type.replaceAll('_', ' ')}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {doc.file_name} · {formatDate(doc.created_at)}
                       </p>
+                      {doc.status === 'rejected' && doc.rejection_reason ? (
+                        <p className="mt-1 text-xs text-destructive">
+                          Reason: {doc.rejection_reason}
+                        </p>
+                      ) : null}
                     </div>
                     <StatusBadge status={doc.status} />
                   </li>
