@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { formatDate } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
@@ -10,6 +11,8 @@ import {
   nominateCandidateAction,
   openElectionAction,
 } from '@/features/circles/actions/election-actions';
+import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const metadata: Metadata = { title: 'Circle elections' };
 export const dynamic = 'force-dynamic';
@@ -176,7 +179,19 @@ export default async function CircleElectionsPage({ params }: Props) {
           Active & recent
         </h2>
         {!electionRows.length ? (
-          <p className="text-muted-foreground">No elections yet.</p>
+          canManage ? (
+            <EmptyState
+              title="No elections yet"
+              description="Open an election above to nominate and vote for chair, treasurer, secretary, or circle admin."
+            />
+          ) : (
+            <EmptyState
+              title="No elections yet"
+              description="Officers open elections for circle seats. Check Community for meetings, or return to the circle hub."
+              actionLabel="Open community"
+              actionHref={`/circles/${slug}/community` as Route}
+            />
+          )
         ) : (
           electionRows.map((election) => {
             const cands = candRows.filter((c) => c.election_id === election.id);
@@ -188,11 +203,14 @@ export default async function CircleElectionsPage({ params }: Props) {
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-semibold">{election.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Seat: {election.seat_role.replace('_', ' ')} · {election.status}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-semibold">{election.title}</h3>
+                      <StatusBadge status={election.status} />
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Seat: {election.seat_role.replace('_', ' ')}
                       {election.closes_at
-                        ? ` · closes ${new Date(election.closes_at).toLocaleString()}`
+                        ? ` · closes ${formatDate(election.closes_at)}`
                         : ''}
                     </p>
                     {election.winner_member_id ? (
@@ -205,7 +223,7 @@ export default async function CircleElectionsPage({ params }: Props) {
                     <form action={closeElectionAction}>
                       <input type="hidden" name="electionId" value={election.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Button type="submit" size="sm" variant="outline" className="min-h-11">
                         Close & elect
                       </Button>
                     </form>
@@ -252,6 +270,7 @@ export default async function CircleElectionsPage({ params }: Props) {
                           <Button
                             type="submit"
                             size="sm"
+                            className="min-h-11"
                             variant={myVote === c.id ? 'default' : 'outline'}
                           >
                             {myVote === c.id ? 'Your vote' : 'Vote'}
@@ -261,7 +280,13 @@ export default async function CircleElectionsPage({ params }: Props) {
                     </li>
                   ))}
                   {!cands.length ? (
-                    <li className="text-sm text-muted-foreground">No candidates yet.</li>
+                    <li className="text-sm text-muted-foreground">
+                      {election.status === 'open'
+                        ? canManage
+                          ? 'No candidates yet. Nominate a member above.'
+                          : 'Waiting for nominations.'
+                        : 'No candidates were nominated.'}
+                    </li>
                   ) : null}
                 </ul>
               </article>

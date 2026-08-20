@@ -116,29 +116,36 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   }, 0);
   const savingsTotal = pockets.reduce((sum, s) => sum + Number(s.balance ?? 0), 0);
 
+  const viewingOther = memberId !== me.id;
+  const viewedMember = memberRows.find((m) => m.id === memberId);
+  const viewedProfile = viewedMember ? profileMap.get(viewedMember.user_id) : null;
+  const viewedName =
+    viewedProfile?.full_name || viewedProfile?.email || stmt.member_code || 'Member';
+
   return (
     <div className="mx-auto max-w-3xl space-y-8 px-6 py-10 print:px-0 print:py-0">
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            My statement
+            {viewingOther ? 'Member statement' : 'My statement'}
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiya.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
+            {viewingOther ? `${viewedName} · ` : ''}
             Member ID {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Circle</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
           {memberId === me.id || canExportOthers ? (
-            <Button asChild size="sm">
+            <Button asChild size="sm" className="min-h-11">
               <a
                 href={`/api/circles/${slug}/statement.pdf${
                   memberId !== me.id ? `?memberId=${memberId}` : ''
@@ -148,7 +155,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
               </a>
             </Button>
           ) : (
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="sm" variant="outline" className="min-h-11">
               <Link href={`/circles/${slug}/officer` as Route}>Upgrade for PDF export</Link>
             </Button>
           )}
@@ -184,7 +191,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <p className="mt-2 text-2xl font-semibold">
             {formatCurrency(loanOutstanding, jamiya.currency)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{loans.length} loan row(s)</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {loans.length === 1 ? '1 loan' : `${loans.length} loans`}
+          </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4 print:rounded-none">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -193,18 +202,20 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <p className="mt-2 text-2xl font-semibold">
             {formatCurrency(savingsTotal, jamiya.currency)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{pockets.length} pocket(s)</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {pockets.length === 1 ? '1 pocket' : `${pockets.length} pockets`}
+          </p>
         </div>
       </section>
 
       {isOfficer && memberRows.length ? (
-        <form className="flex flex-wrap items-end gap-2" method="get">
-          <label className="space-y-1 text-sm">
+        <form className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end" method="get">
+          <label className="w-full space-y-1 text-sm sm:w-auto">
             <span className="text-muted-foreground">View member</span>
             <select
               name="memberId"
               defaultValue={memberId}
-              className="block h-10 min-w-[14rem] rounded-md border border-input bg-background px-3 text-sm"
+              className="block h-11 w-full min-w-[14rem] rounded-md border border-input bg-background px-3 text-sm"
             >
               {memberRows.map((m) => {
                 const p = profileMap.get(m.user_id);
@@ -217,7 +228,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
               })}
             </select>
           </label>
-          <Button type="submit" size="sm" variant="outline">
+          <Button type="submit" size="sm" variant="outline" className="min-h-11 w-full sm:w-auto">
             Open
           </Button>
         </form>
@@ -225,7 +236,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Contributions"
-        empty="No contribution rows."
+        empty="No contribution rows yet."
+        emptyHref={`/circles/${slug}#pay` as Route}
+        emptyLabel="Open dues"
         rows={(stmt.contributions ?? []).map((c) => ({
           key: String(c.id),
           title: `Cycle ${c.cycle}`,
@@ -238,6 +251,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <StatementSection
         title="Fines & penalties"
         empty="No fines on this statement."
+        emptyHref={
+          isOfficer
+            ? (`/circles/${slug}/treasury` as Route)
+            : (`/circles/${slug}` as Route)
+        }
+        emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
         rows={(stmt.penalties ?? []).map((p) => ({
           key: String(p.id),
           title: String(p.notes || p.kind || 'Fine'),
@@ -249,7 +268,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Loans (Qard)"
-        empty="No loans."
+        empty="No loans on this statement."
+        emptyHref={'/finance/qard' as Route}
+        emptyLabel="Open Qard"
         rows={(stmt.loans ?? []).map((l) => ({
           key: String(l.id),
           title: String(l.purpose || 'Loan'),
@@ -261,7 +282,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Savings pockets"
-        empty="No savings pockets."
+        empty="No savings pockets yet."
+        emptyHref={'/wallet' as Route}
+        emptyLabel="Open Money"
         rows={(stmt.savings_pockets ?? []).map((s) => ({
           key: String(s.id),
           title: String(s.label || s.category),
@@ -275,6 +298,8 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <StatementSection
         title="Book entries"
         empty="No book entries linked to this member."
+        emptyHref={`/circles/${slug}/treasury` as Route}
+        emptyLabel="Open treasury"
         rows={(stmt.book_entries ?? []).map((b) => ({
           key: String(b.id),
           title: String(b.entry_type).replaceAll('_', ' '),
@@ -291,10 +316,14 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 function StatementSection({
   title,
   empty,
+  emptyHref,
+  emptyLabel,
   rows,
 }: {
   title: string;
   empty: string;
+  emptyHref?: Route;
+  emptyLabel?: string;
   rows: Array<{
     key: string;
     title: string;
@@ -307,7 +336,14 @@ function StatementSection({
     <section className="space-y-3">
       <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">{title}</h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{empty}</p>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">{empty}</p>
+          {emptyHref && emptyLabel ? (
+            <Button asChild size="sm" variant="outline" className="min-h-11">
+              <Link href={emptyHref}>{emptyLabel}</Link>
+            </Button>
+          ) : null}
+        </div>
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {rows.map((row) => (

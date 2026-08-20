@@ -20,7 +20,7 @@ const INTENTS = [
   {
     id: 'build',
     title: 'Build my savings',
-    hint: 'Personal goals and wallet first',
+    hint: 'Personal goals and Money first',
   },
   {
     id: 'manage',
@@ -43,9 +43,11 @@ export function WelcomeIntentForm() {
         ? ('/phone?next=/finance/goals' as Route)
         : intent === 'manage'
           ? ('/phone?next=/wallet' as Route)
-          : intent === 'business' || intent === 'family'
-            ? ('/phone?next=/circles/new' as Route)
-            : ('/phone?next=/dashboard' as Route);
+          : intent === 'business'
+            ? (`/phone?next=${encodeURIComponent('/circles/new?intent=business')}` as Route)
+            : intent === 'family'
+              ? (`/phone?next=${encodeURIComponent('/circles/new?intent=family')}` as Route)
+              : ('/phone?next=/dashboard' as Route);
 
   return (
     <div className="space-y-6">

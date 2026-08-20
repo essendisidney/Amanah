@@ -38,7 +38,7 @@ export function ProfileOnboardingBanner({
         </p>
         <h2 className="mt-1 text-xl font-bold tracking-tight">Welcome to Amanah</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add your name and Kenya mobile so wallet top-ups and withdrawals can verify you. KYC is
+          Add your name and Kenya mobile so Money top-ups and withdrawals can verify you. KYC is
           recommended before large transfers — you can finish it now or later.
         </p>
       </div>

@@ -32,7 +32,13 @@ function FieldError({ message }: { message?: string }) {
   return <p className="text-sm text-destructive">{message}</p>;
 }
 
-export function CreateCircleForm() {
+export function CreateCircleForm({
+  defaultSegment = 'general',
+  segmentHint,
+}: {
+  defaultSegment?: 'general' | 'womens_circle' | 'boda_stage';
+  segmentHint?: string | null;
+} = {}) {
   const [state, formAction] = useActionState(createCircleAction, initialCreateCircleState);
   const [pending, startTransition] = useTransition();
 
@@ -48,7 +54,7 @@ export function CreateCircleForm() {
       contributionFrequencyDays: 30,
       startDate: '',
       status: 'open',
-      segment: 'general',
+      segment: defaultSegment,
       challengeKind: 'savings',
       joinFeeAmount: 0,
       transactionFeeAmount: 0,
@@ -237,6 +243,9 @@ export function CreateCircleForm() {
               <option value="womens_circle">Women&apos;s circle</option>
               <option value="boda_stage">Boda / tuktuk stage</option>
             </select>
+            {segmentHint ? (
+              <p className="text-xs text-muted-foreground">{segmentHint}</p>
+            ) : null}
             <FieldError message={fieldError('segment')} />
           </div>
           <div className="space-y-2">

@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 import {
   issueInvoicesAction,
   remindInvoicesAction,
@@ -76,6 +77,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
     issued_at: string;
     reminded_at: string | null;
     user_id: string;
+    member_id: string;
     notes: string | null;
   }>;
 
@@ -106,10 +108,10 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Circle</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
           <PrintReportButton />
@@ -133,34 +135,44 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
           <form action={issueInvoicesAction}>
             <input type="hidden" name="jamiyaId" value={jamiya.id} />
             <input type="hidden" name="slug" value={slug} />
-            <Button type="submit" size="sm">
+            <Button type="submit" size="sm" className="min-h-11">
               Issue invoices for open dues
             </Button>
           </form>
           <form action={remindInvoicesAction}>
             <input type="hidden" name="jamiyaId" value={jamiya.id} />
             <input type="hidden" name="slug" value={slug} />
-            <Button type="submit" size="sm" variant="outline">
+            <Button type="submit" size="sm" variant="outline" className="min-h-11">
               Remind open invoices
             </Button>
           </form>
         </div>
       ) : null}
 
-      {invoices.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          {isOfficer
-            ? 'No invoices yet. Issue invoices for pending or late contributions.'
-            : 'You have no contribution invoices in this circle.'}
-        </p>
+        {invoices.length === 0 ? (
+        isOfficer ? (
+          <EmptyState
+            title="No invoices yet"
+            description="Issue invoices for pending or late contributions so members get a clear amount due."
+          />
+        ) : (
+          <EmptyState
+            title="No invoices for you"
+            description="When an officer issues contribution invoices, they will appear here."
+            actionLabel="Open circle dues"
+            actionHref={`/circles/${slug}#pay` as Route}
+          />
+        )
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card print:rounded-none print:border-0">
           {invoices.map((inv) => {
             const profile = profileMap.get(inv.user_id);
+            const isMine = inv.user_id === user.id;
+            const isOpen = inv.status === 'open';
             return (
               <li
                 key={inv.id}
-                className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between print:break-inside-avoid"
+                className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between print:break-inside-avoid"
               >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -176,9 +188,25 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
                     {inv.reminded_at ? ` · reminded ${formatDate(inv.reminded_at)}` : ''}
                   </p>
                 </div>
-                <p className="text-sm font-semibold">
-                  {formatCurrency(Number(inv.amount_due), inv.currency)}
-                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold">
+                    {formatCurrency(Number(inv.amount_due), inv.currency)}
+                  </p>
+                  {isOpen && isMine ? (
+                    <Button asChild size="sm" className="min-h-11 print:hidden">
+                      <Link href={`/circles/${slug}#pay` as Route}>Pay now</Link>
+                    </Button>
+                  ) : null}
+                  {isOfficer && inv.member_id ? (
+                    <Button asChild size="sm" variant="ghost" className="min-h-11 print:hidden">
+                      <Link
+                        href={`/circles/${slug}/statement?memberId=${inv.member_id}` as Route}
+                      >
+                        Statement
+                      </Link>
+                    </Button>
+                  ) : null}
+                </div>
               </li>
             );
           })}

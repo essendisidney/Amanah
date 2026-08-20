@@ -188,7 +188,7 @@ export default async function WalletPage({ searchParams }: Props) {
           <div>
             <p className="text-sm font-semibold text-foreground">Add a Kenya mobile</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Wallet verification SMS and withdrawals need a +254 number on your profile.
+              Money verification SMS and withdrawals need a +254 number on your profile.
             </p>
           </div>
           <Button asChild className="min-h-11 shrink-0">
@@ -249,7 +249,7 @@ export default async function WalletPage({ searchParams }: Props) {
         <div>
           <h2 className="text-lg font-bold tracking-tight">All products</h2>
           <p className="text-sm text-muted-foreground">
-            Finance tools, giving, and support — not just the wallet.
+            Finance tools, giving, and support — not just your balance.
           </p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -322,7 +322,7 @@ export default async function WalletPage({ searchParams }: Props) {
         </p>
         <p className="mt-6 text-sm font-semibold tracking-wide">{displayName.toUpperCase()}</p>
         <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/55">
-          Member wallet
+          Member Money
         </p>
       </section>
 
