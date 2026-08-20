@@ -30,6 +30,7 @@ import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -672,6 +673,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               invitations={invitations}
               slug={jamiya.slug}
               canManage={canManageOps}
+              siteUrl={getSiteUrl()}
+              circleName={jamiya.name}
             />
           </section>
         </>

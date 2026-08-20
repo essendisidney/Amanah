@@ -101,15 +101,24 @@ export async function middleware(request: NextRequest) {
   if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/phone';
-    loginUrl.searchParams.set('next', pathname);
+    // Keep full path (e.g. /invitations/CODE) so invite deep links survive phone OTP.
+    loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
     return NextResponse.redirect(loginUrl);
   }
 
   if (user && AUTH_ROUTES.has(pathname) && pathname !== '/reset-password') {
-    const dashboardUrl = request.nextUrl.clone();
-    dashboardUrl.pathname = '/dashboard';
-    dashboardUrl.search = '';
-    return NextResponse.redirect(dashboardUrl);
+    // Never drop ?next= — invitees often land on /phone with cookies already set
+    // (OTP race) and must continue to /invitations/… instead of dashboard.
+    const rawNext = request.nextUrl.searchParams.get('next');
+    const dest =
+      rawNext &&
+      rawNext.startsWith('/') &&
+      !rawNext.startsWith('//') &&
+      !rawNext.includes('\\') &&
+      !rawNext.includes('://')
+        ? rawNext
+        : '/dashboard';
+    return NextResponse.redirect(new URL(dest, request.url));
   }
 
   return response;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createInvitationAction } from '../actions/invitation-actions';
 import { initialActionState } from '../lib/action-state';
@@ -17,6 +17,13 @@ export function InviteMemberForm({
     createInvitationAction,
     initialActionState,
   );
+  const shareRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (state.success && state.inviteUrl && state.inviteCode) {
+      shareRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [state.success, state.inviteUrl, state.inviteCode]);
 
   return (
     <div className="space-y-4">
@@ -24,14 +31,6 @@ export function InviteMemberForm({
         <Alert variant={state.success ? 'success' : 'destructive'}>
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
-      ) : null}
-
-      {state.success && state.inviteUrl && state.inviteCode ? (
-        <InviteSharePanel
-          inviteUrl={state.inviteUrl}
-          inviteCode={state.inviteCode}
-          circleName={circleName}
-        />
       ) : null}
 
       <form action={formAction} className="space-y-4">
@@ -66,6 +65,16 @@ export function InviteMemberForm({
           {pending ? 'Creating invite…' : 'Create invitation'}
         </Button>
       </form>
+
+      {state.success && state.inviteUrl && state.inviteCode ? (
+        <div ref={shareRef}>
+          <InviteSharePanel
+            inviteUrl={state.inviteUrl}
+            inviteCode={state.inviteCode}
+            circleName={circleName}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

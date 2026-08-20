@@ -3,7 +3,7 @@ import { Button } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { revokeInvitationAction } from '../actions/invitation-actions';
 import { setMemberRoleAction, vouchMemberAction } from '../actions/member-actions';
-import { CopyInviteCodeButton } from './copy-invite-code-button';
+import { InviteSharePanel } from './invite-share-panel';
 
 export type MemberListItem = {
   id: string;
@@ -122,52 +122,70 @@ export function PendingInvitationsList({
   invitations,
   slug,
   canManage,
+  siteUrl,
+  circleName,
 }: {
   invitations: InvitationListItem[];
   slug: string;
   canManage: boolean;
+  siteUrl: string;
+  circleName?: string;
 }) {
   if (invitations.length === 0) {
     return <p className="text-sm text-muted-foreground">No pending invitations.</p>;
   }
 
+  const origin = siteUrl.replace(/\/$/, '');
+
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-      {invitations.map((invite) => (
-        <li
-          key={invite.id}
-          className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="font-medium text-foreground">
-                {invite.phone ?? invite.email ?? 'Invite'}
+      {invitations.map((invite) => {
+        const inviteUrl = invite.inviteCode
+          ? `${origin}/invitations/${invite.inviteCode}`
+          : null;
+        return (
+          <li
+            key={invite.id}
+            className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-medium text-foreground">
+                  {invite.phone ?? invite.email ?? 'Invite'}
+                </p>
+                <StatusBadge status={invite.status} />
+              </div>
+              {invite.inviteCode ? (
+                <p className="mt-1 font-mono text-sm font-semibold tracking-wide text-foreground">
+                  {invite.inviteCode}
+                </p>
+              ) : null}
+              <p className="mt-1 text-sm text-muted-foreground">
+                Expires {formatDate(invite.expiresAt)} · Sent {formatDate(invite.createdAt)}
               </p>
-              <StatusBadge status={invite.status} />
             </div>
-            {invite.inviteCode ? (
-              <p className="mt-1 font-mono text-sm font-semibold tracking-wide text-foreground">
-                {invite.inviteCode}
-              </p>
+            {canManage && invite.status === 'pending' ? (
+              <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                {invite.inviteCode && inviteUrl ? (
+                  <InviteSharePanel
+                    compact
+                    inviteUrl={inviteUrl}
+                    inviteCode={invite.inviteCode}
+                    circleName={circleName}
+                  />
+                ) : null}
+                <form action={revokeInvitationAction}>
+                  <input type="hidden" name="invitationId" value={invite.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                    Revoke
+                  </Button>
+                </form>
+              </div>
             ) : null}
-            <p className="mt-1 text-sm text-muted-foreground">
-              Expires {formatDate(invite.expiresAt)} · Sent {formatDate(invite.createdAt)}
-            </p>
-          </div>
-          {canManage && invite.status === 'pending' ? (
-            <div className="flex flex-wrap gap-2">
-              {invite.inviteCode ? <CopyInviteCodeButton code={invite.inviteCode} /> : null}
-              <form action={revokeInvitationAction}>
-                <input type="hidden" name="invitationId" value={invite.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <Button type="submit" size="sm" variant="outline" className="min-h-11">
-                  Revoke
-                </Button>
-              </form>
-            </div>
-          ) : null}
-        </li>
-      ))}
+          </li>
+        );
+      })}
     </ul>
   );
 }

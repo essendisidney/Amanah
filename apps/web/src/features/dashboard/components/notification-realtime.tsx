@@ -2,20 +2,24 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import type { Route } from 'next';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
 import { dispatchNotificationInsert } from '@/lib/notification-events';
+import { notificationHref } from '../lib/notification-href';
 
 type NotificationPayload = {
   id: string;
   title: string;
   body: string;
+  type?: string;
+  data?: Record<string, unknown> | null;
   user_id: string;
 };
 
 /**
  * Subscribes to in-app notification inserts for the signed-in user.
- * Updates the nav badge locally; only refreshes list pages when needed.
+ * Toast “Open” deep-links into the right approve / review screen.
  */
 export function NotificationRealtime({ userId }: { userId: string }) {
   const router = useRouter();
@@ -45,7 +49,20 @@ export function NotificationRealtime({ userId }: { userId: string }) {
           },
           (payload: { new: NotificationPayload }) => {
             const row = payload.new;
-            toast(row.title, { description: row.body });
+            const href =
+              notificationHref(row.type ?? 'system', row.data, undefined, row.title) ??
+              ('/notifications' as Route);
+
+            toast(row.title, {
+              description: row.body,
+              duration: 10_000,
+              action: {
+                label: 'Open',
+                onClick: () => {
+                  router.push(href);
+                },
+              },
+            });
             dispatchNotificationInsert();
 
             const path = pathnameRef.current ?? '';

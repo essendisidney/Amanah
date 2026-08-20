@@ -53,7 +53,8 @@ async function createClaimInvitation(args: {
 
     if (!error && data) {
       const invite = data as { id: string; invite_code: string };
-      const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
+      const invitePath = `/invitations/${invite.invite_code}`;
+      const inviteUrl = `${getSiteUrl()}${invitePath}`;
 
       await args.writer.from('notifications').insert({
         user_id: args.inviteeUserId,
@@ -65,7 +66,7 @@ async function createClaimInvitation(args: {
           jamiya_id: args.jamiyaId,
           slug: args.slug,
           invitation_id: invite.id,
-          invite_path: `/invitations/${token}`,
+          invite_path: invitePath,
           invite_code: invite.invite_code,
         },
       } as never);

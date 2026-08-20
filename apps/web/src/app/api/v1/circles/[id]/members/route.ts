@@ -191,7 +191,7 @@ export async function POST(
     });
   }
 
-  const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
+  const inviteUrl = `${getSiteUrl()}/invitations/${invitation.invite_code}`;
   await supabase.rpc('queue_invitation_delivery', {
     p_invitation_id: invitation.id,
     p_invite_url: inviteUrl,

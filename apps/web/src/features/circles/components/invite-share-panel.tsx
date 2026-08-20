@@ -7,6 +7,8 @@ type InviteSharePanelProps = {
   inviteUrl: string;
   inviteCode: string;
   circleName?: string;
+  /** Compact row for pending invitation lists. */
+  compact?: boolean;
 };
 
 function buildShareText(
@@ -15,7 +17,7 @@ function buildShareText(
   circleName?: string,
 ): string {
   const name = circleName?.trim() || 'an Amanah savings circle';
-  return `You're invited to join ${name} on Amanah.\n\n1) Open Amanah and sign in with your phone (SMS code)\n2) Go to Circles → Enter invite code: ${inviteCode}\n\nOr open this link after signing in:\n${inviteUrl}`;
+  return `You're invited to join ${name} on Amanah.\n\nOpen this link, sign in with your phone (SMS code), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
 }
 
 function qrImageUrl(data: string): string {
@@ -26,6 +28,7 @@ export function InviteSharePanel({
   inviteUrl,
   inviteCode,
   circleName,
+  compact = false,
 }: InviteSharePanelProps) {
   const [copied, setCopied] = useState<'link' | 'code' | null>(null);
   const shareText = buildShareText(inviteUrl, inviteCode, circleName);
@@ -59,6 +62,36 @@ export function InviteSharePanel({
   const canNativeShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
+  if (compact) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="min-h-11"
+          onClick={() => void copy(inviteUrl, 'link')}
+        >
+          {copied === 'link' ? 'Link copied' : 'Copy link'}
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="min-h-11"
+          onClick={() => void copy(inviteCode, 'code')}
+        >
+          {copied === 'code' ? 'Code copied' : 'Copy code'}
+        </Button>
+        <Button type="button" size="sm" variant="outline" className="min-h-11" asChild>
+          <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
+            WhatsApp
+          </a>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-3 space-y-4 rounded-lg border border-border bg-muted/30 p-3">
       <div className="space-y-1">
@@ -72,8 +105,7 @@ export function InviteSharePanel({
           {inviteCode}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          Share on WhatsApp. They sign in with phone OTP, open Circles, and paste this
-          code under “Enter invite code”.
+          Share on WhatsApp. They open the link, sign in with phone OTP, then tap Accept.
         </p>
       </div>
 

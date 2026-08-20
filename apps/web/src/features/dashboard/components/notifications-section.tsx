@@ -54,7 +54,7 @@ export function NotificationsSection({
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {notifications.map((item) => {
-            const href = notificationHref(item.type, item.data, slugByJamiyaId);
+            const href = notificationHref(item.type, item.data, slugByJamiyaId, item.title);
             return (
               <li
                 key={item.id}

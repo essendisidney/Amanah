@@ -181,7 +181,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
+  const invitePath = `/invitations/${invitation.invite_code}`;
+  const inviteUrl = `${getSiteUrl()}${invitePath}`;
 
   if (inviteeUserId) {
     await supabase.from('notifications').insert({
@@ -194,7 +195,7 @@ export async function POST(request: Request) {
         jamiya_id: circle.id,
         slug: circle.slug,
         invitation_id: invitation.id,
-        invite_path: `/invitations/${token}`,
+        invite_path: invitePath,
         invite_code: invitation.invite_code,
       },
     });

@@ -210,7 +210,9 @@ export async function createInvitationAction(
     };
   }
 
-  const inviteUrl = `${getSiteUrl()}/invitations/${token}`;
+  // Prefer short invite codes in share URLs — long tokens cannot be rebuilt after refresh.
+  const invitePath = `/invitations/${invite.invite_code}`;
+  const inviteUrl = `${getSiteUrl()}${invitePath}`;
 
   if (inviteeUserId) {
     await supabase.from('notifications').insert({
@@ -223,7 +225,7 @@ export async function createInvitationAction(
         jamiya_id: circle.id,
         slug: circle.slug,
         invitation_id: invite.id,
-        invite_path: `/invitations/${token}`,
+        invite_path: invitePath,
         invite_code: invite.invite_code,
       },
     } as never);
