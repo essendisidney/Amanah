@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, Fraunces } from 'next/font/google';
+import { Manrope } from 'next/font/google';
 import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
 import { InstallPrompt } from '@/components/install-prompt';
 import { BootSplashMarkup } from '@/components/app-loader';
@@ -10,15 +10,9 @@ import { getDictionary } from '@/i18n/get-dictionary';
 import './globals.css';
 import '@/components/app-loader.css';
 
-const dmSans = DM_Sans({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
-  display: 'swap',
-});
-
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  variable: '--font-display',
   display: 'swap',
 });
 
@@ -50,8 +44,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#047857' },
-    { media: '(prefers-color-scheme: dark)', color: '#047857' },
+    { media: '(prefers-color-scheme: light)', color: '#0b5c42' },
+    { media: '(prefers-color-scheme: dark)', color: '#0b5c42' },
   ],
   width: 'device-width',
   initialScale: 1,
@@ -65,7 +59,7 @@ export default async function RootLayout({
 }>) {
   const { locale, dict } = await getDictionary();
   return (
-    <html lang={locale} className={`${dmSans.variable} ${fraunces.variable}`}>
+    <html lang={locale} className={manrope.variable}>
       <body className="min-h-dvh font-sans">
         <BootSplashMarkup />
         <Providers>

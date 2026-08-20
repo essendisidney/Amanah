@@ -1,8 +1,8 @@
 /** Brand & product constants */
 export const APP_NAME = 'Amanah';
 export const APP_DESCRIPTION =
-  'Shariah-compliant digital rotating savings — save together, grow together.';
-export const APP_TAGLINE = 'Trust. Community. Prosperity.';
+  'The financial operating system for trusted communities — Shariah-compliant circles, wallet, and savings.';
+export const APP_TAGLINE = 'Your money. Your people. Your Amanah.';
 
 /** Supported currencies (ISO 4217). Expand as markets open. */
 export const SUPPORTED_CURRENCIES = ['KES', 'USD', 'AED', 'SAR', 'GBP'] as const;

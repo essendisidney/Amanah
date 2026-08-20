@@ -76,17 +76,31 @@ export type DashboardWallet = {
   currency: string;
 };
 
+export type DashboardActivity = {
+  id: string;
+  type: string;
+  direction: string;
+  amount: number;
+  currency: string;
+  status: string;
+  reference: string | null;
+  createdAt: string;
+};
+
 export type DashboardData = {
   profile: DashboardProfile | null;
   jamiyas: DashboardJamiya[];
   contributions: DashboardContribution[];
   payouts: DashboardPayout[];
   notifications: DashboardNotification[];
+  activity: DashboardActivity[];
   wallet: DashboardWallet | null;
   unreadNotificationCount: number;
   stats: {
     activeCircles: number;
     pendingContributions: number;
     upcomingPayouts: number;
+    committedAmount: number;
+    monthInflow: number;
   };
 };

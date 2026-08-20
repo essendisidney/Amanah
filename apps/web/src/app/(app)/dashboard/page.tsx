@@ -5,7 +5,7 @@ import { getDictionary } from '@/i18n/get-dictionary';
 import { getAuthUser } from '@/lib/supabase/auth';
 
 export const metadata: Metadata = {
-  title: 'Dashboard',
+  title: 'Home',
 };
 
 export const dynamic = 'force-dynamic';

@@ -6,12 +6,11 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
-import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { RedeemInviteCodeForm } from '@/features/circles/components/redeem-invite-code-form';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: 'My circles',
+  title: 'Amanah Circles',
 };
 
 export const dynamic = 'force-dynamic';
@@ -83,23 +82,23 @@ export default async function MyCirclesPage() {
   const rows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            {labels.eyebrow}
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+            Amanah Circles
           </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-            {labels.title}
-          </h1>
-          <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">{labels.title}</h1>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Each circle is a trusted financial account for your community.
+          </p>
         </div>
         <Button asChild>
           <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
         </Button>
       </div>
 
-      <section className="rounded-xl border border-border bg-card p-5">
+      <section className="amanah-surface p-5">
         <RedeemInviteCodeForm
           title={labels.redeemTitle}
           hint={labels.redeemHint}
@@ -118,46 +117,47 @@ export default async function MyCirclesPage() {
           actionHref={'/circles/new' as Route}
         />
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="grid gap-3 md:grid-cols-2">
           {rows.map((row) => {
             const jamiya = row.jamiya!;
             const amount =
               typeof jamiya.contribution_amount === 'number'
                 ? jamiya.contribution_amount
                 : Number(jamiya.contribution_amount);
+            const progress =
+              jamiya.cycle_count && jamiya.cycle_count > 0
+                ? Math.min(100, Math.round((jamiya.current_cycle / jamiya.cycle_count) * 100))
+                : 0;
+            const estimated = amount * Math.max(jamiya.current_cycle, 1);
 
             return (
               <li key={row.id}>
                 <Link
                   href={`/circles/${jamiya.slug}` as Route}
-                  className="flex flex-col gap-3 px-5 py-5 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center sm:justify-between"
+                  className="amanah-surface block p-5 transition-colors hover:border-primary/30"
                 >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-lg font-medium text-foreground">{jamiya.name}</p>
-                      <StatusBadge status={jamiya.status} />
-                      <StatusBadge status={row.role} />
-                      {jamiya.segment && jamiya.segment !== 'general' ? (
-                        <StatusBadge status={jamiya.segment} />
-                      ) : null}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-lg font-bold tracking-tight">{jamiya.name}</p>
+                      <p className="mt-1 text-xs capitalize text-muted-foreground">
+                        {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}/
+                        {jamiya.max_members} {common.members}
+                      </p>
                     </div>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {jamiya.member_count}/{jamiya.max_members} {common.members} ·{' '}
-                      {jamiya.cycle_count != null
-                        ? `${common.cycle} ${jamiya.current_cycle}/${jamiya.cycle_count}`
-                        : common.cycle}
-                      {jamiya.start_date
-                        ? ` · ${common.starts} ${formatDate(jamiya.start_date)}`
-                        : ''}
+                    <p className="amanah-money shrink-0 text-lg font-bold">
+                      {formatCurrency(estimated, jamiya.currency)}
                     </p>
                   </div>
-                  <div className="text-sm font-semibold text-foreground sm:text-right">
-                    {formatCurrency(amount, jamiya.currency)}
-                    <span className="block text-xs font-normal text-muted-foreground">
-                      {common.perCycle}
-                      {row.payout_position ? ` · #${row.payout_position}` : ''}
-                    </span>
+                  <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {progress}% · next {formatCurrency(amount, jamiya.currency)} {common.perCycle}
+                    {jamiya.start_date ? ` · ${common.starts} ${formatDate(jamiya.start_date)}` : ''}
+                  </p>
                 </Link>
               </li>
             );

@@ -5,9 +5,8 @@ import type { Route } from 'next';
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import {
+  Activity,
   Bell,
-  CircleDollarSign,
-  Heart,
   Home,
   LayoutGrid,
   LogOut,
@@ -38,6 +37,16 @@ type Tab = {
 
 function pathActive(pathname: string, href: string) {
   if (href === '/dashboard') return pathname === '/dashboard';
+  if (href === '/wallet') {
+    return (
+      pathname === '/wallet' ||
+      pathname.startsWith('/wallet/') ||
+      pathname.startsWith('/finance')
+    );
+  }
+  if (href === '/notifications') {
+    return pathname === '/notifications' || pathname.startsWith('/notifications/');
+  }
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -101,10 +110,10 @@ export function AppShell({
       icon: Wallet,
     },
     {
-      href: '/finance' as Route,
+      href: '/notifications' as Route,
       label: dict.nav.finance,
       short: dict.nav.financeShort,
-      icon: CircleDollarSign,
+      icon: Activity,
     },
     {
       href: '/profile' as Route,
@@ -115,27 +124,30 @@ export function AppShell({
   ];
 
   const desktopLinks: Array<{ href: Route; label: string }> = [
-    ...tabs.map((t) => ({ href: t.href, label: t.label })),
+    { href: '/dashboard' as Route, label: dict.nav.dashboard },
+    { href: '/circles' as Route, label: dict.nav.circles },
+    { href: '/wallet' as Route, label: dict.nav.wallet },
+    { href: '/finance/goals' as Route, label: 'Goals' },
+    { href: '/notifications' as Route, label: dict.nav.finance },
     { href: '/sadaka' as Route, label: dict.common.sadaka },
-    { href: '/support' as Route, label: dict.common.support },
-    { href: '/notifications' as Route, label: dict.common.notifications },
+    { href: '/profile' as Route, label: dict.nav.profile },
   ];
   if (showAdmin) {
     desktopLinks.push({ href: '/admin' as Route, label: dict.common.admin });
   }
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-[linear-gradient(180deg,#fbfcfa_0%,#eef5f0_100%)]">
-      <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+    <div className="amanah-geo min-h-dvh overflow-x-hidden bg-background">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-card/85 pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-16 md:px-6">
           <Link
             href={'/dashboard' as Route}
-            className="min-w-0 shrink font-[family-name:var(--font-display)] text-lg font-semibold text-primary md:text-xl"
+            className="min-w-0 shrink text-lg font-bold tracking-tight text-primary md:text-xl"
           >
             {APP_NAME}
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+          <nav className="hidden items-center gap-0.5 xl:flex" aria-label="Primary">
             {desktopLinks.map((item) => {
               const active = pathActive(pathname, item.href);
               return (
@@ -143,15 +155,15 @@ export function AppShell({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-muted text-foreground'
+                      ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
                   {item.label}
                   {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-md bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
                       {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
@@ -163,21 +175,8 @@ export function AppShell({
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <LanguageSwitcher locale={locale} label={dict.common.language} />
             <Link
-              href={'/sadaka' as Route}
-              className={cn(
-                'inline-flex h-11 w-11 items-center justify-center rounded-md lg:hidden',
-                pathActive(pathname, '/sadaka')
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-              aria-label={dict.common.sadaka}
-              title={dict.common.sadaka}
-            >
-              <Heart className="h-5 w-5" />
-            </Link>
-            <Link
               href={'/notifications' as Route}
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
               aria-label={
                 liveUnread > 0
                   ? `${dict.common.notifications}, ${liveUnread}`
@@ -186,7 +185,7 @@ export function AppShell({
             >
               <Bell className="h-5 w-5" />
               {liveUnread > 0 ? (
-                <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+                <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-md bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
                   {liveUnread > 9 ? '9+' : liveUnread}
                 </span>
               ) : null}
@@ -199,7 +198,7 @@ export function AppShell({
             <form action={signOutAction} className="sm:hidden">
               <button
                 type="submit"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
                 aria-label={dict.common.signOut}
                 title={dict.common.signOut}
               >
@@ -210,29 +209,33 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:py-6 md:px-6 md:py-10 md:pb-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-[calc(5.5rem+env(safe-area-inset-bottom))] sm:py-6 md:px-6 md:py-8 md:pb-10">
         <SmoothRouteTransition>{children}</SmoothRouteTransition>
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
         aria-label="Mobile primary"
       >
         <ul className="mx-auto grid max-w-lg grid-cols-5">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
+            const showBadge = item.href === '/notifications' && liveUnread > 0;
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className={cn(
-                    'flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium',
+                    'relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-semibold',
                     active ? 'text-primary' : 'text-muted-foreground',
                   )}
                 >
-                  <Icon className={cn('h-5 w-5', active && 'stroke-[2.25]')} />
+                  <Icon className={cn('h-5 w-5', active && 'stroke-[2.4]')} />
                   {item.short}
+                  {showBadge ? (
+                    <span className="absolute right-[18%] top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                  ) : null}
                 </Link>
               </li>
             );

@@ -14,7 +14,7 @@ import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
-  title: 'Notifications',
+  title: 'Activity',
 };
 
 export const dynamic = 'force-dynamic';

@@ -8,6 +8,7 @@ import type {
   DashboardPayout,
   DashboardProfile,
   DashboardWallet,
+  DashboardActivity,
 } from '../types';
 
 type MembershipRow = {
@@ -107,6 +108,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     membershipsResult,
     notificationsResult,
     walletResult,
+    activityResult,
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -151,6 +153,12 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       .eq('user_id', userId)
       .eq('currency', 'KES')
       .maybeSingle(),
+    supabase
+      .from('transactions')
+      .select('id, type, direction, amount, currency, status, reference, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   const profile = profileResult.data
@@ -296,18 +304,63 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       }
     : null;
 
+  type ActivityRow = {
+    id: string;
+    type: string;
+    direction: string;
+    amount: number | string;
+    currency: string;
+    status: string;
+    reference: string | null;
+    created_at: string;
+  };
+
+  const activity = ((activityResult.data ?? []) as unknown as ActivityRow[]).map(
+    (row) =>
+      ({
+        id: row.id,
+        type: row.type,
+        direction: row.direction,
+        amount: toNumber(row.amount),
+        currency: row.currency,
+        status: row.status,
+        reference: row.reference,
+        createdAt: row.created_at,
+      }) satisfies DashboardActivity,
+  );
+
+  const committedAmount = contributions.reduce(
+    (sum, item) => sum + Math.max(item.amount - item.amountPaid, 0),
+    0,
+  );
+
+  const monthStart = new Date();
+  monthStart.setDate(1);
+  monthStart.setHours(0, 0, 0, 0);
+  const monthInflow = activity
+    .filter(
+      (row) =>
+        row.direction === 'credit' &&
+        row.status === 'completed' &&
+        new Date(row.createdAt) >= monthStart,
+    )
+    .reduce((sum, row) => sum + row.amount, 0);
+
   return {
     profile,
     jamiyas,
     contributions,
     payouts,
     notifications,
+    activity,
     wallet,
     unreadNotificationCount,
     stats: {
       activeCircles: jamiyas.filter((item) => item.status === 'active').length,
       pendingContributions: contributions.length,
       upcomingPayouts: payouts.length,
+      committedAmount,
+      monthInflow,
     },
   };
 }
