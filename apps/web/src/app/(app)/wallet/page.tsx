@@ -9,6 +9,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
+import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
@@ -137,7 +138,9 @@ export default async function WalletPage({ searchParams }: Props) {
           className={
             notices.noticeType === 'error'
               ? 'rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
-              : 'rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
+              : notices.noticeType === 'info'
+                ? 'rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-sm text-foreground'
+                : 'rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
           }
           role="status"
         >
@@ -234,7 +237,10 @@ export default async function WalletPage({ searchParams }: Props) {
 
       {pendingIntents.length > 0 ? (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{labels.pendingPaystackHint}</p>
+          </div>
           <ul className="amanah-surface divide-y divide-border/70">
             {pendingIntents.map((intent) => (
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
@@ -246,7 +252,18 @@ export default async function WalletPage({ searchParams }: Props) {
                     {intent.provider} · {formatDate(intent.created_at)}
                   </p>
                 </div>
-                <StatusBadge status={intent.status} />
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={intent.status} />
+                  {intent.provider === 'paystack' ? (
+                    <CheckPaystackStatusButton
+                      intentId={intent.id}
+                      labels={{
+                        checkStatus: dict.walletForms.checkStatus,
+                        checkingStatus: dict.walletForms.checkingStatus,
+                      }}
+                    />
+                  ) : null}
+                </div>
               </li>
             ))}
           </ul>
@@ -267,7 +284,13 @@ export default async function WalletPage({ searchParams }: Props) {
                     {intent.error_message ?? intent.status}
                   </p>
                 </div>
-                <RetryIntentButton intentId={intent.id} label={dict.walletForms.retry} />
+                <RetryIntentButton
+                  intentId={intent.id}
+                  labels={{
+                    retry: dict.walletForms.retry,
+                    retrying: dict.walletForms.retrying,
+                  }}
+                />
               </li>
             ))}
           </ul>

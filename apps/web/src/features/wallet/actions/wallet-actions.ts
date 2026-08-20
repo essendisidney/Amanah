@@ -332,3 +332,62 @@ export async function retryPaymentIntentAction(
     intentId: created.intent_id,
   };
 }
+
+/** Re-verify a pending Paystack intent against Paystack and settle if paid. */
+export async function checkPaystackIntentAction(
+  _prev: WalletActionState,
+  formData: FormData,
+): Promise<WalletActionState> {
+  const intentId = String(formData.get('intentId') ?? '');
+  if (!intentId) return { success: false, message: 'Missing payment intent.' };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { success: false, message: 'Sign in again.' };
+
+  const { data: intent } = await supabase
+    .from('payment_intents')
+    .select('id, user_id, provider, status, provider_reference')
+    .eq('id', intentId)
+    .maybeSingle();
+
+  const row = intent as {
+    id: string;
+    user_id: string;
+    provider: string;
+    status: string;
+    provider_reference: string | null;
+  } | null;
+
+  if (!row || row.user_id !== user.id) {
+    return { success: false, message: 'Payment not found.' };
+  }
+  if (row.provider !== 'paystack') {
+    return { success: false, message: 'Check status is only for Paystack payments.' };
+  }
+
+  const { paystackReferenceForIntent, settlePaystackReference } = await import(
+    '@/lib/payments/paystack'
+  );
+  const reference = row.provider_reference || paystackReferenceForIntent(intentId);
+  const settled = await settlePaystackReference(reference);
+
+  revalidatePath('/wallet');
+  revalidatePath('/dashboard');
+
+  if (!settled.ok) {
+    return { success: false, message: settled.error ?? 'Could not verify payment yet.' };
+  }
+  if (settled.status === 'success') {
+    return { success: true, message: 'Payment confirmed. Wallet updated.' };
+  }
+  if (settled.status === 'failed' || settled.status === 'abandoned') {
+    return { success: false, message: `Paystack marked this payment as ${settled.status}.` };
+  }
+  return {
+    success: true,
+    message: 'Still pending at Paystack. Finish checkout or wait a moment and check again.',
+  };
+}

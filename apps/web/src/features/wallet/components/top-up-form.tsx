@@ -67,6 +67,9 @@ export function TopUpForm({
       {provider !== 'simulated' ? (
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
       ) : null}
+      {provider === 'paystack' && !needsOtp ? (
+        <p className="text-xs text-muted-foreground">{labels.paystackReturnHint}</p>
+      ) : null}
       {needsOtp ? (
         <div className="space-y-2">
           <Label htmlFor="otp">{labels.verificationCode}</Label>
@@ -100,7 +103,13 @@ export function TopUpForm({
             ? labels.confirmWithCode
             : provider === 'simulated'
               ? labels.topUpWallet
-              : labels.sendCode}
+              : provider === 'paystack'
+                ? labels.payPaystack
+                : provider === 'mpesa'
+                  ? labels.payMpesa
+                  : provider === 'bank'
+                    ? labels.startBank
+                    : labels.sendCode}
       </Button>
     </form>
   );

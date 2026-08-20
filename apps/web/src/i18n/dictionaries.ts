@@ -163,6 +163,7 @@ export type Dictionary = {
     topUp: string;
     withdraw: string;
     paymentsInProgress: string;
+    pendingPaystackHint: string;
     failedPayments: string;
     historyTitle: string;
     historyEmpty: string;
@@ -171,6 +172,7 @@ export type Dictionary = {
     amount: string;
     mpesaPhone: string;
     paystackHint: string;
+    paystackReturnHint: string;
     bankHint: string;
     simulatedHint: string;
     processing: string;
@@ -186,6 +188,8 @@ export type Dictionary = {
     requestWithdrawal: string;
     retry: string;
     retrying: string;
+    checkStatus: string;
+    checkingStatus: string;
     stepUpHint: string;
     verificationCode: string;
     sendCode: string;
@@ -520,6 +524,8 @@ export const en: Dictionary = {
     topUp: 'Add money',
     withdraw: 'Withdraw',
     paymentsInProgress: 'Payments in progress',
+    pendingPaystackHint:
+      'If you already paid on Paystack, wait a moment or tap Check status.',
     failedPayments: 'Failed payments — retry',
     historyTitle: 'Transaction history',
     historyEmpty:
@@ -530,6 +536,8 @@ export const en: Dictionary = {
     mpesaPhone: 'M-Pesa phone',
     paystackHint:
       'Pay with Paystack Checkout (card, M-Pesa mobile money, bank). You will be redirected to complete payment securely.',
+    paystackReturnHint:
+      'After Paystack, you return here. If the balance is slow to update, use Check status on payments in progress.',
     bankHint: 'Bank top-up creates a pending intent for settlement against your bank flow.',
     simulatedHint:
       'Instant demo wallet credit (no M-Pesa). Use this to pay dues, fund pockets, and repay loans while testing.',
@@ -546,6 +554,8 @@ export const en: Dictionary = {
     requestWithdrawal: 'Request withdrawal',
     retry: 'Retry',
     retrying: 'Retrying…',
+    checkStatus: 'Check status',
+    checkingStatus: 'Checking…',
     stepUpHint:
       'Layer 2: we SMS a code to the phone on your profile before money can move.',
     verificationCode: 'Verification code',
@@ -886,6 +896,8 @@ export const sw: Dictionary = {
     topUp: 'Ongeza pesa',
     withdraw: 'Toa',
     paymentsInProgress: 'Malipo yanayoendelea',
+    pendingPaystackHint:
+      'Ukishalipa kwenye Paystack, subiri kidogo au bofya Angalia hali.',
     failedPayments: 'Malipo yaliyoshindikana — jaribu tena',
     historyTitle: 'Historia ya miamala',
     historyEmpty:
@@ -896,6 +908,8 @@ export const sw: Dictionary = {
     mpesaPhone: 'Simu ya M-Pesa',
     paystackHint:
       'Lipa kwa Paystack Checkout (kadi, M-Pesa, benki). Utaelekezwa kukamilisha malipo salama.',
+    paystackReturnHint:
+      'Baada ya Paystack, unarudi hapa. Salio likichelewa, tumia Angalia hali kwenye malipo yanayoendelea.',
     bankHint: 'Ongezeko la benki linaunda ombi linalosubiri kuthibitishwa katika mtiririko wa benki.',
     simulatedHint:
       'Salio la majaribio papo hapo (bila M-Pesa). Tumia kulipa michango, kujaza hazina, na kulipa mikopo wakati wa majaribio.',
@@ -912,6 +926,8 @@ export const sw: Dictionary = {
     requestWithdrawal: 'Omba kutoa pesa',
     retry: 'Jaribu tena',
     retrying: 'Inajaribu tena…',
+    checkStatus: 'Angalia hali',
+    checkingStatus: 'Inaangalia…',
     stepUpHint:
       'Safu ya 2: tunatuma SMS ya nambari kwenye simu ya wasifu wako kabla pesa haijahanishwa.',
     verificationCode: 'Nambari ya uthibitisho',
