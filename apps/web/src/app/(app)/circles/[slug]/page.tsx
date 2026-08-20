@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { formatCurrency, formatDate } from '@jamiya/shared';
+import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
@@ -26,6 +26,7 @@ import { ExportCircleReportButtons } from '@/features/circles/components/export-
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { NextPayoutBoard } from '@/features/circles/components/circle-ops-panel';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
@@ -101,6 +102,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: contribData },
     { data: payoutData },
     graceResult,
+    { data: walletData },
   ] = await Promise.all([
     supabase
       .from('members')
@@ -132,9 +134,24 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .select('id', { count: 'exact', head: true })
       .eq('jamiya_id', jamiya.id)
       .eq('status', 'pending'),
+    supabase
+      .from('wallets')
+      .select('available_balance, currency')
+      .eq('user_id', user.id)
+      .eq('currency', jamiya.currency)
+      .maybeSingle(),
   ]);
 
   const pendingGraceCount = graceResult.count ?? 0;
+  const walletRow = walletData as
+    | { available_balance: number | string; currency: string }
+    | null;
+  const walletAvailable = walletRow
+    ? typeof walletRow.available_balance === 'number'
+      ? walletRow.available_balance
+      : Number(walletRow.available_balance)
+    : null;
+  const walletCurrency = walletRow?.currency ?? jamiya.currency;
 
   const memberRows = (membersData ?? []) as unknown as Array<{
     id: string;
@@ -407,7 +424,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
           {
-            href: `/circles/${slug}#calendar` as Route,
+            href: (myOpenDue
+              ? `/circles/${slug}#pay`
+              : `/circles/${slug}#calendar`) as Route,
             label: myOpenDue ? 'Contribute' : 'Calendar',
             primary: Boolean(myOpenDue),
           },
@@ -432,23 +451,21 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       </section>
 
       {myOpenDue ? (
-        <section className="amanah-surface flex flex-wrap items-center justify-between gap-3 px-4 py-3.5">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Your next contribution
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              {formatCurrency(
-                Math.max(myOpenDue.amount - myOpenDue.amountPaid, 0),
-                myOpenDue.currency,
-              )}{' '}
-              · due {formatDate(myOpenDue.dueDate)}
-            </p>
-          </div>
-          <Button asChild size="sm">
-            <Link href={`#calendar`}>Pay now</Link>
-          </Button>
-        </section>
+        <NextContributionCard
+          contributionId={myOpenDue.id}
+          slug={slug}
+          amount={myOpenDue.amount}
+          amountPaid={myOpenDue.amountPaid}
+          currency={myOpenDue.currency}
+          dueDate={myOpenDue.dueDate}
+          status={myOpenDue.status}
+          walletAvailable={
+            walletAvailable != null && Number.isFinite(walletAvailable)
+              ? walletAvailable
+              : null
+          }
+          walletCurrency={walletCurrency}
+        />
       ) : null}
 
       <div className="flex flex-wrap gap-2">

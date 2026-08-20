@@ -74,7 +74,7 @@ export function ContributionCalendar({
   });
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
       {ordered.map((item) => {
         const paid = item.amountPaid ?? 0;
         const remaining = Math.max(item.amount - paid, 0);
@@ -89,18 +89,24 @@ export function ContributionCalendar({
         return (
           <li
             key={item.id}
-            className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            id={item.isMine ? `contrib-${item.id}` : undefined}
+            className={[
+              'flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between',
+              payable ? 'bg-secondary/35' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">Cycle {item.cycleNumber}</p>
                 <StatusBadge status={item.status} />
                 {item.isMine ? (
-                  <span className="text-xs text-muted-foreground">Yours</span>
+                  <span className="text-xs font-medium text-primary">Yours</span>
                 ) : null}
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
-                Due {formatDate(item.dueDate)} · Due{' '}
+                Due {formatDate(item.dueDate)} ·{' '}
                 {formatCurrency(item.amount, item.currency)}
                 {paid > 0
                   ? ` · Paid ${formatCurrency(paid, item.currency)} · Remaining ${formatCurrency(remaining, item.currency)}`
@@ -128,7 +134,7 @@ export function ContributionCalendar({
                   />
                 </label>
                 <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                  {ahead ? 'Pay ahead' : 'Lipa / Pay'}
+                  {ahead ? 'Pay ahead' : 'Pay from wallet'}
                 </Button>
               </form>
             ) : null}
