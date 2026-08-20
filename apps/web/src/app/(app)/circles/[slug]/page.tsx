@@ -594,15 +594,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               Circle finance
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Qard loans, welfare support, and partner Tawarruq — without leaving this circle
-              context.
+              Qard loans, welfare support, and partner Tawarruq — circle preselected where
+              possible.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm">
-                <Link href={'/finance/qard' as Route}>Qard Hassan</Link>
+                <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard Hassan</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href={'/finance/welfare' as Route}>Welfare</Link>
+                <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
               </Button>
               <Button asChild variant="outline" size="sm">
                 <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>

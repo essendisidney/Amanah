@@ -65,7 +65,7 @@ export default async function FinancePage() {
       <section className="amanah-surface flex flex-col gap-4 border-primary/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Wallet available
+            Money available
           </p>
           <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">
             {formatCurrency(wallet?.availableBalance ?? 0, currency)}
@@ -123,7 +123,12 @@ export default async function FinancePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-muted-foreground">{labels.noWelfare}</p>
+          <div className="mt-3 space-y-3">
+            <p className="text-sm text-muted-foreground">{labels.noWelfare}</p>
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={'/finance/welfare' as Route}>Open Welfare</Link>
+            </Button>
+          </div>
         )}
       </section>
     </div>

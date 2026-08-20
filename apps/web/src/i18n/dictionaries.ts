@@ -548,7 +548,7 @@ export const en: Dictionary = {
     payMpesa: 'Pay with M-Pesa',
     payPaystack: 'Pay with Paystack',
     startBank: 'Start bank top-up',
-    topUpWallet: 'Top up wallet',
+    topUpWallet: 'Top up Money',
     bank: 'Bank',
     bankName: 'Bank name',
     accountName: 'Account name',

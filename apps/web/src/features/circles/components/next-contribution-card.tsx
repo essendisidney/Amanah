@@ -75,7 +75,7 @@ export function NextContributionCard({
         {walletAvailable != null ? (
           <div className="rounded-xl bg-secondary/70 px-3 py-2 text-right">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              Wallet available
+              Money available
             </p>
             <p className="mt-0.5 text-sm font-semibold">
               {formatCurrency(walletAvailable, walletCurrency)}

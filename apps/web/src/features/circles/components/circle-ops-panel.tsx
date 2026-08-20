@@ -172,7 +172,7 @@ export function CircleOpsPanel({
               <Link href={'/finance/welfare' as Route}>Welfare fund</Link>
             </Button>
             <Button asChild size="sm" variant="outline">
-              <Link href={'/wallet' as Route}>Top up wallet</Link>
+              <Link href={'/wallet' as Route}>Top up Money</Link>
             </Button>
           </div>
         </section>

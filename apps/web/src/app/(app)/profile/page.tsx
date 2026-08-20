@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
@@ -148,6 +150,36 @@ export default async function ProfilePage({ searchParams }: Props) {
           <p className="text-xs text-muted-foreground">Light or dark on this device</p>
         </div>
         <ThemeToggle />
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Give &amp; support
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Charity, zakat estimate, and optional platform tip.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {(
+            [
+              { href: '/sadaka', title: dict.common.sadaka, desc: 'Campaigns' },
+              { href: '/zakat', title: 'Zakat', desc: 'Estimate' },
+              { href: '/support', title: 'Support', desc: 'Tip Amanah' },
+              { href: '/finance/goals', title: 'Goals', desc: 'Save toward' },
+            ] as const
+          ).map((item) => (
+            <Link
+              key={item.href}
+              href={item.href as Route}
+              className="amanah-surface flex min-h-11 flex-col justify-center px-3 py-3 transition-colors hover:border-primary/30"
+            >
+              <span className="text-sm font-semibold text-foreground">{item.title}</span>
+              <span className="mt-0.5 text-xs text-muted-foreground">{item.desc}</span>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-8 lg:grid-cols-2">

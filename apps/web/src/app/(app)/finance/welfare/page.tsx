@@ -41,12 +41,19 @@ type Claim = {
   jamiya: { name: string } | null;
 };
 
-export default async function WelfarePage() {
+type Props = {
+  searchParams?: Promise<{ jamiyaId?: string }>;
+};
+
+export default async function WelfarePage({ searchParams }: Props) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/finance/welfare');
+
+  const params = (await searchParams) ?? {};
+  const preferredJamiyaId = params.jamiyaId?.trim() || '';
 
   const [{ data: memberships }, { data: fundsData }, { data: claimsData }] = await Promise.all([
     supabase
@@ -75,6 +82,12 @@ export default async function WelfarePage() {
   );
   const fundByJamiya = new Set(funds.map((f) => f.jamiya_id));
   const fundCircles = circles.filter((m) => fundByJamiya.has(m.jamiya_id));
+  const defaultAdminJamiyaId = adminCircles.some((m) => m.jamiya_id === preferredJamiyaId)
+    ? preferredJamiyaId
+    : adminCircles[0]?.jamiya_id ?? '';
+  const defaultFundJamiyaId = fundCircles.some((m) => m.jamiya_id === preferredJamiyaId)
+    ? preferredJamiyaId
+    : fundCircles[0]?.jamiya_id ?? '';
 
   return (
     <div className="space-y-10">
@@ -131,6 +144,7 @@ export default async function WelfarePage() {
                 id="ensureJamiya"
                 name="jamiyaId"
                 required
+                defaultValue={defaultAdminJamiyaId}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {adminCircles.map((m) => (
@@ -170,6 +184,7 @@ export default async function WelfarePage() {
                 id="contribJamiya"
                 name="jamiyaId"
                 required
+                defaultValue={defaultFundJamiyaId}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {fundCircles.map((m) => (
@@ -204,6 +219,7 @@ export default async function WelfarePage() {
                 id="claimJamiya"
                 name="jamiyaId"
                 required
+                defaultValue={defaultFundJamiyaId}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {fundCircles.map((m) => (

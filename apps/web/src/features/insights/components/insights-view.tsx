@@ -27,7 +27,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
           {formatCurrency(monthInflow, currency)}
         </p>
         <p className="mt-2 text-sm text-white/80">
-          Outflow {formatCurrency(monthOutflow, currency)} · Wallet available{' '}
+          Outflow {formatCurrency(monthOutflow, currency)} · Money available{' '}
           {formatCurrency(dashboard.wallet?.availableBalance ?? 0, currency)}
         </p>
       </section>

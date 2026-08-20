@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
@@ -9,6 +11,7 @@ import {
   requestQardFormAction,
   respondQardGuaranteeFormAction,
 } from '@/features/finance/actions';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,12 +35,19 @@ type Membership = {
   jamiya: { name: string } | null;
 };
 
-export default async function QardPage() {
+type Props = {
+  searchParams?: Promise<{ jamiyaId?: string }>;
+};
+
+export default async function QardPage({ searchParams }: Props) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/finance/qard');
+
+  const params = (await searchParams) ?? {};
+  const preferredJamiyaId = params.jamiyaId?.trim() || '';
 
   const [
     { data: loansData },
@@ -45,38 +55,41 @@ export default async function QardPage() {
     { data: pendingData },
     { data: pendingGuaranteeData },
   ] = await Promise.all([
-      supabase
-        .from('qard_loans')
-        .select(
-          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
-        )
-        .eq('borrower_id', user.id)
-        .order('created_at', { ascending: false }),
-      supabase
-        .from('members')
-        .select('jamiya_id, role, jamiya:jamiyas(name)')
-        .eq('user_id', user.id)
-        .eq('status', 'active'),
-      supabase
-        .from('qard_loans')
-        .select(
-          'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at',
-        )
-        .eq('status', 'requested')
-        .order('created_at', { ascending: false })
-        .limit(50),
-      supabase
-        .from('qard_guarantees')
-        .select(
-          'id, loan_id, status, loan:qard_loans(id, amount, currency, purpose, status, borrower_id)',
-        )
-        .eq('guarantor_user_id', user.id)
-        .eq('status', 'pending')
-        .limit(30),
-    ]);
+    supabase
+      .from('qard_loans')
+      .select(
+        'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at, agreement_signer_name',
+      )
+      .eq('borrower_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('members')
+      .select('jamiya_id, role, jamiya:jamiyas(name)')
+      .eq('user_id', user.id)
+      .eq('status', 'active'),
+    supabase
+      .from('qard_loans')
+      .select(
+        'id, jamiya_id, borrower_id, amount, amount_repaid, currency, purpose, status, due_date, agreement_accepted_at',
+      )
+      .eq('status', 'requested')
+      .order('created_at', { ascending: false })
+      .limit(50),
+    supabase
+      .from('qard_guarantees')
+      .select(
+        'id, loan_id, status, loan:qard_loans(id, amount, currency, purpose, status, borrower_id)',
+      )
+      .eq('guarantor_user_id', user.id)
+      .eq('status', 'pending')
+      .limit(30),
+  ]);
 
   const loans = (loansData ?? []) as unknown as Loan[];
   const memberships = (membershipsData ?? []) as unknown as Membership[];
+  const defaultJamiyaId = memberships.some((m) => m.jamiya_id === preferredJamiyaId)
+    ? preferredJamiyaId
+    : memberships[0]?.jamiya_id ?? '';
   const officerCircleIds = new Set(
     memberships
       .filter((m) => ['circle_admin', 'treasurer', 'chair'].includes(m.role))
@@ -85,6 +98,7 @@ export default async function QardPage() {
   const pendingForOfficer = ((pendingData ?? []) as unknown as Loan[]).filter((loan) =>
     officerCircleIds.has(loan.jamiya_id),
   );
+  const hasActiveRepay = loans.some((loan) => loan.status === 'active');
 
   const caps = await Promise.all(
     memberships.map(async (m) => {
@@ -101,21 +115,44 @@ export default async function QardPage() {
     }),
   );
 
+  const pendingGuarantees = (
+    (pendingGuaranteeData ?? []) as unknown as Array<{
+      id: string;
+      loan:
+        | { amount: number | string; currency: string; purpose: string; status: string }
+        | Array<{ amount: number | string; currency: string; purpose: string; status: string }>
+        | null;
+    }>
+  ).filter((row) => {
+    const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
+    return loan?.status === 'requested';
+  });
+
   return (
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          Interest-free lending
+          <Link href={'/finance' as Route} className="hover:text-primary">
+            Finance
+          </Link>
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           Qard Hassan
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Cap is 50% of your paid contributions in that circle (minimum KES 5,000 if you have no
-          paid history yet). To ask fellow members to guarantee (kafala) a request, open the circle
-          page and select guarantors when requesting.
+        <p className="mt-2 max-w-2xl text-muted-foreground">
+          Interest-free circle loans. Cap is 50% of your paid contributions in that circle
+          (minimum KES 5,000 if you have no paid history yet).
         </p>
       </div>
+
+      {memberships.length === 0 ? (
+        <EmptyState
+          title="Join a circle first"
+          description="Qard Hassan is available inside an active circle. Create or join one, then return here."
+          actionLabel="Go to Circles"
+          actionHref={'/circles' as Route}
+        />
+      ) : null}
 
       {caps.length > 0 ? (
         <ul className="grid gap-3 sm:grid-cols-2">
@@ -132,35 +169,15 @@ export default async function QardPage() {
         </ul>
       ) : null}
 
-      {((pendingGuaranteeData ?? []) as unknown as Array<{
-        id: string;
-        loan:
-          | { amount: number | string; currency: string; purpose: string; status: string }
-          | Array<{ amount: number | string; currency: string; purpose: string; status: string }>
-          | null;
-      }>).filter((row) => {
-        const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
-        return loan?.status === 'requested';
-      }).length > 0 ? (
+      {pendingGuarantees.length > 0 ? (
         <section className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Guarantee requests for you
           </h2>
           <ul className="divide-y divide-border border-y border-border">
-            {((pendingGuaranteeData ?? []) as unknown as Array<{
-              id: string;
-              loan:
-                | { amount: number | string; currency: string; purpose: string; status: string }
-                | Array<{
-                    amount: number | string;
-                    currency: string;
-                    purpose: string;
-                    status: string;
-                  }>
-                | null;
-            }>).map((row) => {
+            {pendingGuarantees.map((row) => {
               const loan = Array.isArray(row.loan) ? row.loan[0] : row.loan;
-              if (!loan || loan.status !== 'requested') return null;
+              if (!loan) return null;
               return (
                 <li
                   key={row.id}
@@ -176,14 +193,14 @@ export default async function QardPage() {
                     <form action={respondQardGuaranteeFormAction}>
                       <input type="hidden" name="guaranteeId" value={row.id} />
                       <input type="hidden" name="accept" value="true" />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" size="sm" className="min-h-11">
                         Accept
                       </Button>
                     </form>
                     <form action={respondQardGuaranteeFormAction}>
                       <input type="hidden" name="guaranteeId" value={row.id} />
                       <input type="hidden" name="accept" value="false" />
-                      <Button type="submit" size="sm" variant="destructive">
+                      <Button type="submit" size="sm" variant="destructive" className="min-h-11">
                         Decline
                       </Button>
                     </form>
@@ -195,48 +212,55 @@ export default async function QardPage() {
         </section>
       ) : null}
 
-      <form action={requestQardFormAction} className="max-w-xl space-y-4 border border-border bg-card p-6">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Request a loan
-        </h2>
-        <div className="space-y-2">
-          <Label htmlFor="jamiyaId">Circle</Label>
-          <select
-            id="jamiyaId"
-            name="jamiyaId"
-            required
-            className="h-10 w-full border border-input bg-background px-3"
-          >
-            <option value="">Choose circle</option>
-            {memberships.map((m) => (
-              <option key={m.jamiya_id} value={m.jamiya_id}>
-                {m.jamiya?.name ?? 'Circle'}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="amount">Amount (KES)</Label>
-          <Input id="amount" name="amount" type="number" min="100" required />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="installments">Monthly installments</Label>
-          <Input
-            id="installments"
-            name="installments"
-            type="number"
-            min="1"
-            max="24"
-            defaultValue="4"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="purpose">Purpose</Label>
-          <Textarea id="purpose" name="purpose" minLength={5} required />
-        </div>
-        <Button type="submit">Submit request</Button>
-      </form>
+      {memberships.length > 0 ? (
+        <form
+          action={requestQardFormAction}
+          className="max-w-xl space-y-4 rounded-xl border border-border bg-card p-6"
+        >
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Request a loan
+          </h2>
+          <div className="space-y-2">
+            <Label htmlFor="jamiyaId">Circle</Label>
+            <select
+              id="jamiyaId"
+              name="jamiyaId"
+              required
+              defaultValue={defaultJamiyaId}
+              className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            >
+              {memberships.map((m) => (
+                <option key={m.jamiya_id} value={m.jamiya_id}>
+                  {m.jamiya?.name ?? 'Circle'}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="amount">Amount (KES)</Label>
+            <Input id="amount" name="amount" type="number" min="100" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="installments">Monthly installments</Label>
+            <Input
+              id="installments"
+              name="installments"
+              type="number"
+              min="1"
+              max="24"
+              defaultValue="4"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="purpose">Purpose</Label>
+            <Textarea id="purpose" name="purpose" minLength={5} required />
+          </div>
+          <Button type="submit" className="min-h-11">
+            Submit request
+          </Button>
+        </form>
+      ) : null}
 
       {pendingForOfficer.length > 0 ? (
         <section>
@@ -265,6 +289,7 @@ export default async function QardPage() {
                     <Button
                       type="submit"
                       size="sm"
+                      className="min-h-11"
                       disabled={!loan.agreement_accepted_at}
                     >
                       Approve
@@ -273,7 +298,7 @@ export default async function QardPage() {
                   <form action={decideQardFormAction}>
                     <input type="hidden" name="loanId" value={loan.id} />
                     <input type="hidden" name="approve" value="false" />
-                    <Button type="submit" size="sm" variant="destructive">
+                    <Button type="submit" size="sm" variant="destructive" className="min-h-11">
                       Reject
                     </Button>
                   </form>
@@ -285,9 +310,16 @@ export default async function QardPage() {
       ) : null}
 
       <section>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Your loans
-        </h2>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Your loans
+          </h2>
+          {hasActiveRepay ? (
+            <Button asChild variant="outline" size="sm" className="min-h-11">
+              <Link href={'/wallet#top-up' as Route}>Top up Money</Link>
+            </Button>
+          ) : null}
+        </div>
         {loans.length ? (
           <ul className="mt-4 divide-y divide-border border-y border-border">
             {loans.map((loan) => {
@@ -320,7 +352,7 @@ export default async function QardPage() {
                         required
                         minLength={2}
                       />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" size="sm" className="min-h-11">
                         Accept agreement
                       </Button>
                     </form>
@@ -332,7 +364,10 @@ export default async function QardPage() {
                     </p>
                   ) : null}
                   {loan.status === 'active' ? (
-                    <form action={repayQardFormAction} className="flex items-center gap-2">
+                    <form
+                      action={repayQardFormAction}
+                      className="flex flex-wrap items-center gap-2"
+                    >
                       <input type="hidden" name="loanId" value={loan.id} />
                       <Input
                         name="amount"
@@ -341,9 +376,9 @@ export default async function QardPage() {
                         max={due}
                         placeholder="Repay"
                         required
-                        className="w-28"
+                        className="h-11 w-28"
                       />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" size="sm" className="min-h-11">
                         Repay
                       </Button>
                     </form>
@@ -353,7 +388,10 @@ export default async function QardPage() {
             })}
           </ul>
         ) : (
-          <p className="mt-3 text-muted-foreground">You have no Qard requests.</p>
+          <EmptyState
+            title="No Qard requests yet"
+            description="Request an interest-free loan from a circle where you are an active member."
+          />
         )}
       </section>
     </div>
