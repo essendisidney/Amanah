@@ -121,7 +121,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            ID report
+            My statement
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiya.name}

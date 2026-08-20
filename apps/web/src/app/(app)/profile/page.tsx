@@ -110,6 +110,18 @@ export default async function ProfilePage({ searchParams }: Props) {
           hasPhone={hasPhone}
           hasKycDoc={docs.length > 0}
         />
+      ) : !hasPhone ? (
+        <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Add a Kenya mobile</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Needed for wallet verification SMS before top-ups and withdrawals.
+            </p>
+          </div>
+          <Button asChild className="min-h-11 shrink-0">
+            <a href="#personal-details">Add phone below</a>
+          </Button>
+        </div>
       ) : null}
 
       <div>

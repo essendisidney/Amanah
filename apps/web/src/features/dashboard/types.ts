@@ -10,6 +10,7 @@ import type {
 export type DashboardProfile = {
   full_name: string | null;
   email: string | null;
+  phone: string | null;
   platform_role: string;
   kyc_status: string;
   profile_completed: boolean;

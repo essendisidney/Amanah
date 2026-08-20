@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
-import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
+import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
@@ -77,6 +77,10 @@ export function DashboardView({
   const committed = data.stats.committedAmount;
   const monthInflow = data.stats.monthInflow;
   const nextDue = data.contributions[0];
+  const needsPhone =
+    Boolean(data.profile) &&
+    !isValidKeMobile(String(data.profile?.phone ?? '').trim());
+  const needsProfile = Boolean(data.profile && !data.profile.profile_completed);
 
   const quickActions: Array<{
     href: Route;
@@ -100,9 +104,17 @@ export function DashboardView({
             Your Amanah
           </h1>
         </div>
-        {data.profile && !data.profile.profile_completed ? (
+        {needsPhone || needsProfile ? (
           <Button asChild size="sm" variant="outline">
-            <Link href={'/profile' as Route}>{labels.completeProfile}</Link>
+            <Link
+              href={
+                (needsPhone
+                  ? '/profile?onboarding=1&next=/dashboard#personal-details'
+                  : '/profile') as Route
+              }
+            >
+              {needsPhone ? 'Add phone' : labels.completeProfile}
+            </Link>
           </Button>
         ) : null}
       </header>

@@ -442,7 +442,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             label: myOpenDue ? 'Contribute' : 'Calendar',
             primary: Boolean(myOpenDue),
           },
-          { href: `/circles/${slug}/statement` as Route, label: 'Statement' },
+          { href: `/circles/${slug}/statement` as Route, label: circleLabels.myStatement },
           { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
           {
             href: (canManageMembers
@@ -534,7 +534,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
       <section id="calendar" className="space-y-4">
         <h2 className="text-xl font-bold tracking-tight">Contribution calendar</h2>
-        <ContributionCalendar contributions={contributions} slug={jamiya.slug} />
+        <ContributionCalendar
+          contributions={contributions}
+          slug={jamiya.slug}
+          walletAvailable={
+            walletAvailable != null && Number.isFinite(walletAvailable)
+              ? walletAvailable
+              : null
+          }
+          walletCurrency={walletCurrency}
+        />
       </section>
 
       <section className="space-y-4">

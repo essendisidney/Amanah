@@ -1,5 +1,7 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import {
   activateCircleAction,
@@ -56,14 +58,18 @@ export function ActivateCircleButton({
 export function ContributionCalendar({
   contributions,
   slug,
+  walletAvailable = null,
+  walletCurrency,
 }: {
   contributions: ScheduleContribution[];
   slug: string;
+  walletAvailable?: number | null;
+  walletCurrency?: string;
 }) {
   if (contributions.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No contribution schedule yet. Activate the circle once members are ready.
+        No contribution schedule yet. Invite members, then activate the circle.
       </p>
     );
   }
@@ -85,6 +91,15 @@ export function ContributionCalendar({
             item.status === 'partial');
         const ahead =
           new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10));
+        const currency = walletCurrency ?? item.currency;
+        const canCover =
+          walletAvailable != null &&
+          currency === item.currency &&
+          walletAvailable + 1e-9 >= remaining;
+        const shortfall =
+          walletAvailable != null && currency === item.currency
+            ? Math.max(remaining - walletAvailable, 0)
+            : remaining;
 
         return (
           <li
@@ -112,31 +127,49 @@ export function ContributionCalendar({
                   ? ` · Paid ${formatCurrency(paid, item.currency)} · Remaining ${formatCurrency(remaining, item.currency)}`
                   : null}
               </p>
+              {payable && !canCover ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {walletAvailable == null
+                    ? 'Top up Money, then pay this cycle.'
+                    : `Need about ${formatCurrency(shortfall, item.currency)} more in wallet.`}
+                </p>
+              ) : null}
             </div>
             {payable ? (
-              <form
-                action={ahead ? payContributionAheadAction : payContributionAction}
-                className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-              >
-                <input type="hidden" name="contributionId" value={item.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <label className="block text-xs text-muted-foreground sm:inline">
-                  Amount (blank = full remaining)
-                  <input
-                    name="amount"
-                    type="number"
-                    inputMode="decimal"
-                    min={1}
-                    step="0.01"
-                    max={remaining}
-                    placeholder={String(remaining)}
-                    className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:ml-2 sm:mt-0 sm:inline-block sm:h-10 sm:w-32 sm:text-sm"
-                  />
-                </label>
-                <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                  {ahead ? 'Pay ahead' : 'Pay from wallet'}
-                </Button>
-              </form>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+                {canCover ? (
+                  <form
+                    action={ahead ? payContributionAheadAction : payContributionAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+                  >
+                    <input type="hidden" name="contributionId" value={item.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                      {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
+                    </Button>
+                  </form>
+                ) : (
+                  <Button asChild className="min-h-11 w-full sm:w-auto">
+                    <Link
+                      href={
+                        `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
+                      }
+                    >
+                      {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
+                    </Link>
+                  </Button>
+                )}
+                {!canCover && walletAvailable != null && walletAvailable > 0 ? (
+                  <form action={ahead ? payContributionAheadAction : payContributionAction}>
+                    <input type="hidden" name="contributionId" value={item.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="amount" value={String(walletAvailable)} />
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
+                      Pay {formatCurrency(walletAvailable, item.currency)} now
+                    </Button>
+                  </form>
+                ) : null}
+              </div>
             ) : null}
           </li>
         );
