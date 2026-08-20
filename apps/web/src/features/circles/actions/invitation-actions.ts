@@ -120,7 +120,7 @@ export async function createInvitationAction(
     };
   }
 
-  let inviteeUserId = await findInviteeUserId(supabase, email || undefined, phone || undefined);
+  const inviteeUserId = await findInviteeUserId(supabase, email || undefined, phone || undefined);
 
   if (inviteeUserId) {
     const { data: existing } = await supabase
