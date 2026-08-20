@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { APP_NAME } from '@jamiya/shared';
+import { AmanahLogo } from '@/components/amanah-logo';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 
@@ -18,9 +17,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
       />
       <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-8 sm:px-6">
         <div className="mb-10 flex items-center justify-between gap-3">
-          <Link href="/" className="text-2xl font-bold tracking-tight text-primary">
-            {APP_NAME}
-          </Link>
+          <AmanahLogo href="/" size="lg" tone="brand" />
           <LanguageSwitcher locale={locale} label={dict.common.language} />
         </div>
         <div className="flex flex-1 items-start justify-center md:items-center">{children}</div>

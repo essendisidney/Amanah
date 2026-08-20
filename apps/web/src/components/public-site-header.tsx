@@ -5,8 +5,8 @@ import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { APP_NAME } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { AmanahLogo } from '@/components/amanah-logo';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Locale } from '@/i18n/config';
 import { cn } from '@/lib/utils';
@@ -51,12 +51,7 @@ export function PublicSiteHeader({
   return (
     <header className={cn('relative z-30', className)}>
       <div className="flex items-center justify-between gap-3">
-        <Link
-          href={homeHref}
-          className="min-w-0 shrink font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-primary sm:text-2xl"
-        >
-          {APP_NAME}
-        </Link>
+        <AmanahLogo href={homeHref} size="md" tone="brand" />
 
         <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
           <LanguageSwitcher locale={locale} label={languageLabel} />

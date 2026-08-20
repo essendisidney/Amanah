@@ -1,5 +1,5 @@
 /* Amanah PWA — installability + light offline shell. */
-const SHELL = 'amanah-shell-v5';
+const SHELL = 'amanah-shell-v6';
 const PRECACHE = [
   '/manifest.webmanifest',
   '/icons/icon-192.png',

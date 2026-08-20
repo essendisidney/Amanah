@@ -13,7 +13,6 @@ import {
   Shield,
   UserRound,
 } from 'lucide-react';
-import { APP_NAME } from '@jamiya/shared';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -25,6 +24,7 @@ import {
 } from '@/lib/notification-events';
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AmanahLogo } from '@/components/amanah-logo';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
@@ -143,12 +143,7 @@ export function AppShell({
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
       <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)] md:backdrop-blur-xl">
         <div className="mx-auto flex h-14 w-full max-w-[390px] items-center justify-between gap-3 px-4 md:h-[4.25rem] md:max-w-6xl md:px-10">
-          <Link
-            href={'/dashboard' as Route}
-            className="min-w-0 shrink font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-primary md:text-2xl"
-          >
-            {APP_NAME}
-          </Link>
+          <AmanahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
           <nav
             className="amanah-nav-glass hidden items-center gap-1 rounded-full px-1.5 py-1 md:flex"

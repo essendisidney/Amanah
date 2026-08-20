@@ -10,7 +10,7 @@ export function PwaRegister() {
     const onMessage = (event: MessageEvent) => {
       if (event.data?.type === 'AMANAH_SW_UPDATED') {
         // New shell is active — reload once so theme/boot scripts aren't stale.
-        const key = 'amanah-sw-reload-v5';
+        const key = 'amanah-sw-reload-v6';
         try {
           if (!sessionStorage.getItem(key)) {
             sessionStorage.setItem(key, '1');

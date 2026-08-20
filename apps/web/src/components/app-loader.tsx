@@ -1,4 +1,5 @@
 import { APP_NAME, APP_TAGLINE } from '@jamiya/shared';
+import { AmanahMark } from '@/components/amanah-logo';
 
 type AppLoaderProps = {
   message?: string;
@@ -8,7 +9,7 @@ type AppLoaderProps = {
 
 function TrustEmblem() {
   return (
-    <div className="amanah-loader__emblem" aria-hidden>
+    <div className="amanah-loader__emblem flex items-center justify-center" aria-hidden>
       <div className="amanah-loader__ring-outer">
         <svg viewBox="0 0 120 120" className="h-full w-full">
           <circle
@@ -19,29 +20,8 @@ function TrustEmblem() {
           />
         </svg>
       </div>
-      <div className="amanah-loader__ring-inner">
-        <svg viewBox="0 0 120 120" className="h-full w-full">
-          <circle
-            cx="60"
-            cy="60"
-            r="38"
-            className="amanah-loader__svg-ring amanah-loader__svg-ring--b"
-          />
-          <circle
-            cx="60"
-            cy="60"
-            r="28"
-            className="amanah-loader__svg-ring amanah-loader__svg-ring--c"
-          />
-        </svg>
-      </div>
-      <div className="amanah-loader__orbit">
-        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--1" />
-        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--2" />
-        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--3" />
-      </div>
-      <div className="amanah-loader__core">
-        <span className="amanah-loader__core-mark">A</span>
+      <div className="relative z-10">
+        <AmanahMark size={72} />
       </div>
     </div>
   );
