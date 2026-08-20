@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
