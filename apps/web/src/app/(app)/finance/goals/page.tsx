@@ -1,9 +1,12 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { formatCurrency } from '@jamiya/shared';
 import { Button, Input } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { deleteGoalAction, updateGoalFormAction } from '@/features/finance/actions';
 import { CreateGoalForm } from '@/features/finance/components/create-goal-form';
 
+export const metadata: Metadata = { title: 'Goals' };
 export const dynamic = 'force-dynamic';
 
 type Goal = {
@@ -31,35 +34,33 @@ export default async function GoalsPage() {
   const goals = (data ?? []) as unknown as Goal[];
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
           Personal savings
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-          Savings goals
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Save for Hajj, Umra, Udhiyah, or any goal — with a 1, 3, 6, or 12 month horizon.
+        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
+        <p className="mt-2 max-w-xl text-muted-foreground">
+          Hajj, Umra, Udhiyah, emergency fund — track progress with a clear target.
         </p>
       </div>
 
-      <CreateGoalForm />
+      <div className="amanah-surface p-5">
+        <CreateGoalForm />
+      </div>
 
-      <section className="space-y-5">
+      <section className="space-y-3">
         {goals.map((goal) => {
           const target = Number(goal.target_amount);
           const saved = Number(goal.saved_amount);
-          const progress = Math.min(100, Math.round((saved / target) * 100));
+          const progress = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
           return (
-            <div key={goal.id} className="border-b border-border pb-5">
-              <div className="flex flex-wrap justify-between gap-3">
+            <article key={goal.id} className="amanah-surface p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-                    {goal.title}
-                  </h2>
+                  <h2 className="text-xl font-bold tracking-tight">{goal.title}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    KES {saved.toLocaleString()} of {target.toLocaleString()}
+                    {formatCurrency(saved, goal.currency)} / {formatCurrency(target, goal.currency)}
                     {goal.duration_months ? ` · ${goal.duration_months} months` : ''}
                     {goal.target_date ? ` · by ${goal.target_date}` : ''}
                   </p>
@@ -72,8 +73,12 @@ export default async function GoalsPage() {
                 </form>
               </div>
               <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full bg-primary" style={{ width: `${progress}%` }} />
+                <div
+                  className="h-full rounded-full bg-primary transition-[width] duration-500"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
+              <p className="mt-2 text-xs font-semibold text-primary">{progress}% complete</p>
               <form action={updateGoalFormAction} className="mt-4 flex max-w-xs gap-2">
                 <input type="hidden" name="goalId" value={goal.id} />
                 <Input
@@ -88,11 +93,11 @@ export default async function GoalsPage() {
                   Update
                 </Button>
               </form>
-            </div>
+            </article>
           );
         })}
         {!goals.length ? (
-          <p className="text-muted-foreground">Create your first savings goal above.</p>
+          <p className="text-sm text-muted-foreground">Create your first savings goal above.</p>
         ) : null}
       </section>
     </div>

@@ -7,6 +7,7 @@ const AUTH_ROUTES = new Set([
   '/forgot-password',
   '/reset-password',
   '/phone',
+  '/welcome',
 ]);
 
 const PROTECTED_PREFIXES = [

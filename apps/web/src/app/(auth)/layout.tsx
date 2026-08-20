@@ -11,13 +11,14 @@ export const metadata: Metadata = {
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { locale, dict } = await getDictionary();
   return (
-    <div className="min-h-dvh bg-[radial-gradient(ellipse_at_top,_#d1fae5_0%,_transparent_50%),linear-gradient(180deg,_#fbfcfa_0%,_#eef5f0_100%)]">
-      <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-6 py-8">
+    <div className="amanah-geo min-h-dvh bg-background">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-[50vh] bg-[radial-gradient(ellipse_at_top,_rgba(11,92,66,0.12)_0%,_transparent_60%)]"
+      />
+      <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-8 sm:px-6">
         <div className="mb-10 flex items-center justify-between gap-3">
-          <Link
-            href="/"
-            className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight text-primary"
-          >
+          <Link href="/" className="text-2xl font-bold tracking-tight text-primary">
             {APP_NAME}
           </Link>
           <LanguageSwitcher locale={locale} label={dict.common.language} />

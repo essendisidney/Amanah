@@ -300,72 +300,179 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         ? circleLabels.bodaBlurb
         : null;
 
+  const contributedTotal = contributions.reduce((sum, row) => sum + row.amountPaid, 0);
+  const cycleProgress =
+    jamiya.cycle_count && jamiya.cycle_count > 0
+      ? Math.min(100, Math.round((jamiya.current_cycle / jamiya.cycle_count) * 100))
+      : 0;
+  const myOpenDue = contributions.find((c) => c.isMine && ['pending', 'late', 'partial'].includes(c.status));
+  const estimatedPool =
+    contributedTotal > 0
+      ? contributedTotal
+      : amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1);
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge status={jamiya.status} />
-          {membership ? <StatusBadge status={membership.role} /> : null}
-          {segmentLabel ? <StatusBadge status={jamiya.segment} /> : null}
-        </div>
-        <h1 className="font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-          {jamiya.name}
-        </h1>
-        {segmentBlurb ? (
-          <p className="max-w-2xl text-sm text-muted-foreground">{segmentBlurb}</p>
-        ) : null}
-        {jamiya.description ? (
-          <p className="max-w-2xl text-muted-foreground">{jamiya.description}</p>
-        ) : null}
-        {canActivate ? (
-          <div className="pt-2">
-            <ActivateCircleButton
-              jamiyaId={jamiya.id}
-              slug={jamiya.slug}
-              canActivate={canActivate}
-            />
+      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-primary-foreground shadow-[0_12px_40px_rgba(11,92,66,0.2)] md:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+              Amanah Circle
+            </p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">{jamiya.name}</h1>
+            <p className="mt-2 text-sm capitalize text-white/80">
+              {jamiya.status.replaceAll('_', ' ')}
+              {membership ? ` · ${membership.role.replaceAll('_', ' ')}` : ''}
+              {segmentLabel ? ` · ${segmentLabel}` : ''}
+            </p>
           </div>
-        ) : null}
-        {jamiya.challenge_kind && jamiya.challenge_kind !== 'rotating' ? (
-          <p className="text-sm text-muted-foreground">
-            {jamiya.challenge_kind === 'share_dividend'
-              ? 'Share / dividend group — profits and equity, not rotating payouts.'
-              : 'Savings challenge — contribution rounds only, not a merry-go-round.'}
-          </p>
-        ) : null}
-        <div className="flex flex-wrap gap-2 pt-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/elections` as Route}>{circleLabels.elections}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/registration` as Route}>{circleLabels.circleKyc}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/shares` as Route}>{circleLabels.shares}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/statement` as Route}>{circleLabels.idReport}</Link>
-          </Button>
-          {canManageMembers ? (
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/circles/${slug}/officer` as Route}>{circleLabels.officerConsole}</Link>
-            </Button>
-          ) : null}
+          <StatusBadge status={jamiya.status} />
         </div>
+        <p className="amanah-money mt-6 text-4xl font-bold tracking-tight md:text-5xl">
+          {formatCurrency(estimatedPool, jamiya.currency)}
+        </p>
+        <p className="mt-2 text-sm text-white/80">
+          {jamiya.member_count} {circleLabels.members.toLowerCase()} · cycle{' '}
+          {jamiya.cycle_count != null
+            ? `${jamiya.current_cycle}/${jamiya.cycle_count}`
+            : jamiya.current_cycle}{' '}
+          · {cycleProgress}% complete
+        </p>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full rounded-full bg-accent"
+            style={{ width: `${cycleProgress}%` }}
+          />
+        </div>
+        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
+            <p className="text-[11px] uppercase tracking-wide text-white/65">
+              {circleLabels.contribution}
+            </p>
+            <p className="amanah-money mt-1 text-sm font-semibold">
+              {formatCurrency(amount, jamiya.currency)}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
+            <p className="text-[11px] uppercase tracking-wide text-white/65">
+              {circleLabels.members}
+            </p>
+            <p className="mt-1 text-sm font-semibold">
+              {jamiya.member_count}/{jamiya.max_members}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
+            <p className="text-[11px] uppercase tracking-wide text-white/65">
+              {circleLabels.frequency}
+            </p>
+            <p className="mt-1 text-sm font-semibold">
+              {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
+            <p className="text-[11px] uppercase tracking-wide text-white/65">
+              Next payout
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold">
+              {nextPayout?.memberLabel ?? '—'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {(segmentBlurb || jamiya.description) && (
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          {segmentBlurb ?? jamiya.description}
+        </p>
+      )}
+
+      {jamiya.challenge_kind && jamiya.challenge_kind !== 'rotating' ? (
+        <p className="text-sm text-muted-foreground">
+          {jamiya.challenge_kind === 'share_dividend'
+            ? 'Share / dividend group — profits and equity, not rotating payouts.'
+            : 'Savings challenge — contribution rounds only, not a merry-go-round.'}
+        </p>
+      ) : null}
+
+      {canActivate ? (
+        <ActivateCircleButton
+          jamiyaId={jamiya.id}
+          slug={jamiya.slug}
+          canActivate={canActivate}
+        />
+      ) : null}
+
+      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {[
+          {
+            href: `/circles/${slug}#calendar` as Route,
+            label: myOpenDue ? 'Contribute' : 'Calendar',
+            primary: Boolean(myOpenDue),
+          },
+          { href: `/circles/${slug}/statement` as Route, label: 'Statement' },
+          { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
+          {
+            href: (canManageMembers
+              ? `/circles/${slug}/officer`
+              : `/circles/${slug}/community`) as Route,
+            label: canManageMembers ? circleLabels.officerConsole : circleLabels.meetingsChat,
+          },
+        ].map((action) => (
+          <Button
+            key={action.label}
+            asChild
+            variant={action.primary ? 'default' : 'outline'}
+            className="min-h-11"
+          >
+            <Link href={action.href}>{action.label}</Link>
+          </Button>
+        ))}
+      </section>
+
+      {myOpenDue ? (
+        <section className="amanah-surface flex flex-wrap items-center justify-between gap-3 px-4 py-3.5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Your next contribution
+            </p>
+            <p className="mt-1 text-sm font-semibold">
+              {formatCurrency(
+                Math.max(myOpenDue.amount - myOpenDue.amountPaid, 0),
+                myOpenDue.currency,
+              )}{' '}
+              · due {formatDate(myOpenDue.dueDate)}
+            </p>
+          </div>
+          <Button asChild size="sm">
+            <Link href={`#calendar`}>Pay now</Link>
+          </Button>
+        </section>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/elections` as Route}>{circleLabels.elections}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/registration` as Route}>{circleLabels.circleKyc}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/shares` as Route}>{circleLabels.shares}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/circles/${slug}/arrears` as Route}>Arrears</Link>
+        </Button>
       </div>
 
       {canManageMembers ? (
@@ -396,55 +503,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         }
       />
 
-      <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            {circleLabels.contribution}
-          </dt>
-          <dd className="mt-2 text-lg font-semibold">
-            {formatCurrency(amount, jamiya.currency)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            {circleLabels.members}
-          </dt>
-          <dd className="mt-2 text-lg font-semibold">
-            {jamiya.member_count}/{jamiya.max_members}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            {circleLabels.cycle}
-          </dt>
-          <dd className="mt-2 text-lg font-semibold">
-            {jamiya.cycle_count != null
-              ? `${jamiya.current_cycle}/${jamiya.cycle_count}`
-              : 'Not set'}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            {circleLabels.frequency}
-          </dt>
-          <dd className="mt-2 text-lg font-semibold">
-            {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            {circleLabels.startDate}
-          </dt>
-          <dd className="mt-2 text-lg font-semibold">
-            {jamiya.start_date ? formatDate(jamiya.start_date) : circleLabels.notSet}
-          </dd>
-        </div>
-      </dl>
-
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Contribution calendar
-        </h2>
+      <section id="calendar" className="space-y-4">
+        <h2 className="text-xl font-bold tracking-tight">Contribution calendar</h2>
         <ContributionCalendar contributions={contributions} slug={jamiya.slug} />
       </section>
 

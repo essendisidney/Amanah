@@ -45,7 +45,7 @@ export default async function LandingPage() {
           </p>
           <div className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
             <Button size="lg" className="min-h-12 w-full sm:w-auto" asChild>
-              <Link href="/phone">{dict.landing.startWithPhone}</Link>
+              <Link href="/welcome">{dict.landing.startWithPhone}</Link>
             </Button>
             <Button size="lg" variant="outline" className="min-h-12 w-full sm:w-auto" asChild>
               <Link href="/pricing">{dict.landing.joinCircle}</Link>
