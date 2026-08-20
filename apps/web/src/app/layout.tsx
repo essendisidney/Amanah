@@ -43,13 +43,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#0a1f1a' },
-  ],
+  themeColor: '#f8fafc',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  colorScheme: 'light',
 };
 
 export default async function RootLayout({
@@ -63,7 +61,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;if(!localStorage.getItem('amanah-palette-v3')){localStorage.setItem('amanah-theme','light');localStorage.setItem('amanah-palette-v3','1')}var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='light';localStorage.setItem('amanah-theme','light')}var h=(new Date()).getHours();var d=t==='dark'||(t==='auto'&&(h<6||h>=18));if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
+            __html: `(function(){try{var r=document.documentElement;if(!localStorage.getItem('amanah-palette-v4')){localStorage.setItem('amanah-theme','light');localStorage.setItem('amanah-palette-v4','1')}var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='light';localStorage.setItem('amanah-theme','light')}var d=false;if(t==='dark'){d=true}else if(t==='auto'){try{d=window.matchMedia('(prefers-color-scheme: dark)').matches}catch(e){d=false}}if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
           }}
         />
       </head>

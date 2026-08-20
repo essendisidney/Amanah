@@ -12,13 +12,14 @@ export type ThemeAppearance = 'light' | 'dark';
 const STORAGE_KEY = 'amanah-theme';
 const THEME_EVENT = 'amanah-theme-change';
 
-/** Local daylight window — light from 6:00 through 17:59, dark otherwise. */
-const DAY_START_HOUR = 6;
-const NIGHT_START_HOUR = 18;
-
-export function themeFromTimeOfDay(date = new Date()): ThemeAppearance {
-  const hour = date.getHours();
-  return hour >= DAY_START_HOUR && hour < NIGHT_START_HOUR ? 'light' : 'dark';
+/** Auto follows the OS — not clock time (night Auto was forcing dark on mobile). */
+export function themeFromSystem(): ThemeAppearance {
+  if (typeof window === 'undefined') return 'light';
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
 }
 
 export function getStoredPreference(): ThemePreference | null {
@@ -32,7 +33,7 @@ export function getStoredPreference(): ThemePreference | null {
 }
 
 export function resolveAppearance(preference: ThemePreference): ThemeAppearance {
-  if (preference === 'auto') return themeFromTimeOfDay();
+  if (preference === 'auto') return themeFromSystem();
   return preference;
 }
 
@@ -44,6 +45,12 @@ export function applyAppearance(appearance: ThemeAppearance) {
     root.classList.remove('dark');
   }
   root.style.colorScheme = appearance;
+
+  // Keep mobile browser chrome in sync with the actual app theme
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    meta.setAttribute('content', appearance === 'dark' ? '#0a1f1a' : '#f8fafc');
+  }
 }
 
 export function applyPreference(preference: ThemePreference) {
@@ -58,20 +65,6 @@ export function applyPreference(preference: ThemePreference) {
     new CustomEvent(THEME_EVENT, { detail: { preference, appearance } }),
   );
   return appearance;
-}
-
-function msUntilNextDaypartBoundary(date = new Date()) {
-  const next = new Date(date);
-  const hour = date.getHours();
-  if (hour >= DAY_START_HOUR && hour < NIGHT_START_HOUR) {
-    next.setHours(NIGHT_START_HOUR, 0, 0, 0);
-  } else if (hour >= NIGHT_START_HOUR) {
-    next.setDate(next.getDate() + 1);
-    next.setHours(DAY_START_HOUR, 0, 0, 0);
-  } else {
-    next.setHours(DAY_START_HOUR, 0, 0, 0);
-  }
-  return Math.max(1_000, next.getTime() - date.getTime());
 }
 
 type ThemeDetail = { preference: ThemePreference; appearance: ThemeAppearance };
@@ -94,26 +87,11 @@ export function ThemeToggle({
     setAppearance(applyPreference(initial));
     setReady(true);
 
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const scheduleAutoRefresh = (pref: ThemePreference) => {
-      if (timer) clearTimeout(timer);
-      if (pref !== 'auto') return;
-      timer = setTimeout(() => {
-        const nextAppearance = applyPreference('auto');
-        setAppearance(nextAppearance);
-        scheduleAutoRefresh('auto');
-      }, msUntilNextDaypartBoundary());
-    };
-
-    scheduleAutoRefresh(initial);
-
     const onTheme = (event: Event) => {
       const detail = (event as CustomEvent<ThemeDetail>).detail;
       if (!detail) return;
       if (detail.preference === 'light' || detail.preference === 'dark' || detail.preference === 'auto') {
         setPreference(detail.preference);
-        scheduleAutoRefresh(detail.preference);
       }
       if (detail.appearance === 'light' || detail.appearance === 'dark') {
         setAppearance(detail.appearance);
@@ -125,26 +103,27 @@ export function ThemeToggle({
       if (value === 'light' || value === 'dark' || value === 'auto') {
         setPreference(value);
         setAppearance(applyPreference(value));
-        scheduleAutoRefresh(value);
       }
     };
-    const onVisibility = () => {
-      if (document.visibilityState !== 'visible') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onSystem = () => {
       const pref = getStoredPreference() ?? 'light';
       if (pref === 'auto') {
         setAppearance(applyPreference('auto'));
-        scheduleAutoRefresh('auto');
       }
     };
 
     window.addEventListener(THEME_EVENT, onTheme);
     window.addEventListener('storage', onStorage);
-    document.addEventListener('visibilitychange', onVisibility);
+    mq.addEventListener?.('change', onSystem);
+    // Safari < 14
+    mq.addListener?.(onSystem);
+
     return () => {
-      if (timer) clearTimeout(timer);
       window.removeEventListener(THEME_EVENT, onTheme);
       window.removeEventListener('storage', onStorage);
-      document.removeEventListener('visibilitychange', onVisibility);
+      mq.removeEventListener?.('change', onSystem);
+      mq.removeListener?.(onSystem);
     };
   }, []);
 
@@ -156,7 +135,7 @@ export function ThemeToggle({
   function cycleTheme() {
     const order: ThemePreference[] = ['light', 'auto', 'dark'];
     const idx = order.indexOf(preference);
-    setTheme(order[(idx + 1) % order.length] ?? 'auto');
+    setTheme(order[(idx + 1) % order.length] ?? 'light');
   }
 
   if (variant === 'segmented') {
@@ -202,7 +181,7 @@ export function ThemeToggle({
 
   const label =
     preference === 'auto'
-      ? `Auto · ${appearance === 'dark' ? 'night' : 'day'} (tap to change)`
+      ? `Auto · ${appearance === 'dark' ? 'system dark' : 'system light'} (tap to change)`
       : preference === 'dark'
         ? 'Dark mode (tap for Auto)'
         : 'Light mode (tap for Auto)';
