@@ -80,6 +80,7 @@ type NotificationRow = {
   type: DashboardNotification['type'];
   title: string;
   body: string;
+  data: Record<string, unknown> | null;
   read_at: string | null;
   created_at: string;
 };
@@ -143,7 +144,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       .order('created_at', { ascending: false }),
     supabase
       .from('notifications')
-      .select('id, type, title, body, read_at, created_at')
+      .select('id, type, title, body, data, read_at, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(6),
@@ -285,6 +286,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
         type: row.type,
         title: row.title,
         body: row.body,
+        data: row.data ?? null,
         readAt: row.read_at,
         createdAt: row.created_at,
       }) satisfies DashboardNotification,

@@ -13,6 +13,7 @@ import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
+import { NotificationsSection } from './notifications-section';
 
 function greetingForHour(hour: number) {
   if (hour < 12) return 'Good morning';
@@ -193,6 +194,14 @@ export function DashboardView({
         />
       ) : null}
 
+      <NotificationsSection
+        notifications={data.notifications}
+        unreadCount={data.unreadNotificationCount}
+        jamiyas={data.jamiyas}
+        labels={labels}
+        common={common}
+      />
+
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -235,12 +244,14 @@ export function DashboardView({
                           {common.members}
                         </p>
                       </div>
-                      <p className="amanah-money shrink-0 text-base font-bold">
-                        {formatCurrency(
-                          item.jamiya.contributionAmount * Math.max(item.jamiya.currentCycle, 1),
-                          item.jamiya.currency,
-                        )}
-                      </p>
+                      <div className="shrink-0 text-right">
+                        <p className="amanah-money text-base font-bold">
+                          {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}
+                        </p>
+                        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          {common.perCycle}
+                        </p>
+                      </div>
                     </div>
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
@@ -250,7 +261,8 @@ export function DashboardView({
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">
                       {progress}% complete · next{' '}
-                      {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}
+                      {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}{' '}
+                      {common.perCycle}
                     </p>
                   </Link>
                 </li>

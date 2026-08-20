@@ -154,15 +154,32 @@ export default async function NotificationsPage() {
             })}
           </ul>
         </section>
-      ) : null}
+      ) : (
+        <section className="amanah-surface flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold">No recent money yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Top-ups, contributions, and withdrawals will show here.
+            </p>
+          </div>
+          <Button asChild className="min-h-11 shrink-0">
+            <Link href={'/wallet#top-up' as Route}>{labels.openMoney}</Link>
+          </Button>
+        </section>
+      )}
 
       {notifications.length === 0 ? (
-        <EmptyState
-          title={labels.emptyTitle}
-          description={labels.emptyDesc}
-          actionLabel={dict.common.backToDashboard}
-          actionHref={'/dashboard' as Route}
-        />
+        <div className="space-y-3">
+          <EmptyState
+            title={labels.emptyTitle}
+            description={labels.emptyDesc}
+            actionLabel={labels.openCircles}
+            actionHref={'/circles' as Route}
+          />
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/wallet' as Route}>{labels.openMoney}</Link>
+          </Button>
+        </div>
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {notifications.map((item) => {

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
+import { redirect } from 'next/navigation';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
@@ -65,9 +66,11 @@ type Props = { params: Promise<{ slug: string }> };
 export default async function CircleCommunityPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
-    return <p className="text-muted-foreground">Sign in to view circle community.</p>;
+    redirect(`/login?next=/circles/${slug}/community`);
   }
 
   const { data: jamiya } = await supabase
@@ -77,7 +80,7 @@ export default async function CircleCommunityPage({ params }: Props) {
     .maybeSingle();
 
   if (!jamiya) {
-    return <p className="text-muted-foreground">Circle not found.</p>;
+    redirect('/circles');
   }
 
   const j = jamiya as { id: string; name: string; slug: string };
@@ -111,6 +114,22 @@ export default async function CircleCommunityPage({ params }: Props) {
         .limit(10),
     ]);
 
+  const messageRows = (messages ?? []) as Array<{ id: string; body: string; created_at: string }>;
+  const meetingRows = (meetings ?? []) as Array<{
+    id: string;
+    title: string;
+    location: string | null;
+    starts_at: string;
+    status: string;
+  }>;
+  const graceRows = (grace ?? []) as Array<{
+    id: string;
+    status: string;
+    requested_days: number;
+    reason: string | null;
+  }>;
+  const dueRows = (dues ?? []) as Array<{ id: string; cycle_number: number; due_date: string }>;
+
   return (
     <div className="mx-auto max-w-3xl space-y-10">
       <div>
@@ -120,10 +139,10 @@ export default async function CircleCommunityPage({ params }: Props) {
         </h1>
         <p className="mt-2 text-muted-foreground">Chat, meetings, and grace requests.</p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/elections` as Route}>Elections</Link>
           </Button>
         </div>
@@ -135,20 +154,26 @@ export default async function CircleCommunityPage({ params }: Props) {
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="jamiyaId" value={j.id} />
           <Textarea name="body" required maxLength={2000} placeholder="Message your circle…" />
-          <Button type="submit" size="sm">Send</Button>
+          <Button type="submit" size="sm" className="min-h-11">
+            Send
+          </Button>
         </form>
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-          {((messages ?? []) as Array<{ id: string; body: string; created_at: string }>).map(
-            (m) => (
+        {messageRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No messages yet. Say hello to start the circle chat.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {messageRows.map((m) => (
               <li key={m.id} className="px-4 py-3 text-sm">
                 <p>{m.body}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {new Date(m.created_at).toLocaleString()}
                 </p>
               </li>
-            ),
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="space-y-4">
@@ -180,111 +205,127 @@ export default async function CircleCommunityPage({ params }: Props) {
             Schedule meeting
           </Button>
         </form>
-        <ul className="space-y-2 text-sm">
-          {((meetings ?? []) as Array<{
-            id: string;
-            title: string;
-            location: string | null;
-            starts_at: string;
-            status: string;
-          }>).map((m) => (
-            <li key={m.id} className="rounded-lg border border-border bg-card px-4 py-3">
-              <p className="font-medium">{m.title}</p>
-              <p className="text-muted-foreground">
-                {new Date(m.starts_at).toLocaleString()}
-                {m.location ? ` · ${m.location}` : ''} · {m.status}
-              </p>
-              {m.status === 'scheduled' ? (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <form action={updateMeetingStatusAction}>
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="meetingId" value={m.id} />
-                    <input type="hidden" name="status" value="completed" />
-                    <Button type="submit" size="sm">
-                      Mark completed
-                    </Button>
-                  </form>
-                  <form action={updateMeetingStatusAction}>
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="meetingId" value={m.id} />
-                    <input type="hidden" name="status" value="cancelled" />
-                    <Button type="submit" size="sm" variant="outline">
-                      Cancel
-                    </Button>
-                  </form>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+        {meetingRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No meetings scheduled. Officers can add the next gathering above.
+          </p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {meetingRows.map((m) => (
+              <li key={m.id} className="rounded-lg border border-border bg-card px-4 py-3">
+                <p className="font-medium">{m.title}</p>
+                <p className="text-muted-foreground">
+                  {new Date(m.starts_at).toLocaleString()}
+                  {m.location ? ` · ${m.location}` : ''} · {m.status}
+                </p>
+                {m.status === 'scheduled' ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <form action={updateMeetingStatusAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="meetingId" value={m.id} />
+                      <input type="hidden" name="status" value="completed" />
+                      <Button type="submit" size="sm" className="min-h-11">
+                        Mark completed
+                      </Button>
+                    </form>
+                    <form action={updateMeetingStatusAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="meetingId" value={m.id} />
+                      <input type="hidden" name="status" value="cancelled" />
+                      <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                        Cancel
+                      </Button>
+                    </form>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Grace period
         </h2>
-        <form action={requestGraceAction} className="space-y-3">
-          <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="jamiyaId" value={j.id} />
-          <div className="space-y-2">
-            <Label htmlFor="contributionId">Your due contribution</Label>
-            <select
-              id="contributionId"
-              name="contributionId"
-              required
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+        {dueRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            You have no open dues to request grace for.{' '}
+            <Link
+              href={`/circles/${slug}#pay` as Route}
+              className="text-accent underline-offset-4 hover:underline"
             >
-              <option value="">Select…</option>
-              {((dues ?? []) as Array<{ id: string; cycle_number: number; due_date: string }>).map(
-                (c) => (
+              Check your next contribution
+            </Link>
+            .
+          </p>
+        ) : (
+          <form action={requestGraceAction} className="space-y-3">
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="jamiyaId" value={j.id} />
+            <div className="space-y-2">
+              <Label htmlFor="contributionId">Your due contribution</Label>
+              <select
+                id="contributionId"
+                name="contributionId"
+                required
+                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">Select…</option>
+                {dueRows.map((c) => (
                   <option key={c.id} value={c.id}>
                     Cycle {c.cycle_number} · due {c.due_date}
                   </option>
-                ),
-              )}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="days">Days requested</Label>
-            <Input id="days" name="days" type="number" min={1} max={14} defaultValue={3} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="reason">Reason</Label>
-            <Textarea id="reason" name="reason" />
-          </div>
-          <Button type="submit" size="sm">Request grace</Button>
-        </form>
-        <ul className="space-y-2 text-sm">
-          {((grace ?? []) as Array<{
-            id: string;
-            status: string;
-            requested_days: number;
-            reason: string | null;
-          }>).map((g) => (
-            <li key={g.id} className="rounded-lg border border-border bg-card px-4 py-3">
-              <p>
-                {g.requested_days} days · {g.status}
-              </p>
-              {g.reason ? <p className="text-muted-foreground">{g.reason}</p> : null}
-              {g.status === 'pending' ? (
-                <div className="mt-2 flex gap-2">
-                  <form action={decideGraceAction}>
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="requestId" value={g.id} />
-                    <input type="hidden" name="approve" value="1" />
-                    <Button type="submit" size="sm">Approve</Button>
-                  </form>
-                  <form action={decideGraceAction}>
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="requestId" value={g.id} />
-                    <input type="hidden" name="approve" value="0" />
-                    <Button type="submit" size="sm" variant="outline">Reject</Button>
-                  </form>
-                </div>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="days">Days requested</Label>
+              <Input id="days" name="days" type="number" min={1} max={14} defaultValue={3} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reason">Reason</Label>
+              <Textarea id="reason" name="reason" />
+            </div>
+            <Button type="submit" size="sm" className="min-h-11">
+              Request grace
+            </Button>
+          </form>
+        )}
+        {graceRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No grace requests yet for this circle.</p>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {graceRows.map((g) => (
+              <li key={g.id} className="rounded-lg border border-border bg-card px-4 py-3">
+                <p>
+                  {g.requested_days} days · {g.status}
+                </p>
+                {g.reason ? <p className="text-muted-foreground">{g.reason}</p> : null}
+                {g.status === 'pending' ? (
+                  <div className="mt-2 flex gap-2">
+                    <form action={decideGraceAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="requestId" value={g.id} />
+                      <input type="hidden" name="approve" value="1" />
+                      <Button type="submit" size="sm" className="min-h-11">
+                        Approve
+                      </Button>
+                    </form>
+                    <form action={decideGraceAction}>
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="requestId" value={g.id} />
+                      <input type="hidden" name="approve" value="0" />
+                      <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                        Reject
+                      </Button>
+                    </form>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

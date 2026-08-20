@@ -66,6 +66,7 @@ export type DashboardNotification = {
   type: NotificationTypeEnum;
   title: string;
   body: string;
+  data: Record<string, unknown> | null;
   readAt: string | null;
   createdAt: string;
 };

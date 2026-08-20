@@ -13,6 +13,7 @@ import {
 } from '@/features/circles/actions/billing-actions';
 import { remindInvoicesAction } from '@/features/circles/actions/invoice-actions';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const metadata: Metadata = { title: 'Arrears aging' };
 export const dynamic = 'force-dynamic';
@@ -203,7 +204,22 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
           {dict.officer.memberArrears}
         </h2>
         {!members.length ? (
-          <p className="text-sm text-muted-foreground">{dict.officer.noArrears}</p>
+          <div className="space-y-3">
+            <EmptyState
+              title={dict.officer.noArrears}
+              description="All members are current. Use invoices or treasury for related books."
+              actionLabel={dict.circle.invoices}
+              actionHref={`/circles/${slug}/invoices` as Route}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="min-h-11">
+                <Link href={`/circles/${slug}/treasury` as Route}>{dict.circle.treasury}</Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11">
+                <Link href={`/circles/${slug}/officer` as Route}>{dict.circle.officerConsole}</Link>
+              </Button>
+            </div>
+          </div>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {members.map((row) => {

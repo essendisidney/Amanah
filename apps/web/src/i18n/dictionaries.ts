@@ -261,6 +261,7 @@ export type Dictionary = {
     emptyDesc: string;
     recentMoney: string;
     openMoney: string;
+    openCircles: string;
     openItem: string;
   };
   support: {
@@ -633,6 +634,7 @@ export const en: Dictionary = {
     emptyDesc: 'Circle invites, contribution reminders, and payout updates will appear here.',
     recentMoney: 'Recent money',
     openMoney: 'Open Money',
+    openCircles: 'Open Circles',
     openItem: 'Open',
   },
   support: {
@@ -1009,6 +1011,7 @@ export const sw: Dictionary = {
     emptyDesc: 'Mialiko ya miduara, vikumbusho vya michango, na sasisho za malipo vitaonekana hapa.',
     recentMoney: 'Pesa za hivi karibuni',
     openMoney: 'Fungua Pesa',
+    openCircles: 'Fungua Miduara',
     openItem: 'Fungua',
   },
   support: {

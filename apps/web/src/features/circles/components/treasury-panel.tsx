@@ -1,4 +1,6 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import {
   importBankAlertAction,
@@ -10,6 +12,7 @@ import {
   createFineCategoryAction,
   createInvestmentAction,
   createLedgerCategoryAction,
+  ensureTreasuryAction,
   importBookEntriesAction,
   levyFineAction,
   recordTreasuryEntryAction,
@@ -142,6 +145,16 @@ export function TreasuryPanel({
                 <dd className="mt-1 text-lg font-semibold">
                   {formatCurrency(Number(value), currency)}
                 </dd>
+                {label === 'Contributions outstanding' &&
+                canManage &&
+                Number(value) > 0 ? (
+                  <Link
+                    href={`/circles/${slug}/arrears` as Route}
+                    className="mt-2 inline-block text-xs text-accent underline-offset-4 hover:underline"
+                  >
+                    Open arrears
+                  </Link>
+                ) : null}
               </div>
             ))}
           </dl>
@@ -157,9 +170,25 @@ export function TreasuryPanel({
           Account balances
         </h2>
         {accounts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No accounts yet. Officers can seed Petty cash, M-Pesa, and Main bank defaults.
-          </p>
+          <div className="space-y-3 rounded-xl border border-dashed border-border bg-muted/40 px-5 py-6">
+            <p className="text-sm font-medium text-foreground">
+              {canManage ? 'No accounts yet' : 'Treasury accounts not set up'}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {canManage
+                ? 'Seed Petty cash, M-Pesa, and Main bank defaults to start the cashbook.'
+                : 'Ask an officer (chair, treasurer, or admin) to set up treasury accounts.'}
+            </p>
+            {canManage ? (
+              <form action={ensureTreasuryAction}>
+                <input type="hidden" name="jamiyaId" value={jamiyaId} />
+                <input type="hidden" name="slug" value={slug} />
+                <Button type="submit" className="min-h-11">
+                  Seed defaults
+                </Button>
+              </form>
+            ) : null}
+          </div>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {accounts.map((a) => (

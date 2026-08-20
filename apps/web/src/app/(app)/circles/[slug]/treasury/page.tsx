@@ -157,33 +157,45 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Circle</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
           </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/shares` as Route}>Shares</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/invoices` as Route}>Invoices</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
-          </Button>
-          {canManage ? (
+          {canManage && ((accountsData ?? []) as unknown[]).length === 0 ? (
             <form action={ensureTreasuryAction}>
               <input type="hidden" name="jamiyaId" value={jamiya.id} />
               <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm" variant="outline">
+              <Button type="submit" size="sm" className="min-h-11">
                 Seed defaults
               </Button>
             </form>
           ) : null}
+          <details className="relative">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center rounded-md border border-border px-3 text-sm">
+              More tools
+            </summary>
+            <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
+              <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Shares
+              </Link>
+              <Link href={`/circles/${slug}/journal` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Journal
+              </Link>
+              <Link href={`/circles/${slug}/invoices` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Invoices
+              </Link>
+              <Link href={`/circles/${slug}/report` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                GL reports
+              </Link>
+              {canManage ? (
+                <Link href={`/circles/${slug}/arrears` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                  Arrears
+                </Link>
+              ) : null}
+            </div>
+          </details>
         </div>
       </div>
 

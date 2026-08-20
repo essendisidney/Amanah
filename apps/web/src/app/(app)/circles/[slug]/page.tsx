@@ -499,9 +499,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <Button asChild variant="ghost" size="sm">
           <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
         </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/arrears` as Route}>Arrears</Link>
-        </Button>
+        {canManageMembers ? (
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/circles/${slug}/arrears` as Route}>{circleLabels.arrears}</Link>
+          </Button>
+        ) : null}
       </div>
 
       {canManageMembers ? (
