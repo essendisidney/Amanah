@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
@@ -10,7 +12,7 @@ import {
 } from '@/features/wallet/actions/withdrawal-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
-export const metadata: Metadata = { title: 'Admin · Withdrawals' };
+export const metadata: Metadata = { title: 'Admin · Money out' };
 export const dynamic = 'force-dynamic';
 
 type Row = {
@@ -61,15 +63,20 @@ export default async function AdminWithdrawalsPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Withdrawals
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Amounts at/above the platform dual-approval threshold need a second compliance
-          approver. You cannot second-approve your own first approval. Payout cashouts
-          auto-simulate until live Daraja B2C.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Money out
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Amounts at/above the platform dual-approval threshold need a second compliance
+            approver. You cannot second-approve your own first approval. Payout cashouts
+            auto-simulate until live Daraja B2C.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={'/admin' as Route}>Back to Inbox</Link>
+        </Button>
       </div>
 
       {dualRows.length > 0 ? (

@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
@@ -64,39 +66,41 @@ export default async function AdminKycPage() {
       .limit(100),
   ]);
 
-  const docs = (data ?? []) as unknown as DocRow[];
-  const circleDocs = (circleData ?? []) as unknown as CircleDocRow[];
+  const docs = ((data ?? []) as unknown as DocRow[]).slice().sort((a, b) => {
+    const aAction = a.status === 'uploaded' || a.status === 'under_review' ? 0 : 1;
+    const bAction = b.status === 'uploaded' || b.status === 'under_review' ? 0 : 1;
+    return aAction - bAction;
+  });
+  const circleDocs = ((circleData ?? []) as unknown as CircleDocRow[]).slice().sort((a, b) => {
+    const aAction = a.status === 'uploaded' || a.status === 'under_review' ? 0 : 1;
+    const bAction = b.status === 'uploaded' || b.status === 'under_review' ? 0 : 1;
+    return aAction - bAction;
+  });
   const iprsRows = (iprsData ?? []) as unknown as IprsRow[];
+  const pendingPersonal = docs.filter(
+    (d) => d.status === 'uploaded' || d.status === 'under_review',
+  ).length;
+  const pendingCircle = circleDocs.filter(
+    (d) => d.status === 'uploaded' || d.status === 'under_review',
+  ).length;
 
   return (
     <div className="space-y-10">
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          IPRS / National ID lookups
-        </h2>
-        {iprsRows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No IPRS checks yet.</p>
-        ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-            {iprsRows.map((row) => (
-              <li
-                key={row.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
-              >
-                <div>
-                  <p className="font-medium">
-                    {row.first_name} {row.last_name} · ID {row.national_id}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {row.provider} · {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}…
-                  </p>
-                </div>
-                <StatusBadge status={row.outcome} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            KYC review
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {pendingPersonal + pendingCircle === 0
+              ? 'No documents waiting. Scroll for history and IPRS lookups.'
+              : `${pendingPersonal + pendingCircle} waiting · personal ${pendingPersonal} · circle ${pendingCircle}`}
+          </p>
+        </div>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={'/admin' as Route}>Back to Inbox</Link>
+        </Button>
+      </div>
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
@@ -200,6 +204,34 @@ export default async function AdminKycPage() {
                     </form>
                   </div>
                 ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          IPRS / National ID lookups
+        </h2>
+        {iprsRows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No IPRS checks yet.</p>
+        ) : (
+          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+            {iprsRows.map((row) => (
+              <li
+                key={row.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+              >
+                <div>
+                  <p className="font-medium">
+                    {row.first_name} {row.last_name} · ID {row.national_id}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {row.provider} · {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}…
+                  </p>
+                </div>
+                <StatusBadge status={row.outcome} />
               </li>
             ))}
           </ul>

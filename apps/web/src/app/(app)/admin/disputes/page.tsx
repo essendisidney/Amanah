@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
@@ -32,13 +34,28 @@ export default async function AdminDisputesPage() {
     .order('created_at', { ascending: false })
     .limit(100);
 
-  const rows = (data ?? []) as unknown as DisputeRow[];
+  const rows = ((data ?? []) as unknown as DisputeRow[]).slice().sort((a, b) => {
+    const aOpen = a.status === 'open' || a.status === 'under_review' ? 0 : 1;
+    const bOpen = b.status === 'open' || b.status === 'under_review' ? 0 : 1;
+    return aOpen - bOpen;
+  });
+  const waiting = rows.filter((r) => r.status === 'open' || r.status === 'under_review').length;
 
   return (
     <div className="space-y-4">
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-        Disputes
-      </h2>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Disputes
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {waiting === 0 ? 'No open disputes.' : `${waiting} need a decision.`}
+          </p>
+        </div>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={'/admin' as Route}>Back to Inbox</Link>
+        </Button>
+      </div>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">No disputes yet.</p>
       ) : (
@@ -61,31 +78,34 @@ export default async function AdminDisputesPage() {
                 </div>
               </div>
               {row.status === 'open' || row.status === 'under_review' ? (
-                <div className="flex flex-wrap gap-2">
-                  <form action={resolveDisputeAction}>
+                <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <form action={resolveDisputeAction} className="w-full sm:w-auto">
                     <input type="hidden" name="disputeId" value={row.id} />
                     <input type="hidden" name="status" value="under_review" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       Mark reviewing
                     </Button>
                   </form>
-                  <form action={resolveDisputeAction} className="flex gap-2">
+                  <form
+                    action={resolveDisputeAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+                  >
                     <input type="hidden" name="disputeId" value={row.id} />
                     <input type="hidden" name="status" value="resolved" />
                     <input
                       name="notes"
                       placeholder="Resolution notes"
-                      className="h-9 rounded-md border border-border bg-background px-3 text-sm"
+                      className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm sm:min-w-[12rem]"
                     />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Resolve
                     </Button>
                   </form>
-                  <form action={resolveDisputeAction}>
+                  <form action={resolveDisputeAction} className="w-full sm:w-auto">
                     <input type="hidden" name="disputeId" value={row.id} />
                     <input type="hidden" name="status" value="rejected" />
                     <input type="hidden" name="notes" value="Rejected by compliance" />
-                    <Button type="submit" size="sm" variant="destructive">
+                    <Button type="submit" variant="destructive" className="min-h-11 w-full sm:w-auto">
                       Reject
                     </Button>
                   </form>

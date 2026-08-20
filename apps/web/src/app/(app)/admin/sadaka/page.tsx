@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
@@ -117,15 +119,18 @@ export default async function AdminSadakaPage() {
 
   return (
     <div className="space-y-10">
-      <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Sadaka operations
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Review campaigns before they go live. Option B: when a campaign hits target,
-          disbursement is auto-queued (short Amanah pass-through). Cron completes B2C when
-          Daraja is configured, otherwise simulates. Institutions and fee policy below.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Sadaka
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Approve campaigns to go live, verify institutions, then handle disbursements.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={'/admin' as Route}>Back to Inbox</Link>
+        </Button>
       </div>
 
       <section className="space-y-3">
@@ -155,7 +160,7 @@ export default async function AdminSadakaPage() {
                   ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <form action={reviewCampaignFormAction} className="flex flex-wrap items-end gap-2">
+                  <form action={reviewCampaignFormAction} className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
                     <input type="hidden" name="campaignId" value={row.id} />
                     <input type="hidden" name="approve" value="1" />
                     <label className="text-xs text-muted-foreground">
@@ -163,26 +168,26 @@ export default async function AdminSadakaPage() {
                       <select
                         name="shariaEndorsed"
                         defaultValue="false"
-                        className="ml-2 h-9 border border-input bg-background px-2"
+                        className="ml-2 h-11 border border-input bg-background px-2"
                       >
                         <option value="false">No</option>
                         <option value="true">Yes</option>
                       </select>
                     </label>
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Approve → live
                     </Button>
                   </form>
-                  <form action={reviewCampaignFormAction} className="flex flex-wrap items-end gap-2">
+                  <form action={reviewCampaignFormAction} className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
                     <input type="hidden" name="campaignId" value={row.id} />
                     <input type="hidden" name="approve" value="0" />
                     <Input
                       name="rejectionReason"
                       placeholder="Rejection reason"
                       required
-                      className="w-56"
+                      className="min-h-11 w-full sm:w-56"
                     />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       Reject
                     </Button>
                   </form>
