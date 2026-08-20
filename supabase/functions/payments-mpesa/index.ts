@@ -37,6 +37,32 @@ function requireReal(): boolean {
   return env("REQUIRE_REAL_PROVIDERS") === "true";
 }
 
+/** Accept exact service-role secret match or a JWT whose role is service_role for this project. */
+function isServiceRoleRequest(authHeader: string, serviceKey: string): boolean {
+  const trimmedHeader = authHeader.trim();
+  const trimmedKey = serviceKey.trim();
+  if (!trimmedHeader) return false;
+  if (trimmedKey && trimmedHeader === `Bearer ${trimmedKey}`) return true;
+
+  const token = trimmedHeader.replace(/^Bearer\s+/i, "").trim();
+  if (!token || !token.includes(".")) return false;
+  try {
+    const payloadPart = token.split(".")[1] ?? "";
+    const normalized = payloadPart.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded)) as {
+      role?: string;
+      ref?: string;
+    };
+    const projectRef =
+      env("SUPABASE_URL").match(/https?:\/\/([^.]+)\.supabase\.co/)?.[1] ??
+      "vzpnixfqkvovbniaoudx";
+    return payload.role === "service_role" && payload.ref === projectRef;
+  } catch {
+    return false;
+  }
+}
+
 function toMsisdn(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (digits.startsWith("0") && digits.length === 10) {
@@ -143,7 +169,7 @@ Deno.serve(async (req) => {
     }
 
     if ((json as StkBody).action === "health") {
-      if (auth !== `Bearer ${serviceKey}`) {
+      if (!isServiceRoleRequest(auth, serviceKey)) {
         return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
       }
       return Response.json({
@@ -159,7 +185,7 @@ Deno.serve(async (req) => {
 
     // ---- B2C initiate (service) — Sadaka Option B beneficiary payout ----
     if ((json as StkBody).action === "b2c_payment") {
-      if (auth !== `Bearer ${serviceKey}`) {
+      if (!isServiceRoleRequest(auth, serviceKey)) {
         return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
       }
 
@@ -277,7 +303,7 @@ Deno.serve(async (req) => {
 
     // ---- STK initiate (service) ----
     if ((json as StkBody).action === "stk_push") {
-      if (auth !== `Bearer ${serviceKey}`) {
+      if (!isServiceRoleRequest(auth, serviceKey)) {
         return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
       }
 

@@ -17,8 +17,7 @@ export async function invokeMpesaStk(input: {
 }): Promise<MpesaStkResult> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim();
   if (!baseUrl || !serviceKey) {
     return { ok: false, error: 'Supabase URL or service role key missing.' };
   }
@@ -81,7 +80,7 @@ export async function mpesaHealth(): Promise<{
 }> {
   const baseUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim();
   if (!baseUrl || !serviceKey) {
     return {
       ok: false,
