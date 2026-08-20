@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isValidKeMobile, normalizePhone254 } from '@jamiya/shared';
 import { sendSMS } from '@/lib/sms';
+import { isSmsPriorityPhone } from '@/lib/sms-priority';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 
 export const runtime = 'nodejs';
@@ -26,62 +27,65 @@ export async function POST(request: NextRequest) {
     }
 
     const normalized = normalizePhone254(raw);
+    const priority = isSmsPriorityPhone(normalized);
     const admin = createServiceRoleClient();
 
-    const { data: recent } = await admin
-      .from('otp_codes')
-      .select('created_at')
-      .eq('phone', normalized)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    if (!priority) {
+      const { data: recent } = await admin
+        .from('otp_codes')
+        .select('created_at')
+        .eq('phone', normalized)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (recent?.created_at) {
-      const ageMs = Date.now() - new Date(recent.created_at).getTime();
-      const waitSec = Math.ceil((RESEND_COOLDOWN_SEC * 1000 - ageMs) / 1000);
-      if (waitSec > 0) {
+      if (recent?.created_at) {
+        const ageMs = Date.now() - new Date(recent.created_at).getTime();
+        const waitSec = Math.ceil((RESEND_COOLDOWN_SEC * 1000 - ageMs) / 1000);
+        if (waitSec > 0) {
+          return NextResponse.json(
+            {
+              error: `Wait ${waitSec}s before requesting another code.`,
+              retry_after: waitSec,
+            },
+            { status: 429 },
+          );
+        }
+      }
+
+      const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
+        admin
+          .from('otp_codes')
+          .select('id', { count: 'exact', head: true })
+          .eq('phone', normalized)
+          .gte('created_at', hourAgo),
+        admin
+          .from('otp_codes')
+          .select('id', { count: 'exact', head: true })
+          .eq('phone', normalized)
+          .gte('created_at', dayAgo),
+      ]);
+
+      if ((hourCount ?? 0) >= MAX_OTP_PER_HOUR) {
         return NextResponse.json(
           {
-            error: `Wait ${waitSec}s before requesting another code.`,
-            retry_after: waitSec,
+            error: 'Too many codes requested this hour. Try again later.',
+            retry_after: 3600,
           },
           { status: 429 },
         );
       }
-    }
-
-    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
-      admin
-        .from('otp_codes')
-        .select('id', { count: 'exact', head: true })
-        .eq('phone', normalized)
-        .gte('created_at', hourAgo),
-      admin
-        .from('otp_codes')
-        .select('id', { count: 'exact', head: true })
-        .eq('phone', normalized)
-        .gte('created_at', dayAgo),
-    ]);
-
-    if ((hourCount ?? 0) >= MAX_OTP_PER_HOUR) {
-      return NextResponse.json(
-        {
-          error: 'Too many codes requested this hour. Try again later.',
-          retry_after: 3600,
-        },
-        { status: 429 },
-      );
-    }
-    if ((dayCount ?? 0) >= MAX_OTP_PER_DAY) {
-      return NextResponse.json(
-        {
-          error: 'Daily OTP limit reached for this number. Try again tomorrow.',
-          retry_after: 86400,
-        },
-        { status: 429 },
-      );
+      if ((dayCount ?? 0) >= MAX_OTP_PER_DAY) {
+        return NextResponse.json(
+          {
+            error: 'Daily OTP limit reached for this number. Try again tomorrow.',
+            retry_after: 86400,
+          },
+          { status: 429 },
+        );
+      }
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -130,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      retry_after: RESEND_COOLDOWN_SEC,
+      retry_after: priority ? 0 : RESEND_COOLDOWN_SEC,
       ...(process.env.NODE_ENV === 'development' ? { dev_otp: code } : {}),
     });
   } catch (e) {
