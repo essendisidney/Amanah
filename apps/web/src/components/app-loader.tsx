@@ -1,6 +1,4 @@
-import type { CSSProperties } from 'react';
 import { APP_NAME, APP_TAGLINE } from '@jamiya/shared';
-import './app-loader.css';
 
 type AppLoaderProps = {
   message?: string;
@@ -38,9 +36,9 @@ function TrustEmblem() {
         </svg>
       </div>
       <div className="amanah-loader__orbit">
-        <span className="amanah-loader__orbit-dot" style={{ '--orbit-i': 0 } as CSSProperties} />
-        <span className="amanah-loader__orbit-dot" style={{ '--orbit-i': 1 } as CSSProperties} />
-        <span className="amanah-loader__orbit-dot" style={{ '--orbit-i': 2 } as CSSProperties} />
+        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--1" />
+        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--2" />
+        <span className="amanah-loader__orbit-dot amanah-loader__orbit-dot--3" />
       </div>
       <div className="amanah-loader__core">
         <span className="amanah-loader__core-mark">A</span>

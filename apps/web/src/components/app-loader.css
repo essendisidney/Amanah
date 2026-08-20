@@ -201,16 +201,21 @@
   border-radius: 9999px;
   background: #047857;
   box-shadow: 0 0 12px rgb(5 150 105 / 0.55);
-  transform: rotate(calc(var(--orbit-i) * 120deg)) translateY(-2.35rem);
 }
 
-.amanah-loader__orbit-dot:nth-child(2) {
+.amanah-loader__orbit-dot--1 {
+  transform: rotate(0deg) translateY(-2.35rem);
+}
+
+.amanah-loader__orbit-dot--2 {
   background: #059669;
+  transform: rotate(120deg) translateY(-2.35rem);
   animation: amanah-breathe 1.6s ease-in-out infinite 0.2s;
 }
 
-.amanah-loader__orbit-dot:nth-child(3) {
+.amanah-loader__orbit-dot--3 {
   background: #c9a227;
+  transform: rotate(240deg) translateY(-2.35rem);
   animation: amanah-breathe 1.6s ease-in-out infinite 0.45s;
 }
 

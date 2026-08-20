@@ -2,7 +2,16 @@
 
 import { useEffect } from 'react';
 
-const MIN_SPLASH_MS = 750;
+const MIN_SPLASH_MS = 400;
+
+function hideSplash() {
+  const splash = document.getElementById('boot-splash');
+  if (!splash) return;
+  splash.classList.add('amanah-boot-splash--out');
+  window.setTimeout(() => {
+    splash.remove();
+  }, 400);
+}
 
 /** Fades out the static boot splash once the app has hydrated. */
 export function BootSplash() {
@@ -11,22 +20,22 @@ export function BootSplash() {
     if (!splash) return;
 
     const shownAt = Date.now();
+    let timeoutId = 0;
 
     const dismiss = () => {
       const wait = Math.max(0, MIN_SPLASH_MS - (Date.now() - shownAt));
-      window.setTimeout(() => {
-        splash.classList.add('amanah-boot-splash--out');
-        window.setTimeout(() => splash.remove(), 560);
-      }, wait);
+      timeoutId = window.setTimeout(hideSplash, wait);
     };
 
-    if (document.readyState === 'complete') {
-      dismiss();
-      return;
-    }
-
+    dismiss();
+    const failsafe = window.setTimeout(hideSplash, 2500);
     window.addEventListener('load', dismiss, { once: true });
-    return () => window.removeEventListener('load', dismiss);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.clearTimeout(failsafe);
+      window.removeEventListener('load', dismiss);
+    };
   }, []);
 
   return null;

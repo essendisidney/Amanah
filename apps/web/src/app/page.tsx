@@ -9,10 +9,7 @@ export default async function LandingPage() {
   const { locale, dict } = await getDictionary();
 
   return (
-    <div
-      className="relative min-h-dvh overflow-x-hidden bg-[#fbfcfa] text-foreground [color-scheme:light]"
-      style={{ colorScheme: 'light' }}
-    >
+    <div className="relative min-h-dvh overflow-x-hidden bg-[#fbfcfa] text-foreground">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#d1fae5_0%,_transparent_55%),linear-gradient(160deg,_#fbfcfa_0%,_#eef5f0_45%,_#f5ecd0_100%)]"

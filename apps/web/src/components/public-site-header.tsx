@@ -66,7 +66,7 @@ export function PublicSiteHeader({
             aria-label="Site"
           >
             {links.map((item) => (
-              <Button key={item.href} variant={item.variant ?? 'ghost'} size="sm" asChild>
+              <Button key={`${item.href}-${item.label}`} variant={item.variant ?? 'ghost'} size="sm" asChild>
                 <Link href={item.href}>{item.label}</Link>
               </Button>
             ))}
