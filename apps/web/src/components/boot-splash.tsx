@@ -2,18 +2,20 @@
 
 import { useEffect } from 'react';
 
-const MIN_SPLASH_MS = 400;
+const MIN_SPLASH_MS = 1600;
+const FADE_MS = 900;
+const FAILSAFE_MS = 4500;
 
 function hideSplash() {
   const splash = document.getElementById('boot-splash');
-  if (!splash) return;
+  if (!splash || splash.classList.contains('amanah-boot-splash--out')) return;
   splash.classList.add('amanah-boot-splash--out');
   window.setTimeout(() => {
     splash.remove();
-  }, 400);
+  }, FADE_MS);
 }
 
-/** Fades out the static boot splash once the app has hydrated. */
+/** Holds the branded splash long enough to feel smooth, then fades out. */
 export function BootSplash() {
   useEffect(() => {
     const splash = document.getElementById('boot-splash');
@@ -21,15 +23,24 @@ export function BootSplash() {
 
     const shownAt = Date.now();
     let timeoutId = 0;
+    let dismissed = false;
 
     const dismiss = () => {
+      if (dismissed) return;
+      dismissed = true;
       const wait = Math.max(0, MIN_SPLASH_MS - (Date.now() - shownAt));
       timeoutId = window.setTimeout(hideSplash, wait);
     };
 
-    dismiss();
-    const failsafe = window.setTimeout(hideSplash, 2500);
-    window.addEventListener('load', dismiss, { once: true });
+    if (document.readyState === 'complete') {
+      dismiss();
+    } else {
+      window.addEventListener('load', dismiss, { once: true });
+      // Still show a full beat even if load fires early.
+      timeoutId = window.setTimeout(dismiss, MIN_SPLASH_MS);
+    }
+
+    const failsafe = window.setTimeout(hideSplash, FAILSAFE_MS);
 
     return () => {
       window.clearTimeout(timeoutId);

@@ -1,5 +1,5 @@
 import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function WalletLoading() {
-  return <PageLoadingSkeleton />;
+  return <PageLoadingSkeleton message="Loading your wallet…" />;
 }

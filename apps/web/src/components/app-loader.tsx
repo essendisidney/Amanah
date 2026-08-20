@@ -2,7 +2,7 @@ import { APP_NAME, APP_TAGLINE } from '@jamiya/shared';
 
 type AppLoaderProps = {
   message?: string;
-  variant?: 'fullscreen' | 'default' | 'compact';
+  variant?: 'fullscreen' | 'default' | 'compact' | 'inline';
   showBrand?: boolean;
 };
 
@@ -56,6 +56,7 @@ export function AppLoader({
     'amanah-loader',
     variant === 'fullscreen' && 'amanah-loader--fullscreen',
     variant === 'compact' && 'amanah-loader--compact',
+    variant === 'inline' && 'amanah-loader--inline',
   ]
     .filter(Boolean)
     .join(' ');
@@ -83,7 +84,7 @@ export function AppLoader({
   );
 }
 
-/** First-paint splash — removed by BootSplash after hydrate. */
+/** First-paint splash — removed by BootSplash after a smooth hold. */
 export function BootSplashMarkup() {
   return (
     <div id="boot-splash" className="amanah-boot-splash" aria-hidden>

@@ -21,6 +21,7 @@ import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { Locale } from '@/i18n/config';
 import { NOTIFICATION_INSERT_EVENT } from '@/lib/notification-events';
+import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
@@ -194,7 +195,7 @@ export function AppShell({
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 py-5 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:py-6 md:px-6 md:py-10 md:pb-10">
-        {children}
+        <SmoothRouteTransition>{children}</SmoothRouteTransition>
       </main>
 
       <nav
