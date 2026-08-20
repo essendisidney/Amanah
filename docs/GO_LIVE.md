@@ -83,3 +83,25 @@ Expo Go remains for engineers only (SDK 53 sandbox). Play Store / EAS APK packag
 ## 6. Smoke test
 
 See [SMOKE_TEST.md](./SMOKE_TEST.md).
+
+## 7. Next-layer cutover (payments + plans)
+
+Keep **simulated** for UAT demos. Flip live only when Daraja/Paystack secrets are ready.
+
+| Step | Action |
+|------|--------|
+| 1 | Confirm `GET /api/v1/payments/mpesa-health` shows expected provider flags |
+| 2 | Wallet page shows **Payment mode** banner (simulated vs mpesa/paystack) |
+| 3 | Officer → Circle plan: buy Starter/Pro from wallet; renews_at shows |
+| 4 | Cron `plan-renewals` (06:45 UTC) auto-debits or marks `past_due` |
+| 5 | Arrears → **Remind** / **Remind all (SMS)** for open invoices |
+| 6 | When ready: `PAYMENT_PROVIDER=mpesa|paystack`, Edge Daraja secrets, then `REQUIRE_REAL_PROVIDERS=true` and remove `ALLOW_SIMULATED_IN_PROD` |
+
+Light concurrency smoke (public routes only):
+
+```bash
+node scripts/load-smoke.mjs
+BASE_URL=https://amanah-liart.vercel.app CONCURRENCY=20 REQUESTS=100 node scripts/load-smoke.mjs
+```
+
+Member statement PDF stays free for self-download. Officers exporting **another** member’s PDF need Starter/Pro (`exports_included`).

@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/dispatch?job=auto-fines",
       "schedule": "15 6 * * *"
+    },
+    {
+      "path": "/api/cron/dispatch?job=plan-renewals",
+      "schedule": "45 6 * * *"
     }
   ]
 }

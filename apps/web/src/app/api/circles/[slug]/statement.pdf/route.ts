@@ -54,6 +54,25 @@ export async function GET(request: Request, { params }: Params) {
   let memberId = me.id;
   if (memberIdParam && isOfficer) memberId = memberIdParam;
 
+  // Officers exporting another member's PDF requires Starter/Pro exports entitlement.
+  if (memberId !== me.id) {
+    const { data: planPack } = await callRpc('get_circle_plan', { p_jamiya_id: jamiya.id });
+    const plan = planPack as {
+      ok?: boolean;
+      plan?: { exports_included?: boolean };
+    } | null;
+    if (!plan?.plan?.exports_included) {
+      return NextResponse.json(
+        {
+          error: 'EXPORTS_NOT_INCLUDED',
+          message:
+            'Officer PDF exports for other members require Starter or Pro. Upgrade in Officer → Circle plan.',
+        },
+        { status: 402 },
+      );
+    }
+  }
+
   const { data } = await callRpc('member_circle_statement', {
     p_jamiya_id: jamiya.id,
     p_member_id: memberId,

@@ -11,16 +11,22 @@ import {
   runAutoFinesAction,
   setCircleAutoFineAction,
 } from '@/features/circles/actions/billing-actions';
+import { remindInvoicesAction } from '@/features/circles/actions/invoice-actions';
+import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 
 export const metadata: Metadata = { title: 'Arrears aging' };
 export const dynamic = 'force-dynamic';
 
 const OFFICER_ROLES = new Set(['circle_admin', 'chair', 'treasurer', 'secretary']);
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+};
 
-export default async function CircleArrearsPage({ params }: Props) {
+export default async function CircleArrearsPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const notices = (await searchParams) ?? {};
   const { dict } = await getDictionary();
   const supabase = await createClient();
   const {
@@ -81,12 +87,15 @@ export default async function CircleArrearsPage({ params }: Props) {
   const members = aging?.members ?? [];
   const userIds = members.map((m) => m.user_id);
   const { data: profiles } = userIds.length
-    ? await supabase.from('profiles').select('id, full_name, email').in('id', userIds)
+    ? await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds)
     : { data: [] };
   const profileMap = new Map(
-    ((profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
-      (p) => [p.id, p],
-    ),
+    ((profiles ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      email: string | null;
+      phone: string | null;
+    }>).map((p) => [p.id, p]),
   );
 
   const settings = fineSettings as {
@@ -96,6 +105,7 @@ export default async function CircleArrearsPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-6 py-10">
+      <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
@@ -106,7 +116,15 @@ export default async function CircleArrearsPage({ params }: Props) {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">{dict.officer.arrearsIntro}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <form action={remindInvoicesAction}>
+            <input type="hidden" name="jamiyaId" value={jamiya.id} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="returnTo" value="arrears" />
+            <Button type="submit" size="sm" disabled={!members.length}>
+              Remind all (SMS)
+            </Button>
+          </form>
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/officer` as Route}>{dict.circle.officerConsole}</Link>
           </Button>
@@ -193,20 +211,39 @@ export default async function CircleArrearsPage({ params }: Props) {
               return (
                 <li
                   key={row.member_id}
-                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
                 >
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium">
                       {profile?.full_name ?? profile?.email ?? row.member_code ?? row.member_id.slice(0, 8)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {row.open_items} {dict.officer.openItems} · {row.days_overdue}d{' '}
                       {dict.officer.overdue}
+                      {profile?.phone ? ` · ${profile.phone}` : ''}
                     </p>
                   </div>
-                  <p className="text-sm font-semibold">
-                    {formatCurrency(Number(row.outstanding), currency)}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-semibold">
+                      {formatCurrency(Number(row.outstanding), currency)}
+                    </p>
+                    <form action={remindInvoicesAction}>
+                      <input type="hidden" name="jamiyaId" value={jamiya.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="userId" value={row.user_id} />
+                      <input type="hidden" name="returnTo" value="arrears" />
+                      <Button type="submit" size="sm" variant="outline">
+                        Remind
+                      </Button>
+                    </form>
+                    <Button asChild size="sm" variant="ghost">
+                      <Link
+                        href={`/circles/${slug}/statement?memberId=${row.member_id}` as Route}
+                      >
+                        Statement
+                      </Link>
+                    </Button>
+                  </div>
                 </li>
               );
             })}

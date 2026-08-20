@@ -42,13 +42,17 @@ export async function issueInvoicesAction(formData: FormData): Promise<void> {
 export async function remindInvoicesAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
+  const userId = String(formData.get('userId') ?? '').trim();
+  const returnTo = String(formData.get('returnTo') ?? 'invoices');
   if (!jamiyaId || !slug) return;
 
+  const pathSuffix = returnTo === 'arrears' ? '/arrears' : '/invoices';
   const { data, error } = await callRpc('remind_contribution_invoices', {
     p_jamiya_id: jamiyaId,
+    ...(userId ? { p_user_id: userId } : {}),
   });
   if (error) {
-    redirectWithCircleNotice(slug, error.message, 'error', '/invoices');
+    redirectWithCircleNotice(slug, error.message, 'error', pathSuffix);
     return;
   }
   const result = data as {
@@ -58,11 +62,19 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
     error?: string;
   } | null;
   if (!result?.ok) {
-    redirectWithCircleNotice(slug, result?.error ?? 'Could not send reminders.', 'error', '/invoices');
+    redirectWithCircleNotice(
+      slug,
+      result?.error ?? 'Could not send reminders.',
+      'error',
+      pathSuffix,
+    );
     return;
   }
 
   revalidateInvoices(slug);
+  if (returnTo === 'arrears') {
+    revalidatePath(`/circles/${slug}/arrears`);
+  }
   const skipped = result.skipped_cooldown ?? 0;
   redirectWithCircleNotice(
     slug,
@@ -70,6 +82,6 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
       ? `Sent ${result.reminded ?? 0} reminder(s); skipped ${skipped} (24h cooldown).`
       : `Sent ${result.reminded ?? 0} invoice reminder(s).`,
     'success',
-    '/invoices',
+    pathSuffix,
   );
 }

@@ -223,7 +223,14 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
   const planInfo = planPack as {
     ok?: boolean;
     plan_id?: string;
-    plan?: { name?: string; price_kes?: number; max_members?: number };
+    status?: string;
+    renews_at?: string | null;
+    plan?: {
+      name?: string;
+      price_kes?: number;
+      max_members?: number;
+      exports_included?: boolean;
+    };
   } | null;
   const planRows = (plans ?? []) as Array<{
     id: string;
@@ -358,12 +365,24 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
             <span className="font-medium text-foreground">
               {planInfo?.plan?.name ?? 'Free'}
             </span>
-            . Starter and Pro charge the officer wallet in KES for 30 days. See{' '}
+            {planInfo?.status && planInfo.status !== 'active'
+              ? ` · ${planInfo.status.replaceAll('_', ' ')}`
+              : ''}
+            {planInfo?.renews_at
+              ? ` · renews ${formatDate(planInfo.renews_at)}`
+              : ''}
+            . Starter and Pro charge the officer wallet in KES for 30 days (auto-renews if
+            balance allows). See{' '}
             <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
               pricing
             </Link>
             .
           </p>
+          {planInfo?.status === 'past_due' ? (
+            <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+              Plan is past due. Top up your wallet, then tap the plan button again to reactivate.
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2">
             {planRows.map((plan) => (
               <form key={plan.id} action={setCirclePlanAction}>

@@ -55,6 +55,13 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     memberId = qs.memberId;
   }
 
+  const { data: planPack } = await callRpc('get_circle_plan', { p_jamiya_id: jamiya.id });
+  const planInfo = planPack as {
+    ok?: boolean;
+    plan?: { exports_included?: boolean; name?: string };
+  } | null;
+  const canExportOthers = Boolean(planInfo?.plan?.exports_included);
+
   const { data } = await callRpc('member_circle_statement', {
     p_jamiya_id: jamiya.id,
     p_member_id: memberId,
@@ -130,18 +137,31 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
-          <Button asChild size="sm">
-            <a
-              href={`/api/circles/${slug}/statement.pdf${
-                memberId !== me.id ? `?memberId=${memberId}` : ''
-              }`}
-            >
-              Download PDF
-            </a>
-          </Button>
+          {memberId === me.id || canExportOthers ? (
+            <Button asChild size="sm">
+              <a
+                href={`/api/circles/${slug}/statement.pdf${
+                  memberId !== me.id ? `?memberId=${memberId}` : ''
+                }`}
+              >
+                Download PDF
+              </a>
+            </Button>
+          ) : (
+            <Button asChild size="sm" variant="outline">
+              <Link href={`/circles/${slug}/officer` as Route}>Upgrade for PDF export</Link>
+            </Button>
+          )}
           <PrintReportButton />
         </div>
       </div>
+
+      {memberId !== me.id && !canExportOthers ? (
+        <p className="rounded-md border border-accent/30 bg-accent-muted/50 px-3 py-2 text-sm text-muted-foreground print:hidden">
+          Viewing another member’s statement is allowed for officers. PDF download for others
+          needs Starter/Pro — upgrade under Officer → Circle plan.
+        </p>
+      ) : null}
 
       <header className="hidden border-b border-border pb-4 print:block">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">

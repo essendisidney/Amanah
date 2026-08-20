@@ -24,7 +24,8 @@
     "db:lint": "npx supabase db lint",
     "gen:types": "npx supabase gen types typescript --local > packages/database/src/generated.ts",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:load-smoke": "node scripts/load-smoke.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

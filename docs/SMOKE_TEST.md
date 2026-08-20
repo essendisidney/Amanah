@@ -13,6 +13,14 @@ curl -sS -o /dev/null -w "%{http_code}" https://amanah-liart.vercel.app/zakat
 
 Expect: health `ok: true`, pages `200`.
 
+## Concurrency smoke (public)
+
+```bash
+node scripts/load-smoke.mjs
+```
+
+Expect mostly `ok` with low fail count. This does not hit authenticated contribute/wallet paths (needs session cookies).
+
 ## Manual path (15 min)
 
 1. **Register** at `/register` with a real email you can access  

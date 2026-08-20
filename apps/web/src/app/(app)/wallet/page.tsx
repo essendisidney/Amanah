@@ -12,6 +12,11 @@ import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
+import { paymentProvider } from '@/lib/payments/provider';
+import {
+  requireRealProviders,
+  shouldBlockSimulatedPayments,
+} from '@/lib/production-cutover';
 
 export const metadata: Metadata = {
   title: 'Wallet',
@@ -97,6 +102,9 @@ export default async function WalletPage({ searchParams }: Props) {
   const failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
   const pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
   const primaryCurrency = wallets[0]?.currency ?? 'KES';
+  const provider = paymentProvider();
+  const liveLocked = shouldBlockSimulatedPayments();
+  const requireReal = requireRealProviders();
 
   return (
     <div className="space-y-10">
@@ -108,6 +116,16 @@ export default async function WalletPage({ searchParams }: Props) {
           {labels.title}
         </h1>
         <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
+        <p className="mt-3 rounded-md border border-border bg-card px-3 py-2 text-xs text-muted-foreground">
+          Payment mode:{' '}
+          <span className="font-medium text-foreground">{provider}</span>
+          {provider === 'simulated'
+            ? ' · demo credit for UAT (not live M-Pesa)'
+            : requireReal
+              ? ' · live providers required'
+              : ' · live rails with simulated fallback still allowed'}
+          {liveLocked ? ' · simulated top-ups blocked' : ''}
+        </p>
       </div>
 
       {notices.notice ? (
@@ -171,16 +189,7 @@ export default async function WalletPage({ searchParams }: Props) {
             <TopUpForm
               currency={primaryCurrency}
               labels={dict.walletForms}
-              provider={
-                ['mpesa', 'bank', 'paystack'].includes(
-                  (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase(),
-                )
-                  ? ((process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase() as
-                      | 'mpesa'
-                      | 'bank'
-                      | 'paystack')
-                  : 'simulated'
-              }
+              provider={provider}
             />
           </div>
         </section>
