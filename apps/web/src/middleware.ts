@@ -36,9 +36,27 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     .some((cookie) => cookie.name.startsWith('sb-') && cookie.name.includes('auth-token'));
 }
 
-/** Skip remote auth refresh on anonymous public hits (pricing, sadaka, home). */
+function safeNextPath(raw: string | null): string | null {
+  if (
+    !raw ||
+    !raw.startsWith('/') ||
+    raw.startsWith('//') ||
+    raw.includes('\\') ||
+    raw.includes('://')
+  ) {
+    return null;
+  }
+  return raw;
+}
+
+/**
+ * Refresh when we may have (or need) an auth session.
+ * Global practice: installed app + marketing home always resolve “am I signed in?”
+ * so returning users land in the product, not a fake Sign-in wall.
+ */
 function needsSessionRefresh(request: NextRequest, pathname: string): boolean {
   return (
+    pathname === '/' ||
     isProtectedPath(pathname) ||
     AUTH_ROUTES.has(pathname) ||
     pathname.startsWith('/auth/') ||
@@ -99,27 +117,37 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Signed-in users never sit on marketing home (PWA reopen / bookmark / /).
+  if (user && pathname === '/') {
+    const dest = new URL('/dashboard', request.url);
+    const redirect = NextResponse.redirect(dest);
+    response.cookies.getAll().forEach((cookie) => {
+      redirect.cookies.set(cookie.name, cookie.value);
+    });
+    return redirect;
+  }
+
   if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/phone';
     // Keep full path (e.g. /invitations/CODE) so invite deep links survive phone OTP.
     loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(loginUrl);
+    const redirect = NextResponse.redirect(loginUrl);
+    response.cookies.getAll().forEach((cookie) => {
+      redirect.cookies.set(cookie.name, cookie.value);
+    });
+    return redirect;
   }
 
   if (user && AUTH_ROUTES.has(pathname) && pathname !== '/reset-password') {
     // Never drop ?next= — invitees often land on /phone with cookies already set
     // (OTP race) and must continue to /invitations/… instead of dashboard.
-    const rawNext = request.nextUrl.searchParams.get('next');
-    const dest =
-      rawNext &&
-      rawNext.startsWith('/') &&
-      !rawNext.startsWith('//') &&
-      !rawNext.includes('\\') &&
-      !rawNext.includes('://')
-        ? rawNext
-        : '/dashboard';
-    return NextResponse.redirect(new URL(dest, request.url));
+    const dest = safeNextPath(request.nextUrl.searchParams.get('next')) ?? '/dashboard';
+    const redirect = NextResponse.redirect(new URL(dest, request.url));
+    response.cookies.getAll().forEach((cookie) => {
+      redirect.cookies.set(cookie.name, cookie.value);
+    });
+    return redirect;
   }
 
   return response;

@@ -8,9 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: APP_NAME,
     description: APP_DESCRIPTION,
     lang: 'en',
-    // Prefer an always-public entry so Android Chrome install criteria stay green
-    // even when the session cookie is missing on first launch from the home screen.
-    start_url: '/?source=pwa',
+    // App-standard entry: open into the product. Signed-out users are sent to
+    // /phone by middleware; signed-in users land on Home. Marketing stays at /.
+    start_url: '/dashboard?source=pwa',
     scope: '/',
     display: 'standalone',
     display_override: ['standalone', 'minimal-ui'],
