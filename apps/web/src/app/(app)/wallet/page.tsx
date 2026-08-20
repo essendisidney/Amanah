@@ -16,7 +16,7 @@ import {
   requireRealProviders,
   shouldBlockSimulatedPayments,
 } from '@/lib/production-cutover';
-import { ArrowDownLeft, ArrowUpRight, PiggyBank, Plus, Send } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Money',
@@ -177,8 +177,8 @@ export default async function WalletPage({ searchParams }: Props) {
         {[
           { href: '#top-up', label: 'Add', icon: Plus },
           { href: '/finance/goals', label: 'Save', icon: PiggyBank },
+          { href: '/finance/insights', label: 'Insights', icon: ChartNoAxesCombined },
           { href: '#withdraw', label: 'Withdraw', icon: ArrowUpRight },
-          { href: '/finance', label: 'Send', icon: Send },
         ].map((action) => {
           const Icon = action.icon;
           return (

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ArrowDownLeft, ArrowUpRight, PiggyBank, Plus, Send } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
 import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -41,9 +41,14 @@ function AmanahScoreCard({
           <p className="amanah-money text-4xl font-bold tracking-tight text-foreground">{score}</p>
           <p className="mt-1 text-sm font-medium text-primary">{label}</p>
         </div>
-        <p className="max-w-[12rem] text-right text-xs leading-relaxed text-muted-foreground">
-          Based on contribution consistency, circle participation, and account activity.
-        </p>
+        <div className="max-w-[12rem] text-right">
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Based on contribution consistency, circle participation, and account activity.
+          </p>
+          <Button asChild size="sm" variant="ghost" className="mt-2 h-8 px-2">
+            <Link href={'/finance/insights' as Route}>View Insights</Link>
+          </Button>
+        </div>
       </div>
     </section>
   );
@@ -78,7 +83,7 @@ export function DashboardView({
     icon: typeof Plus;
   }> = [
     { href: '/wallet' as Route, label: 'Add money', icon: Plus },
-    { href: '/wallet' as Route, label: 'Send', icon: Send },
+    { href: '/finance/insights' as Route, label: 'Insights', icon: ChartNoAxesCombined },
     { href: '/finance/goals' as Route, label: 'Save', icon: PiggyBank },
     { href: '/wallet' as Route, label: 'Withdraw', icon: ArrowUpRight },
   ];

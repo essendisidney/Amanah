@@ -128,6 +128,7 @@ export function AppShell({
     { href: '/circles' as Route, label: dict.nav.circles },
     { href: '/wallet' as Route, label: dict.nav.wallet },
     { href: '/finance/goals' as Route, label: 'Goals' },
+    { href: '/finance/insights' as Route, label: 'Insights' },
     { href: '/notifications' as Route, label: dict.nav.finance },
     { href: '/sadaka' as Route, label: dict.common.sadaka },
     { href: '/profile' as Route, label: dict.nav.profile },

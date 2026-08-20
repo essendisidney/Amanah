@@ -32,6 +32,7 @@ export default async function FinancePage() {
   const labels = dict.finance;
   const funds = (data ?? []) as unknown as Fund[];
   const items = [
+    ['Insights', 'This month’s inflow, on-time rate, and upcoming dues.', '/finance/insights'],
     [labels.welfareTitle, labels.welfareDesc, '/finance/welfare'],
     [labels.qardTitle, labels.qardDesc, '/finance/qard'],
     [labels.tawarruqTitle, labels.tawarruqDesc, '/finance/tawarruq'],
