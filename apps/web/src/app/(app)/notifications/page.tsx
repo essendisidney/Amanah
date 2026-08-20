@@ -3,16 +3,13 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
-import { EmptyState } from '@/features/dashboard/components/empty-state';
 import {
   MarkAllNotificationsReadButton,
   MarkNotificationReadButton,
 } from '@/features/dashboard/components/mark-notification-read-button';
 import { notificationHref } from '@/features/dashboard/lib/notification-href';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Activity',
@@ -59,13 +56,13 @@ export default async function NotificationsPage() {
       .select('id, title, body, type, data, read_at, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(50),
+      .limit(40),
     supabase
       .from('transactions')
       .select('id, type, status, amount, currency, direction, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(5),
+      .limit(40),
   ]);
 
   const notifications = (data ?? []) as unknown as NotificationRow[];
@@ -96,53 +93,35 @@ export default async function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            {labels.eyebrow}
-          </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-            {labels.title}
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {unreadCount > 0
-              ? t(unreadCount === 1 ? labels.unreadOne : labels.unreadMany, {
-                  count: unreadCount,
-                })
-              : labels.upToDate}
-          </p>
-        </div>
+    <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-xl">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold tracking-tight">{labels.title}</h1>
         {unreadCount > 0 ? (
           <MarkAllNotificationsReadButton label={labels.markAllRead} />
         ) : null}
       </div>
 
-      {recentTx.length > 0 ? (
-        <section className="space-y-3">
-          <div className="flex items-end justify-between gap-3">
-            <h2 className="text-lg font-bold tracking-tight">{labels.recentMoney}</h2>
-            <Button asChild size="sm" variant="ghost">
-              <Link href={'/wallet' as Route}>{labels.openMoney}</Link>
-            </Button>
-          </div>
-          <ul className="amanah-surface divide-y divide-border/70">
-            {recentTx.map((tx) => {
+      <section>
+        <ul>
+          {recentTx.length === 0 ? (
+            <li className="py-6 text-sm text-muted-foreground">No money movement yet</li>
+          ) : (
+            recentTx.map((tx) => {
               const amount = typeof tx.amount === 'number' ? tx.amount : Number(tx.amount);
               const signed =
                 tx.direction === 'debit' || tx.direction === 'out' ? -Math.abs(amount) : amount;
               return (
-                <li key={tx.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold capitalize">
+                <li key={tx.id} className="flex items-center justify-between gap-3 py-3.5">
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-medium capitalize">
                       {tx.type.replaceAll('_', ' ')}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {tx.status} · {formatRelativeTime(tx.created_at)}
+                      {formatRelativeTime(tx.created_at)}
                     </p>
                   </div>
                   <p
-                    className={`amanah-money text-sm font-semibold ${
+                    className={`amanah-money text-[15px] font-semibold ${
                       signed < 0 ? 'text-destructive' : 'text-primary'
                     }`}
                   >
@@ -151,82 +130,44 @@ export default async function NotificationsPage() {
                   </p>
                 </li>
               );
+            })
+          )}
+        </ul>
+      </section>
+
+      {notifications.length > 0 ? (
+        <section className="space-y-1">
+          <h2 className="text-sm font-medium text-muted-foreground">Updates</h2>
+          <ul>
+            {notifications.slice(0, 12).map((item) => {
+              const href = notificationHref(item.type, item.data, slugByJamiyaId, item.title);
+              return (
+                <li key={item.id} className="flex items-start justify-between gap-3 py-3.5">
+                  <div className="min-w-0 flex-1">
+                    {href ? (
+                      <Link href={href} className="text-[15px] font-medium text-foreground">
+                        {item.title}
+                      </Link>
+                    ) : (
+                      <p className="text-[15px] font-medium">{item.title}</p>
+                    )}
+                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{item.body}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {formatRelativeTime(item.created_at)}
+                    </p>
+                  </div>
+                  {!item.read_at ? (
+                    <MarkNotificationReadButton
+                      notificationId={item.id}
+                      label={labels.markRead}
+                    />
+                  ) : null}
+                </li>
+              );
             })}
           </ul>
         </section>
-      ) : (
-        <section className="amanah-surface flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold">No recent money yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Top-ups, contributions, and withdrawals will show here.
-            </p>
-          </div>
-          <Button asChild className="min-h-11 shrink-0">
-            <Link href={'/wallet#top-up' as Route}>{labels.openMoney}</Link>
-          </Button>
-        </section>
-      )}
-
-      {notifications.length === 0 ? (
-        <div className="space-y-3">
-          <EmptyState
-            title={labels.emptyTitle}
-            description={labels.emptyDesc}
-            actionLabel={labels.openCircles}
-            actionHref={'/circles' as Route}
-          />
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/wallet' as Route}>{labels.openMoney}</Link>
-          </Button>
-        </div>
-      ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-          {notifications.map((item) => {
-            const href = notificationHref(item.type, item.data, slugByJamiyaId, item.title);
-            return (
-              <li
-                key={item.id}
-                className={`flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between ${
-                  item.read_at ? '' : 'bg-primary/[0.03]'
-                }`}
-              >
-                <div className="min-w-0 flex-1">
-                  {href ? (
-                    <Link
-                      href={href}
-                      className="font-medium text-foreground hover:text-primary"
-                    >
-                      {item.title}
-                    </Link>
-                  ) : (
-                    <p className="font-medium text-foreground">{item.title}</p>
-                  )}
-                  <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
-                  <p className="mt-2 text-xs capitalize text-muted-foreground">
-                    {item.type.replaceAll('_', ' ')} · {formatRelativeTime(item.created_at)}
-                  </p>
-                  {href ? (
-                    <Button asChild size="sm" variant="link" className="mt-1 h-auto px-0">
-                      <Link href={href}>{labels.openItem}</Link>
-                    </Button>
-                  ) : null}
-                </div>
-                {!item.read_at ? (
-                  <MarkNotificationReadButton
-                    notificationId={item.id}
-                    label={labels.markRead}
-                  />
-                ) : null}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      <Button asChild variant="outline">
-        <Link href={'/dashboard' as Route}>{dict.common.backToDashboard}</Link>
-      </Button>
+      ) : null}
     </div>
   );
 }

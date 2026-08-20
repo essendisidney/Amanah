@@ -18,7 +18,6 @@ import {
 } from '@/features/profile/components/profile-onboarding-banner';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { t } from '@/i18n/dictionaries';
 
 export const metadata: Metadata = {
   title: 'Profile',
@@ -110,8 +109,29 @@ export default async function ProfilePage({ searchParams }: Props) {
     created_at: string;
   }>;
 
+  const amanahScore = Math.min(
+    850,
+    620 +
+      (profile?.kyc_status === 'approved' ? 80 : 0) +
+      (profile?.profile_completed ? 40 : 0) +
+      (hasPhone ? 30 : 0) +
+      Math.min(docs.length, 3) * 15,
+  );
+  const scoreLabel =
+    amanahScore >= 750 ? 'Excellent' : amanahScore >= 680 ? 'Strong' : 'Building';
+
+  const youLinks: Array<{ href: Route; title: string; meta: string | null }> = [
+    { href: '/finance/insights', title: 'Amanah Score', meta: scoreLabel },
+    { href: '/finance/goals', title: 'Goals', meta: null },
+    { href: '/wallet', title: 'Money', meta: null },
+    { href: '/profile#kyc-documents' as Route, title: 'KYC', meta: profile?.kyc_status ?? null },
+    { href: '/sadaka', title: 'Sadaka', meta: null },
+    { href: '/zakat', title: 'Zakat', meta: null },
+    { href: '/support', title: 'Support', meta: null },
+  ];
+
   return (
-    <div className="space-y-10">
+    <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-2xl">
       {onboarding ? (
         <ProfileOnboardingBanner
           continueHref={continueHref}
@@ -119,85 +139,53 @@ export default async function ProfilePage({ searchParams }: Props) {
           hasPhone={hasPhone}
           hasKycDoc={docs.length > 0}
         />
-      ) : !hasPhone ? (
-        <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold text-foreground">Add a Kenya mobile</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Needed for wallet verification SMS before top-ups and withdrawals.
-            </p>
-          </div>
-          <Button asChild className="min-h-11 shrink-0">
-            <a href="#personal-details">Add phone below</a>
-          </Button>
-        </div>
       ) : null}
 
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          {labels.eyebrow}
-        </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight">
-          {labels.title}
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {profile?.full_name?.trim() || 'You'}
         </h1>
-        <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <StatusBadge status={profile?.platform_role ?? 'member'} />
-          <StatusBadge status={profile?.kyc_status ?? 'not_started'} />
-          <StatusBadge
-            status={profile?.profile_completed ? 'active' : 'pending'}
-          />
-        </div>
-      </div>
+        <p className="text-sm text-muted-foreground">
+          {profile?.phone || profile?.email || user.email || '—'}
+        </p>
+      </header>
 
-      <section className="amanah-surface flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold">Appearance</p>
-          <p className="text-xs text-muted-foreground">
-            Auto follows local time — light 6am–6pm, dark after.
-          </p>
+      <section className="amanah-forest rounded-[1.5rem] px-5 py-5">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
+          Amanah Score
+        </p>
+        <div className="mt-2 flex items-end justify-between gap-3">
+          <p className="amanah-money text-4xl font-bold tracking-tight text-primary">{amanahScore}</p>
+          <Link href={'/finance/insights' as Route} className="text-sm font-medium text-primary">
+            {scoreLabel}
+          </Link>
         </div>
+      </section>
+
+      <ul className="divide-y divide-border/40">
+        {youLinks.map((item) => (
+          <li key={item.href}>
+            <Link
+              href={item.href}
+              className="flex items-center justify-between gap-3 py-4 text-[15px] font-medium"
+            >
+              <span>{item.title}</span>
+              <span className="text-sm font-normal capitalize text-muted-foreground">
+                {item.meta ? String(item.meta).replaceAll('_', ' ') : '›'}
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+
+      <section className="flex items-center justify-between gap-3 py-1">
+        <p className="text-sm text-muted-foreground">Appearance</p>
         <ThemeToggle variant="segmented" />
       </section>
 
-      <section className="space-y-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Give &amp; support
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Charity, zakat estimate, and optional platform tip.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {(
-            [
-              { href: '/sadaka', title: dict.common.sadaka, desc: 'Campaigns' },
-              { href: '/zakat', title: 'Zakat', desc: 'Estimate' },
-              { href: '/support', title: 'Support', desc: 'Tip Amanah' },
-              { href: '/finance/goals', title: 'Goals', desc: 'Save toward' },
-            ] as const
-          ).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href as Route}
-              className="amanah-surface flex min-h-11 flex-col justify-center px-3 py-3 transition-colors hover:border-primary/30"
-            >
-              <span className="text-sm font-semibold text-foreground">{item.title}</span>
-              <span className="mt-0.5 text-xs text-muted-foreground">{item.desc}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       <section className="grid gap-8 lg:grid-cols-2">
-        <div id="personal-details" className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-            {labels.personalDetails}
-          </h2>
-          <p className="mb-4 text-sm text-muted-foreground">
-            {t(labels.email, { email: profile?.email ?? user.email ?? '—' })}
-          </p>
+        <div id="personal-details" className="space-y-4">
+          <h2 className="text-base font-semibold">{labels.personalDetails}</h2>
           <ProfileForm
             labels={labels}
             continueHref={onboarding ? continueHref : undefined}
@@ -211,10 +199,8 @@ export default async function ProfilePage({ searchParams }: Props) {
           />
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-            {labels.mpesaLinkage}
-          </h2>
+        <div className="space-y-4">
+          <h2 className="text-base font-semibold">{labels.mpesaLinkage}</h2>
           <MpesaLinkForm
             labels={labels}
             defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
@@ -227,10 +213,8 @@ export default async function ProfilePage({ searchParams }: Props) {
           referrals={referrals}
         />
 
-        <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-            IPRS identity (Kenya)
-          </h2>
+        <div className="space-y-4">
+          <h2 className="text-base font-semibold">IPRS identity</h2>
           <IprsVerifyForm
             defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
             defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
@@ -239,22 +223,18 @@ export default async function ProfilePage({ searchParams }: Props) {
           />
         </div>
 
-        <div className="space-y-6">
-          <div id="kyc-documents" className="rounded-xl border border-border bg-card p-6">
-            <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-              {labels.kycDocuments}
-            </h2>
+        <div className="space-y-6 lg:col-span-2">
+          <div id="kyc-documents" className="space-y-4">
+            <h2 className="text-base font-semibold">{labels.kycDocuments}</h2>
             <KycUploadForm labels={labels} />
           </div>
 
-          <div className="rounded-xl border border-border bg-card p-6">
-            <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
-              {labels.uploadedFiles}
-            </h2>
+          <div className="space-y-3">
+            <h2 className="text-base font-semibold">{labels.uploadedFiles}</h2>
             {docs.length === 0 ? (
               <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-border/40">
                 {docs.map((doc) => (
                   <li key={doc.id} className="flex items-center justify-between gap-3 py-3">
                     <div className="min-w-0">
@@ -264,11 +244,6 @@ export default async function ProfilePage({ searchParams }: Props) {
                       <p className="text-xs text-muted-foreground">
                         {doc.file_name} · {formatDate(doc.created_at)}
                       </p>
-                      {doc.status === 'rejected' && doc.rejection_reason ? (
-                        <p className="mt-1 text-xs text-destructive">
-                          Reason: {doc.rejection_reason}
-                        </p>
-                      ) : null}
                     </div>
                     <StatusBadge status={doc.status} />
                   </li>
@@ -279,17 +254,11 @@ export default async function ProfilePage({ searchParams }: Props) {
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-6 sm:hidden">
-        <h2 className="mb-2 font-[family-name:var(--font-display)] text-xl font-semibold">
+      <form action={signOutAction} className="pb-4">
+        <Button type="submit" variant="outline" className="min-h-11 w-full rounded-full">
           {dict.common.signOut}
-        </h2>
-        <p className="mb-4 text-sm text-muted-foreground">{dict.common.signOutHint}</p>
-        <form action={signOutAction}>
-          <Button type="submit" variant="outline" className="min-h-11 w-full">
-            {dict.common.signOut}
-          </Button>
-        </form>
-      </section>
+        </Button>
+      </form>
     </div>
   );
 }

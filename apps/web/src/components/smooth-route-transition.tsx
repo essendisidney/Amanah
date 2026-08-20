@@ -51,7 +51,12 @@ export function SmoothRouteTransition({ children }: { children: ReactNode }) {
             .join(' ')}
         />
       </div>
-      {children}
+      <div
+        key={pathname}
+        className="amanah-page-enter"
+      >
+        {children}
+      </div>
     </div>
   );
 }

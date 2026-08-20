@@ -333,17 +333,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       : amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1);
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-[390px] space-y-8 md:max-w-3xl md:space-y-10">
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
-      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white shadow-[0_12px_40px_rgba(11,92,66,0.2)] md:p-7">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-              Amanah Circle
-            </p>
-            <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">{jamiya.name}</h1>
-            <p className="mt-2 text-sm capitalize text-white/80">
+      <header className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-semibold tracking-tight md:text-3xl">
+              {jamiya.name}
+            </h1>
+            <p className="mt-1 text-sm capitalize text-muted-foreground">
               {jamiya.status.replaceAll('_', ' ')}
               {membership ? ` · ${membership.role.replaceAll('_', ' ')}` : ''}
               {segmentLabel ? ` · ${segmentLabel}` : ''}
@@ -351,68 +350,24 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           </div>
           <StatusBadge status={jamiya.status} />
         </div>
-        <p className="amanah-money mt-6 text-4xl font-bold tracking-tight md:text-5xl">
+        <p className="amanah-money text-4xl font-bold tracking-tight md:text-5xl">
           {formatCurrency(estimatedPool, jamiya.currency)}
         </p>
-        <p className="mt-2 text-sm text-white/80">
-          {jamiya.member_count} {circleLabels.members.toLowerCase()} · cycle{' '}
+        <p className="text-sm text-muted-foreground">
+          {jamiya.member_count}/{jamiya.max_members} {circleLabels.members.toLowerCase()}
           {jamiya.cycle_count != null
-            ? `${jamiya.current_cycle}/${jamiya.cycle_count}`
-            : jamiya.current_cycle}{' '}
-          · {cycleProgress}% complete
+            ? ` · cycle ${jamiya.current_cycle}/${jamiya.cycle_count}`
+            : ` · cycle ${jamiya.current_cycle}`}
         </p>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/20">
-          <div
-            className="h-full rounded-full bg-accent"
-            style={{ width: `${cycleProgress}%` }}
-          />
-        </div>
         {canManageOps && jamiya.member_count < 2 ? (
-          <div className="mt-5 rounded-xl bg-white/10 px-4 py-3 backdrop-blur-sm">
-            <p className="text-sm font-semibold text-white">Invite 1–2 people to activate</p>
-            <p className="mt-1 text-xs text-white/75">
-              Circles work best with family or friends. Share a join link or short code below.
-            </p>
-            <Button asChild size="sm" variant="secondary" className="mt-3 min-h-10">
-              <a href="#invite-people">Invite people</a>
-            </Button>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Invite people to activate.{' '}
+            <a href="#invite-people" className="font-medium text-primary">
+              Invite
+            </a>
+          </p>
         ) : null}
-        <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
-            <p className="text-[11px] uppercase tracking-wide text-white/65">
-              {circleLabels.contribution}
-            </p>
-            <p className="amanah-money mt-1 text-sm font-semibold">
-              {formatCurrency(amount, jamiya.currency)}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
-            <p className="text-[11px] uppercase tracking-wide text-white/65">
-              {circleLabels.members}
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              {jamiya.member_count}/{jamiya.max_members}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
-            <p className="text-[11px] uppercase tracking-wide text-white/65">
-              {circleLabels.frequency}
-            </p>
-            <p className="mt-1 text-sm font-semibold">
-              {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
-            </p>
-          </div>
-          <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
-            <p className="text-[11px] uppercase tracking-wide text-white/65">
-              Next payout
-            </p>
-            <p className="mt-1 truncate text-sm font-semibold">
-              {nextPayout?.memberLabel ?? '—'}
-            </p>
-          </div>
-        </div>
-      </section>
+      </header>
 
       {(segmentBlurb || jamiya.description) && (
         <p className="max-w-2xl text-sm text-muted-foreground">
@@ -436,7 +391,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      <section className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <section className="flex flex-wrap gap-2">
         {[
           {
             href: (myOpenDue
@@ -454,15 +409,41 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             label: canManageMembers ? circleLabels.officerConsole : circleLabels.meetingsChat,
           },
         ].map((action) => (
-          <Button
+          <Link
             key={action.label}
-            asChild
-            variant={action.primary ? 'default' : 'outline'}
-            className="min-h-11"
+            href={action.href}
+            className={
+              action.primary
+                ? 'amanah-glass-pill inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-primary'
+                : 'inline-flex min-h-10 items-center rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
+            }
           >
-            <Link href={action.href}>{action.label}</Link>
-          </Button>
+            {action.label}
+          </Link>
         ))}
+      </section>
+
+      <section className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-4">
+        <div>
+          <p className="text-muted-foreground">{circleLabels.contribution}</p>
+          <p className="amanah-money mt-0.5 font-semibold">
+            {formatCurrency(amount, jamiya.currency)}
+          </p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">{circleLabels.frequency}</p>
+          <p className="mt-0.5 font-semibold">
+            {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
+          </p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Next payout</p>
+          <p className="mt-0.5 truncate font-semibold">{nextPayout?.memberLabel ?? '—'}</p>
+        </div>
+        <div>
+          <p className="text-muted-foreground">Progress</p>
+          <p className="mt-0.5 font-semibold">{cycleProgress}%</p>
+        </div>
       </section>
 
       {myOpenDue ? (

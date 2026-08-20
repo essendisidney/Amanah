@@ -42,11 +42,7 @@ function pathActive(pathname: string, href: string) {
     return (
       pathname === '/pay' ||
       pathname === '/wallet' ||
-      pathname.startsWith('/wallet/') ||
-      pathname.startsWith('/finance') ||
-      pathname.startsWith('/sadaka') ||
-      pathname.startsWith('/zakat') ||
-      pathname.startsWith('/support')
+      pathname.startsWith('/wallet/')
     );
   }
   if (href === '/notifications') {
@@ -145,16 +141,19 @@ export function AppShell({
 
   return (
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
-      <header className="sticky top-0 z-40 border-b border-white/30 bg-white/40 pt-[env(safe-area-inset-top)] backdrop-blur-xl dark:border-white/10 dark:bg-[#131916]/55">
-        <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between gap-3 px-4 md:h-16 md:max-w-5xl md:px-6">
+      <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)] md:backdrop-blur-xl">
+        <div className="mx-auto flex h-14 w-full max-w-[390px] items-center justify-between gap-3 px-4 md:h-[4.25rem] md:max-w-6xl md:px-10">
           <Link
             href={'/dashboard' as Route}
-            className="min-w-0 shrink text-lg font-bold tracking-tight text-primary md:text-xl"
+            className="min-w-0 shrink font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight text-primary md:text-2xl"
           >
             {APP_NAME}
           </Link>
 
-          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
+          <nav
+            className="amanah-nav-glass hidden items-center gap-1 rounded-full px-1.5 py-1 md:flex"
+            aria-label="Primary"
+          >
             {desktopLinks.map((item) => {
               const active = pathActive(pathname, item.href);
               return (
@@ -162,15 +161,15 @@ export function AppShell({
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:bg-white/40 hover:text-foreground dark:hover:bg-white/5',
+                      ? 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(46,204,113,0.35)]'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {item.label}
                   {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-white/90 px-1.5 text-[10px] font-semibold text-primary">
                       {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
@@ -188,7 +187,7 @@ export function AppShell({
                 className={cn(
                   'inline-flex h-11 w-11 items-center justify-center rounded-full md:hidden',
                   pathname.startsWith('/admin')
-                    ? 'bg-primary/10 text-primary'
+                    ? 'bg-primary/15 text-primary'
                     : 'text-muted-foreground hover:bg-white/40 dark:hover:bg-white/5',
                 )}
                 aria-label={dict.common.admin}
@@ -199,7 +198,7 @@ export function AppShell({
             ) : null}
             <Link
               href={'/notifications' as Route}
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-white/40 dark:hover:bg-white/5"
+              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-white/40 md:hidden dark:hover:bg-white/5"
               aria-label={
                 liveUnread > 0
                   ? `${dict.common.notifications}, ${liveUnread}`
@@ -220,22 +219,22 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:max-w-5xl md:px-6 md:py-8 md:pb-10">
+      <main className="mx-auto w-full max-w-[390px] px-4 py-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:max-w-6xl md:px-10 md:py-12 md:pb-14">
         <SmoothRouteTransition>{children}</SmoothRouteTransition>
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-white/35 bg-white/55 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-white/10 dark:bg-[#131916]/70 md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1 md:hidden"
         aria-label="Mobile primary"
       >
-        <ul className="mx-auto grid max-w-lg grid-cols-5 items-end px-1">
+        <ul className="amanah-nav-glass mx-auto grid max-w-lg grid-cols-5 items-end rounded-[1.75rem] px-1 py-1.5">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
             const showBadge = item.href === '/notifications' && liveUnread > 0;
             if (item.center) {
               return (
-                <li key={item.href} className="relative -mt-5 flex justify-center">
+                <li key={item.href} className="relative -mt-7 flex justify-center">
                   <Link
                     href={item.href}
                     className="flex flex-col items-center gap-1"
@@ -243,11 +242,11 @@ export function AppShell({
                   >
                     <span
                       className={cn(
-                        'inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(11,92,66,0.35)] transition-transform active:scale-95',
-                        active && 'ring-4 ring-primary/20',
+                        'amanah-pay-glow inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95',
+                        active && 'ring-4 ring-primary/25',
                       )}
                     >
-                      <Icon className="h-6 w-6" />
+                      <Icon className="h-6 w-6" strokeWidth={1.75} />
                     </span>
                     <span
                       className={cn(
@@ -266,14 +265,14 @@ export function AppShell({
                 <Link
                   href={item.href}
                   className={cn(
-                    'relative flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-semibold',
+                    'relative flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-semibold',
                     active ? 'text-primary' : 'text-muted-foreground',
                   )}
                 >
-                  <Icon className={cn('h-5 w-5', active && 'stroke-[2.4]')} />
+                  <Icon className={cn('h-5 w-5', active && 'stroke-[2.4]')} strokeWidth={1.6} />
                   {item.short}
                   {showBadge ? (
-                    <span className="absolute right-[18%] top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="absolute right-[18%] top-1 h-1.5 w-1.5 rounded-full bg-primary" />
                   ) : null}
                 </Link>
               </li>

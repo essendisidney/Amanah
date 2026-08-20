@@ -82,15 +82,17 @@ export default async function MyCirclesPage() {
   const rows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
 
   return (
-    <div className="mx-auto max-w-lg space-y-8 md:max-w-2xl">
+    <div className="mx-auto w-full max-w-[390px] space-y-8 md:max-w-2xl">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold tracking-tight">{labels.title}</h1>
-        <Button asChild size="sm" className="rounded-full">
-          <Link href={'/circles/new' as Route}>+</Link>
+        <h1 className="text-2xl font-semibold tracking-tight">{labels.title}</h1>
+        <Button asChild size="sm" className="h-9 w-9 rounded-full p-0">
+          <Link href={'/circles/new' as Route} aria-label={labels.createCircle}>
+            +
+          </Link>
         </Button>
       </div>
 
-      <section id="redeem-invite" className="scroll-mt-24 space-y-2">
+      <section id="redeem-invite" className="scroll-mt-24">
         <RedeemInviteCodeForm
           title={labels.redeemTitle}
           hint={labels.redeemHint}
@@ -114,7 +116,7 @@ export default async function MyCirclesPage() {
           </Button>
         </div>
       ) : (
-        <ul className="divide-y divide-border/50">
+        <ul className="divide-y divide-border/40">
           {rows.map((row) => {
             const jamiya = row.jamiya!;
             const amount =
@@ -126,17 +128,19 @@ export default async function MyCirclesPage() {
               <li key={row.id}>
                 <Link
                   href={`/circles/${jamiya.slug}` as Route}
-                  className="block py-5 transition-opacity hover:opacity-80"
+                  className="flex items-start justify-between gap-4 py-5 transition-opacity active:opacity-70"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    {jamiya.name}
-                  </p>
-                  <p className="amanah-money mt-2 text-2xl font-bold tracking-tight">
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-semibold tracking-tight">
+                      {jamiya.name}
+                    </p>
+                    <p className="mt-1 text-sm capitalize text-muted-foreground">
+                      {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}{' '}
+                      {common.members}
+                    </p>
+                  </div>
+                  <p className="amanah-money shrink-0 text-lg font-semibold">
                     {formatCurrency(amount, jamiya.currency)}
-                  </p>
-                  <p className="mt-1 text-sm capitalize text-muted-foreground">
-                    {jamiya.member_count} {common.members} ·{' '}
-                    {jamiya.status.replaceAll('_', ' ')}
                   </p>
                 </Link>
               </li>
@@ -144,12 +148,6 @@ export default async function MyCirclesPage() {
           })}
         </ul>
       )}
-
-      <div className="pt-2">
-        <Button asChild variant="outline" className="min-h-11 w-full rounded-full">
-          <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
-        </Button>
-      </div>
     </div>
   );
 }
