@@ -1,5 +1,5 @@
-import { AppLoader } from '@/components/app-loader';
+import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function CircleDetailsLoading() {
-  return <AppLoader message="Opening circle details…" variant="compact" showBrand={false} />;
+  return <PageLoadingSkeleton />;
 }

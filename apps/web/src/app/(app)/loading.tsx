@@ -1,5 +1,5 @@
-import { AppLoader } from '@/components/app-loader';
+import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function AppLoading() {
-  return <AppLoader message="Loading your amanah…" />;
+  return <PageLoadingSkeleton />;
 }

@@ -28,42 +28,51 @@ export function NotificationRealtime({ userId }: { userId: string }) {
   }, [pathname]);
 
   useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`notifications:${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload: { new: NotificationPayload }) => {
-          const row = payload.new;
-          toast(row.title, { description: row.body });
-          dispatchNotificationInsert();
+    let channel: ReturnType<ReturnType<typeof createClient>['channel']> | null = null;
+    let supabase: ReturnType<typeof createClient> | null = null;
 
-          const path = pathnameRef.current ?? '';
-          if (!path.startsWith('/notifications') && !path.startsWith('/dashboard')) {
-            return;
-          }
+    try {
+      supabase = createClient();
+      channel = supabase
+        .channel(`notifications:${userId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload: { new: NotificationPayload }) => {
+            const row = payload.new;
+            toast(row.title, { description: row.body });
+            dispatchNotificationInsert();
 
-          if (refreshTimerRef.current) {
-            clearTimeout(refreshTimerRef.current);
-          }
-          refreshTimerRef.current = setTimeout(() => {
-            router.refresh();
-          }, 1500);
-        },
-      )
-      .subscribe();
+            const path = pathnameRef.current ?? '';
+            if (!path.startsWith('/notifications') && !path.startsWith('/dashboard')) {
+              return;
+            }
+
+            if (refreshTimerRef.current) {
+              clearTimeout(refreshTimerRef.current);
+            }
+            refreshTimerRef.current = setTimeout(() => {
+              router.refresh();
+            }, 1500);
+          },
+        )
+        .subscribe();
+    } catch {
+      return undefined;
+    }
 
     return () => {
       if (refreshTimerRef.current) {
         clearTimeout(refreshTimerRef.current);
       }
-      void supabase.removeChannel(channel);
+      if (supabase && channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, [userId, router]);
 

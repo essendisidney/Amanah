@@ -1,11 +1,21 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
+
 export default function GlobalError({
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const retried = useRef(false);
+
+  useEffect(() => {
+    if (retried.current) return;
+    retried.current = true;
+    reset();
+  }, [reset]);
+
   return (
     <html lang="en">
       <body
@@ -26,8 +36,7 @@ export default function GlobalError({
           </p>
           <h1 style={{ margin: '12px 0', fontSize: 24 }}>Could not open the app</h1>
           <p style={{ margin: '0 0 20px', color: '#5c6b62', lineHeight: 1.5 }}>
-            Refresh the page. If it still fails, close the tab and open amanah-liart.vercel.app
-            again.
+            Retrying now. If this stays, close the tab and open amanah-liart.vercel.app again.
           </p>
           <button
             type="button"

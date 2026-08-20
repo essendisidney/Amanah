@@ -1,5 +1,5 @@
-import { AppLoader } from '@/components/app-loader';
+import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function WalletLoading() {
-  return <AppLoader message="Loading your wallet…" variant="compact" showBrand={false} />;
+  return <PageLoadingSkeleton />;
 }

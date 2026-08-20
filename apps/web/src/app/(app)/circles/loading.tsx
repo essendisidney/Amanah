@@ -1,5 +1,5 @@
-import { AppLoader } from '@/components/app-loader';
+import { PageLoadingSkeleton } from '@/components/page-loading-skeleton';
 
 export default function CirclesLoading() {
-  return <AppLoader message="Gathering your circles…" variant="compact" showBrand={false} />;
+  return <PageLoadingSkeleton />;
 }

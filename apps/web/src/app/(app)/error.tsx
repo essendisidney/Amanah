@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Button } from '@jamiya/ui';
 
 export default function AppError({
@@ -10,9 +10,17 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const retried = useRef(false);
+
   useEffect(() => {
     console.error(error);
   }, [error]);
+
+  useEffect(() => {
+    if (retried.current) return;
+    retried.current = true;
+    reset();
+  }, [reset]);
 
   return (
     <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-card p-6">
@@ -20,8 +28,7 @@ export default function AppError({
         Something went wrong
       </h1>
       <p className="text-sm text-muted-foreground">
-        The page hit an error. Try again, or go back and upload a smaller JPEG of the ID if this
-        happened during KYC.
+        We are retrying this page. Tap below if it does not load automatically.
       </p>
       <Button type="button" onClick={reset}>
         Try again

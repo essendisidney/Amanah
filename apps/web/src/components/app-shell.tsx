@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   Bell,
@@ -28,7 +28,7 @@ type Tab = {
   href: Route;
   label: string;
   short: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
 };
 
 function pathActive(pathname: string, href: string) {
@@ -44,7 +44,7 @@ export function AppShell({
   locale,
   dict,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   unread: number;
   showAdmin: boolean;
   signOutAction: () => Promise<void>;
