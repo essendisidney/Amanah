@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button, Input } from '@jamiya/ui';
@@ -41,7 +43,8 @@ export default async function GoalsPage() {
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Hajj, Umra, Udhiyah, emergency fund — track progress with a clear target.
+          Hajj, Umra, Udhiyah, emergency fund — track progress with a clear target. Top up Money,
+          then update what you have set aside.
         </p>
       </div>
 
@@ -53,7 +56,14 @@ export default async function GoalsPage() {
         {goals.map((goal) => {
           const target = Number(goal.target_amount);
           const saved = Number(goal.saved_amount);
+          const remaining = Math.max(target - saved, 0);
           const progress = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
+          const monthlyHint =
+            goal.duration_months && goal.duration_months > 0 && remaining > 0
+              ? Math.ceil(remaining / goal.duration_months)
+              : null;
+          const topUpAmount = Math.max(Math.ceil(remaining || 100), 100);
+
           return (
             <article key={goal.id} className="amanah-surface p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -64,6 +74,16 @@ export default async function GoalsPage() {
                     {goal.duration_months ? ` · ${goal.duration_months} months` : ''}
                     {goal.target_date ? ` · by ${goal.target_date}` : ''}
                   </p>
+                  {remaining > 0 ? (
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {formatCurrency(remaining, goal.currency)} still to go
+                      {monthlyHint
+                        ? ` · about ${formatCurrency(monthlyHint, goal.currency)} / month`
+                        : ''}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-sm font-medium text-primary">Target reached</p>
+                  )}
                 </div>
                 <form action={deleteGoalAction}>
                   <input type="hidden" name="goalId" value={goal.id} />
@@ -79,20 +99,37 @@ export default async function GoalsPage() {
                 />
               </div>
               <p className="mt-2 text-xs font-semibold text-primary">{progress}% complete</p>
-              <form action={updateGoalFormAction} className="mt-4 flex max-w-xs gap-2">
-                <input type="hidden" name="goalId" value={goal.id} />
-                <Input
-                  name="savedAmount"
-                  type="number"
-                  inputMode="decimal"
-                  min="0"
-                  defaultValue={saved}
-                  className="h-11 text-base sm:h-10 sm:text-sm"
-                />
-                <Button type="submit" className="min-h-11">
-                  Update
-                </Button>
-              </form>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                {remaining > 0 ? (
+                  <Button asChild className="min-h-11">
+                    <Link
+                      href={
+                        `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
+                      }
+                    >
+                      Top up Money toward this
+                    </Link>
+                  </Button>
+                ) : null}
+                <form action={updateGoalFormAction} className="flex max-w-xs flex-1 gap-2">
+                  <input type="hidden" name="goalId" value={goal.id} />
+                  <Input
+                    name="savedAmount"
+                    type="number"
+                    inputMode="decimal"
+                    min="0"
+                    defaultValue={saved}
+                    className="h-11 text-base sm:h-10 sm:text-sm"
+                    aria-label="Saved amount"
+                  />
+                  <Button type="submit" variant="outline" className="min-h-11">
+                    Update
+                  </Button>
+                </form>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Update records how much you have set aside after topping up or transferring.
+              </p>
             </article>
           );
         })}

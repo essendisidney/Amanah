@@ -18,23 +18,31 @@ function revalidateCircle(slug?: string) {
 export async function activateCircleAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
-  if (!jamiyaId) return;
+  if (!jamiyaId || !slug) return;
 
   const { data, error } = await callRpc('activate_jamiya', {
     p_jamiya_id: jamiyaId,
   });
 
   if (error) {
-    console.error('activate_jamiya', error.message);
-    return;
+    redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
   }
 
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    console.error('activate_jamiya', result?.error);
+    redirectWithCircleNotice(
+      slug,
+      mapMoneyError(result?.error) || result?.error || 'Could not activate circle.',
+      'error',
+    );
   }
 
-  revalidateCircle(slug || undefined);
+  revalidateCircle(slug);
+  redirectWithCircleNotice(
+    slug,
+    'Circle activated. Contribution and payout schedules are ready.',
+    'success',
+  );
 }
 
 export async function payContributionAction(formData: FormData): Promise<void> {

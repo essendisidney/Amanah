@@ -2,8 +2,10 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { getDashboardData } from '@/features/dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,16 +23,25 @@ export default async function FinancePage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/finance');
 
-  const [{ dict }, { data }] = await Promise.all([
+  const [{ dict }, { data }, dashboard] = await Promise.all([
     getDictionary(),
     supabase
       .from('welfare_funds')
       .select('jamiya_id, balance, currency, jamiya:jamiyas(name)')
       .order('created_at'),
+    getDashboardData(user.id),
   ]);
 
   const labels = dict.finance;
   const funds = (data ?? []) as unknown as Fund[];
+  const wallet = dashboard.wallet;
+  const openDues = dashboard.stats.pendingContributions;
+  const openDueTotal = dashboard.contributions.reduce(
+    (sum, item) => sum + Math.max(item.amount - item.amountPaid, 0),
+    0,
+  );
+  const currency = wallet?.currency ?? 'KES';
+
   const items = [
     ['Insights', 'This month’s inflow, on-time rate, and upcoming dues.', '/finance/insights'],
     [labels.welfareTitle, labels.welfareDesc, '/finance/welfare'],
@@ -50,6 +61,37 @@ export default async function FinancePage() {
         </h1>
         <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
       </div>
+
+      <section className="amanah-surface flex flex-col gap-4 border-primary/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Wallet available
+          </p>
+          <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">
+            {formatCurrency(wallet?.availableBalance ?? 0, currency)}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {openDues > 0
+              ? `${openDues} open due${openDues === 1 ? '' : 's'} · ${formatCurrency(openDueTotal, currency)} left`
+              : 'No open contribution dues'}
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button asChild className="min-h-11">
+            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
+          </Button>
+          {openDues > 0 ? (
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={'/finance/insights' as Route}>View dues</Link>
+            </Button>
+          ) : (
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={'/finance/goals' as Route}>Savings goals</Link>
+            </Button>
+          )}
+        </div>
+      </section>
+
       <div className="divide-y divide-border border-y border-border">
         {items.map(([title, description, href]) => (
           <Link
@@ -81,7 +123,7 @@ export default async function FinancePage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-muted-foreground">{labels.noWelfare}</p>
+          <p className="mt-3 text-sm text-muted-foreground">{labels.noWelfare}</p>
         )}
       </section>
     </div>

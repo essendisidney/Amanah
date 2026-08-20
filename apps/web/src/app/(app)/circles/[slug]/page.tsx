@@ -543,6 +543,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               : null
           }
           walletCurrency={walletCurrency}
+          canActivate={canActivate}
+          canManageOps={Boolean(canManageOps)}
+          memberCount={jamiya.member_count}
         />
       </section>
 

@@ -566,9 +566,10 @@ export const en: Dictionary = {
     confirmWithCode: 'Confirm with code',
   },
   finance: {
-    eyebrow: 'Circle finance',
+    eyebrow: 'Finance',
     title: 'Finance',
-    subtitle: 'Manage Sharia-conscious finance tools connected to your circles.',
+    subtitle:
+      'Personal wallet tools and Sharia-conscious circle finance — goals, welfare, Qard, and more.',
     welfareTitle: 'Welfare fund',
     welfareDesc: 'Medical, funeral, and accident support for your circle.',
     qardTitle: 'Qard Hassan',
@@ -941,9 +942,10 @@ export const sw: Dictionary = {
     confirmWithCode: 'Thibitisha kwa nambari',
   },
   finance: {
-    eyebrow: 'Fedha za mduara',
+    eyebrow: 'Fedha',
     title: 'Fedha',
-    subtitle: 'Simamia zana za fedha zinazofuata sheria za Kiislamu katika miduara yako.',
+    subtitle:
+      'Zana za pochi ya kibinafsi na fedha za miduara zinazofuata sheria — malengo, ustawi, Qard, na zaidi.',
     welfareTitle: 'Hazina ya ustawi',
     welfareDesc: 'Msaada wa matibabu, mazishi, na ajali kwa mduara wako.',
     qardTitle: 'Qard Hassan',

@@ -47,10 +47,18 @@ export function ActivateCircleButton({
   if (!canActivate) return null;
 
   return (
-    <form action={activateCircleAction}>
+    <form action={activateCircleAction} className="amanah-surface space-y-3 border-primary/25 px-4 py-4">
       <input type="hidden" name="jamiyaId" value={jamiyaId} />
       <input type="hidden" name="slug" value={slug} />
-      <Button type="submit">Activate circle &amp; generate schedule</Button>
+      <div>
+        <p className="text-sm font-semibold text-foreground">Ready to activate</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Generates the contribution calendar and payout schedule for this circle.
+        </p>
+      </div>
+      <Button type="submit" className="min-h-11">
+        Activate circle &amp; generate schedule
+      </Button>
     </form>
   );
 }
@@ -60,17 +68,48 @@ export function ContributionCalendar({
   slug,
   walletAvailable = null,
   walletCurrency,
+  canActivate = false,
+  canManageOps = false,
+  memberCount = 0,
 }: {
   contributions: ScheduleContribution[];
   slug: string;
   walletAvailable?: number | null;
   walletCurrency?: string;
+  canActivate?: boolean;
+  canManageOps?: boolean;
+  memberCount?: number;
 }) {
   if (contributions.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
-        No contribution schedule yet. Invite members, then activate the circle.
-      </p>
+      <div className="amanah-surface space-y-2 px-4 py-5 text-sm text-muted-foreground">
+        {canActivate ? (
+          <>
+            <p className="font-medium text-foreground">No schedule yet — activate to generate it.</p>
+            <p>Use Activate above to build contribution and payout rounds.</p>
+          </>
+        ) : canManageOps && memberCount < 2 ? (
+          <>
+            <p className="font-medium text-foreground">Invite at least one more person first.</p>
+            <p>
+              <a href="#invite-people" className="font-medium text-primary hover:underline">
+                Invite people
+              </a>{' '}
+              , then activate when you have two or more members.
+            </p>
+          </>
+        ) : canManageOps ? (
+          <>
+            <p className="font-medium text-foreground">Schedule appears after activation.</p>
+            <p>Activate the circle when members are ready.</p>
+          </>
+        ) : (
+          <>
+            <p className="font-medium text-foreground">Waiting on the circle officer.</p>
+            <p>Contribution dates show here after the circle is activated.</p>
+          </>
+        )}
+      </div>
     );
   }
 

@@ -347,6 +347,9 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         slug={slug}
         lateCount={late.length}
         pendingGrace={(grace ?? []).length}
+        pendingQard={loanRows.length}
+        pendingDual={dualRows.length}
+        openCases={(cases ?? []).length}
         nextPayoutLabel={nextPayout ? `Cycle ${nextPayout.cycle_number}` : null}
         nextPayoutDate={nextPayout?.scheduled_date ?? null}
         nextPayoutAmount={
@@ -442,7 +445,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section id="officer-qard" className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           {dict.officer.qardQueue}
         </h2>
@@ -492,7 +495,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
       </section>
 
       {dualRows.length > 0 ? (
-        <section className="space-y-3">
+        <section id="officer-dual" className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Awaiting second officer
           </h2>
@@ -535,7 +538,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         </section>
       ) : null}
 
-      <section className="space-y-3">
+      <section id="officer-dues" className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Late & pending dues
         </h2>
@@ -563,7 +566,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         )}
       </section>
 
-      <section className="space-y-3">
+      <section id="officer-grace" className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Pending grace
         </h2>
@@ -606,7 +609,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         )}
       </section>
 
-      <section className="space-y-3">
+      <section id="officer-cases" className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Collection cases
         </h2>
