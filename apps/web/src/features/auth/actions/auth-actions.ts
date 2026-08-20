@@ -11,6 +11,8 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import {
   getSafeRedirectPath,
+  isProfileComplete,
+  buildPostAuthPath,
   mapZodErrors,
   type AuthActionState,
 } from '../lib/types';
@@ -105,7 +107,21 @@ export async function loginAction(
   }
 
   const next = getSafeRedirectPath(String(formData.get('next') ?? '/dashboard'));
-  redirect(next);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  let complete = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('profile_completed, full_name')
+      .eq('id', user.id)
+      .maybeSingle();
+    complete = isProfileComplete(
+      profile as { profile_completed?: boolean; full_name?: string | null } | null,
+    );
+  }
+  redirect(buildPostAuthPath(next, complete));
 }
 
 export async function forgotPasswordAction(

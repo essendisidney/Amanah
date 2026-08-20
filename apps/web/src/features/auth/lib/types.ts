@@ -25,5 +25,24 @@ export function getSafeRedirectPath(path: string | null | undefined, fallback = 
   if (!path || !path.startsWith('/') || path.startsWith('//')) {
     return fallback;
   }
-  return path;
+  if (path.includes('\\') || path.includes('://')) {
+    return fallback;
+  }
+  return path || fallback;
+}
+
+export function isProfileComplete(
+  row: { profile_completed?: boolean | null; full_name?: string | null } | null | undefined,
+): boolean {
+  return Boolean(row?.profile_completed && row?.full_name?.trim());
+}
+
+/** Incomplete profiles land on onboarding; password-reset destinations are left alone. */
+export function buildPostAuthPath(next: string | null | undefined, profileComplete: boolean): string {
+  const dest = getSafeRedirectPath(next);
+  if (dest === '/reset-password' || dest.startsWith('/reset-password?')) {
+    return dest;
+  }
+  if (profileComplete) return dest;
+  return `/profile?onboarding=1&next=${encodeURIComponent(dest)}`;
 }

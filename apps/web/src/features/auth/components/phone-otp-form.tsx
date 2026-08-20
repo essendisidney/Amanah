@@ -7,6 +7,7 @@ import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
+import { getSafeRedirectPath, buildPostAuthPath } from '../lib/types';
 import { AuthFormMessage } from './auth-form-message';
 
 type Step = 'request' | 'verify';
@@ -35,14 +36,6 @@ function readApiError(json: unknown, fallback: string): string {
   return fallback;
 }
 
-/** Only allow same-origin relative paths for post-login redirects. */
-function safeNextPath(next: unknown): string {
-  if (typeof next !== 'string') return '/dashboard';
-  if (!next.startsWith('/') || next.startsWith('//')) return '/dashboard';
-  if (next.includes('\\') || next.includes('://')) return '/dashboard';
-  return next || '/dashboard';
-}
-
 export function PhoneOtpForm({
   next = '/dashboard',
   labels,
@@ -50,7 +43,7 @@ export function PhoneOtpForm({
   next?: string;
   labels: PhoneLabels;
 }) {
-  const dest = safeNextPath(next);
+  const dest = getSafeRedirectPath(next);
   const [phone, setPhone] = useState('');
   const [token, setToken] = useState('');
   const [step, setStep] = useState<Step>('request');
@@ -186,11 +179,7 @@ export function PhoneOtpForm({
         .catch(() => undefined);
     }
 
-    window.location.replace(
-      json.profile_completed === true
-        ? dest
-        : `/profile?onboarding=1&next=${encodeURIComponent(dest)}`,
-    );
+    window.location.replace(buildPostAuthPath(dest, json.profile_completed === true));
     return true;
   }
 
