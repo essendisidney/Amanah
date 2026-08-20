@@ -144,10 +144,12 @@ export default async function ProfilePage({ searchParams }: Props) {
         </div>
       </div>
 
-      <section className="amanah-surface flex items-center justify-between gap-3 px-4 py-3.5">
+      <section className="amanah-surface flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold">Appearance</p>
-          <p className="text-xs text-muted-foreground">Light or dark on this device</p>
+          <p className="text-xs text-muted-foreground">
+            Auto follows local time — light 6am–6pm, dark after.
+          </p>
         </div>
         <ThemeToggle variant="segmented" />
       </section>

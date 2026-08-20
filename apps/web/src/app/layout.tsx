@@ -63,7 +63,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('amanah-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);var r=document.documentElement;if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='auto';try{localStorage.setItem('amanah-theme','auto')}catch(e){}}var h=(new Date()).getHours();var d=t==='dark'||(t==='auto'&&(h<6||h>=18));var r=document.documentElement;if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){}})();`,
           }}
         />
       </head>
