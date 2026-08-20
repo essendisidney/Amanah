@@ -83,6 +83,44 @@ export default async function CircleAuditPage({ params }: Props) {
     created_at: string;
   }>;
 
+  const personIds = Array.from(
+    new Set(
+      [
+        ...auditRows.map((r) => r.actor_id),
+        ...dualRows.map((r) => r.first_approver_id),
+        ...dualRows.map((r) => r.second_approver_id),
+      ].filter(Boolean),
+    ),
+  ) as string[];
+
+  const { data: profileData } = personIds.length
+    ? await supabase.from('profiles').select('id, full_name, phone').in('id', personIds)
+    : { data: [] as unknown[] };
+
+  const personName = new Map(
+    ((profileData ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      phone: string | null;
+    }>).map((p) => [p.id, p.full_name?.trim() || p.phone || p.id.slice(0, 8)]),
+  );
+
+  function labelPerson(id: string | null) {
+    if (!id) return null;
+    return personName.get(id) ?? `${id.slice(0, 8)}…`;
+  }
+
+  function metaBits(metadata: Record<string, unknown> | null) {
+    if (!metadata) return null;
+    const bits: string[] = [];
+    for (const key of ['status', 'email', 'phone', 'notes', 'amount', 'kind']) {
+      const value = metadata[key];
+      if (value == null || value === '') continue;
+      bits.push(`${key}: ${String(value)}`);
+    }
+    return bits.length ? bits.join(' · ') : null;
+  }
+
   const treasuryish = auditRows.filter((r) =>
     ['treasury', 'book_entry', 'payout', 'fine', 'share', 'dividend', 'bank_alert', 'journal'].some(
       (k) => r.entity_type.includes(k) || String(r.metadata?.kind ?? '').includes(k),
@@ -123,10 +161,10 @@ export default async function CircleAuditPage({ params }: Props) {
                   <p className="text-xs text-muted-foreground">
                     {formatDate(row.created_at)}
                     {row.first_approver_id
-                      ? ` · 1st ${row.first_approver_id.slice(0, 8)}…`
+                      ? ` · 1st ${labelPerson(row.first_approver_id)}`
                       : ''}
                     {row.second_approver_id
-                      ? ` · 2nd ${row.second_approver_id.slice(0, 8)}…`
+                      ? ` · 2nd ${labelPerson(row.second_approver_id)}`
                       : ''}
                   </p>
                 </div>
@@ -153,9 +191,12 @@ export default async function CircleAuditPage({ params }: Props) {
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {formatDate(row.created_at)}
-                    {row.actor_id ? ` · ${row.actor_id.slice(0, 8)}…` : ''}
+                    {row.actor_id ? ` · ${labelPerson(row.actor_id)}` : ''}
                     {row.entity_id ? ` · ${row.entity_id.slice(0, 8)}…` : ''}
                   </p>
+                  {metaBits(row.metadata) ? (
+                    <p className="text-xs text-muted-foreground">{metaBits(row.metadata)}</p>
+                  ) : null}
                 </div>
                 <StatusBadge status={row.action} />
               </li>
@@ -175,7 +216,13 @@ export default async function CircleAuditPage({ params }: Props) {
                 <p className="text-sm font-medium capitalize">
                   {row.action.replaceAll('_', ' ')} · {row.entity_type}
                 </p>
-                <p className="text-xs text-muted-foreground">{formatDate(row.created_at)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {formatDate(row.created_at)}
+                  {row.actor_id ? ` · ${labelPerson(row.actor_id)}` : ''}
+                </p>
+                {metaBits(row.metadata) ? (
+                  <p className="text-xs text-muted-foreground">{metaBits(row.metadata)}</p>
+                ) : null}
               </div>
               <StatusBadge status={row.action} />
             </li>

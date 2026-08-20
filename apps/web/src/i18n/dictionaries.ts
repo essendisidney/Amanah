@@ -146,6 +146,12 @@ export type Dictionary = {
     emptyTitle: string;
     emptyDesc: string;
     createACircle: string;
+    redeemTitle: string;
+    redeemHint: string;
+    redeemPlaceholder: string;
+    redeemSubmit: string;
+    redeemWorking: string;
+    redeemInvalid: string;
   };
   wallet: {
     eyebrow: string;
@@ -334,6 +340,11 @@ export type Dictionary = {
     opening: string;
     notNow: string;
   };
+  errors: {
+    title: string;
+    body: string;
+    tryAgain: string;
+  };
 };
 
 export const en: Dictionary = {
@@ -491,6 +502,13 @@ export const en: Dictionary = {
     emptyTitle: 'You have not joined a circle yet',
     emptyDesc: 'Create a new circle or wait for an invitation from your community.',
     createACircle: 'Create a circle',
+    redeemTitle: 'Enter invite code',
+    redeemHint:
+      'Got an 8-character code on WhatsApp? Paste it here after you sign in with phone.',
+    redeemPlaceholder: 'e.g. AB3K7M2Q',
+    redeemSubmit: 'Join with code',
+    redeemWorking: 'Opening…',
+    redeemInvalid: 'Use the 6–8 character invite code (letters and numbers, no O/0/I/1).',
   },
   wallet: {
     eyebrow: 'Balances',
@@ -571,7 +589,7 @@ export const en: Dictionary = {
     linking: 'Linking…',
     linkMpesa: 'Link M-Pesa',
     documentType: 'Document type',
-    fileHint: 'File (JPEG, PNG, WebP, or PDF · max 10MB)',
+    fileHint: 'Photo or PDF (phone photos are compressed automatically · max ~10MB)',
     uploading: 'Uploading…',
     uploadDocument: 'Upload document',
     nationalId: 'National ID',
@@ -686,6 +704,11 @@ export const en: Dictionary = {
     install: 'Install',
     opening: 'Opening…',
     notNow: 'Not now',
+  },
+  errors: {
+    title: 'Something went wrong',
+    body: 'We are retrying this page. Tap below if it does not load automatically.',
+    tryAgain: 'Try again',
   },
 };
 
@@ -845,6 +868,13 @@ export const sw: Dictionary = {
     emptyTitle: 'Bado hujajiunga na mduara',
     emptyDesc: 'Unda mduara mpya au subiri mwaliko kutoka jamii yako.',
     createACircle: 'Unda mduara',
+    redeemTitle: 'Weka msimbo wa mwaliko',
+    redeemHint:
+      'Umepata msimbo wa herufi 8 kwenye WhatsApp? Ubandike hapa baada ya kuingia kwa simu.',
+    redeemPlaceholder: 'mf. AB3K7M2Q',
+    redeemSubmit: 'Jiunge kwa msimbo',
+    redeemWorking: 'Inafungua…',
+    redeemInvalid: 'Tumia msimbo wa herufi 6–8 (bila O/0/I/1).',
   },
   wallet: {
     eyebrow: 'Salio',
@@ -926,7 +956,7 @@ export const sw: Dictionary = {
     linking: 'Inaunganisha…',
     linkMpesa: 'Unganisha M-Pesa',
     documentType: 'Aina ya hati',
-    fileHint: 'Faili (JPEG, PNG, WebP, au PDF · max 10MB)',
+    fileHint: 'Picha au PDF (picha za simu zinabanwa kiotomatiki · max ~10MB)',
     uploading: 'Inapakia…',
     uploadDocument: 'Pakia hati',
     nationalId: 'Kitambulisho cha taifa',
@@ -1042,6 +1072,11 @@ export const sw: Dictionary = {
     install: 'Sakinisha',
     opening: 'Inafungua…',
     notNow: 'Si sasa',
+  },
+  errors: {
+    title: 'Kuna hitilafu',
+    body: 'Tunajaribu tena ukurasa huu. Gusa hapa chini usipopakia kiotomatiki.',
+    tryAgain: 'Jaribu tena',
   },
 };
 

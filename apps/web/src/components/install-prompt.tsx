@@ -6,7 +6,7 @@ import type { Dictionary } from '@/i18n/dictionaries';
 
 const DISMISS_KEY = 'amanah-install-dismissed-at';
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
-const ANDROID_FALLBACK_MS = 3500;
+const ANDROID_FALLBACK_MS = 2200;
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;

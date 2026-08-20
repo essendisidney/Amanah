@@ -15,7 +15,7 @@ function buildShareText(
   circleName?: string,
 ): string {
   const name = circleName?.trim() || 'an Amanah savings circle';
-  return `You're invited to join ${name} on Amanah.\n\n1) Open Amanah and sign in with your phone (SMS code)\n2) Enter invite code: ${inviteCode}\n\nOr open this link after signing in:\n${inviteUrl}`;
+  return `You're invited to join ${name} on Amanah.\n\n1) Open Amanah and sign in with your phone (SMS code)\n2) Go to Circles → Enter invite code: ${inviteCode}\n\nOr open this link after signing in:\n${inviteUrl}`;
 }
 
 function qrImageUrl(data: string): string {
@@ -72,8 +72,8 @@ export function InviteSharePanel({
           {inviteCode}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          Easy to share on WhatsApp. No email needed — sign in with phone OTP, then paste
-          this code in Amanah.
+          Share on WhatsApp. They sign in with phone OTP, open Circles, and paste this
+          code under “Enter invite code”.
         </p>
       </div>
 

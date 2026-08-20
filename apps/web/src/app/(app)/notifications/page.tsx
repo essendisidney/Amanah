@@ -7,9 +7,9 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import {
-  markNotificationReadAction,
-  markAllNotificationsReadAction,
-} from '@/features/dashboard/actions/notification-actions';
+  MarkAllNotificationsReadButton,
+  MarkNotificationReadButton,
+} from '@/features/dashboard/components/mark-notification-read-button';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
@@ -70,11 +70,7 @@ export default async function NotificationsPage() {
           </p>
         </div>
         {unreadCount > 0 ? (
-          <form action={markAllNotificationsReadAction}>
-            <Button type="submit" variant="outline" size="sm">
-              {labels.markAllRead}
-            </Button>
-          </form>
+          <MarkAllNotificationsReadButton label={labels.markAllRead} />
         ) : null}
       </div>
 
@@ -102,12 +98,10 @@ export default async function NotificationsPage() {
                 </p>
               </div>
               {!item.read_at ? (
-                <form action={markNotificationReadAction}>
-                  <input type="hidden" name="notificationId" value={item.id} />
-                  <Button type="submit" size="sm" variant="ghost">
-                    {labels.markRead}
-                  </Button>
-                </form>
+                <MarkNotificationReadButton
+                  notificationId={item.id}
+                  label={labels.markRead}
+                />
               ) : null}
             </li>
           ))}

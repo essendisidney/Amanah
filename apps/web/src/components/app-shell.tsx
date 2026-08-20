@@ -20,7 +20,11 @@ import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { Locale } from '@/i18n/config';
-import { NOTIFICATION_INSERT_EVENT } from '@/lib/notification-events';
+import {
+  NOTIFICATION_CLEAR_EVENT,
+  NOTIFICATION_INSERT_EVENT,
+  NOTIFICATION_READ_EVENT,
+} from '@/lib/notification-events';
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
@@ -61,8 +65,20 @@ export function AppShell({
 
   useEffect(() => {
     const onInsert = () => setLiveUnread((count) => count + 1);
+    const onRead = (event: Event) => {
+      const detail = (event as CustomEvent<{ count?: number }>).detail;
+      const n = Math.max(1, Number(detail?.count ?? 1));
+      setLiveUnread((count) => Math.max(0, count - n));
+    };
+    const onClear = () => setLiveUnread(0);
     window.addEventListener(NOTIFICATION_INSERT_EVENT, onInsert);
-    return () => window.removeEventListener(NOTIFICATION_INSERT_EVENT, onInsert);
+    window.addEventListener(NOTIFICATION_READ_EVENT, onRead);
+    window.addEventListener(NOTIFICATION_CLEAR_EVENT, onClear);
+    return () => {
+      window.removeEventListener(NOTIFICATION_INSERT_EVENT, onInsert);
+      window.removeEventListener(NOTIFICATION_READ_EVENT, onRead);
+      window.removeEventListener(NOTIFICATION_CLEAR_EVENT, onClear);
+    };
   }, []);
 
   const tabs: Tab[] = [

@@ -69,7 +69,13 @@ export default async function CircleRegistrationPage({ params }: Props) {
           ) : null}
         </div>
         <p className="mt-2 text-muted-foreground">
-          Upload registration papers, constitution, minutes, or bank letters for this circle.
+          {j.registration_status === 'approved'
+            ? 'Registration approved. Keep documents current if the registrar asks for updates.'
+            : j.registration_status === 'rejected'
+              ? 'Registration was rejected. Check notes below, fix the papers, and upload again.'
+              : j.registration_status === 'pending'
+                ? 'Documents are with compliance for review. You will get an in-app notification when decided.'
+                : 'Upload registration papers, constitution, minutes, or bank letters for this circle.'}
         </p>
         <Button asChild variant="outline" size="sm" className="mt-4">
           <Link href={`/circles/${slug}` as Route}>Back to circle</Link>

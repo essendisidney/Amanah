@@ -22,7 +22,7 @@ function loadImage(file: File): Promise<HTMLImageElement> {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      reject(new Error('Could not read that photo. Save the ID as JPEG or PNG and try again.'));
+      reject(new Error('Could not read that photo. Save as JPEG or PNG and try again.'));
     };
     img.src = url;
   });
@@ -64,9 +64,9 @@ async function compressImageToJpeg(file: File): Promise<File> {
     blob = await canvasToJpeg(img, quality);
   }
   if (blob.size > MAX_IMAGE_BYTES) {
-    throw new Error('That ID photo is still too large. Try a closer, clearer JPEG under 4MB.');
+    throw new Error('That photo is still too large. Try a clearer JPEG under 4MB.');
   }
-  const base = file.name.replace(/\.[^.]+$/, '') || 'national-id';
+  const base = file.name.replace(/\.[^.]+$/, '') || 'document';
   return new File([blob], `${base}.jpg`, { type: 'image/jpeg' });
 }
 
@@ -82,7 +82,7 @@ export async function prepareKycUploadFile(file: File): Promise<File> {
     return file;
   }
   if (!isLikelyImage(file)) {
-    throw new Error('Upload a photo of your ID (JPEG, PNG, WebP) or a PDF.');
+    throw new Error('Upload a photo (JPEG, PNG, WebP) or a PDF.');
   }
   return compressImageToJpeg(file);
 }

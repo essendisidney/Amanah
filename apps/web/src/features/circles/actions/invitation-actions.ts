@@ -1,6 +1,6 @@
 'use server';
 
-import { createInvitationSchema } from '@jamiya/shared';
+import { createInvitationSchema, normalizePhone254, toE164Kenya } from '@jamiya/shared';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
@@ -14,6 +14,40 @@ import {
 } from '../lib/invitation-token';
 import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
+
+async function findInviteeUserId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  email: string | undefined,
+  phone: string | undefined,
+): Promise<string | null> {
+  if (email) {
+    const { data: byEmail } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+    const id = (byEmail as unknown as { id: string } | null)?.id;
+    if (id) return id;
+  }
+
+  if (!phone) return null;
+  const e164 = toE164Kenya(phone);
+  const normalized = normalizePhone254(phone);
+  const candidates = Array.from(
+    new Set([e164, normalized, normalized ? `+${normalized}` : null].filter(Boolean)),
+  ) as string[];
+
+  for (const candidate of candidates) {
+    const { data: byPhone } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('phone', candidate)
+      .maybeSingle();
+    const id = (byPhone as unknown as { id: string } | null)?.id;
+    if (id) return id;
+  }
+  return null;
+}
 
 export async function createInvitationAction(
   _prev: ActionState,
@@ -42,7 +76,8 @@ export async function createInvitationAction(
     return { success: false, message: 'Authentication required.' };
   }
 
-  const { jamiyaId, email, phone } = parsed.data;
+  const { jamiyaId, email, phone: rawPhone } = parsed.data;
+  const phone = rawPhone ? toE164Kenya(rawPhone) ?? rawPhone : '';
 
   const { data: jamiya } = await supabase
     .from('jamiyas')
@@ -85,26 +120,18 @@ export async function createInvitationAction(
     };
   }
 
-  let inviteeUserId: string | null = null;
-  if (email) {
-    const { data: invitee } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', email)
-      .maybeSingle();
-    inviteeUserId = (invitee as unknown as { id: string } | null)?.id ?? null;
+  let inviteeUserId = await findInviteeUserId(supabase, email || undefined, phone || undefined);
 
-    if (inviteeUserId) {
-      const { data: existing } = await supabase
-        .from('members')
-        .select('id, status')
-        .eq('jamiya_id', jamiyaId)
-        .eq('user_id', inviteeUserId)
-        .maybeSingle();
-      const existingMember = existing as unknown as { status: string } | null;
-      if (existingMember?.status === 'active') {
-        return { success: false, message: 'That user is already an active member.' };
-      }
+  if (inviteeUserId) {
+    const { data: existing } = await supabase
+      .from('members')
+      .select('id, status')
+      .eq('jamiya_id', jamiyaId)
+      .eq('user_id', inviteeUserId)
+      .maybeSingle();
+    const existingMember = existing as unknown as { status: string } | null;
+    if (existingMember?.status === 'active') {
+      return { success: false, message: 'That user is already an active member.' };
     }
   }
 

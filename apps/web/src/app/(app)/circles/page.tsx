@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { RedeemInviteCodeForm } from '@/features/circles/components/redeem-invite-code-form';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -97,6 +98,17 @@ export default async function MyCirclesPage() {
           <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
         </Button>
       </div>
+
+      <section className="rounded-xl border border-border bg-card p-5">
+        <RedeemInviteCodeForm
+          title={labels.redeemTitle}
+          hint={labels.redeemHint}
+          placeholder={labels.redeemPlaceholder}
+          submitLabel={labels.redeemSubmit}
+          workingLabel={labels.redeemWorking}
+          invalidLabel={labels.redeemInvalid}
+        />
+      </section>
 
       {rows.length === 0 ? (
         <EmptyState
