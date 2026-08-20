@@ -221,7 +221,7 @@ export default async function WalletPage({ searchParams }: Props) {
           actionHref={'#top-up' as Route}
         />
       ) : (
-        <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white md:p-7">
+        <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
             Available
           </p>
@@ -331,7 +331,7 @@ export default async function WalletPage({ searchParams }: Props) {
         </div>
       </section>
 
-      <section className="amanah-surface overflow-hidden bg-[linear-gradient(135deg,#121816_0%,#1f2a24_55%,#0b5c42_120%)] p-5 text-white">
+      <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white">
         <div className="flex items-start justify-between">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Amanah</p>
           <span className="text-accent">✦</span>

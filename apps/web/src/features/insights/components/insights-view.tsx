@@ -32,7 +32,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
         </div>
       </div>
 
-      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white md:p-7">
+      <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
           Inflow this month
         </p>

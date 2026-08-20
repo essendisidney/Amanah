@@ -65,7 +65,7 @@ export default async function LandingPage() {
 
         <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
           <div className="amanah-surface overflow-hidden p-4 sm:p-5">
-            <div className="rounded-2xl bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_60%,#0b5c42_100%)] p-5 text-white">
+            <div className="amanah-forest rounded-2xl p-5 text-white">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
                 Total Amanah
               </p>

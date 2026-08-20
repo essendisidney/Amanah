@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /*
-  Amanah — liquid glass spatial UI (global)
-  Soft ambient mint / sky / butter · luminous emerald · frosted surfaces
+  Amanah — exact palette sampled from the liquid-glass mock
+  Paper #f5f5fd · primary teal-mint #07b78d · forest #0a231c
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -20,6 +20,7 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
 
+  --color-brand: var(--brand);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
@@ -41,6 +42,11 @@
   --color-forest: var(--forest);
   --color-forest-foreground: var(--forest-foreground);
 
+  --color-tint-add: var(--tint-add);
+  --color-tint-send: var(--tint-send);
+  --color-tint-pay: var(--tint-pay);
+  --color-tint-withdraw: var(--tint-withdraw);
+
   --radius-sm: 0.75rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
@@ -48,50 +54,54 @@
 }
 
 :root {
-  /* Soft cool paper — ambient blobs sit on top */
-  --background: #f3f6f4;
-  --foreground: #121816;
-  --muted: #e8efeb;
-  --muted-foreground: #5f6b65;
-  --border: rgba(18, 24, 22, 0.08);
-  --ring: #2ecc71;
+  /* Cool lavender paper (mock canvas) */
+  --background: #f5f5fd;
+  --foreground: #1a1d24;
+  --muted: #ebeef8;
+  --muted-foreground: #6b7080;
+  --border: rgba(26, 29, 36, 0.08);
+  --ring: #07b78d;
 
-  --card: rgba(255, 255, 255, 0.62);
-  --card-foreground: #121816;
+  --card: rgba(255, 255, 255, 0.72);
+  --card-foreground: #1a1d24;
 
-  /* Luminous mint (mock primary) */
-  --primary: #2ecc71;
+  /* Teal-mint from mock Add / Pay CTA (#07b78d / #01bf91) */
+  --brand: #07b78d;
+  --primary: #07b78d;
   --primary-foreground: #ffffff;
-  --primary-hover: #27ae60;
+  --primary-hover: #06a57e;
 
-  --secondary: rgba(255, 255, 255, 0.55);
-  --secondary-foreground: #121816;
+  --secondary: rgba(255, 255, 255, 0.7);
+  --secondary-foreground: #1a1d24;
 
-  --accent: #3db8e8;
-  --accent-foreground: #0b1f2a;
-  --accent-muted: rgba(61, 184, 232, 0.16);
+  /* Soft sky blue (Send) */
+  --accent: #5b9cff;
+  --accent-foreground: #0b1f3a;
+  --accent-muted: rgba(91, 156, 255, 0.14);
 
-  --destructive: #ef6b6b;
-  --destructive-foreground: #fff5f5;
+  /* Soft coral debit (#ef6b7b / #ff96a3) */
+  --destructive: #ef6b7b;
+  --destructive-foreground: #fff7f8;
 
-  --success: #2ecc71;
+  --success: #07b78d;
   --warning: #f0b429;
-  --info: #3db8e8;
+  --info: #5b9cff;
 
-  /* Deep forest for score / card moments */
-  --forest: #0a261f;
+  /* Score / card panel (#0a231c / #0c231b) */
+  --forest: #0a231c;
   --forest-foreground: #e8f5ef;
 
-  /* Quick-action tints */
-  --tint-add: #2ecc71;
-  --tint-send: #4aa3f0;
-  --tint-pay: #8b7cf6;
-  --tint-withdraw: #f08a5a;
+  /* Home quick-action icon colours (exact) */
+  --tint-add: #07b78d;
+  --tint-send: #5b9cff;
+  --tint-pay: #7b5cf0;
+  --tint-withdraw: #f07860;
+  --tint-request: #07b78d;
 
-  --glass-bg: rgba(255, 255, 255, 0.58);
-  --glass-border: rgba(255, 255, 255, 0.72);
-  --glass-shadow: 0 12px 40px rgba(18, 40, 32, 0.07);
-  --nav-glass: rgba(255, 255, 255, 0.72);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.88);
+  --glass-shadow: 0 12px 40px rgba(40, 50, 80, 0.07);
+  --nav-glass: rgba(255, 255, 255, 0.8);
 }
 
 .dark {
@@ -100,41 +110,43 @@
   --muted: #12201b;
   --muted-foreground: #9aa59e;
   --border: rgba(255, 255, 255, 0.1);
-  --ring: #2ecc71;
+  --ring: #07b78d;
 
-  --card: rgba(18, 36, 30, 0.72);
+  --card: rgba(14, 32, 28, 0.72);
   --card-foreground: #e8ebe8;
 
-  --primary: #2ecc71;
+  --brand: #2ed3a5;
+  --primary: #2ed3a5;
   --primary-foreground: #04140e;
-  --primary-hover: #3ad97f;
+  --primary-hover: #3adfb2;
 
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #e8ebe8;
 
-  --accent: #5cc8f5;
+  --accent: #6aabff;
   --accent-foreground: #041018;
-  --accent-muted: rgba(92, 200, 245, 0.14);
+  --accent-muted: rgba(106, 171, 255, 0.16);
 
-  --destructive: #ef6b6b;
+  --destructive: #ef6b7b;
   --destructive-foreground: #2a0f0f;
 
-  --success: #2ecc71;
+  --success: #2ed3a5;
   --warning: #f0b429;
-  --info: #5cc8f5;
+  --info: #6aabff;
 
   --forest: #061a15;
   --forest-foreground: #e8f5ef;
 
-  --tint-add: #2ecc71;
-  --tint-send: #5bb0f5;
-  --tint-pay: #a094ff;
+  --tint-add: #2ed3a5;
+  --tint-send: #6aabff;
+  --tint-pay: #9b85ff;
   --tint-withdraw: #f59d6e;
+  --tint-request: #2ed3a5;
 
-  --glass-bg: rgba(16, 32, 26, 0.62);
+  --glass-bg: rgba(14, 32, 28, 0.7);
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --nav-glass: rgba(12, 24, 20, 0.78);
+  --nav-glass: rgba(10, 24, 20, 0.84);
 }
 
 @layer base {
@@ -150,29 +162,29 @@
     @apply text-foreground antialiased;
     font-family: var(--font-sans);
     background-color: var(--background);
+    /* Mock ambient: mint + sky + soft lavender (lavender paper base) */
     background-image:
-      radial-gradient(ellipse 85% 55% at 8% -8%, rgba(46, 204, 113, 0.28), transparent 55%),
-      radial-gradient(ellipse 70% 50% at 92% 4%, rgba(61, 184, 232, 0.2), transparent 52%),
-      radial-gradient(ellipse 75% 45% at 55% 108%, rgba(240, 210, 90, 0.22), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 70% 40%, rgba(139, 124, 246, 0.08), transparent 60%);
+      radial-gradient(ellipse 85% 55% at 4% -10%, rgba(7, 183, 141, 0.14), transparent 58%),
+      radial-gradient(ellipse 70% 48% at 98% 2%, rgba(91, 156, 255, 0.12), transparent 55%),
+      radial-gradient(ellipse 75% 45% at 55% 110%, rgba(123, 92, 240, 0.07), transparent 58%),
+      radial-gradient(ellipse 60% 40% at 80% 70%, rgba(240, 120, 96, 0.05), transparent 55%);
     background-attachment: fixed;
     min-height: 100dvh;
   }
 
   .dark body {
     background-image:
-      radial-gradient(ellipse 85% 55% at 8% -8%, rgba(46, 204, 113, 0.18), transparent 55%),
-      radial-gradient(ellipse 70% 50% at 92% 4%, rgba(61, 184, 232, 0.12), transparent 52%),
-      radial-gradient(ellipse 75% 45% at 55% 108%, rgba(240, 210, 90, 0.1), transparent 55%),
-      radial-gradient(ellipse 50% 40% at 70% 40%, rgba(139, 124, 246, 0.08), transparent 60%);
+      radial-gradient(ellipse 85% 55% at 4% -10%, rgba(46, 211, 165, 0.12), transparent 58%),
+      radial-gradient(ellipse 70% 48% at 98% 2%, rgba(91, 156, 255, 0.08), transparent 55%),
+      radial-gradient(ellipse 75% 45% at 55% 110%, rgba(123, 92, 240, 0.06), transparent 58%);
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--color-primary) 28%, white);
+    background: color-mix(in oklab, var(--primary) 26%, white);
   }
 
   .dark ::selection {
-    background: color-mix(in oklab, var(--color-primary) 40%, black);
+    background: color-mix(in oklab, var(--primary) 38%, black);
   }
 }
 
@@ -182,16 +194,15 @@
     letter-spacing: -0.03em;
   }
 
-  /* Default elevated surface = liquid glass (global) */
   .amanah-surface {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     background: var(--glass-bg);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
       var(--glass-shadow);
-    backdrop-filter: blur(22px) saturate(1.35);
-    -webkit-backdrop-filter: blur(22px) saturate(1.35);
+    backdrop-filter: blur(22px) saturate(1.25);
+    -webkit-backdrop-filter: blur(22px) saturate(1.25);
   }
 
   .dark .amanah-surface {
@@ -204,10 +215,10 @@
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
       var(--glass-shadow);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
   }
 
   .dark .amanah-glass {
@@ -218,56 +229,62 @@
 
   .amanah-glass-pill {
     border: 1px solid var(--glass-border);
-    background: color-mix(in oklab, white 52%, transparent);
+    background: color-mix(in oklab, white 62%, transparent);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      0 6px 20px rgba(18, 40, 32, 0.06);
-    backdrop-filter: blur(16px) saturate(1.3);
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      0 6px 18px rgba(40, 50, 80, 0.05);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
   }
 
   .dark .amanah-glass-pill {
-    background: color-mix(in oklab, #12201b 70%, transparent);
+    background: color-mix(in oklab, #12201b 72%, transparent);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
-  /* Soft tinted action tiles (home quick actions) */
-  .amanah-tint-add {
-    background: color-mix(in oklab, var(--tint-add) 18%, white);
-    color: var(--tint-add);
+  /* Soft pastel washes matching mock tiles */
+  .amanah-tint-add,
+  .amanah-tint-request {
+    background: #d6f5ee;
+    color: #07b78d;
   }
   .amanah-tint-send {
-    background: color-mix(in oklab, var(--tint-send) 18%, white);
-    color: var(--tint-send);
+    background: #dff0ff;
+    color: #5b9cff;
   }
   .amanah-tint-pay {
-    background: color-mix(in oklab, var(--tint-pay) 18%, white);
-    color: var(--tint-pay);
+    background: #ebe4ff;
+    color: #7b5cf0;
   }
   .amanah-tint-withdraw {
-    background: color-mix(in oklab, var(--tint-withdraw) 18%, white);
-    color: var(--tint-withdraw);
+    background: #ffe6df;
+    color: #f07860;
   }
 
-  .dark .amanah-tint-add {
-    background: color-mix(in oklab, var(--tint-add) 22%, transparent);
+  .dark .amanah-tint-add,
+  .dark .amanah-tint-request {
+    background: color-mix(in oklab, #07b78d 24%, transparent);
+    color: #2ed3a5;
   }
   .dark .amanah-tint-send {
-    background: color-mix(in oklab, var(--tint-send) 22%, transparent);
+    background: color-mix(in oklab, #5b9cff 24%, transparent);
+    color: #6aabff;
   }
   .dark .amanah-tint-pay {
-    background: color-mix(in oklab, var(--tint-pay) 22%, transparent);
+    background: color-mix(in oklab, #7b5cf0 24%, transparent);
+    color: #9b85ff;
   }
   .dark .amanah-tint-withdraw {
-    background: color-mix(in oklab, var(--tint-withdraw) 22%, transparent);
+    background: color-mix(in oklab, #f07860 24%, transparent);
+    color: #f59d6e;
   }
 
   .amanah-forest {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(46, 204, 113, 0.35), transparent 55%),
-      radial-gradient(ellipse 60% 50% at 90% 80%, rgba(61, 184, 232, 0.15), transparent 50%),
+      radial-gradient(ellipse 80% 60% at 18% 0%, rgba(7, 183, 141, 0.35), transparent 55%),
+      radial-gradient(ellipse 55% 45% at 92% 85%, rgba(91, 156, 255, 0.12), transparent 50%),
       var(--forest);
     color: var(--forest-foreground);
   }
@@ -280,16 +297,16 @@
     border: 1px solid var(--glass-border);
     background: var(--nav-glass);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.55),
-      0 12px 40px rgba(18, 40, 32, 0.12);
-    backdrop-filter: blur(24px) saturate(1.4);
-    -webkit-backdrop-filter: blur(24px) saturate(1.4);
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 10px 32px rgba(40, 50, 80, 0.1);
+    backdrop-filter: blur(24px) saturate(1.3);
+    -webkit-backdrop-filter: blur(24px) saturate(1.3);
   }
 
   .amanah-pay-glow {
     box-shadow:
-      0 0 0 6px color-mix(in oklab, var(--primary) 22%, transparent),
-      0 12px 32px color-mix(in oklab, var(--primary) 45%, transparent);
+      0 0 0 5px rgba(7, 183, 141, 0.18),
+      0 10px 28px rgba(7, 183, 141, 0.4);
   }
 
   .amanah-page-enter {
@@ -308,10 +325,10 @@
   }
 
   .amanah-geo {
-    background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%232ecc71' stroke-opacity='0.08' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2307b78d' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
   }
 
   .dark .amanah-geo {
-    background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%232ecc71' stroke-opacity='0.14' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2307b78d' stroke-opacity='0.14' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
   }
 }

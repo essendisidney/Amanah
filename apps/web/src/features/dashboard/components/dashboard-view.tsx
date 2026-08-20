@@ -50,7 +50,7 @@ export function DashboardView({
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
     },
-  ];
+  ] as const;
 
   const circle = data.jamiyas[0] ?? null;
   const recent = data.activity.slice(0, 3);

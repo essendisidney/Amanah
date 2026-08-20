@@ -19,21 +19,25 @@ const ACTIONS = [
     href: '/wallet' as Route,
     label: 'Send',
     icon: Send,
+    tint: 'amanah-tint-send',
   },
   {
     href: '/wallet' as Route,
     label: 'Request',
     icon: ArrowDownToLine,
+    tint: 'amanah-tint-request',
   },
   {
     href: '/wallet#top-up' as Route,
     label: 'Add Money',
     icon: Plus,
+    tint: 'amanah-tint-add',
   },
   {
     href: '/wallet#withdraw' as Route,
     label: 'Withdraw',
     icon: ArrowUpFromLine,
+    tint: 'amanah-tint-withdraw',
   },
 ] as const;
 
@@ -63,7 +67,7 @@ export function PaySheet() {
         )}
       >
         <div className="amanah-glass rounded-t-[1.75rem] px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-8px_40px_rgba(18,24,22,0.12)] md:rounded-[1.75rem]">
-          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
+          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-black/12 dark:bg-white/20" />
 
           <div className="mb-5 flex items-center justify-between">
             <h1 className="text-xl font-semibold tracking-tight">Pay</h1>
@@ -79,9 +83,9 @@ export function PaySheet() {
           <button
             type="button"
             disabled
-            className="mb-4 flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-primary px-6 py-12 text-primary-foreground shadow-[0_12px_36px_rgba(46,204,113,0.35)]"
+            className="amanah-pay-glow mb-4 flex w-full flex-col items-center justify-center gap-3 rounded-[1.5rem] bg-primary px-6 py-12 text-primary-foreground"
           >
-            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+            <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/18">
               <QrCode className="h-7 w-7" strokeWidth={1.5} />
             </span>
             <span className="text-[15px] font-semibold">Scan</span>
@@ -96,7 +100,12 @@ export function PaySheet() {
                     href={action.href}
                     className="flex items-center gap-3 px-4 py-4 transition-colors active:bg-black/5 dark:active:bg-white/5"
                   >
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/70 text-primary dark:bg-white/10">
+                    <span
+                      className={cn(
+                        'inline-flex h-10 w-10 items-center justify-center rounded-[0.85rem]',
+                        action.tint,
+                      )}
+                    >
                       <Icon className="h-4 w-4" strokeWidth={1.75} />
                     </span>
                     <span className="flex-1 text-[15px] font-medium">{action.label}</span>
