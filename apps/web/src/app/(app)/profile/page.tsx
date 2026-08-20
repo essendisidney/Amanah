@@ -10,6 +10,7 @@ import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
 import { IprsVerifyForm } from '@/features/profile/components/iprs-verify-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 import { ReferralPanel } from '@/features/profile/components/referral-panel';
+import { ProfileOnboardingBanner } from '@/features/profile/components/profile-onboarding-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
@@ -43,7 +44,11 @@ type KycRow = {
   rejection_reason: string | null;
 };
 
-export default async function ProfilePage() {
+type Props = {
+  searchParams?: Promise<{ onboarding?: string; next?: string }>;
+};
+
+export default async function ProfilePage({ searchParams }: Props) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -52,6 +57,10 @@ export default async function ProfilePage() {
   if (!user) {
     redirect('/login?next=/profile');
   }
+
+  const params = (await searchParams) ?? {};
+  const onboarding = params.onboarding === '1';
+  const continueHref = params.next;
 
   const { dict } = await getDictionary();
   const labels = dict.profile;
@@ -90,6 +99,14 @@ export default async function ProfilePage() {
 
   return (
     <div className="space-y-10">
+      {onboarding ? (
+        <ProfileOnboardingBanner
+          continueHref={continueHref}
+          profileCompleted={Boolean(profile?.profile_completed && profile?.full_name?.trim())}
+          hasKycDoc={docs.length > 0}
+        />
+      ) : null}
+
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           {labels.eyebrow}
@@ -108,7 +125,7 @@ export default async function ProfilePage() {
       </div>
 
       <section className="grid gap-8 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-6">
+        <div id="personal-details" className="rounded-xl border border-border bg-card p-6">
           <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
             {labels.personalDetails}
           </h2>
@@ -117,6 +134,7 @@ export default async function ProfilePage() {
           </p>
           <ProfileForm
             labels={labels}
+            continueHref={onboarding ? continueHref : undefined}
             defaultValues={{
               fullName: profile?.full_name ?? '',
               phone: profile?.phone ?? '',
@@ -155,7 +173,7 @@ export default async function ProfilePage() {
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-border bg-card p-6">
+          <div id="kyc-documents" className="rounded-xl border border-border bg-card p-6">
             <h2 className="mb-4 font-[family-name:var(--font-display)] text-xl font-semibold">
               {labels.kycDocuments}
             </h2>

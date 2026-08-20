@@ -351,6 +351,19 @@ export async function POST(req: NextRequest) {
       console.error('[auth/phone/verify] cookie session threw', cookieSetErr);
     }
 
+    const { data: profileAfter } = await admin
+      .from('profiles')
+      .select('profile_completed, full_name')
+      .eq('id', authUserId)
+      .maybeSingle();
+
+    const profileCompleted = Boolean(
+      (profileAfter as { profile_completed?: boolean } | null)?.profile_completed,
+    );
+    const hasName = Boolean(
+      ((profileAfter as { full_name?: string | null } | null)?.full_name ?? '').trim(),
+    );
+
     claimedOtpId = null;
     return NextResponse.json({
       success: true,
@@ -359,6 +372,7 @@ export async function POST(req: NextRequest) {
       refresh_token: session.refresh_token,
       expires_in: session.expires_in,
       userId: authUserId,
+      profile_completed: profileCompleted && hasName,
     });
   } catch (err) {
     console.error('[auth/phone/verify]', err);

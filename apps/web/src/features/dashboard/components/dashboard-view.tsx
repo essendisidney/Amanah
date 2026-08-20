@@ -166,7 +166,7 @@ export function DashboardView({
             <p className="text-xs text-muted-foreground">Due {formatDate(nextDue.dueDate)}</p>
           </div>
           <Button asChild size="sm">
-            <Link href={`/circles/${nextDue.jamiyaSlug}` as Route}>{common.pay}</Link>
+            <Link href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}>{common.pay}</Link>
           </Button>
         </section>
       ) : null}

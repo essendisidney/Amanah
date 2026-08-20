@@ -124,6 +124,7 @@ export function PhoneOtpForm({
       cookies_set?: boolean;
       access_token?: string;
       refresh_token?: string;
+      profile_completed?: boolean;
     } = {};
 
     try {
@@ -185,7 +186,11 @@ export function PhoneOtpForm({
         .catch(() => undefined);
     }
 
-    window.location.replace(dest);
+    window.location.replace(
+      json.profile_completed === true
+        ? dest
+        : `/profile?onboarding=1&next=${encodeURIComponent(dest)}`,
+    );
     return true;
   }
 

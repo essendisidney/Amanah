@@ -37,7 +37,7 @@ export function ContributionsSection({
               <div>
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
-                    href={`/circles/${item.jamiyaSlug}` as Route}
+                    href={`/circles/${item.jamiyaSlug}#pay` as Route}
                     className="font-medium text-foreground hover:text-primary"
                   >
                     {item.jamiyaName}

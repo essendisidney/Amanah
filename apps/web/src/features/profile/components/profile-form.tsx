@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import type { Route } from 'next';
 import { useActionState } from 'react';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
 import { updateProfileAction } from '../actions/profile-actions';
@@ -9,6 +11,7 @@ import type { Dictionary } from '@/i18n/dictionaries';
 export function ProfileForm({
   defaultValues,
   labels,
+  continueHref,
 }: {
   defaultValues: {
     fullName: string;
@@ -17,11 +20,20 @@ export function ProfileForm({
     countryCode: string;
   };
   labels: Dictionary['profile'];
+  continueHref?: string;
 }) {
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
     initialProfileActionState,
   );
+
+  const next =
+    continueHref &&
+    continueHref.startsWith('/') &&
+    !continueHref.startsWith('//') &&
+    !continueHref.includes('://')
+      ? (continueHref as Route)
+      : null;
 
   return (
     <div className="space-y-4">
@@ -77,9 +89,16 @@ export function ProfileForm({
             <p className="text-sm text-destructive">{state.fieldErrors.bio[0]}</p>
           ) : null}
         </div>
-        <Button type="submit" disabled={pending}>
-          {pending ? labels.saving : labels.saveProfile}
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Button type="submit" disabled={pending}>
+            {pending ? labels.saving : labels.saveProfile}
+          </Button>
+          {state.success && next ? (
+            <Button asChild variant="outline">
+              <Link href={next}>Continue to Amanah</Link>
+            </Button>
+          ) : null}
+        </div>
       </form>
     </div>
   );
