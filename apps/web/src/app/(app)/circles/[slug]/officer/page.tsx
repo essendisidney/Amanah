@@ -335,7 +335,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                 Invoices
               </Link>
               <Link href={`/circles/${slug}/statement` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
-                ID reports
+                Statements
               </Link>
               <Link href={`/circles/${slug}/report` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 GL report

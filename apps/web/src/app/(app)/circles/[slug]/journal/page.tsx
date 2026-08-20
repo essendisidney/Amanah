@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const metadata: Metadata = { title: 'Cashbook journal' };
 export const dynamic = 'force-dynamic';
@@ -84,8 +85,17 @@ export default async function CircleJournalPage({ params }: Props) {
         </div>
       </div>
 
-      {entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No journal lines yet.</p>
+      {pack && pack.ok === false ? (
+        <p className="text-sm text-destructive">
+          Could not load journal lines. Try again from Treasury.
+        </p>
+      ) : entries.length === 0 ? (
+        <EmptyState
+          title="No journal lines yet"
+          description="Cashbook lines appear after officers seed treasury accounts and record deposits, expenses, or fines."
+          actionLabel="Open treasury"
+          actionHref={`/circles/${slug}/treasury` as Route}
+        />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
           <table className="w-full min-w-[40rem] border-collapse text-left text-sm">

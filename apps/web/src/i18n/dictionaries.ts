@@ -61,6 +61,11 @@ export type Dictionary = {
     preferEmail: string;
     signInPassword: string;
     createEmailAccount: string;
+    codeAlreadyUsed: string;
+    invalidOrExpired: string;
+    networkError: string;
+    verifyFallback: string;
+    inviteNextHint: string;
   };
   loans: {
     title: string;
@@ -419,6 +424,11 @@ export const en: Dictionary = {
     preferEmail: 'Prefer email?',
     signInPassword: 'Sign in with password',
     createEmailAccount: 'Create email account',
+    codeAlreadyUsed: 'This code was already used or failed. Request a new code.',
+    invalidOrExpired: 'Invalid or expired code. Request a new one.',
+    networkError: 'Network error verifying code. Check connection and try again.',
+    verifyFallback: 'Could not verify code. Request a new one.',
+    inviteNextHint: 'After verifying, you’ll open your circle invite.',
   },
   loans: {
     title: 'Circle loans (Qard Hassan)',
@@ -795,6 +805,11 @@ export const sw: Dictionary = {
     preferEmail: 'Unapendelea barua pepe?',
     signInPassword: 'Ingia kwa nenosiri',
     createEmailAccount: 'Fungua akaunti ya barua pepe',
+    codeAlreadyUsed: 'Msimbo huu umetumika au umeshindikana. Omba msimbo mpya.',
+    invalidOrExpired: 'Msimbo si sahihi au umeisha muda. Omba mpya.',
+    networkError: 'Hitilafu ya mtandao wakati wa kuthibitisha. Angalia muunganisho.',
+    verifyFallback: 'Imeshindikana kuthibitisha msimbo. Omba mpya.',
+    inviteNextHint: 'Baada ya kuthibitisha, utafungua mwaliko wa mduara.',
   },
   loans: {
     title: 'Mikopo ya mduara (Qard Hassan)',

@@ -37,20 +37,7 @@ export function InviteMemberForm({
       <form action={formAction} className="space-y-4">
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="member@example.com"
-            autoComplete="email"
-          />
-          {state.fieldErrors?.email?.[0] ? (
-            <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
-          ) : null}
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone (optional)</Label>
+          <Label htmlFor="phone">Phone</Label>
           <Input
             id="phone"
             name="phone"
@@ -62,7 +49,20 @@ export function InviteMemberForm({
             <p className="text-sm text-destructive">{state.fieldErrors.phone[0]}</p>
           ) : null}
         </div>
-        <Button type="submit" disabled={pending}>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email (optional)</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="member@example.com"
+            autoComplete="email"
+          />
+          {state.fieldErrors?.email?.[0] ? (
+            <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
+          ) : null}
+        </div>
+        <Button type="submit" disabled={pending} className="min-h-11">
           {pending ? 'Creating invite…' : 'Create invitation'}
         </Button>
       </form>

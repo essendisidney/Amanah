@@ -112,7 +112,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .order('payout_position', { ascending: true, nullsFirst: false }),
     supabase
       .from('invitations')
-      .select('id, email, phone, status, expires_at, created_at')
+      .select('id, email, phone, status, expires_at, created_at, invite_code')
       .eq('jamiya_id', jamiya.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
@@ -231,6 +231,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       status: string;
       expires_at: string;
       created_at: string;
+      invite_code: string | null;
     }>
   ).map((row) => ({
     id: row.id,
@@ -239,6 +240,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     status: row.status,
     expiresAt: row.expires_at,
     createdAt: row.created_at,
+    inviteCode: row.invite_code,
   }));
 
   const contributions: ScheduleContribution[] = (

@@ -7,6 +7,7 @@ import { Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 import {
   allocateDividendAction,
   payDividendAction,
@@ -120,6 +121,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
   const today = new Date().toISOString().slice(0, 10);
   const shareCapital = Number(gl?.balance_sheet?.equity_liabilities?.share_capital ?? 0);
   const currency = jamiya.share_currency || jamiya.currency;
+  const bankAccounts = (accountsData ?? []) as Array<{ id: string; name: string }>;
 
   return (
     <div className="mx-auto max-w-5xl space-y-10 px-6 py-10">
@@ -143,7 +145,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/statement` as Route}>ID reports</Link>
+            <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
           </Button>
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
@@ -255,7 +257,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                 defaultValue=""
               >
                 <option value="">— book only —</option>
-                {((accountsData ?? []) as Array<{ id: string; name: string }>).map((a) => (
+                {bankAccounts.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name}
                   </option>
@@ -267,7 +269,9 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
               <Input id="notes" name="notes" placeholder="Initial capital / top-up" />
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit">Record purchase</Button>
+              <Button type="submit" className="min-h-11">
+                Record purchase
+              </Button>
             </div>
           </form>
         </section>
@@ -278,7 +282,20 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           Share register
         </h2>
         {!(gl?.share_register?.length) ? (
-          <p className="text-sm text-muted-foreground">No shares recorded yet.</p>
+          <EmptyState
+            title="No shares recorded yet"
+            description={
+              canManage
+                ? 'Record the first share purchase above to open the register.'
+                : 'Ask an officer to record share purchases for this circle.'
+            }
+            {...(canManage
+              ? {}
+              : {
+                  actionLabel: 'Back to circle',
+                  actionHref: `/circles/${slug}` as Route,
+                })}
+          />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {gl.share_register.map((row) => (
@@ -304,7 +321,14 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           Recent lots
         </h2>
         {!(lotsData as unknown[] | null)?.length ? (
-          <p className="text-sm text-muted-foreground">No purchase lots yet.</p>
+          <EmptyState
+            title="No purchase lots yet"
+            description={
+              canManage
+                ? 'Each recorded purchase creates a lot for audit and dividends.'
+                : 'Share lots appear after an officer records purchases.'
+            }
+          />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {((lotsData ?? []) as Array<Record<string, unknown>>).map((lot) => (
@@ -392,31 +416,41 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                   </p>
                 </div>
                 {canManage && String(d.status) === 'allocated' ? (
-                  <form action={payDividendAction} className="flex flex-wrap items-end gap-2">
-                    <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="dividendId" value={String(d.id)} />
-                    <div className="space-y-1">
-                      <Label htmlFor={`payAcct-${String(d.id)}`}>Pay from account</Label>
-                      <select
-                        id={`payAcct-${String(d.id)}`}
-                        name="bankAccountId"
-                        required
-                        className="h-10 min-w-[12rem] rounded-md border border-input bg-background px-3 text-sm"
-                        defaultValue={
-                          ((accountsData ?? []) as Array<{ id: string }>)[0]?.id ?? ''
-                        }
+                  bankAccounts.length > 0 ? (
+                    <form action={payDividendAction} className="flex flex-wrap items-end gap-2">
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="dividendId" value={String(d.id)} />
+                      <div className="space-y-1">
+                        <Label htmlFor={`payAcct-${String(d.id)}`}>Pay from account</Label>
+                        <select
+                          id={`payAcct-${String(d.id)}`}
+                          name="bankAccountId"
+                          required
+                          className="h-11 min-w-[12rem] rounded-md border border-input bg-background px-3 text-sm"
+                          defaultValue={bankAccounts[0]?.id ?? ''}
+                        >
+                          {bankAccounts.map((a) => (
+                            <option key={a.id} value={a.id}>
+                              {a.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <Button type="submit" size="sm" className="min-h-11">
+                        Pay to Money
+                      </Button>
+                    </form>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Add a treasury bank account first, then pay this dividend.{' '}
+                      <Link
+                        href={`/circles/${slug}/treasury` as Route}
+                        className="text-accent underline-offset-4 hover:underline"
                       >
-                        {((accountsData ?? []) as Array<{ id: string; name: string }>).map((a) => (
-                          <option key={a.id} value={a.id}>
-                            {a.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <Button type="submit" size="sm">
-                      Pay to wallets
-                    </Button>
-                  </form>
+                        Open treasury
+                      </Link>
+                    </p>
+                  )
                 ) : null}
               </li>
             ))}

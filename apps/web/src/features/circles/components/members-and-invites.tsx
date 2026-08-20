@@ -3,6 +3,7 @@ import { Button } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { revokeInvitationAction } from '../actions/invitation-actions';
 import { setMemberRoleAction, vouchMemberAction } from '../actions/member-actions';
+import { CopyInviteCodeButton } from './copy-invite-code-button';
 
 export type MemberListItem = {
   id: string;
@@ -24,6 +25,7 @@ export type InvitationListItem = {
   status: string;
   expiresAt: string;
   createdAt: string;
+  inviteCode?: string | null;
 };
 
 const OFFICER_ROLES = ['member', 'secretary', 'treasurer', 'chair', 'circle_admin'] as const;
@@ -139,22 +141,30 @@ export function PendingInvitationsList({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-medium text-foreground">
-                {invite.email ?? invite.phone ?? 'Invite'}
+                {invite.phone ?? invite.email ?? 'Invite'}
               </p>
               <StatusBadge status={invite.status} />
             </div>
+            {invite.inviteCode ? (
+              <p className="mt-1 font-mono text-sm font-semibold tracking-wide text-foreground">
+                {invite.inviteCode}
+              </p>
+            ) : null}
             <p className="mt-1 text-sm text-muted-foreground">
               Expires {formatDate(invite.expiresAt)} · Sent {formatDate(invite.createdAt)}
             </p>
           </div>
           {canManage && invite.status === 'pending' ? (
-            <form action={revokeInvitationAction}>
-              <input type="hidden" name="invitationId" value={invite.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <Button type="submit" size="sm" variant="outline">
-                Revoke
-              </Button>
-            </form>
+            <div className="flex flex-wrap gap-2">
+              {invite.inviteCode ? <CopyInviteCodeButton code={invite.inviteCode} /> : null}
+              <form action={revokeInvitationAction}>
+                <input type="hidden" name="invitationId" value={invite.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                  Revoke
+                </Button>
+              </form>
+            </div>
           ) : null}
         </li>
       ))}

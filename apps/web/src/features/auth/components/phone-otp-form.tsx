@@ -44,6 +44,8 @@ export function PhoneOtpForm({
   labels: PhoneLabels;
 }) {
   const dest = getSafeRedirectPath(next);
+  const inviteNext = dest.includes('/invitations/');
+  const otpInputRef = useRef<HTMLInputElement | null>(null);
   const [phone, setPhone] = useState('');
   const [token, setToken] = useState('');
   const [step, setStep] = useState<Step>('request');
@@ -60,6 +62,11 @@ export function PhoneOtpForm({
     const t = window.setTimeout(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
     return () => window.clearTimeout(t);
   }, [cooldown]);
+
+  useEffect(() => {
+    if (step !== 'verify') return;
+    otpInputRef.current?.focus();
+  }, [step]);
 
   async function sendCode(rawPhone: string) {
     setError(null);
@@ -102,7 +109,8 @@ export function PhoneOtpForm({
     if (verifyingRef.current) return false;
     if (lastVerifiedToken.current === trimmed) {
       // Same code already tried (often already consumed). Do not silent-no-op.
-      setError('This code was already used or failed. Request a new code.');
+      setError(labels.codeAlreadyUsed);
+      setToken('');
       return false;
     }
 
@@ -130,15 +138,18 @@ export function PhoneOtpForm({
       });
       json = (await res.json().catch(() => ({}))) as typeof json;
       if (!res.ok || !json.success) {
-        setError(readApiError(json, 'Invalid or expired code. Request a new one.'));
+        setError(readApiError(json, labels.invalidOrExpired));
+        setToken('');
+        lastVerifiedToken.current = null;
         return false;
       }
     } catch (err) {
       lastVerifiedToken.current = null;
+      setToken('');
       const msg =
         err instanceof Error && err.message.trim()
           ? err.message.trim()
-          : 'Network error verifying code. Check connection and try again.';
+          : labels.networkError;
       setError(msg);
       return false;
     } finally {
@@ -201,7 +212,7 @@ export function PhoneOtpForm({
           <AlertDescription>
             {typeof error === 'string' && error.trim() && error !== '{}'
               ? error
-              : 'Could not verify code. Request a new one.'}
+              : labels.verifyFallback}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -270,8 +281,10 @@ export function PhoneOtpForm({
             <Input
               id="token"
               name="token"
+              ref={otpInputRef}
               inputMode="numeric"
               autoComplete="one-time-code"
+              autoFocus
               placeholder="123456"
               maxLength={6}
               value={token}
@@ -280,6 +293,7 @@ export function PhoneOtpForm({
             />
             <p className="text-xs text-muted-foreground">
               {t(labels.sentTo, { phone: formatPhoneHint(phone) })}
+              {inviteNext ? ` ${labels.inviteNextHint}` : ''}
             </p>
           </div>
           <Button type="submit" className="w-full" disabled={pending || token.length !== 6}>
