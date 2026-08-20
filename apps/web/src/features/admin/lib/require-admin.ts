@@ -20,7 +20,7 @@ export async function requireAdminAccess(
   const { user } = await getAuthUser();
 
   if (!user) {
-    redirect('/login?next=/admin');
+    redirect('/phone?next=/admin');
   }
 
   const profile = await getUserProfile(user.id);

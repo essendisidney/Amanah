@@ -81,18 +81,35 @@ export async function confirmCircleDualApprovalAction(formData: FormData): Promi
   const requestId = String(formData.get('requestId') ?? '');
   const slug = String(formData.get('slug') ?? '');
   const approve = String(formData.get('approve') ?? 'true') === 'true';
-  if (!requestId) return;
+  if (!requestId || !slug) return;
 
-  await callRpc('confirm_dual_approval', {
+  const { data, error } = await callRpc('confirm_dual_approval', {
     p_request_id: requestId,
     p_approve: approve,
   });
 
-  if (slug) {
-    revalidatePath(`/circles/${slug}`);
-    revalidatePath(`/circles/${slug}/officer`);
-    revalidatePath(`/circles/${slug}/audit`);
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath(`/circles/${slug}/officer`);
+  revalidatePath(`/circles/${slug}/audit`);
+
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message), 'error', '/officer');
   }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    const code = result?.error ?? 'Could not complete second approval.';
+    const message =
+      code === 'SECOND_APPROVER_MUST_DIFFER'
+        ? 'A different officer must second-approve. You already gave the first approval.'
+        : mapMoneyError(code);
+    redirectWithCircleNotice(slug, message, 'error', '/officer');
+  }
+  redirectWithCircleNotice(
+    slug,
+    approve ? 'Second approval recorded.' : 'Request rejected.',
+    'success',
+    '/officer',
+  );
 }
 
 export async function setCircleAutoFineAction(formData: FormData): Promise<void> {

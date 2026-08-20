@@ -121,23 +121,26 @@ export default async function AdminKycPage() {
                   <StatusBadge status={doc.status} />
                 </div>
                 {doc.status === 'uploaded' || doc.status === 'under_review' ? (
-                  <div className="flex flex-wrap gap-2">
-                    <form action={reviewKycDocumentAction}>
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <form action={reviewKycDocumentAction} className="w-full sm:w-auto">
                       <input type="hidden" name="documentId" value={doc.id} />
                       <input type="hidden" name="decision" value="approved" />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" className="min-h-11 w-full sm:w-auto">
                         Approve
                       </Button>
                     </form>
-                    <form action={reviewKycDocumentAction} className="flex gap-2">
+                    <form
+                      action={reviewKycDocumentAction}
+                      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+                    >
                       <input type="hidden" name="documentId" value={doc.id} />
                       <input type="hidden" name="decision" value="rejected" />
                       <input
                         name="reason"
                         placeholder="Rejection reason"
-                        className="h-9 rounded-md border border-border bg-card px-2 text-sm"
+                        className="min-h-11 w-full rounded-md border border-border bg-card px-3 text-sm sm:min-w-[12rem]"
                       />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                         Reject
                       </Button>
                     </form>
@@ -172,23 +175,26 @@ export default async function AdminKycPage() {
                   <StatusBadge status={doc.status} />
                 </div>
                 {doc.status === 'uploaded' || doc.status === 'under_review' ? (
-                  <div className="flex flex-wrap gap-2">
-                    <form action={reviewJamiyaKycAction}>
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+                    <form action={reviewJamiyaKycAction} className="w-full sm:w-auto">
                       <input type="hidden" name="documentId" value={doc.id} />
                       <input type="hidden" name="status" value="approved" />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" className="min-h-11 w-full sm:w-auto">
                         Approve
                       </Button>
                     </form>
-                    <form action={reviewJamiyaKycAction} className="flex gap-2">
+                    <form
+                      action={reviewJamiyaKycAction}
+                      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
+                    >
                       <input type="hidden" name="documentId" value={doc.id} />
                       <input type="hidden" name="status" value="rejected" />
                       <input
                         name="notes"
                         placeholder="Rejection notes"
-                        className="h-9 rounded-md border border-border bg-card px-2 text-sm"
+                        className="min-h-11 w-full rounded-md border border-border bg-card px-3 text-sm sm:min-w-[12rem]"
                       />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                         Reject
                       </Button>
                     </form>

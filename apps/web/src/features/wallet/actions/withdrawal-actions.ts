@@ -1,9 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
 import { logger } from '@/lib/observability';
 import { paymentProvider } from '@/lib/payments/provider';
+import { withNoticeQuery } from '@/features/auth/lib/types';
 
 export type WithdrawalActionState = {
   success: boolean;
@@ -95,15 +97,39 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
 export async function confirmDualApprovalAction(formData: FormData): Promise<void> {
   const requestId = String(formData.get('requestId') ?? '');
   const approve = String(formData.get('approve') ?? 'true') === 'true';
-  if (!requestId) return;
+  if (!requestId) {
+    redirect(withNoticeQuery('/admin/withdrawals', 'Missing approval request.', 'error'));
+  }
 
-  await callRpc('confirm_dual_approval', {
+  const { data, error } = await callRpc('confirm_dual_approval', {
     p_request_id: requestId,
     p_approve: approve,
   });
 
   revalidatePath('/admin/withdrawals');
   revalidatePath('/wallet');
+
+  if (error) {
+    redirect(withNoticeQuery('/admin/withdrawals', error.message, 'error'));
+  }
+  const result = data as { ok?: boolean; error?: string; status?: string } | null;
+  if (!result?.ok) {
+    const code = result?.error ?? 'Could not complete second approval.';
+    const message =
+      code === 'SECOND_APPROVER_MUST_DIFFER'
+        ? 'A different admin must second-approve. You already gave the first approval.'
+        : code === 'FORBIDDEN'
+          ? 'You do not have permission to second-approve this request.'
+          : code;
+    redirect(withNoticeQuery('/admin/withdrawals', message, 'error'));
+  }
+  redirect(
+    withNoticeQuery(
+      '/admin/withdrawals',
+      approve ? 'Second approval recorded.' : 'Request rejected.',
+      'success',
+    ),
+  );
 }
 
 /** Simulated B2C for circle payout cashouts until live Daraja. */

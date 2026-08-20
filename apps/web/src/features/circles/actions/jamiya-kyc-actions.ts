@@ -1,9 +1,11 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { withNoticeQuery } from '@/features/auth/lib/types';
 
 const DOC_TYPES = [
   'certificate_of_registration',
@@ -96,8 +98,10 @@ export async function reviewJamiyaKycAction(formData: FormData): Promise<void> {
   const documentId = String(formData.get('documentId') ?? '');
   const status = String(formData.get('status') ?? '');
   const notes = String(formData.get('notes') ?? '');
-  if (!documentId || !status) return;
-  await callRpc('review_jamiya_kyc_document', {
+  if (!documentId || !status) {
+    redirect(withNoticeQuery('/admin/kyc', 'Missing document or status.', 'error'));
+  }
+  const { data, error } = await callRpc('review_jamiya_kyc_document', {
     p_document_id: documentId,
     p_status: status,
     p_notes: notes || null,
@@ -106,4 +110,25 @@ export async function reviewJamiyaKycAction(formData: FormData): Promise<void> {
   revalidatePath('/admin');
   revalidatePath('/notifications');
   revalidatePath('/circles');
+
+  if (error) {
+    redirect(withNoticeQuery('/admin/kyc', error.message, 'error'));
+  }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (result && result.ok === false) {
+    redirect(
+      withNoticeQuery(
+        '/admin/kyc',
+        result.error ?? 'Could not update circle KYC document.',
+        'error',
+      ),
+    );
+  }
+  redirect(
+    withNoticeQuery(
+      '/admin/kyc',
+      status === 'approved' ? 'Circle document approved.' : 'Circle document rejected.',
+      'success',
+    ),
+  );
 }

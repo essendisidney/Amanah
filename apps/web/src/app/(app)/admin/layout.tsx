@@ -1,6 +1,8 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { AdminNoticeFromQuery } from '@/features/admin/components/admin-notice-from-query';
 
 const links: Array<{ href: Route; label: string }> = [
   { href: '/admin' as Route, label: 'Overview' },
@@ -23,8 +25,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { profile, role } = await requireAdminAccess('compliance');
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/70 pb-6">
+    <div className="space-y-6 pb-4">
+      <div className="space-y-4 border-b border-border/70 pb-5">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
             Administration
@@ -37,18 +39,24 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className="capitalize">{role.replaceAll('_', ' ')}</span>
           </p>
         </div>
-        <nav className="flex flex-wrap gap-2" aria-label="Admin">
+        <nav
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+          aria-label="Admin"
+        >
           {links.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted"
+              className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-border bg-card px-3.5 text-sm font-medium text-foreground hover:bg-muted"
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </div>
+      <Suspense fallback={null}>
+        <AdminNoticeFromQuery />
+      </Suspense>
       {children}
     </div>
   );

@@ -26,9 +26,12 @@ export function mapMoneyError(code: string | undefined | null): string {
     INSUFFICIENT_POCKET: 'Not enough balance in this savings pocket.',
     INSUFFICIENT_BALANCE: 'Not enough balance in that circle account.',
     INVALID_AMOUNT: 'Enter a valid amount.',
+    SECOND_APPROVER_MUST_DIFFER:
+      'A different person must second-approve. You already gave the first approval.',
     FORBIDDEN: 'You do not have permission for this action.',
     NOT_FOUND: 'That item was not found.',
     UNAUTHENTICATED: 'Sign in again, then retry.',
+    NOT_PENDING: 'This request is no longer pending.',
     AGREEMENT_REQUIRED: 'Borrower must accept the facility agreement first.',
     GUARANTEES_PENDING: 'Wait until nominated guarantors accept or decline.',
     GUARANTEE_REQUIRED: 'At least one accepted guarantor is required for this request.',

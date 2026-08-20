@@ -486,20 +486,20 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                       : ''}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <form action={decideQardFormAction}>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <form action={decideQardFormAction} className="w-full sm:w-auto">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="loanId" value={loan.id} />
                     <input type="hidden" name="approve" value="true" />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       {dict.officer.approveLoan}
                     </Button>
                   </form>
-                  <form action={decideQardFormAction}>
+                  <form action={decideQardFormAction} className="w-full sm:w-auto">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="loanId" value={loan.id} />
                     <input type="hidden" name="approve" value="false" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       {dict.officer.rejectLoan}
                     </Button>
                   </form>
@@ -534,20 +534,20 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                     · {formatDate(row.created_at)}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <form action={confirmCircleDualApprovalAction}>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <form action={confirmCircleDualApprovalAction} className="w-full sm:w-auto">
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="approve" value="true" />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Second approve
                     </Button>
                   </form>
-                  <form action={confirmCircleDualApprovalAction}>
+                  <form action={confirmCircleDualApprovalAction} className="w-full sm:w-auto">
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="approve" value="false" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       Reject
                     </Button>
                   </form>

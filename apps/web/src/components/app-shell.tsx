@@ -10,6 +10,7 @@ import {
   Home,
   LayoutGrid,
   LogOut,
+  Shield,
   UserRound,
   Wallet,
 } from 'lucide-react';
@@ -184,6 +185,22 @@ export function AppShell({
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
             <ThemeToggle />
             <LanguageSwitcher locale={locale} label={dict.common.language} />
+            {showAdmin ? (
+              <Link
+                href={'/admin' as Route}
+                className={cn(
+                  'inline-flex h-11 items-center justify-center gap-1.5 rounded-xl px-2.5 text-sm font-semibold xl:hidden',
+                  pathname.startsWith('/admin')
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
+                aria-label={dict.common.admin}
+                title={dict.common.admin}
+              >
+                <Shield className="h-5 w-5" />
+                <span className="hidden sm:inline">{dict.common.admin}</span>
+              </Link>
+            ) : null}
             <Link
               href={'/notifications' as Route}
               className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"

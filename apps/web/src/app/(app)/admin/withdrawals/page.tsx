@@ -67,7 +67,8 @@ export default async function AdminWithdrawalsPage() {
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Amounts at/above the platform dual-approval threshold need a second compliance
-          approver. Payout cashouts auto-simulate until live Daraja B2C.
+          approver. You cannot second-approve your own first approval. Payout cashouts
+          auto-simulate until live Daraja B2C.
         </p>
       </div>
 
@@ -91,18 +92,18 @@ export default async function AdminWithdrawalsPage() {
                     {formatDate(row.created_at)}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <form action={confirmDualApprovalAction}>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <form action={confirmDualApprovalAction} className="w-full sm:w-auto">
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="approve" value="true" />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Second approve
                     </Button>
                   </form>
-                  <form action={confirmDualApprovalAction}>
+                  <form action={confirmDualApprovalAction} className="w-full sm:w-auto">
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="approve" value="false" />
-                    <Button type="submit" size="sm" variant="destructive">
+                    <Button type="submit" variant="destructive" className="min-h-11 w-full sm:w-auto">
                       Reject
                     </Button>
                   </form>
@@ -141,26 +142,30 @@ export default async function AdminWithdrawalsPage() {
                   </div>
                 </div>
                 {row.status === 'pending' || row.status === 'processing' ? (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
                     {isPayoutCashout ? (
-                      <form action={processPayoutCashoutAction}>
+                      <form action={processPayoutCashoutAction} className="w-full sm:w-auto">
                         <input type="hidden" name="withdrawalId" value={row.id} />
-                        <Button type="submit" size="sm">
+                        <Button type="submit" className="min-h-11 w-full sm:w-auto">
                           Sim B2C cashout
                         </Button>
                       </form>
                     ) : null}
-                    <form action={processWithdrawalAction}>
+                    <form action={processWithdrawalAction} className="w-full sm:w-auto">
                       <input type="hidden" name="withdrawalId" value={row.id} />
                       <input type="hidden" name="approve" value="true" />
-                      <Button type="submit" size="sm" variant={isPayoutCashout ? 'outline' : 'default'}>
+                      <Button
+                        type="submit"
+                        variant={isPayoutCashout ? 'outline' : 'default'}
+                        className="min-h-11 w-full sm:w-auto"
+                      >
                         Approve &amp; debit
                       </Button>
                     </form>
-                    <form action={processWithdrawalAction}>
+                    <form action={processWithdrawalAction} className="w-full sm:w-auto">
                       <input type="hidden" name="withdrawalId" value={row.id} />
                       <input type="hidden" name="approve" value="false" />
-                      <Button type="submit" size="sm" variant="destructive">
+                      <Button type="submit" variant="destructive" className="min-h-11 w-full sm:w-auto">
                         Reject
                       </Button>
                     </form>
