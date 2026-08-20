@@ -68,7 +68,7 @@ export default async function PricingPage() {
               </ul>
               <div className="mt-8 space-y-2">
                 <Button asChild className="w-full min-h-11">
-                  <Link href={'/circles' as Route}>Open officer console</Link>
+                  <Link href={'/circles' as Route}>Open your circles</Link>
                 </Button>
                 <p className="text-xs text-muted-foreground">
                   Officers change the plan under Officer console → Circle plan.

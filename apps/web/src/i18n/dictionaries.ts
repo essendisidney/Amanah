@@ -226,6 +226,22 @@ export type Dictionary = {
     goalsDesc: string;
     investTitle: string;
     investDesc: string;
+    investSharesTitle: string;
+    investSharesBody: string;
+    investSharesCta: string;
+    investSharesJoinCta: string;
+    investTreasuryTitle: string;
+    investTreasuryBody: string;
+    investTreasuryCta: string;
+    investTreasuryBrowseCta: string;
+    investTawarruqTitle: string;
+    investTawarruqBody: string;
+    investTawarruqCta: string;
+    investYourCircles: string;
+    investEmptyTitle: string;
+    investEmptyDesc: string;
+    investEmptyCta: string;
+    backToFinance: string;
     shariaTitle: string;
     shariaLead: string;
     welfareOverview: string;
@@ -624,6 +640,26 @@ export const en: Dictionary = {
     goalsDesc: 'Save for Hajj, Umra, Udhiyah, or any personal target.',
     investTitle: 'Investments',
     investDesc: 'Circle shares, treasury projects, and partner finance options.',
+    investSharesTitle: 'Circle shares',
+    investSharesBody:
+      'Buy and hold membership shares in your circle. Par value and dividends are managed by officers with clear records.',
+    investSharesCta: 'Open shares',
+    investSharesJoinCta: 'Join a circle first',
+    investTreasuryTitle: 'Treasury projects',
+    investTreasuryBody:
+      'Circles can record Shariah-conscious investments and projects in the treasury — so members see where pooled capital goes.',
+    investTreasuryCta: 'Open treasury',
+    investTreasuryBrowseCta: 'Browse circles',
+    investTawarruqTitle: 'Partner Tawarruq',
+    investTawarruqBody:
+      'When you need larger finance outside the circle pool, apply through partner-facilitated Tawarruq — kept separate from interest-free Qard.',
+    investTawarruqCta: 'Explore Tawarruq',
+    investYourCircles: 'Your circles',
+    investEmptyTitle: 'No circles yet',
+    investEmptyDesc:
+      'Join or create a circle to access shares and treasury investment records.',
+    investEmptyCta: 'Go to Circles',
+    backToFinance: 'Back to Finance',
     shariaTitle: 'Shariah on Amanah',
     shariaLead:
       'Circles avoid riba between members. Qard is interest-free. Welfare and giving support mutual care. Partner Tawarruq is offered as a separate Sharia finance path — not a fatwa.',
@@ -1028,6 +1064,26 @@ export const sw: Dictionary = {
     goalsDesc: 'Okoa kwa Hajj, Umra, Udhiyah, au lengo lolote la kibinafsi.',
     investTitle: 'Uwekezaji',
     investDesc: 'Hisa za mduara, miradi ya hazina, na chaguo za fedha za washirika.',
+    investSharesTitle: 'Hisa za mduara',
+    investSharesBody:
+      'Nunua na shikilia hisa za uanachama katika mduara wako. Thamani ya hisa na gawio husimamiwa na maafisa kwa rekodi wazi.',
+    investSharesCta: 'Fungua hisa',
+    investSharesJoinCta: 'Jiunge na mduara kwanza',
+    investTreasuryTitle: 'Miradi ya hazina',
+    investTreasuryBody:
+      'Miduara inaweza kurekodi uwekezaji na miradi inayofuata Shariah katika hazina — ili wanachama waone pesa za pamoja zinakokwenda.',
+    investTreasuryCta: 'Fungua hazina',
+    investTreasuryBrowseCta: 'Vinjari miduara',
+    investTawarruqTitle: 'Tawarruq ya washirika',
+    investTawarruqBody:
+      'Unapohitaji fedha kubwa nje ya hazina ya mduara, omba Tawarruq kupitia washirika — tofauti na Qard isiyo na riba.',
+    investTawarruqCta: 'Gundua Tawarruq',
+    investYourCircles: 'Miduara yako',
+    investEmptyTitle: 'Bado hakuna miduara',
+    investEmptyDesc:
+      'Jiunge au unda mduara ili ufikie hisa na rekodi za uwekezaji wa hazina.',
+    investEmptyCta: 'Nenda Miduara',
+    backToFinance: 'Rudi Fedha',
     shariaTitle: 'Shariah kwenye Amanah',
     shariaLead:
       'Miduara huepuka riba kati ya wanachama. Qard haina riba. Ustawi na kutoa huunga mkono utunzaji wa pamoja. Tawarruq ya washirika ni njia tofauti ya fedha za Sharia — si fatwa.',

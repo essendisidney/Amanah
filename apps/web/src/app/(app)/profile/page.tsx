@@ -61,7 +61,7 @@ export default async function ProfilePage({ searchParams }: Props) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/profile');
+    redirect('/phone?next=/profile');
   }
 
   const params = (await searchParams) ?? {};

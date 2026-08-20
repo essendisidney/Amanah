@@ -18,7 +18,7 @@ export default async function CircleRegistrationPage({ params }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/registration`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/registration`);
 
   const { data: jamiya } = await supabase
     .from('jamiyas')

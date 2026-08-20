@@ -31,7 +31,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/invoices`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/invoices`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

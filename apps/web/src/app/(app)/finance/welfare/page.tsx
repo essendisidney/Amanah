@@ -50,7 +50,7 @@ export default async function WelfarePage({ searchParams }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/finance/welfare');
+  if (!user) redirect('/phone?next=/finance/welfare');
 
   const params = (await searchParams) ?? {};
   const preferredJamiyaId = params.jamiyaId?.trim() || '';

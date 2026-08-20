@@ -44,7 +44,7 @@ export default async function QardPage({ searchParams }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/finance/qard');
+  if (!user) redirect('/phone?next=/finance/qard');
 
   const params = (await searchParams) ?? {};
   const preferredJamiyaId = params.jamiyaId?.trim() || '';

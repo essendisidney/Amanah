@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const [{ user }, { dict }] = await Promise.all([getAuthUser(), getDictionary()]);
 
   if (!user) {
-    redirect('/login?next=/dashboard');
+    redirect('/phone?next=/dashboard');
   }
 
   const data = await getDashboardData(user.id);

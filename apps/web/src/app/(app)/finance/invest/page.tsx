@@ -19,9 +19,10 @@ export default async function InvestPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/finance/invest');
+  if (!user) redirect('/phone?next=/finance/invest');
 
   const { dict } = await getDictionary();
+  const labels = dict.finance;
   const { data } = await supabase
     .from('members')
     .select('jamiya:jamiyas(id, name, slug)')
@@ -34,24 +35,24 @@ export default async function InvestPage() {
 
   const options = [
     {
-      title: 'Circle shares',
-      body: 'Buy and hold membership shares in your circle. Par value and dividends are managed by officers with clear records.',
+      title: labels.investSharesTitle,
+      body: labels.investSharesBody,
       href: circles[0] ? (`/circles/${circles[0].slug}/shares` as Route) : ('/circles' as Route),
-      cta: circles.length ? 'Open shares' : 'Join a circle first',
+      cta: circles.length ? labels.investSharesCta : labels.investSharesJoinCta,
     },
     {
-      title: 'Treasury projects',
-      body: 'Circles can record Shariah-conscious investments and projects in the treasury — so members see where pooled capital goes.',
+      title: labels.investTreasuryTitle,
+      body: labels.investTreasuryBody,
       href: circles[0]
         ? (`/circles/${circles[0].slug}/treasury` as Route)
         : ('/circles' as Route),
-      cta: circles.length ? 'Open treasury' : 'Browse circles',
+      cta: circles.length ? labels.investTreasuryCta : labels.investTreasuryBrowseCta,
     },
     {
-      title: 'Partner Tawarruq',
-      body: 'When you need larger finance outside the circle pool, apply through partner-facilitated Tawarruq — kept separate from interest-free Qard.',
+      title: labels.investTawarruqTitle,
+      body: labels.investTawarruqBody,
       href: '/finance/tawarruq' as Route,
-      cta: 'Explore Tawarruq',
+      cta: labels.investTawarruqCta,
     },
   ] as const;
 
@@ -60,16 +61,16 @@ export default async function InvestPage() {
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
           <Link href={'/finance' as Route} className="hover:text-primary">
-            {dict.finance.eyebrow}
+            {labels.eyebrow}
           </Link>
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
-          {dict.finance.investTitle}
+          {labels.investTitle}
         </h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">{dict.finance.investDesc}</p>
+        <p className="mt-2 max-w-xl text-muted-foreground">{labels.investDesc}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/finance' as Route}>Back to Finance</Link>
+            <Link href={'/finance' as Route}>{labels.backToFinance}</Link>
           </Button>
         </div>
       </div>
@@ -94,7 +95,7 @@ export default async function InvestPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold tracking-tight">Your circles</h2>
+        <h2 className="text-lg font-bold tracking-tight">{labels.investYourCircles}</h2>
         {circles.length ? (
           <ul className="divide-y divide-border border-y border-border">
             {circles.map((circle) => (
@@ -105,10 +106,14 @@ export default async function InvestPage() {
                 <span className="font-medium">{circle.name}</span>
                 <div className="flex flex-wrap gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/circles/${circle.slug}/shares` as Route}>Shares</Link>
+                    <Link href={`/circles/${circle.slug}/shares` as Route}>
+                      {labels.investSharesCta}
+                    </Link>
                   </Button>
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/circles/${circle.slug}/treasury` as Route}>Treasury</Link>
+                    <Link href={`/circles/${circle.slug}/treasury` as Route}>
+                      {labels.investTreasuryCta}
+                    </Link>
                   </Button>
                 </div>
               </li>
@@ -116,9 +121,9 @@ export default async function InvestPage() {
           </ul>
         ) : (
           <EmptyState
-            title="No circles yet"
-            description="Join or create a circle to access shares and treasury investment records."
-            actionLabel="Go to Circles"
+            title={labels.investEmptyTitle}
+            description={labels.investEmptyDesc}
+            actionLabel={labels.investEmptyCta}
             actionHref={'/circles' as Route}
           />
         )}

@@ -27,7 +27,7 @@ export default async function GoalsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/finance/goals');
+  if (!user) redirect('/phone?next=/finance/goals');
 
   const { data } = await supabase
     .from('savings_goals')

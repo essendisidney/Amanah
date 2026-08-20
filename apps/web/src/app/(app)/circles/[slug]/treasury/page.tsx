@@ -26,7 +26,7 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/treasury`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/treasury`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

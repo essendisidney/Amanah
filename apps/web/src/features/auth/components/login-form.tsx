@@ -21,6 +21,16 @@ export function LoginForm({
 
   return (
     <div className="space-y-6">
+      <Button asChild className="w-full min-h-11" size="lg">
+        <Link href={`/phone?next=${encodeURIComponent(next)}` as Route}>
+          Continue with phone
+        </Link>
+      </Button>
+
+      <p className="text-center text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        Or use email
+      </p>
+
       {showError ? (
         <Alert variant="destructive">
           <AlertDescription>
@@ -76,22 +86,12 @@ export function LoginForm({
             <p className="text-sm text-destructive">{state.fieldErrors.password[0]}</p>
           ) : null}
         </div>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" variant="outline" className="w-full" disabled={pending}>
           {pending ? 'Signing in…' : 'Sign in with email'}
         </Button>
       </form>
 
       <GoogleSignInButton next={next} />
-
-      <AuthFormMessage>
-        Prefer phone?{' '}
-        <Link
-          href={`/phone?next=${encodeURIComponent(next)}` as Route}
-          className="font-medium text-primary hover:underline"
-        >
-          Sign in with OTP
-        </Link>
-      </AuthFormMessage>
 
       <AuthFormMessage>
         New to Amanah?{' '}

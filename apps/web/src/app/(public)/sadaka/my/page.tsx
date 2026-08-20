@@ -26,7 +26,7 @@ export default async function MySadakaCampaignsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/sadaka/my');
+  if (!user) redirect('/phone?next=/sadaka/my');
 
   const [{ data }, { data: sponsorships }] = await Promise.all([
     supabase
@@ -98,7 +98,12 @@ export default async function MySadakaCampaignsPage() {
             </li>
           ))
         ) : (
-          <li className="px-5 py-8 text-sm text-muted-foreground">No campaigns yet.</li>
+          <li className="px-5 py-8 text-sm text-muted-foreground">
+            No campaigns yet.{' '}
+            <Link href={'/sadaka/new' as Route} className="underline">
+              Start a campaign
+            </Link>
+          </li>
         )}
       </ul>
 

@@ -21,7 +21,7 @@ export default async function NewSadakaCampaignPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/sadaka/new');
+  if (!user) redirect('/phone?next=/sadaka/new');
 
   const { count } = await supabase
     .from('members')

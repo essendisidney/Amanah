@@ -32,7 +32,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/shares`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/shares`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
@@ -292,12 +292,12 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                 ? 'Record the first share purchase above to open the register.'
                 : 'Ask an officer to record share purchases for this circle.'
             }
-            {...(canManage
-              ? {}
-              : {
-                  actionLabel: 'Back to circle',
-                  actionHref: `/circles/${slug}` as Route,
-                })}
+            actionLabel={canManage ? 'Open treasury' : 'Back to circle'}
+            actionHref={
+              (canManage
+                ? `/circles/${slug}/treasury`
+                : `/circles/${slug}`) as Route
+            }
           />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -331,6 +331,8 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                 ? 'Each recorded purchase creates a lot for audit and dividends.'
                 : 'Share lots appear after an officer records purchases.'
             }
+            actionLabel="Back to circle"
+            actionHref={`/circles/${slug}` as Route}
           />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">

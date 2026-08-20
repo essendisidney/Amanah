@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { submitTawarruqFormAction } from '@/features/finance/actions';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { getDictionary } from '@/i18n/get-dictionary';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,7 +26,10 @@ export default async function TawarruqPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/login?next=/finance/tawarruq');
+  if (!user) redirect('/phone?next=/finance/tawarruq');
+
+  const { dict } = await getDictionary();
+  const labels = dict.finance;
 
   const { data } = await supabase
     .from('tawarruq_applications')
@@ -39,20 +43,24 @@ export default async function TawarruqPage() {
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           <Link href={'/finance' as Route} className="hover:text-primary">
-            Finance
+            {labels.eyebrow}
           </Link>
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-          Tawarruq
+          {labels.tawarruqTitle}
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Submit an application for review and partner-bank handoff. Approval is not guaranteed.
-          Prefer interest-free support from your circle? Try{' '}
+          {labels.tawarruqDesc} Prefer interest-free support from your circle? Try{' '}
           <Link href={'/finance/qard' as Route} className="text-accent underline-offset-4 hover:underline">
-            Qard Hassan
+            {labels.qardTitle}
           </Link>
           .
         </p>
+        <div className="mt-4">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/finance' as Route}>{labels.backToFinance}</Link>
+          </Button>
+        </div>
       </div>
 
       <form
@@ -105,7 +113,7 @@ export default async function TawarruqPage() {
           <EmptyState
             title="No applications yet"
             description="Submit a request above when you need partner Sharia finance beyond circle Qard."
-            actionLabel="Back to Finance"
+            actionLabel={labels.backToFinance}
             actionHref={'/finance' as Route}
           />
         )}

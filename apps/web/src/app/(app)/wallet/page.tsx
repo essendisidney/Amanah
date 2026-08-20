@@ -76,7 +76,7 @@ export default async function WalletPage({ searchParams }: Props) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/wallet');
+    redirect('/phone?next=/wallet');
   }
 
   const [{ dict }, walletResult, txResult, intentResult, pendingResult, profileResult] =

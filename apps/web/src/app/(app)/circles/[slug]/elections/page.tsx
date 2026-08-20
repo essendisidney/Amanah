@@ -32,7 +32,7 @@ export default async function CircleElectionsPage({ params }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/elections`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/elections`);
 
   const { data: jamiya } = await supabase
     .from('jamiyas')
@@ -183,6 +183,8 @@ export default async function CircleElectionsPage({ params }: Props) {
             <EmptyState
               title="No elections yet"
               description="Open an election above to nominate and vote for chair, treasurer, secretary, or circle admin."
+              actionLabel="Open community"
+              actionHref={`/circles/${slug}/community` as Route}
             />
           ) : (
             <EmptyState

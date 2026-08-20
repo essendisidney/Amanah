@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   return (
     <AuthCard
       title="Welcome back"
-      description="Sign in to manage your circles, contributions, and payouts."
+      description="Continue with phone OTP, or sign in with email to manage circles, contributions, and payouts."
     >
       <LoginForm next={params.next ?? '/dashboard'} error={params.error} />
     </AuthCard>

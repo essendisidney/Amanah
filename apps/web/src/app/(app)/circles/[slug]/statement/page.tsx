@@ -24,7 +24,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/statement`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/statement`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

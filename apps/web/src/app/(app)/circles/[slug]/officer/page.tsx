@@ -70,7 +70,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/login?next=/circles/${slug}/officer`);
+  if (!user) redirect(`/phone?next=/circles/${slug}/officer`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
