@@ -59,7 +59,14 @@ export default async function RootLayout({
 }>) {
   const { locale, dict } = await getDictionary();
   return (
-    <html lang={locale} className={manrope.variable}>
+    <html lang={locale} className={manrope.variable} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('amanah-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(d){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark'}else{document.documentElement.style.colorScheme='light'}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="min-h-dvh font-sans">
         <BootSplashMarkup />
         <Providers>

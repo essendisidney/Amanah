@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  HandHeart,
+  Landmark,
+  PiggyBank,
+  Plus,
+} from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -88,9 +95,9 @@ export function DashboardView({
     icon: typeof Plus;
   }> = [
     { href: '/wallet' as Route, label: 'Add money', icon: Plus },
-    { href: '/finance/insights' as Route, label: 'Insights', icon: ChartNoAxesCombined },
+    { href: '/finance' as Route, label: 'Finance', icon: Landmark },
     { href: '/finance/goals' as Route, label: 'Save', icon: PiggyBank },
-    { href: '/wallet' as Route, label: 'Withdraw', icon: ArrowUpRight },
+    { href: '/sadaka' as Route, label: 'Sadaka', icon: HandHeart },
   ];
 
   return (

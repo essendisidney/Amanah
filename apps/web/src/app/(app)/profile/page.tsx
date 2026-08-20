@@ -14,6 +14,7 @@ import {
   ProfileOnboardingBanner,
   hasValidProfilePhone,
 } from '@/features/profile/components/profile-onboarding-banner';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
@@ -140,6 +141,14 @@ export default async function ProfilePage({ searchParams }: Props) {
           />
         </div>
       </div>
+
+      <section className="amanah-surface flex items-center justify-between gap-3 px-4 py-3.5">
+        <div>
+          <p className="text-sm font-semibold">Appearance</p>
+          <p className="text-xs text-muted-foreground">Light or dark on this device</p>
+        </div>
+        <ThemeToggle />
+      </section>
 
       <section className="grid gap-8 lg:grid-cols-2">
         <div id="personal-details" className="rounded-xl border border-border bg-card p-6">

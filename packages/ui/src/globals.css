@@ -4,6 +4,8 @@
   Amanah design tokens — premium Islamic fintech / African community finance
   Deep emerald · warm off-white · near-black · restrained gold
 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
@@ -42,6 +44,36 @@
   --radius-xl: 1.25rem;
 }
 
+.dark {
+  --color-background: #0c100e;
+  --color-foreground: #e8ebe8;
+  --color-muted: #171c19;
+  --color-muted-foreground: #9aa59e;
+  --color-border: #2a332e;
+  --color-ring: #2d9a6e;
+
+  --color-card: #131916;
+  --color-card-foreground: #e8ebe8;
+
+  --color-primary: #2d9a6e;
+  --color-primary-foreground: #06140f;
+  --color-primary-hover: #3cb884;
+
+  --color-secondary: #1a2420;
+  --color-secondary-foreground: #e8ebe8;
+
+  --color-accent: #d4a84b;
+  --color-accent-foreground: #121816;
+  --color-accent-muted: #2a2414;
+
+  --color-destructive: #ef6b6b;
+  --color-destructive-foreground: #2a0f0f;
+
+  --color-success: #2dd4bf;
+  --color-warning: #eab308;
+  --color-info: #38bdf8;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -59,6 +91,10 @@
   ::selection {
     background: color-mix(in oklab, var(--color-primary) 22%, white);
   }
+
+  .dark ::selection {
+    background: color-mix(in oklab, var(--color-primary) 35%, black);
+  }
 }
 
 @layer utilities {
@@ -71,7 +107,17 @@
     @apply rounded-2xl border border-border/80 bg-card shadow-[0_1px_2px_rgba(18,24,22,0.04),0_8px_24px_rgba(18,24,22,0.04)];
   }
 
+  .dark .amanah-surface {
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.35),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
   .amanah-geo {
     background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%230b5c42' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .dark .amanah-geo {
+    background-image: url("data:image/svg+xml,%3Csvg width='72' height='72' viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%232d9a6e' stroke-opacity='0.12' stroke-width='1'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Cpath d='M36 16 L56 36 L36 56 L16 36 Z'/%3E%3C/g%3E%3C/svg%3E");
   }
 }

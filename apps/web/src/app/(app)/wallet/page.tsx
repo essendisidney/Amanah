@@ -20,7 +20,7 @@ import {
   requireRealProviders,
   shouldBlockSimulatedPayments,
 } from '@/lib/production-cutover';
-import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, PiggyBank, Plus } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, ChartNoAxesCombined, HandHeart, Landmark, PiggyBank, Plus } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Money',
@@ -243,6 +243,72 @@ export default async function WalletPage({ searchParams }: Props) {
             </Link>
           );
         })}
+      </section>
+
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">All products</h2>
+          <p className="text-sm text-muted-foreground">
+            Finance tools, giving, and support — not just the wallet.
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {[
+            {
+              href: '/finance',
+              title: 'Finance hub',
+              desc: 'Qard, welfare, Tawarruq, goals',
+              icon: Landmark,
+            },
+            {
+              href: '/sadaka',
+              title: dict.common.sadaka,
+              desc: 'Give to endorsed campaigns',
+              icon: HandHeart,
+            },
+            {
+              href: '/zakat',
+              title: 'Zakat',
+              desc: 'Calculator for your dues',
+              icon: PiggyBank,
+            },
+            {
+              href: '/support',
+              title: 'Support Amanah',
+              desc: 'Optional tip for the platform',
+              icon: HandHeart,
+            },
+            {
+              href: '/finance/qard',
+              title: 'Qard Hassan',
+              desc: 'Interest-free circle loans',
+              icon: Landmark,
+            },
+            {
+              href: '/finance/tawarruq',
+              title: 'Tawarruq',
+              desc: 'Partner Sharia finance',
+              icon: Landmark,
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href as Route}
+                className="amanah-surface flex items-start gap-3 px-3 py-3 transition-colors hover:border-primary/30"
+              >
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-foreground">{item.title}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{item.desc}</span>
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </section>
 
       <section className="amanah-surface overflow-hidden bg-[linear-gradient(135deg,#121816_0%,#1f2a24_55%,#0b5c42_120%)] p-5 text-white">

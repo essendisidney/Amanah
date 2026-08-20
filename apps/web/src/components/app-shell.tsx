@@ -25,6 +25,7 @@ import {
   NOTIFICATION_READ_EVENT,
 } from '@/lib/notification-events';
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
@@ -41,8 +42,14 @@ function pathActive(pathname: string, href: string) {
     return (
       pathname === '/wallet' ||
       pathname.startsWith('/wallet/') ||
-      pathname.startsWith('/finance')
+      pathname.startsWith('/finance') ||
+      pathname.startsWith('/sadaka') ||
+      pathname.startsWith('/zakat') ||
+      pathname.startsWith('/support')
     );
+  }
+  if (href === '/finance') {
+    return pathname === '/finance' || pathname.startsWith('/finance/');
   }
   if (href === '/notifications') {
     return pathname === '/notifications' || pathname.startsWith('/notifications/');
@@ -127,10 +134,11 @@ export function AppShell({
     { href: '/dashboard' as Route, label: dict.nav.dashboard },
     { href: '/circles' as Route, label: dict.nav.circles },
     { href: '/wallet' as Route, label: dict.nav.wallet },
+    { href: '/finance' as Route, label: 'Finance' },
     { href: '/finance/goals' as Route, label: 'Goals' },
     { href: '/finance/insights' as Route, label: 'Insights' },
-    { href: '/notifications' as Route, label: dict.nav.finance },
     { href: '/sadaka' as Route, label: dict.common.sadaka },
+    { href: '/notifications' as Route, label: dict.nav.finance },
     { href: '/profile' as Route, label: dict.nav.profile },
   ];
   if (showAdmin) {
@@ -174,6 +182,7 @@ export function AppShell({
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <ThemeToggle />
             <LanguageSwitcher locale={locale} label={dict.common.language} />
             <Link
               href={'/notifications' as Route}
