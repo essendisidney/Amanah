@@ -34,12 +34,12 @@ export function ProfileOnboardingBanner({
     <section className="amanah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          Finish setting up
+          Almost ready
         </p>
         <h2 className="mt-1 text-xl font-bold tracking-tight">Welcome to Amanah</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add your name and Kenya mobile so Money top-ups and withdrawals can verify you. KYC is
-          recommended before large transfers — you can finish it now or later.
+          Add your name and Kenya mobile for secure money moves. Verification is recommended
+          before larger transfers.
         </p>
       </div>
 
@@ -91,18 +91,18 @@ export function ProfileOnboardingBanner({
       <div className="flex flex-col gap-2 sm:flex-row">
         {ready ? (
           <Button asChild className="min-h-11">
-            <Link href={dest}>Continue to Amanah</Link>
+            <Link href={dest}>Home</Link>
           </Button>
         ) : (
           <Button asChild variant="outline" className="min-h-11">
             <a href="#personal-details">
-              {!nameDone ? 'Add your name below' : 'Add your phone below'}
+              {!nameDone ? 'Add your name' : 'Add your phone'}
             </a>
           </Button>
         )}
         {!kycDone ? (
           <Button asChild variant="ghost" className="min-h-11">
-            <a href="#kyc-documents">Go to KYC</a>
+            <a href="#kyc-documents">Verification</a>
           </Button>
         ) : null}
       </div>

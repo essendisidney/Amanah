@@ -79,15 +79,21 @@ export default async function FinancePage() {
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button asChild className="min-h-11">
-            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
+            <Link href={'/wallet#top-up' as Route}>Add money</Link>
           </Button>
-          {openDues > 0 ? (
+          {openDues > 0 && dashboard.contributions[0] ? (
             <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/finance/insights' as Route}>View dues</Link>
+              <Link
+                href={
+                  `/circles/${dashboard.contributions[0].jamiyaSlug}#pay` as Route
+                }
+              >
+                Pay dues
+              </Link>
             </Button>
           ) : (
             <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/finance/goals' as Route}>Savings goals</Link>
+              <Link href={'/finance/goals' as Route}>Goals</Link>
             </Button>
           )}
         </div>
@@ -120,7 +126,7 @@ export default async function FinancePage() {
           {labels.shariaLead}
         </p>
         <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/#shariah' as Route}>Read the Shariah overview</Link>
+          <Link href={'/#shariah' as Route}>Shariah</Link>
         </Button>
       </section>
 

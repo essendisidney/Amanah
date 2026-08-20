@@ -6,10 +6,9 @@ import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
-  Bell,
   Home,
   LayoutGrid,
-  QrCode,
+  Wallet,
   Shield,
   UserRound,
 } from 'lucide-react';
@@ -38,7 +37,7 @@ type Tab = {
 
 function pathActive(pathname: string, href: string) {
   if (href === '/dashboard') return pathname === '/dashboard';
-  if (href === '/pay') {
+  if (href === '/wallet' || href === '/pay') {
     return (
       pathname === '/pay' ||
       pathname === '/wallet' ||
@@ -108,10 +107,10 @@ export function AppShell({
       icon: LayoutGrid,
     },
     {
-      href: '/pay' as Route,
+      href: '/wallet' as Route,
       label: dict.nav.pay,
       short: dict.nav.payShort,
-      icon: QrCode,
+      icon: Wallet,
       center: true,
     },
     {
@@ -131,7 +130,7 @@ export function AppShell({
   const desktopLinks: Array<{ href: Route; label: string }> = [
     { href: '/dashboard' as Route, label: dict.nav.dashboard },
     { href: '/circles' as Route, label: dict.nav.circles },
-    { href: '/pay' as Route, label: dict.nav.pay },
+    { href: '/wallet' as Route, label: dict.nav.pay },
     { href: '/notifications' as Route, label: dict.nav.activity },
     { href: '/profile' as Route, label: dict.nav.profile },
   ];
@@ -191,22 +190,6 @@ export function AppShell({
                 <Shield className="h-5 w-5" />
               </Link>
             ) : null}
-            <Link
-              href={'/notifications' as Route}
-              className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-muted-foreground hover:bg-white/40 md:hidden dark:hover:bg-white/5"
-              aria-label={
-                liveUnread > 0
-                  ? `${dict.common.notifications}, ${liveUnread}`
-                  : dict.common.notifications
-              }
-            >
-              <Bell className="h-5 w-5" />
-              {liveUnread > 0 ? (
-                <span className="absolute right-1.5 top-1.5 inline-flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
-                  {liveUnread > 9 ? '9+' : liveUnread}
-                </span>
-              ) : null}
-            </Link>
             <form action={signOutAction} className="hidden">
               <button type="submit">{dict.common.signOut}</button>
             </form>

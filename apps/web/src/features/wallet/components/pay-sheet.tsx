@@ -4,12 +4,11 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { useEffect, useState } from 'react';
 import {
-  ArrowDownToLine,
   ArrowUpFromLine,
   ChevronRight,
+  LayoutGrid,
   Plus,
-  QrCode,
-  Send,
+  Target,
   X,
 } from 'lucide-react';
 import { AmanahLogo } from '@/components/amanah-logo';
@@ -17,36 +16,29 @@ import { cn } from '@/lib/utils';
 
 const ACTIONS = [
   {
-    href: '/wallet' as Route,
-    label: 'Send',
-    hint: 'To anyone, anytime',
-    icon: Send,
-    tint: 'amanah-tint-send',
-  },
-  {
-    href: '/wallet' as Route,
-    label: 'Request',
-    hint: 'Ask and receive',
-    icon: ArrowDownToLine,
-    tint: 'amanah-tint-request',
-  },
-  {
-    href: '/wallet#top-up' as Route,
-    label: 'Add Money',
-    hint: 'From M-Pesa, Bank, Card',
-    icon: Plus,
-    tint: 'amanah-tint-add',
-  },
-  {
     href: '/wallet#withdraw' as Route,
     label: 'Withdraw',
-    hint: 'To M-Pesa or Bank',
+    hint: 'To M-Pesa or bank',
     icon: ArrowUpFromLine,
     tint: 'amanah-tint-withdraw',
   },
+  {
+    href: '/circles' as Route,
+    label: 'Pay a circle',
+    hint: 'Contribution dues',
+    icon: LayoutGrid,
+    tint: 'amanah-tint-pay',
+  },
+  {
+    href: '/finance/goals' as Route,
+    label: 'Goals',
+    hint: 'Hajj, Umra, and more',
+    icon: Target,
+    tint: 'amanah-tint-send',
+  },
 ] as const;
 
-/** Pay — IMAGE #2 liquid-glass surface (light, soft, premium). */
+/** Pay — liquid-glass launcher into real money destinations (no dead ends). */
 export function PaySheet() {
   const [ready, setReady] = useState(false);
 
@@ -62,7 +54,6 @@ export function PaySheet() {
         ready ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
       )}
     >
-      {/* Soft ambient wash behind the sheet — never a black veil */}
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-x-6 -top-8 h-56 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.12)_0%,_rgba(91,141,239,0.08)_45%,_transparent_70%)]"
@@ -72,7 +63,14 @@ export function PaySheet() {
         <div className="mb-6 flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-3">
             <AmanahLogo href={'/dashboard' as Route} size="sm" tone="brand" />
-            <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">Pay</h1>
+            <div>
+              <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">
+                Move money
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Straight to add, withdraw, or pay a circle.
+              </p>
+            </div>
           </div>
           <Link
             href={'/dashboard' as Route}
@@ -83,11 +81,9 @@ export function PaySheet() {
           </Link>
         </div>
 
-        {/* Scan — soft deep emerald glass, not neon */}
-        <button
-          type="button"
-          disabled
-          className="relative mb-5 flex w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-[1.5rem] px-6 py-14 text-left text-white"
+        <Link
+          href={'/wallet#top-up' as Route}
+          className="relative mb-5 flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[1.5rem] px-6 py-12 text-left text-white"
           style={{
             background:
               'radial-gradient(ellipse 90% 70% at 20% 0%, rgba(56,201,138,0.45), transparent 55%), linear-gradient(165deg, #0f6b54 0%, #0b4a3c 55%, #08352c 100%)',
@@ -100,15 +96,11 @@ export function PaySheet() {
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(91,141,239,0.2),transparent_45%)]"
           />
           <span className="relative inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 backdrop-blur-sm">
-            <QrCode className="h-7 w-7" strokeWidth={1.5} />
+            <Plus className="h-7 w-7" strokeWidth={1.5} />
           </span>
-          <span className="relative text-[15px] font-semibold tracking-tight">Scan to pay</span>
-          <span className="relative text-xs text-white/70">Tap to open camera</span>
-        </button>
-
-        <p className="mb-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-          Quick actions
-        </p>
+          <span className="relative text-[15px] font-semibold tracking-tight">Add money</span>
+          <span className="relative text-xs text-white/70">Top up your balance</span>
+        </Link>
 
         <ul className="overflow-hidden rounded-[1.35rem] bg-white/55 dark:bg-white/[0.04]">
           {ACTIONS.map((action) => {
@@ -136,7 +128,10 @@ export function PaySheet() {
                     </span>
                     <span className="mt-0.5 block text-xs text-muted-foreground">{action.hint}</span>
                   </span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/70" strokeWidth={1.5} />
+                  <ChevronRight
+                    className="h-4 w-4 shrink-0 text-muted-foreground/70"
+                    strokeWidth={1.5}
+                  />
                 </Link>
               </li>
             );

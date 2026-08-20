@@ -121,10 +121,9 @@ export default async function ProfilePage({ searchParams }: Props) {
     amanahScore >= 750 ? 'Excellent' : amanahScore >= 680 ? 'Strong' : 'Building';
 
   const youLinks: Array<{ href: Route; title: string; meta: string | null }> = [
-    { href: '/finance/insights', title: 'Amanah Score', meta: scoreLabel },
-    { href: '/finance/goals', title: 'Goals', meta: null },
     { href: '/wallet', title: 'Money', meta: null },
-    { href: '/profile#kyc-documents' as Route, title: 'KYC', meta: profile?.kyc_status ?? null },
+    { href: '/finance/goals', title: 'Goals', meta: null },
+    { href: '/profile#kyc-documents' as Route, title: 'Verification', meta: profile?.kyc_status ?? null },
     { href: '/sadaka', title: 'Sadaka', meta: null },
     { href: '/zakat', title: 'Zakat', meta: null },
     { href: '/support', title: 'Support', meta: null },
@@ -150,17 +149,18 @@ export default async function ProfilePage({ searchParams }: Props) {
         </p>
       </header>
 
-      <section className="amanah-forest rounded-[1.5rem] px-5 py-5">
+      <Link
+        href={'/finance/insights' as Route}
+        className="amanah-forest block rounded-[1.5rem] px-5 py-5 transition-transform active:scale-[0.99]"
+      >
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
           Amanah Score
         </p>
         <div className="mt-2 flex items-end justify-between gap-3">
           <p className="amanah-money text-4xl font-bold tracking-tight text-primary">{amanahScore}</p>
-          <Link href={'/finance/insights' as Route} className="text-sm font-medium text-primary">
-            {scoreLabel}
-          </Link>
+          <span className="text-sm font-medium text-primary">{scoreLabel}</span>
         </div>
-      </section>
+      </Link>
 
       <ul className="divide-y divide-border/40">
         {youLinks.map((item) => (

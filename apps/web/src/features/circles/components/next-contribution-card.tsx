@@ -87,12 +87,12 @@ export function NextContributionCard({
       {!canCover ? (
         <p className="text-sm text-muted-foreground">
           {walletAvailable == null
-            ? 'Open Money to create your wallet, top up, then pay this contribution.'
-            : `You need about ${formatCurrency(shortfall, currency)} more in your wallet to pay in full.`}
+            ? 'Add money to your wallet, then pay this contribution.'
+            : `You need about ${formatCurrency(shortfall, currency)} more to pay in full.`}
         </p>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Pays from your Amanah wallet into this circle account. Leave amount blank to pay the full
+          Pays from your Amanah balance into this circle. Leave amount blank for the full
           remaining balance.
         </p>
       )}
@@ -119,7 +119,7 @@ export function NextContributionCard({
               />
             </label>
             <Button type="submit" className="min-h-11 w-full sm:w-auto">
-              {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
+              {ahead ? 'Pay ahead' : 'Pay'}
             </Button>
           </form>
         ) : (
@@ -129,7 +129,7 @@ export function NextContributionCard({
                 `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
               }
             >
-              {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
+              {walletAvailable == null ? 'Add money' : 'Add money to pay'}
             </Link>
           </Button>
         )}
@@ -155,13 +155,13 @@ export function NextContributionCard({
               />
             </label>
             <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-              Pay partial now
+              Pay partial
             </Button>
           </form>
         ) : null}
 
         <Button asChild variant="ghost" size="sm" className="min-h-11">
-          <Link href="#calendar">View calendar</Link>
+          <Link href="#calendar">Calendar</Link>
         </Button>
       </div>
     </section>

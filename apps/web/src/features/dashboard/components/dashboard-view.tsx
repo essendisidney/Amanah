@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import {
   Plus,
-  QrCode,
-  Send,
   ArrowUpFromLine,
+  LayoutGrid,
+  CircleDollarSign,
 } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -42,8 +42,15 @@ export function DashboardView({
 
   const quickActions = [
     { href: '/wallet#top-up' as Route, label: 'Add', icon: Plus, tint: 'amanah-tint-add' },
-    { href: '/pay' as Route, label: 'Send', icon: Send, tint: 'amanah-tint-send' },
-    { href: '/pay' as Route, label: 'Pay', icon: QrCode, tint: 'amanah-tint-pay' },
+    {
+      href: (nextDue
+        ? `/circles/${nextDue.jamiyaSlug}#pay`
+        : '/circles') as Route,
+      label: nextDue ? 'Pay due' : 'Circles',
+      icon: CircleDollarSign,
+      tint: 'amanah-tint-pay',
+    },
+    { href: '/circles' as Route, label: 'Circles', icon: LayoutGrid, tint: 'amanah-tint-send' },
     {
       href: '/wallet#withdraw' as Route,
       label: 'Withdraw',
@@ -51,6 +58,22 @@ export function DashboardView({
       tint: 'amanah-tint-withdraw',
     },
   ] as const;
+
+  // Avoid two identical Circles tiles when there is no due.
+  const actions =
+    nextDue != null
+      ? quickActions
+      : ([
+          quickActions[0],
+          {
+            href: '/wallet' as Route,
+            label: 'Money',
+            icon: CircleDollarSign,
+            tint: 'amanah-tint-pay',
+          },
+          quickActions[2],
+          quickActions[3],
+        ] as const);
 
   const circle = data.jamiyas[0] ?? null;
   const recent = data.activity.slice(0, 3);
@@ -85,11 +108,11 @@ export function DashboardView({
           <p className="amanah-money relative text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
             {formatCurrency(available, currency)}
           </p>
-          <p className="relative text-sm text-muted-foreground">available</p>
+          <p className="relative text-sm text-muted-foreground">Available</p>
         </section>
 
         <section className="flex items-start justify-between gap-2 px-1">
-          {quickActions.map((action) => {
+          {actions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
@@ -127,12 +150,7 @@ export function DashboardView({
         ) : null}
 
         <section className="space-y-3">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-medium text-muted-foreground">Your circles</h2>
-            <Link href={'/circles' as Route} className="text-sm font-medium text-primary">
-              See all
-            </Link>
-          </div>
+          <h2 className="text-sm font-medium text-muted-foreground">Circles</h2>
 
           {!circle ? (
             <Link
@@ -179,7 +197,7 @@ export function DashboardView({
               href={'/notifications' as Route}
               className="text-sm font-medium text-primary"
             >
-              See all
+              Activity
             </Link>
           </div>
           <RecentList rows={recent} />
@@ -190,7 +208,7 @@ export function DashboardView({
         <div className="flex items-baseline justify-between">
           <h2 className="text-sm font-medium text-muted-foreground">Recent</h2>
           <Link href={'/notifications' as Route} className="text-sm font-medium text-primary">
-            See all
+            Activity
           </Link>
         </div>
         <RecentList rows={recent} />

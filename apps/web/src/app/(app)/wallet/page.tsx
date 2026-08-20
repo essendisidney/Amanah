@@ -185,7 +185,7 @@ export default async function WalletPage({ searchParams }: Props) {
           </p>
           {returnPath && notices.noticeType !== 'error' ? (
             <Button asChild className="min-h-11">
-              <Link href={returnPath as Route}>Continue to contribution</Link>
+              <Link href={returnPath as Route}>Pay contribution</Link>
             </Button>
           ) : null}
         </div>
@@ -261,24 +261,22 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">All products</h2>
-          <p className="text-sm text-muted-foreground">
-            Finance tools, giving, and support — not just your balance.
-          </p>
+          <h2 className="text-lg font-bold tracking-tight">More</h2>
+          <p className="text-sm text-muted-foreground">Lending, goals, and giving.</p>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {[
             {
-              href: '/finance',
-              title: 'Finance hub',
-              desc: 'Qard, welfare, Tawarruq, goals',
-              icon: Landmark,
+              href: '/finance/goals',
+              title: 'Goals',
+              desc: 'Hajj, Umra, and personal saves',
+              icon: TrendingUp,
             },
             {
-              href: '/finance/invest',
-              title: 'Investments',
-              desc: 'Shares, treasury projects, Tawarruq',
-              icon: TrendingUp,
+              href: '/finance/qard',
+              title: 'Qard Hassan',
+              desc: 'Interest-free circle loans',
+              icon: Landmark,
             },
             {
               href: '/sadaka',
@@ -289,26 +287,8 @@ export default async function WalletPage({ searchParams }: Props) {
             {
               href: '/zakat',
               title: 'Zakat',
-              desc: 'Calculator for your dues',
+              desc: 'Estimate what you owe',
               icon: Calculator,
-            },
-            {
-              href: '/support',
-              title: 'Support Amanah',
-              desc: 'Optional tip for the platform',
-              icon: HandHeart,
-            },
-            {
-              href: '/finance/qard',
-              title: 'Qard Hassan',
-              desc: 'Interest-free circle loans',
-              icon: Landmark,
-            },
-            {
-              href: '/finance/tawarruq',
-              title: 'Tawarruq',
-              desc: 'Partner Sharia finance',
-              icon: Landmark,
             },
           ].map((item) => {
             const Icon = item.icon;
