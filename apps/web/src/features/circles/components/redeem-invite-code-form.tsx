@@ -4,7 +4,11 @@ import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { useState, useTransition } from 'react';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
-import { isShortInviteCode } from '../lib/invitation-token';
+
+/** Matches server-side short invite codes (no 0/O/1/I/L). */
+function isShortInviteCode(value: string): boolean {
+  return /^[A-HJ-NP-Z2-9]{6,8}$/i.test(value.trim());
+}
 
 export function RedeemInviteCodeForm({
   title,
