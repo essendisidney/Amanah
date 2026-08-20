@@ -1,6 +1,6 @@
 'use server';
 
-import { updateProfileSchema, sanitizePlainText } from '@jamiya/shared';
+import { updateProfileSchema, phoneSchema, sanitizePlainText, isValidKeMobile } from '@jamiya/shared';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
@@ -10,6 +10,7 @@ export async function updateProfileAction(
   _prev: ProfileActionState,
   formData: FormData,
 ): Promise<ProfileActionState> {
+  const requirePhone = String(formData.get('requirePhone') ?? '') === '1';
   const parsed = updateProfileSchema.safeParse({
     fullName: formData.get('fullName'),
     phone: formData.get('phone') || '',
@@ -23,6 +24,20 @@ export async function updateProfileAction(
       message: 'Please fix the errors below.',
       fieldErrors: mapProfileZodErrors(parsed.error),
     };
+  }
+
+  if (requirePhone || parsed.data.phone) {
+    const phoneRaw = parsed.data.phone || '';
+    const phoneCheck = phoneSchema.safeParse(phoneRaw);
+    if (!phoneCheck.success || !isValidKeMobile(phoneRaw)) {
+      return {
+        success: false,
+        message: 'Please fix the errors below.',
+        fieldErrors: {
+          phone: ['Use a Kenya mobile in E.164 form, e.g. +254712345678.'],
+        },
+      };
+    }
   }
 
   const supabase = await createClient();

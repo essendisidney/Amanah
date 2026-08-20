@@ -219,7 +219,13 @@ export async function verifyPaystackTransaction(
 /** Verify with Paystack API and settle the matching payment intent (service role). */
 export async function settlePaystackReference(
   reference: string,
-): Promise<{ ok: boolean; intentId?: string; status?: string; error?: string }> {
+): Promise<{
+  ok: boolean;
+  intentId?: string;
+  status?: string;
+  error?: string;
+  returnPath?: string | null;
+}> {
   const verified = await verifyPaystackTransaction(reference);
   if (!verified.ok || !verified.data) {
     return { ok: false, error: verified.error ?? 'VERIFY_FAILED' };
@@ -229,6 +235,11 @@ export async function settlePaystackReference(
     (typeof verified.data.metadata?.intent_id === 'string'
       ? verified.data.metadata.intent_id
       : null) ?? intentIdFromPaystackReference(reference);
+
+  const returnPath =
+    typeof verified.data.metadata?.return_path === 'string'
+      ? verified.data.metadata.return_path
+      : null;
 
   if (!intentId) {
     return { ok: false, error: 'INTENT_NOT_FOUND' };
@@ -250,16 +261,21 @@ export async function settlePaystackReference(
         currency: verified.data.currency ?? null,
       },
     });
-    if (error) return { ok: false, intentId, error: error.message };
+    if (error) return { ok: false, intentId, error: error.message, returnPath };
     const result = data as {
       ok?: boolean;
       error?: string;
       already_completed?: boolean;
     } | null;
     if (!result?.ok) {
-      return { ok: false, intentId, error: result?.error ?? 'COMPLETE_FAILED' };
+      return {
+        ok: false,
+        intentId,
+        error: result?.error ?? 'COMPLETE_FAILED',
+        returnPath,
+      };
     }
-    return { ok: true, intentId, status: 'success' };
+    return { ok: true, intentId, status: 'success', returnPath };
   }
 
   if (status === 'failed' || status === 'abandoned') {
@@ -267,8 +283,8 @@ export async function settlePaystackReference(
       p_intent_id: intentId,
       p_error_message: verified.data.gateway_response ?? `Paystack ${status}`,
     });
-    return { ok: true, intentId, status };
+    return { ok: true, intentId, status, returnPath };
   }
 
-  return { ok: true, intentId, status: status || 'pending' };
+  return { ok: true, intentId, status: status || 'pending', returnPath };
 }

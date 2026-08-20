@@ -15,17 +15,28 @@ export function TopUpForm({
   currency = 'KES',
   provider = 'simulated',
   labels,
+  defaultAmount,
+  returnPath,
 }: {
   currency?: string;
   provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack';
   labels: Dictionary['walletForms'];
+  defaultAmount?: number;
+  returnPath?: string | null;
 }) {
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
   const needsOtp = Boolean(state.needsOtp);
+  const amountDefault =
+    defaultAmount && Number.isFinite(defaultAmount) && defaultAmount >= 100
+      ? Math.ceil(defaultAmount)
+      : provider === 'simulated'
+        ? 50000
+        : 1000;
 
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="currency" value={currency} />
+      {returnPath ? <input type="hidden" name="next" value={returnPath} /> : null}
       <div className="space-y-2">
         <Label htmlFor="amount">{t(labels.amount, { currency })}</Label>
         <Input
@@ -35,7 +46,7 @@ export function TopUpForm({
           inputMode="decimal"
           min={100}
           step={100}
-          defaultValue={provider === 'simulated' ? 50000 : 1000}
+          defaultValue={amountDefault}
           required
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
@@ -69,6 +80,11 @@ export function TopUpForm({
       ) : null}
       {provider === 'paystack' && !needsOtp ? (
         <p className="text-xs text-muted-foreground">{labels.paystackReturnHint}</p>
+      ) : null}
+      {returnPath ? (
+        <p className="text-xs text-muted-foreground">
+          After top-up you will continue back to pay your contribution.
+        </p>
       ) : null}
       {needsOtp ? (
         <div className="space-y-2">

@@ -17,6 +17,7 @@ type Props = {
   status: string;
   walletAvailable: number | null;
   walletCurrency: string;
+  circleName?: string;
 };
 
 export function NextContributionCard({
@@ -29,6 +30,7 @@ export function NextContributionCard({
   status,
   walletAvailable,
   walletCurrency,
+  circleName,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
   const ahead = new Date(dueDate) > new Date(new Date().toISOString().slice(0, 10));
@@ -55,6 +57,7 @@ export function NextContributionCard({
             {formatCurrency(remaining, currency)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
+            {circleName ? `${circleName} · ` : ''}
             Due {formatDate(dueDate)}
             {status === 'late' ? ' · overdue' : ahead ? ' · pay ahead available' : ''}
             {amountPaid > 0
@@ -100,7 +103,11 @@ export function NextContributionCard({
           </form>
         ) : (
           <Button asChild className="min-h-11 w-full sm:w-auto">
-            <Link href={'/wallet#top-up' as Route}>
+            <Link
+              href={
+                `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
+              }
+            >
               {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
             </Link>
           </Button>

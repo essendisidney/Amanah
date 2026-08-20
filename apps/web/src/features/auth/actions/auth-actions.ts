@@ -114,11 +114,15 @@ export async function loginAction(
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('profile_completed, full_name')
+      .select('profile_completed, full_name, phone')
       .eq('id', user.id)
       .maybeSingle();
     complete = isProfileComplete(
-      profile as { profile_completed?: boolean; full_name?: string | null } | null,
+      profile as {
+        profile_completed?: boolean;
+        full_name?: string | null;
+        phone?: string | null;
+      } | null,
     );
   }
   redirect(buildPostAuthPath(next, complete));

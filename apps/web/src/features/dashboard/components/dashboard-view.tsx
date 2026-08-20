@@ -5,6 +5,7 @@ import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
+import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 
 function greetingForHour(hour: number) {
   if (hour < 12) return 'Good morning';
@@ -159,21 +160,18 @@ export function DashboardView({
       </section>
 
       {nextDue ? (
-        <section className="amanah-surface flex flex-wrap items-center justify-between gap-3 px-4 py-3.5">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Next contribution
-            </p>
-            <p className="mt-1 text-sm font-semibold text-foreground">
-              {formatCurrency(nextDue.amount - nextDue.amountPaid, nextDue.currency)} ·{' '}
-              {nextDue.jamiyaName}
-            </p>
-            <p className="text-xs text-muted-foreground">Due {formatDate(nextDue.dueDate)}</p>
-          </div>
-          <Button asChild size="sm">
-            <Link href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}>{common.pay}</Link>
-          </Button>
-        </section>
+        <NextContributionCard
+          contributionId={nextDue.id}
+          slug={nextDue.jamiyaSlug}
+          amount={nextDue.amount}
+          amountPaid={nextDue.amountPaid}
+          currency={nextDue.currency}
+          dueDate={nextDue.dueDate}
+          status={nextDue.status}
+          walletAvailable={data.wallet?.availableBalance ?? null}
+          walletCurrency={data.wallet?.currency ?? nextDue.currency}
+          circleName={nextDue.jamiyaName}
+        />
       ) : null}
 
       <section className="space-y-3">

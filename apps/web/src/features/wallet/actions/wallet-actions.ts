@@ -24,6 +24,8 @@ export async function topUpWalletAction(
   const amount = Number(amountRaw);
   const provider = paymentProvider();
   const requireReal = process.env.REQUIRE_REAL_PROVIDERS === 'true';
+  const { getSafeReturnPath, withNoticeQuery } = await import('@/features/auth/lib/types');
+  const returnPath = getSafeReturnPath(String(formData.get('next') ?? ''));
 
   if (!Number.isFinite(amount) || amount < 100) {
     return { success: false, message: 'Enter an amount of at least 100.' };
@@ -82,7 +84,11 @@ export async function topUpWalletAction(
     p_phone: phone || null,
     p_provider: provider,
     p_idempotency_key: `topup:${provider}:${currency}:${amount}:${Date.now()}`,
-    p_metadata: { kind: 'wallet_top_up', source: 'wallet_ui' },
+    p_metadata: {
+      kind: 'wallet_top_up',
+      source: 'wallet_ui',
+      ...(returnPath ? { return_path: returnPath } : {}),
+    },
   });
 
   if (error) {
@@ -133,6 +139,15 @@ export async function topUpWalletAction(
 
     revalidatePath('/wallet');
     revalidatePath('/dashboard');
+    if (returnPath) {
+      redirect(
+        withNoticeQuery(
+          returnPath,
+          'Wallet topped up. You can pay your contribution now.',
+          'success',
+        ),
+      );
+    }
     return {
       success: true,
       message: 'Wallet topped up (simulated payment).',
@@ -187,7 +202,10 @@ export async function topUpWalletAction(
       email: user?.email,
       phone: phone || user?.phone || null,
       userId: user?.id,
-      metadata: { kind: 'wallet_top_up' },
+      metadata: {
+        kind: 'wallet_top_up',
+        ...(returnPath ? { return_path: returnPath } : {}),
+      },
     });
     if (!init.ok) {
       return {

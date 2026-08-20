@@ -12,6 +12,7 @@ export function ProfileForm({
   defaultValues,
   labels,
   continueHref,
+  requirePhone = false,
 }: {
   defaultValues: {
     fullName: string;
@@ -21,6 +22,7 @@ export function ProfileForm({
   };
   labels: Dictionary['profile'];
   continueHref?: string;
+  requirePhone?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(
     updateProfileAction,
@@ -44,6 +46,7 @@ export function ProfileForm({
       ) : null}
 
       <form action={formAction} className="space-y-4">
+        {requirePhone ? <input type="hidden" name="requirePhone" value="1" /> : null}
         <div className="space-y-2">
           <Label htmlFor="fullName">{labels.fullName}</Label>
           <Input
@@ -64,7 +67,13 @@ export function ProfileForm({
             type="tel"
             placeholder="+254712345678"
             defaultValue={defaultValues.phone}
+            required={requirePhone}
           />
+          {requirePhone ? (
+            <p className="text-xs text-muted-foreground">
+              Required for wallet verification SMS and M-Pesa / Paystack step-up.
+            </p>
+          ) : null}
           {state.fieldErrors?.phone?.[0] ? (
             <p className="text-sm text-destructive">{state.fieldErrors.phone[0]}</p>
           ) : null}

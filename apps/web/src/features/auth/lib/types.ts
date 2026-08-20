@@ -1,3 +1,5 @@
+import { isValidKeMobile } from '@jamiya/shared';
+
 export type AuthActionState = {
   success: boolean;
   message?: string;
@@ -32,9 +34,37 @@ export function getSafeRedirectPath(path: string | null | undefined, fallback = 
 }
 
 export function isProfileComplete(
-  row: { profile_completed?: boolean | null; full_name?: string | null } | null | undefined,
+  row:
+    | {
+        profile_completed?: boolean | null;
+        full_name?: string | null;
+        phone?: string | null;
+      }
+    | null
+    | undefined,
 ): boolean {
-  return Boolean(row?.profile_completed && row?.full_name?.trim());
+  if (!row?.profile_completed || !row?.full_name?.trim()) return false;
+  const phone = row.phone?.trim() ?? '';
+  return Boolean(phone && isValidKeMobile(phone));
+}
+
+/** Safe in-app return path after wallet top-up (allows #hash). */
+export function getSafeReturnPath(path: string | null | undefined): string | null {
+  if (!path || !path.startsWith('/') || path.startsWith('//')) return null;
+  if (path.includes('\\') || path.includes('://')) return null;
+  return path;
+}
+
+export function withNoticeQuery(
+  path: string,
+  notice: string,
+  noticeType: 'success' | 'error' | 'info' = 'success',
+): string {
+  const [withoutHash, hash] = path.split('#');
+  const sep = withoutHash.includes('?') ? '&' : '?';
+  return `${withoutHash}${sep}notice=${encodeURIComponent(notice)}&noticeType=${noticeType}${
+    hash ? `#${hash}` : ''
+  }`;
 }
 
 /** Incomplete profiles land on onboarding; password-reset destinations are left alone. */

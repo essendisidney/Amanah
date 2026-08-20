@@ -353,15 +353,17 @@ export async function POST(req: NextRequest) {
 
     const { data: profileAfter } = await admin
       .from('profiles')
-      .select('profile_completed, full_name')
+      .select('profile_completed, full_name, phone')
       .eq('id', authUserId)
       .maybeSingle();
 
-    const profileCompleted = Boolean(
-      (profileAfter as { profile_completed?: boolean } | null)?.profile_completed,
-    );
-    const hasName = Boolean(
-      ((profileAfter as { full_name?: string | null } | null)?.full_name ?? '').trim(),
+    const { isProfileComplete } = await import('@/features/auth/lib/types');
+    const profileCompleted = isProfileComplete(
+      profileAfter as {
+        profile_completed?: boolean;
+        full_name?: string | null;
+        phone?: string | null;
+      } | null,
     );
 
     claimedOtpId = null;
@@ -372,7 +374,7 @@ export async function POST(req: NextRequest) {
       refresh_token: session.refresh_token,
       expires_in: session.expires_in,
       userId: authUserId,
-      profile_completed: profileCompleted && hasName,
+      profile_completed: profileCompleted,
     });
   } catch (err) {
     console.error('[auth/phone/verify]', err);

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
@@ -27,7 +28,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 type Props = {
-  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+  searchParams?: Promise<{
+    notice?: string;
+    noticeType?: string;
+    next?: string;
+    amount?: string;
+  }>;
 };
 
 type WalletRow = {
@@ -50,6 +56,9 @@ type TxRow = {
 
 export default async function WalletPage({ searchParams }: Props) {
   const notices = (await searchParams) ?? {};
+  const { getSafeReturnPath } = await import('@/features/auth/lib/types');
+  const returnPath = getSafeReturnPath(notices.next);
+  const amountPrefill = Number(notices.amount ?? '');
   const supabase = await createClient();
   const {
     data: { user },
@@ -134,18 +143,25 @@ export default async function WalletPage({ searchParams }: Props) {
       </div>
 
       {notices.notice ? (
-        <p
-          className={
-            notices.noticeType === 'error'
-              ? 'rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
-              : notices.noticeType === 'info'
-                ? 'rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-sm text-foreground'
-                : 'rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
-          }
-          role="status"
-        >
-          {notices.notice}
-        </p>
+        <div className="space-y-2">
+          <p
+            className={
+              notices.noticeType === 'error'
+                ? 'rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
+                : notices.noticeType === 'info'
+                  ? 'rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-sm text-foreground'
+                  : 'rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
+            }
+            role="status"
+          >
+            {notices.notice}
+          </p>
+          {returnPath && notices.noticeType !== 'error' ? (
+            <Button asChild className="min-h-11">
+              <Link href={returnPath as Route}>Continue to contribution</Link>
+            </Button>
+          ) : null}
+        </div>
       ) : null}
 
       <PaymentModeBanner
@@ -211,7 +227,7 @@ export default async function WalletPage({ searchParams }: Props) {
         </p>
         <p className="mt-6 text-sm font-semibold tracking-wide">{displayName.toUpperCase()}</p>
         <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/55">
-          Virtual card · Quiet premium · Coming with live rails
+          Member wallet
         </p>
       </section>
 
@@ -223,6 +239,12 @@ export default async function WalletPage({ searchParams }: Props) {
               currency={primaryCurrency}
               labels={dict.walletForms}
               provider={provider}
+              defaultAmount={
+                Number.isFinite(amountPrefill) && amountPrefill >= 100
+                  ? amountPrefill
+                  : undefined
+              }
+              returnPath={returnPath}
             />
           </div>
         </section>

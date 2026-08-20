@@ -10,7 +10,10 @@ import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
 import { IprsVerifyForm } from '@/features/profile/components/iprs-verify-form';
 import { MpesaLinkForm } from '@/features/profile/components/mpesa-link-form';
 import { ReferralPanel } from '@/features/profile/components/referral-panel';
-import { ProfileOnboardingBanner } from '@/features/profile/components/profile-onboarding-banner';
+import {
+  ProfileOnboardingBanner,
+  hasValidProfilePhone,
+} from '@/features/profile/components/profile-onboarding-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 
@@ -89,6 +92,7 @@ export default async function ProfilePage({ searchParams }: Props) {
 
   const profile = profileData as unknown as ProfileRow | null;
   const docs = (docsData ?? []) as unknown as KycRow[];
+  const hasPhone = hasValidProfilePhone(profile?.phone);
   const referrals = (referralData ?? []) as unknown as Array<{
     id: string;
     status: string;
@@ -103,6 +107,7 @@ export default async function ProfilePage({ searchParams }: Props) {
         <ProfileOnboardingBanner
           continueHref={continueHref}
           profileCompleted={Boolean(profile?.profile_completed && profile?.full_name?.trim())}
+          hasPhone={hasPhone}
           hasKycDoc={docs.length > 0}
         />
       ) : null}
@@ -135,6 +140,7 @@ export default async function ProfilePage({ searchParams }: Props) {
           <ProfileForm
             labels={labels}
             continueHref={onboarding ? continueHref : undefined}
+            requirePhone={onboarding || !hasPhone}
             defaultValues={{
               fullName: profile?.full_name ?? '',
               phone: profile?.phone ?? '',
