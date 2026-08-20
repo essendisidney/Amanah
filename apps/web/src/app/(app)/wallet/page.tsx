@@ -12,6 +12,7 @@ import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
+import { hasValidProfilePhone } from '@/features/profile/components/profile-onboarding-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 import { paymentProvider } from '@/lib/payments/provider';
@@ -140,6 +141,9 @@ export default async function WalletPage({ searchParams }: Props) {
       ?.mpesa_phone ??
     (profileResult.data as { phone?: string | null } | null)?.phone ??
     '';
+  const hasPhone = hasValidProfilePhone(
+    (profileResult.data as { phone?: string | null } | null)?.phone ?? withdrawPhone,
+  );
 
   return (
     <div className="space-y-8">
@@ -178,6 +182,22 @@ export default async function WalletPage({ searchParams }: Props) {
         requireReal={requireReal}
         simulatedBlocked={liveLocked}
       />
+
+      {!hasPhone ? (
+        <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Add a Kenya mobile</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Wallet verification SMS and withdrawals need a +254 number on your profile.
+            </p>
+          </div>
+          <Button asChild className="min-h-11 shrink-0">
+            <Link href={'/profile?onboarding=1&next=/wallet#personal-details' as Route}>
+              Add phone
+            </Link>
+          </Button>
+        </div>
+      ) : null}
 
       {wallets.length === 0 ? (
         <EmptyState

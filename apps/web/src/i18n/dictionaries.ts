@@ -511,11 +511,11 @@ export const en: Dictionary = {
     createACircle: 'Create a circle',
     redeemTitle: 'Enter invite code',
     redeemHint:
-      'Got an 8-character code on WhatsApp? Paste it here after you sign in with phone.',
-    redeemPlaceholder: 'e.g. AB3K7M2Q',
+      'Paste a short invite code or the full join link from WhatsApp.',
+    redeemPlaceholder: 'AB3K7M2Q or https://…/invitations/…',
     redeemSubmit: 'Join with code',
     redeemWorking: 'Opening…',
-    redeemInvalid: 'Use the 6–8 character invite code (letters and numbers, no O/0/I/1).',
+    redeemInvalid: 'Paste a 6–8 character invite code or an /invitations/… link.',
   },
   wallet: {
     eyebrow: 'Money',
@@ -886,11 +886,11 @@ export const sw: Dictionary = {
     createACircle: 'Unda mduara',
     redeemTitle: 'Weka msimbo wa mwaliko',
     redeemHint:
-      'Umepata msimbo wa herufi 8 kwenye WhatsApp? Ubandike hapa baada ya kuingia kwa simu.',
-    redeemPlaceholder: 'mf. AB3K7M2Q',
+      'Bandika msimbo mfupi au kiungo kamili cha mwaliko kutoka WhatsApp.',
+    redeemPlaceholder: 'AB3K7M2Q au https://…/invitations/…',
     redeemSubmit: 'Jiunge kwa msimbo',
     redeemWorking: 'Inafungua…',
-    redeemInvalid: 'Tumia msimbo wa herufi 6–8 (bila O/0/I/1).',
+    redeemInvalid: 'Bandika msimbo wa herufi 6–8 au kiungo cha /invitations/….',
   },
   wallet: {
     eyebrow: 'Pesa',

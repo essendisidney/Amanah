@@ -18,6 +18,8 @@ type Props = {
   walletAvailable: number | null;
   walletCurrency: string;
   circleName?: string;
+  /** When false, omit id="pay" (use for stacked lists). Default true. */
+  showAnchor?: boolean;
 };
 
 export function NextContributionCard({
@@ -31,6 +33,7 @@ export function NextContributionCard({
   walletAvailable,
   walletCurrency,
   circleName,
+  showAnchor = true,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
   const ahead = new Date(dueDate) > new Date(new Date().toISOString().slice(0, 10));
@@ -45,7 +48,7 @@ export function NextContributionCard({
 
   return (
     <section
-      id="pay"
+      id={showAnchor ? 'pay' : undefined}
       className="amanah-surface space-y-4 border-primary/20 px-4 py-4 md:px-5 md:py-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">

@@ -43,7 +43,7 @@ export function WelcomeIntentForm() {
         ? ('/phone?next=/finance/goals' as Route)
         : intent === 'manage'
           ? ('/phone?next=/wallet' as Route)
-          : intent === 'business'
+          : intent === 'business' || intent === 'family'
             ? ('/phone?next=/circles/new' as Route)
             : ('/phone?next=/dashboard' as Route);
 

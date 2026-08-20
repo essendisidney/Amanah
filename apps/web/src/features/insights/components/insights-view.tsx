@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
+import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { InsightsData } from '../lib/get-insights-data';
+import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 
 export function InsightsView({ data }: { data: InsightsData }) {
   const { dashboard, monthInflow, monthOutflow, currency, onTimeRate, openDueTotal } = data;
@@ -71,7 +72,7 @@ export function InsightsView({ data }: { data: InsightsData }) {
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold tracking-tight">Upcoming dues</h2>
-            <p className="text-sm text-muted-foreground">What still needs settling</p>
+            <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
           </div>
           <Button asChild size="sm" variant="ghost">
             <Link href={'/circles' as Route}>Circles</Link>
@@ -82,32 +83,24 @@ export function InsightsView({ data }: { data: InsightsData }) {
             No open contributions. You are clear for now.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
-            {dashboard.contributions.map((item) => {
-              const remaining = Math.max(item.amount - item.amountPaid, 0);
-              return (
-                <li
-                  key={item.id}
-                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5"
-                >
-                  <div>
-                    <p className="text-sm font-semibold">{item.jamiyaName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Cycle {item.cycleNumber} · due {formatDate(item.dueDate)} · {item.status}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <p className="amanah-money text-sm font-bold">
-                      {formatCurrency(remaining, item.currency)}
-                    </p>
-                    <Button asChild size="sm">
-                      <Link href={`/circles/${item.jamiyaSlug}#pay` as Route}>Pay</Link>
-                    </Button>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="space-y-3">
+            {dashboard.contributions.map((item, index) => (
+              <NextContributionCard
+                key={item.id}
+                contributionId={item.id}
+                slug={item.jamiyaSlug}
+                amount={item.amount}
+                amountPaid={item.amountPaid}
+                currency={item.currency}
+                dueDate={item.dueDate}
+                status={item.status}
+                walletAvailable={dashboard.wallet?.availableBalance ?? null}
+                walletCurrency={dashboard.wallet?.currency ?? item.currency}
+                circleName={item.jamiyaName}
+                showAnchor={index === 0}
+              />
+            ))}
+          </div>
         )}
       </section>
 

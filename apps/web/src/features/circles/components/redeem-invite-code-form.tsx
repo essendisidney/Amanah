@@ -10,6 +10,43 @@ function isShortInviteCode(value: string): boolean {
   return /^[A-HJ-NP-Z2-9]{6,8}$/i.test(value.trim());
 }
 
+/** Accept short codes or pasted /invitations/{token|code} links. */
+export function extractInviteCredential(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  if (isShortInviteCode(trimmed)) {
+    return trimmed.toUpperCase();
+  }
+
+  try {
+    const asUrl = trimmed.includes('://')
+      ? new URL(trimmed)
+      : trimmed.startsWith('/')
+        ? new URL(trimmed, 'https://amanah.local')
+        : null;
+    if (asUrl) {
+      const match = asUrl.pathname.match(/\/invitations\/([^/?#]+)/i);
+      if (match?.[1]) {
+        const part = decodeURIComponent(match[1]).trim();
+        if (isShortInviteCode(part)) return part.toUpperCase();
+        if (part.length >= 8) return part;
+      }
+    }
+  } catch {
+    // fall through
+  }
+
+  const pathMatch = trimmed.match(/\/invitations\/([^/?#\s]+)/i);
+  if (pathMatch?.[1]) {
+    const part = decodeURIComponent(pathMatch[1]).trim();
+    if (isShortInviteCode(part)) return part.toUpperCase();
+    if (part.length >= 8) return part;
+  }
+
+  return null;
+}
+
 export function RedeemInviteCodeForm({
   title,
   hint,
@@ -35,14 +72,14 @@ export function RedeemInviteCodeForm({
       className="space-y-3"
       onSubmit={(event) => {
         event.preventDefault();
-        const trimmed = code.trim().toUpperCase();
-        if (!isShortInviteCode(trimmed)) {
+        const credential = extractInviteCredential(code);
+        if (!credential) {
           setError(invalidLabel);
           return;
         }
         setError(null);
         startTransition(() => {
-          router.push(`/invitations/${encodeURIComponent(trimmed)}` as Route);
+          router.push(`/invitations/${encodeURIComponent(credential)}` as Route);
         });
       }}
     >
@@ -62,13 +99,11 @@ export function RedeemInviteCodeForm({
             id="inviteCode"
             name="inviteCode"
             value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            onChange={(e) => setCode(e.target.value)}
             placeholder={placeholder}
             autoComplete="off"
-            autoCapitalize="characters"
             spellCheck={false}
-            className="font-mono tracking-[0.18em]"
-            maxLength={8}
+            className="font-mono tracking-[0.08em]"
           />
         </div>
         <Button type="submit" className="min-h-11 sm:min-h-10" disabled={pending}>

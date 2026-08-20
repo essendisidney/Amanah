@@ -364,6 +364,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             style={{ width: `${cycleProgress}%` }}
           />
         </div>
+        {canManageOps && jamiya.member_count < 2 ? (
+          <div className="mt-5 rounded-xl bg-white/10 px-4 py-3 backdrop-blur-sm">
+            <p className="text-sm font-semibold text-white">Invite 1–2 people to activate</p>
+            <p className="mt-1 text-xs text-white/75">
+              Circles work best with family or friends. Share a join link or short code below.
+            </p>
+            <Button asChild size="sm" variant="secondary" className="mt-3 min-h-10">
+              <a href="#invite-people">Invite people</a>
+            </Button>
+          </div>
+        ) : null}
         <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <div className="rounded-xl bg-white/10 px-3 py-2.5 backdrop-blur-sm">
             <p className="text-[11px] uppercase tracking-wide text-white/65">
@@ -607,7 +618,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
       {canManageOps ? (
         <>
-          <section className="space-y-4">
+          <section id="invite-people" className="space-y-4">
             <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
               Add people (manual)
             </h2>
