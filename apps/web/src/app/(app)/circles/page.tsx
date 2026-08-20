@@ -6,6 +6,7 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
+import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { RedeemInviteCodeForm } from '@/features/circles/components/redeem-invite-code-form';
 import { getDictionary } from '@/i18n/get-dictionary';
 
@@ -93,12 +94,12 @@ export default async function MyCirclesPage() {
             Each circle is a trusted financial account for your community.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="min-h-11">
           <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
         </Button>
       </div>
 
-      <section className="amanah-surface p-5">
+      <section id="redeem-invite" className="amanah-surface scroll-mt-24 p-5">
         <RedeemInviteCodeForm
           title={labels.redeemTitle}
           hint={labels.redeemHint}
@@ -110,12 +111,17 @@ export default async function MyCirclesPage() {
       </section>
 
       {rows.length === 0 ? (
-        <EmptyState
-          title={labels.emptyTitle}
-          description={labels.emptyDesc}
-          actionLabel={labels.createACircle}
-          actionHref={'/circles/new' as Route}
-        />
+        <div className="space-y-3">
+          <EmptyState
+            title={labels.emptyTitle}
+            description={labels.emptyDesc}
+            actionLabel={labels.createACircle}
+            actionHref={'/circles/new' as Route}
+          />
+          <Button asChild variant="outline" className="min-h-11">
+            <a href="#redeem-invite">Enter invite code</a>
+          </Button>
+        </div>
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {rows.map((row) => {
@@ -128,7 +134,6 @@ export default async function MyCirclesPage() {
               jamiya.cycle_count && jamiya.cycle_count > 0
                 ? Math.min(100, Math.round((jamiya.current_cycle / jamiya.cycle_count) * 100))
                 : 0;
-            const estimated = amount * Math.max(jamiya.current_cycle, 1);
 
             return (
               <li key={row.id}>
@@ -138,15 +143,24 @@ export default async function MyCirclesPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="truncate text-lg font-bold tracking-tight">{jamiya.name}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-lg font-bold tracking-tight">{jamiya.name}</p>
+                        <StatusBadge status={row.status} />
+                        <StatusBadge status={row.role} />
+                      </div>
                       <p className="mt-1 text-xs capitalize text-muted-foreground">
                         {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}/
                         {jamiya.max_members} {common.members}
                       </p>
                     </div>
-                    <p className="amanah-money shrink-0 text-lg font-bold">
-                      {formatCurrency(estimated, jamiya.currency)}
-                    </p>
+                    <div className="shrink-0 text-right">
+                      <p className="amanah-money text-lg font-bold">
+                        {formatCurrency(amount, jamiya.currency)}
+                      </p>
+                      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                        {common.perCycle}
+                      </p>
+                    </div>
                   </div>
                   <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div
@@ -155,7 +169,10 @@ export default async function MyCirclesPage() {
                     />
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {progress}% · next {formatCurrency(amount, jamiya.currency)} {common.perCycle}
+                    {jamiya.cycle_count
+                      ? `${common.cycle} ${jamiya.current_cycle}/${jamiya.cycle_count}`
+                      : `${common.cycle} ${jamiya.current_cycle}`}
+                    {progress > 0 ? ` · ${progress}%` : ''}
                     {jamiya.start_date ? ` · ${common.starts} ${formatDate(jamiya.start_date)}` : ''}
                   </p>
                 </Link>

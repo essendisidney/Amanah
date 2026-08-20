@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import type { Route } from 'next';
 import { CreateCircleForm } from '@/features/circles';
 
 export const metadata: Metadata = {
@@ -16,6 +18,16 @@ export default function CreateCirclePage() {
         <p className="mt-3 max-w-xl text-muted-foreground">
           Set contribution rules for your rotating savings circle. You become the circle admin
           automatically.
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Have an invite?{' '}
+          <Link
+            href={'/circles#redeem-invite' as Route}
+            className="text-accent underline-offset-4 hover:underline"
+          >
+            Enter your code instead
+          </Link>
+          .
         </p>
       </div>
 

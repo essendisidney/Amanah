@@ -7,6 +7,7 @@ import { Button, Input } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { deleteGoalAction, updateGoalFormAction } from '@/features/finance/actions';
 import { CreateGoalForm } from '@/features/finance/components/create-goal-form';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const metadata: Metadata = { title: 'Goals' };
 export const dynamic = 'force-dynamic';
@@ -39,13 +40,23 @@ export default async function GoalsPage() {
     <div className="space-y-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          Personal savings
+          <Link href={'/finance' as Route} className="hover:text-primary">
+            Finance
+          </Link>
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
           Hajj, Umra, Udhiyah, emergency fund — track progress with a clear target. Top up Money,
           then update what you have set aside.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/finance' as Route}>Back to Finance</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="amanah-surface p-5">
@@ -53,6 +64,12 @@ export default async function GoalsPage() {
       </div>
 
       <section className="space-y-3">
+        {goals.length === 0 ? (
+          <EmptyState
+            title="No goals yet"
+            description="Create your first savings goal above — Hajj, emergency, or any target you care about."
+          />
+        ) : null}
         {goals.map((goal) => {
           const target = Number(goal.target_amount);
           const saved = Number(goal.saved_amount);
@@ -63,6 +80,7 @@ export default async function GoalsPage() {
               ? Math.ceil(remaining / goal.duration_months)
               : null;
           const topUpAmount = Math.max(Math.ceil(remaining || 100), 100);
+          const reached = remaining === 0;
 
           return (
             <article key={goal.id} className="amanah-surface p-5">
@@ -74,21 +92,21 @@ export default async function GoalsPage() {
                     {goal.duration_months ? ` · ${goal.duration_months} months` : ''}
                     {goal.target_date ? ` · by ${goal.target_date}` : ''}
                   </p>
-                  {remaining > 0 ? (
+                  {reached ? (
+                    <p className="mt-1 text-sm font-medium text-primary">Target reached</p>
+                  ) : (
                     <p className="mt-1 text-sm font-medium text-foreground">
                       {formatCurrency(remaining, goal.currency)} still to go
                       {monthlyHint
                         ? ` · about ${formatCurrency(monthlyHint, goal.currency)} / month`
                         : ''}
                     </p>
-                  ) : (
-                    <p className="mt-1 text-sm font-medium text-primary">Target reached</p>
                   )}
                 </div>
                 <form action={deleteGoalAction}>
                   <input type="hidden" name="goalId" value={goal.id} />
-                  <Button type="submit" variant="outline" size="sm">
-                    Delete
+                  <Button type="submit" variant={reached ? 'default' : 'outline'} size="sm">
+                    {reached ? 'Archive / delete' : 'Delete'}
                   </Button>
                 </form>
               </div>
@@ -99,8 +117,8 @@ export default async function GoalsPage() {
                 />
               </div>
               <p className="mt-2 text-xs font-semibold text-primary">{progress}% complete</p>
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                {remaining > 0 ? (
+              {!reached ? (
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                   <Button asChild className="min-h-11">
                     <Link
                       href={
@@ -110,32 +128,35 @@ export default async function GoalsPage() {
                       Top up Money toward this
                     </Link>
                   </Button>
-                ) : null}
-                <form action={updateGoalFormAction} className="flex max-w-xs flex-1 gap-2">
-                  <input type="hidden" name="goalId" value={goal.id} />
-                  <Input
-                    name="savedAmount"
-                    type="number"
-                    inputMode="decimal"
-                    min="0"
-                    defaultValue={saved}
-                    className="h-11 text-base sm:h-10 sm:text-sm"
-                    aria-label="Saved amount"
-                  />
-                  <Button type="submit" variant="outline" className="min-h-11">
-                    Update
-                  </Button>
-                </form>
-              </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                Update records how much you have set aside after topping up or transferring.
-              </p>
+                  <form action={updateGoalFormAction} className="flex max-w-xs flex-1 gap-2">
+                    <input type="hidden" name="goalId" value={goal.id} />
+                    <Input
+                      name="savedAmount"
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      defaultValue={saved}
+                      className="h-11 text-base sm:h-10 sm:text-sm"
+                      aria-label="Saved amount"
+                    />
+                    <Button type="submit" variant="outline" className="min-h-11">
+                      Update
+                    </Button>
+                  </form>
+                </div>
+              ) : (
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Nice work. You can archive this goal or keep it for your records.
+                </p>
+              )}
+              {!reached ? (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Update records how much you have set aside after topping up or transferring.
+                </p>
+              ) : null}
             </article>
           );
         })}
-        {!goals.length ? (
-          <p className="text-sm text-muted-foreground">Create your first savings goal above.</p>
-        ) : null}
       </section>
     </div>
   );

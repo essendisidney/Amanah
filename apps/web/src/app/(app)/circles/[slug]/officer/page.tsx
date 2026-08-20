@@ -191,7 +191,30 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     user_id: string;
     member_code: string | null;
   }>;
-  const userIds = memberRows.map((m) => m.user_id);
+  const dualRowsEarly = (dualPending ?? []) as Array<{
+    id: string;
+    kind: string;
+    amount: number | string;
+    currency: string;
+    first_approver_id: string;
+    created_at: string;
+  }>;
+  const caseRowsEarly = (cases ?? []) as Array<{
+    id: string;
+    status: string;
+    severity: string;
+    amount_due: number | string;
+    currency: string;
+    days_overdue: number;
+    user_id: string | null;
+  }>;
+  const userIds = [
+    ...new Set([
+      ...memberRows.map((m) => m.user_id),
+      ...dualRowsEarly.map((r) => r.first_approver_id),
+      ...caseRowsEarly.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
+    ]),
+  ];
   const { data: profiles } = userIds.length
     ? await supabase.from('profiles').select('id, full_name, email').in('id', userIds)
     : { data: [] };
@@ -200,6 +223,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
       (p) => [p.id, p],
     ),
   );
+  const memberById = new Map(memberRows.map((m) => [m.id, m]));
 
   const late = ((lateDues ?? []) as Array<{ status: string }>).filter((d) => d.status === 'late');
   const nextPayout = (payouts ?? [])[0] as
@@ -238,15 +262,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     price_kes: number | string;
     max_members: number;
   }>;
-  const dualRows = (dualPending ?? []) as Array<{
-    id: string;
-    kind: string;
-    amount: number | string;
-    currency: string;
-    first_approver_id: string;
-    created_at: string;
-  }>;
-  const loanRows = (pendingLoans ?? []) as Array<{
+  const dualRows = dualRowsEarly;  const loanRows = (pendingLoans ?? []) as Array<{
     id: string;
     amount: number | string;
     currency: string;
@@ -282,64 +298,53 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/circles/${slug}` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
+            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
           >
             Circle
           </Link>
           <Link
-            href={`/circles/${slug}/community` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            Community
-          </Link>
-          <Link
-            href={`/circles/${slug}/treasury` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            Treasury
-          </Link>
-          <Link
-            href={`/circles/${slug}/shares` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            Shares
-          </Link>
-          <Link
-            href={`/circles/${slug}/journal` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            Journal
-          </Link>
-          <Link
-            href={`/circles/${slug}/invoices` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            Invoices
-          </Link>
-          <Link
-            href={`/circles/${slug}/statement` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            ID reports
-          </Link>
-          <Link
-            href={`/circles/${slug}/report` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
-          >
-            GL report
-          </Link>
-          <Link
             href={`/circles/${slug}/arrears` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
+            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
           >
             {dict.circle.arrears}
           </Link>
           <Link
-            href={`/circles/${slug}/audit` as Route}
-            className="rounded-md border border-border px-3 py-1.5 text-sm"
+            href={`/circles/${slug}/treasury` as Route}
+            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
           >
-            {dict.circle.auditTrail}
+            Treasury
           </Link>
+          <Link
+            href={`/circles/${slug}/community` as Route}
+            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
+          >
+            Community
+          </Link>
+          <details className="relative">
+            <summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center">
+              More tools
+            </summary>
+            <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
+              <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Shares
+              </Link>
+              <Link href={`/circles/${slug}/journal` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Journal
+              </Link>
+              <Link href={`/circles/${slug}/invoices` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                Invoices
+              </Link>
+              <Link href={`/circles/${slug}/statement` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                ID reports
+              </Link>
+              <Link href={`/circles/${slug}/report` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                GL report
+              </Link>
+              <Link href={`/circles/${slug}/audit` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                {dict.circle.auditTrail}
+              </Link>
+            </div>
+          </details>
         </div>
       </div>
 
@@ -382,9 +387,20 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
             .
           </p>
           {planInfo?.status === 'past_due' ? (
-            <p className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
-              Plan is past due. Top up your wallet, then tap the plan button again to reactivate.
-            </p>
+            <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3">
+              <p className="text-xs text-destructive">
+                Plan is past due. Top up Money, then tap the plan button again to reactivate.
+              </p>
+              <Button asChild size="sm" className="min-h-11">
+                <Link
+                  href={
+                    `/wallet?next=${encodeURIComponent(`/circles/${slug}/officer`)}#top-up` as Route
+                  }
+                >
+                  Top up Money
+                </Link>
+              </Button>
+            </div>
           ) : null}
           <div className="flex flex-wrap gap-2">
             {planRows.map((plan) => (
@@ -511,7 +527,11 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    First: {row.first_approver_id.slice(0, 8)}… · {formatDate(row.created_at)}
+                    First:{' '}
+                    {profileMap.get(row.first_approver_id)?.full_name ??
+                      profileMap.get(row.first_approver_id)?.email ??
+                      'Officer'}{' '}
+                    · {formatDate(row.created_at)}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -548,20 +568,30 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {((lateDues ?? []) as Array<{
               id: string;
+              member_id: string;
               cycle_number: number;
               amount: number | string;
               currency: string;
               status: string;
               due_date: string;
-            }>).map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <p className="text-sm">
-                  Cycle {row.cycle_number} · {formatCurrency(Number(row.amount), row.currency)} · due{' '}
-                  {formatDate(row.due_date)}
-                </p>
-                <StatusBadge status={row.status} />
-              </li>
-            ))}
+            }>).map((row) => {
+              const member = memberById.get(row.member_id);
+              const profile = member ? profileMap.get(member.user_id) : null;
+              const memberName =
+                profile?.full_name ?? profile?.email ?? member?.member_code ?? 'Member';
+              return (
+                <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium">{memberName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Cycle {row.cycle_number} · {formatCurrency(Number(row.amount), row.currency)} ·
+                      due {formatDate(row.due_date)}
+                    </p>
+                  </div>
+                  <StatusBadge status={row.status} />
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
@@ -619,25 +649,28 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           </p>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-            {((cases ?? []) as Array<{
-              id: string;
-              status: string;
-              severity: string;
-              amount_due: number | string;
-              currency: string;
-              days_overdue: number;
-            }>).map((row) => (
-              <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <p className="text-sm">
-                  {formatCurrency(Number(row.amount_due), row.currency)} · {row.days_overdue}d
-                  overdue
-                </p>
-                <div className="flex gap-2">
-                  <StatusBadge status={row.status} />
-                  <StatusBadge status={row.severity} />
-                </div>
-              </li>
-            ))}
+            {caseRowsEarly.map((row) => {
+              const profile = row.user_id ? profileMap.get(row.user_id) : null;
+              const memberName = profile?.full_name ?? profile?.email ?? 'Member';
+              return (
+                <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium">{memberName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatCurrency(Number(row.amount_due), row.currency)} · {row.days_overdue}d
+                      overdue
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={row.status} />
+                    <StatusBadge status={row.severity} />
+                    <Button asChild size="sm" variant="outline" className="min-h-11">
+                      <Link href={`/circles/${slug}/arrears` as Route}>Open arrears</Link>
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

@@ -38,7 +38,7 @@ export function WelcomeIntentForm() {
   const [intent, setIntent] = useState<(typeof INTENTS)[number]['id']>('family');
   const next =
     intent === 'join'
-      ? ('/phone?next=/circles' as Route)
+      ? (`/phone?next=${encodeURIComponent('/circles#redeem-invite')}` as Route)
       : intent === 'build'
         ? ('/phone?next=/finance/goals' as Route)
         : intent === 'manage'

@@ -66,10 +66,13 @@ export default async function PricingPage() {
                 <li>Dual approval: {plan.dual_approval_included ? 'Included' : 'Optional'}</li>
                 <li>Exports / print statements: {plan.exports_included ? 'Yes' : 'No'}</li>
               </ul>
-              <div className="mt-8">
-                <Button asChild className="w-full">
-                  <Link href={'/circles' as Route}>Choose in a circle</Link>
+              <div className="mt-8 space-y-2">
+                <Button asChild className="w-full min-h-11">
+                  <Link href={'/circles' as Route}>Open officer console</Link>
                 </Button>
+                <p className="text-xs text-muted-foreground">
+                  Officers change the plan under Officer console → Circle plan.
+                </p>
               </div>
             </li>
           );
@@ -78,7 +81,7 @@ export default async function PricingPage() {
 
       {plans.length === 0 ? (
         <p className="mt-10 text-sm text-muted-foreground">
-          Plans will appear after the latest database migration is applied.
+          Plans are temporarily unavailable. Try again later.
         </p>
       ) : null}
     </main>

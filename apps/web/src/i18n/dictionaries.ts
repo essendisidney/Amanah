@@ -507,7 +507,7 @@ export const en: Dictionary = {
     subtitle: 'All rotating savings circles linked to your account.',
     createCircle: 'Create circle',
     emptyTitle: 'You have not joined a circle yet',
-    emptyDesc: 'Create a new circle or wait for an invitation from your community.',
+    emptyDesc: 'Create a new circle, or enter an invite code above to join one.',
     createACircle: 'Create a circle',
     redeemTitle: 'Enter invite code',
     redeemHint:
@@ -883,7 +883,7 @@ export const sw: Dictionary = {
     subtitle: 'Miduara yote ya akiba inayozunguka iliyounganishwa na akaunti yako.',
     createCircle: 'Unda mduara',
     emptyTitle: 'Bado hujajiunga na mduara',
-    emptyDesc: 'Unda mduara mpya au subiri mwaliko kutoka jamii yako.',
+    emptyDesc: 'Unda mduara mpya, au weka msimbo wa mwaliko hapo juu ili ujiunge.',
     createACircle: 'Unda mduara',
     redeemTitle: 'Weka msimbo wa mwaliko',
     redeemHint:
