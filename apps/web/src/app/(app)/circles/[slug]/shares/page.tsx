@@ -142,6 +142,9 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
           <Button asChild variant="outline" size="sm">

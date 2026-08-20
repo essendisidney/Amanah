@@ -262,6 +262,8 @@ export default async function WelfarePage({ searchParams }: Props) {
           <EmptyState
             title="No claims yet"
             description="When someone files a medical, funeral, or accident claim, it will show here for review."
+            actionLabel="Back to Finance"
+            actionHref={'/finance' as Route}
           />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">

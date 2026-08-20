@@ -26,6 +26,8 @@ export function ContributionsSection({
         <EmptyState
           title={labels.contributionsEmptyTitle}
           description={labels.contributionsEmptyDesc}
+          actionLabel="Open Circles"
+          actionHref={'/circles' as Route}
         />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">

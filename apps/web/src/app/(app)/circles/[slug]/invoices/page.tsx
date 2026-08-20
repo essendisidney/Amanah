@@ -154,6 +154,8 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
           <EmptyState
             title="No invoices yet"
             description="Issue invoices for pending or late contributions so members get a clear amount due."
+            actionLabel="Open dues"
+            actionHref={`/circles/${slug}#pay` as Route}
           />
         ) : (
           <EmptyState

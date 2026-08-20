@@ -283,8 +283,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <StatementSection
         title="Savings pockets"
         empty="No savings pockets yet."
-        emptyHref={'/wallet' as Route}
-        emptyLabel="Open Money"
+        emptyHref={
+          isOfficer
+            ? (`/circles/${slug}/treasury` as Route)
+            : (`/circles/${slug}` as Route)
+        }
+        emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
         rows={(stmt.savings_pockets ?? []).map((s) => ({
           key: String(s.id),
           title: String(s.label || s.category),

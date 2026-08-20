@@ -34,6 +34,8 @@ export type Dictionary = {
     walletShort: string;
     finance: string;
     financeShort: string;
+    activity: string;
+    activityShort: string;
     profile: string;
     profileShort: string;
   };
@@ -409,8 +411,10 @@ export const en: Dictionary = {
     circlesShort: 'Circles',
     wallet: 'Money',
     walletShort: 'Money',
-    finance: 'Activity',
-    financeShort: 'Activity',
+    finance: 'Finance',
+    financeShort: 'Finance',
+    activity: 'Activity',
+    activityShort: 'Activity',
     profile: 'Profile',
     profileShort: 'You',
   },
@@ -698,7 +702,7 @@ export const en: Dictionary = {
     journal: 'Journal',
     invoices: 'Invoices',
     myStatement: 'My statement',
-    idReport: 'ID report',
+    idReport: 'Member statement',
     officerConsole: 'Officer console',
     contribution: 'Contribution',
     members: 'Members',
@@ -810,8 +814,10 @@ export const sw: Dictionary = {
     circlesShort: 'Miduara',
     wallet: 'Pesa',
     walletShort: 'Pesa',
-    finance: 'Shughuli',
-    financeShort: 'Shughuli',
+    finance: 'Fedha',
+    financeShort: 'Fedha',
+    activity: 'Shughuli',
+    activityShort: 'Shughuli',
     profile: 'Wasifu',
     profileShort: 'Wewe',
   },
@@ -1100,7 +1106,7 @@ export const sw: Dictionary = {
     journal: 'Jarida',
     invoices: 'Ankara',
     myStatement: 'Taarifa yangu',
-    idReport: 'Ripoti ya kitambulisho',
+    idReport: 'Taarifa ya mwanachama',
     officerConsole: 'Dashibodi ya ofisa',
     contribution: 'Mchango',
     members: 'Wanachama',

@@ -68,6 +68,8 @@ export default async function GoalsPage() {
           <EmptyState
             title="No goals yet"
             description="Create your first savings goal above — Hajj, emergency, or any target you care about."
+            actionLabel="Open Money"
+            actionHref={'/wallet#top-up' as Route}
           />
         ) : null}
         {goals.map((goal) => {

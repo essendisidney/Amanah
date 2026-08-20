@@ -694,7 +694,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                 <div className="flex gap-2">
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/circles/${slug}/statement?memberId=${m.id}` as Route}>
-                      ID report
+                      {dict.circle.idReport}
                     </Link>
                   </Button>
                   <form action={vouchFormAction}>

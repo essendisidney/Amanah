@@ -391,6 +391,8 @@ export default async function QardPage({ searchParams }: Props) {
           <EmptyState
             title="No Qard requests yet"
             description="Request an interest-free loan from a circle where you are an active member."
+            actionLabel="Back to Finance"
+            actionHref={'/finance' as Route}
           />
         )}
       </section>

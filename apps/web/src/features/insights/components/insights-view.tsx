@@ -4,6 +4,7 @@ import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { InsightsData } from '../lib/get-insights-data';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export function InsightsView({ data }: { data: InsightsData }) {
   const { dashboard, monthInflow, monthOutflow, currency, onTimeRate, openDueTotal } = data;
@@ -12,11 +13,23 @@ export function InsightsView({ data }: { data: InsightsData }) {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Insights</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+          <Link href={'/finance' as Route} className="hover:text-primary">
+            Finance
+          </Link>
+        </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Your money story</h1>
         <p className="mt-2 text-muted-foreground">
           A quiet snapshot of how {name} is saving and contributing this month.
         </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/finance' as Route}>Back to Finance</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
+          </Button>
+        </div>
       </div>
 
       <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white md:p-7">
@@ -115,9 +128,12 @@ export function InsightsView({ data }: { data: InsightsData }) {
           </Button>
         </div>
         {dashboard.activity.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground">
-            No wallet activity yet. Top up to get started.
-          </p>
+          <EmptyState
+            title="No wallet activity yet"
+            description="Top up Money to start tracking inflows and outflows here."
+            actionLabel="Top up Money"
+            actionHref={'/wallet#top-up' as Route}
+          />
         ) : (
           <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
             {dashboard.activity.map((row) => {
@@ -156,6 +172,9 @@ export function InsightsView({ data }: { data: InsightsData }) {
       <section className="flex flex-wrap gap-2">
         <Button asChild variant="outline">
           <Link href={'/finance/goals' as Route}>Savings goals</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link href={'/finance' as Route}>Back to Finance</Link>
         </Button>
         <Button asChild variant="ghost">
           <Link href={'/wallet' as Route}>Back to Money</Link>
