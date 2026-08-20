@@ -11,10 +11,15 @@ import {
   fileWelfareClaimFormAction,
 } from '@/features/finance/actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { EmptyState } from '@/features/dashboard/components/empty-state';
 
 export const dynamic = 'force-dynamic';
 
-type Membership = { jamiya_id: string; role: string; jamiya: { id: string; name: string; currency: string } | null };
+type Membership = {
+  jamiya_id: string;
+  role: string;
+  jamiya: { id: string; name: string; currency: string } | null;
+};
 type Fund = {
   id: string;
   jamiya_id: string;
@@ -69,6 +74,7 @@ export default async function WelfarePage() {
     ['circle_admin', 'treasurer', 'chair'].includes(m.role),
   );
   const fundByJamiya = new Set(funds.map((f) => f.jamiya_id));
+  const fundCircles = circles.filter((m) => fundByJamiya.has(m.jamiya_id));
 
   return (
     <div className="space-y-10">
@@ -90,7 +96,17 @@ export default async function WelfarePage() {
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Balances</h2>
         {funds.length === 0 ? (
-          <p className="text-muted-foreground">No welfare funds yet. Admins can create one below.</p>
+          <EmptyState
+            title="No welfare funds yet"
+            description={
+              adminCircles.length > 0
+                ? 'Create a fund for one of your circles below so members can contribute and claim.'
+                : 'Ask a circle officer (chair, treasurer, or admin) to create a welfare fund first.'
+            }
+            {...(adminCircles.length === 0
+              ? { actionLabel: 'Back to Finance', actionHref: '/finance' as Route }
+              : {})}
+          />
         ) : (
           <ul className="divide-y divide-border border-y border-border">
             {funds.map((fund) => (
@@ -141,7 +157,7 @@ export default async function WelfarePage() {
         </section>
       ) : null}
 
-      {circles.length > 0 ? (
+      {fundCircles.length > 0 ? (
         <section className="max-w-md space-y-4 rounded-xl border border-border bg-card p-6">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Contribute
@@ -156,13 +172,11 @@ export default async function WelfarePage() {
                 required
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                {circles
-                  .filter((m) => fundByJamiya.has(m.jamiya_id))
-                  .map((m) => (
-                    <option key={m.jamiya_id} value={m.jamiya_id}>
-                      {m.jamiya?.name ?? m.jamiya_id}
-                    </option>
-                  ))}
+                {fundCircles.map((m) => (
+                  <option key={m.jamiya_id} value={m.jamiya_id}>
+                    {m.jamiya?.name ?? m.jamiya_id}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="space-y-2">
@@ -172,9 +186,13 @@ export default async function WelfarePage() {
             <Button type="submit">Contribute from wallet</Button>
           </form>
         </section>
+      ) : circles.length > 0 && funds.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          Contribute and claim options appear after a welfare fund exists for your circle.
+        </p>
       ) : null}
 
-      {circles.length > 0 ? (
+      {fundCircles.length > 0 ? (
         <section className="max-w-lg space-y-4 rounded-xl border border-border bg-card p-6">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             File a claim
@@ -188,13 +206,11 @@ export default async function WelfarePage() {
                 required
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
-                {circles
-                  .filter((m) => fundByJamiya.has(m.jamiya_id))
-                  .map((m) => (
-                    <option key={m.jamiya_id} value={m.jamiya_id}>
-                      {m.jamiya?.name ?? m.jamiya_id}
-                    </option>
-                  ))}
+                {fundCircles.map((m) => (
+                  <option key={m.jamiya_id} value={m.jamiya_id}>
+                    {m.jamiya?.name ?? m.jamiya_id}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="space-y-2">
@@ -227,7 +243,10 @@ export default async function WelfarePage() {
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Claims</h2>
         {claims.length === 0 ? (
-          <p className="text-muted-foreground">No claims yet.</p>
+          <EmptyState
+            title="No claims yet"
+            description="When someone files a medical, funeral, or accident claim, it will show here for review."
+          />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {claims.map((claim) => {

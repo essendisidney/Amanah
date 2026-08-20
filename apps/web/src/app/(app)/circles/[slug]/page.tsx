@@ -333,7 +333,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     <div className="space-y-8">
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
-      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-primary-foreground shadow-[0_12px_40px_rgba(11,92,66,0.2)] md:p-7">
+      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white shadow-[0_12px_40px_rgba(11,92,66,0.2)] md:p-7">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
@@ -591,19 +591,25 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <section className="grid gap-4 sm:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-5">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Qard & table banking
+              Circle finance
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Request or repay circle loans, and review guarantees, without loading the whole book
-              on this page.
+              Qard loans, welfare support, and partner Tawarruq — without leaving this circle
+              context.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm">
-                <Link href={'/finance/qard' as Route}>Open Qard</Link>
+                <Link href={'/finance/qard' as Route}>Qard Hassan</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={'/finance/welfare' as Route}>Welfare</Link>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
               </Button>
               {canManageMembers ? (
-                <Button asChild variant="outline" size="sm">
-                  <Link href={`/circles/${slug}/officer` as Route}>Officer loan queue</Link>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href={`/circles/${slug}/officer` as Route}>Officer queue</Link>
                 </Button>
               ) : null}
             </div>

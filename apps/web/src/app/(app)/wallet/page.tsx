@@ -207,7 +207,7 @@ export default async function WalletPage({ searchParams }: Props) {
           actionHref={'/dashboard' as Route}
         />
       ) : (
-        <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-primary-foreground md:p-7">
+        <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white md:p-7">
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
             Available
           </p>

@@ -126,7 +126,7 @@ export function DashboardView({
         ) : null}
       </header>
 
-      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-primary-foreground shadow-[0_12px_40px_rgba(11,92,66,0.22)] md:p-7">
+      <section className="amanah-surface overflow-hidden bg-[linear-gradient(145deg,#0b5c42_0%,#0f766e_55%,#0b5c42_100%)] p-5 text-white shadow-[0_12px_40px_rgba(11,92,66,0.22)] md:p-7">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
           Total Amanah
         </p>

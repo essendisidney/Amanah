@@ -139,6 +139,10 @@ export function ContributionCalendar({
           walletAvailable != null && currency === item.currency
             ? Math.max(remaining - walletAvailable, 0)
             : remaining;
+        const maxPartial =
+          walletAvailable != null && currency === item.currency
+            ? Math.min(remaining, walletAvailable)
+            : remaining;
 
         return (
           <li
@@ -183,6 +187,19 @@ export function ContributionCalendar({
                   >
                     <input type="hidden" name="contributionId" value={item.id} />
                     <input type="hidden" name="slug" value={slug} />
+                    <label className="block text-xs text-muted-foreground">
+                      Amount (optional)
+                      <input
+                        name="amount"
+                        type="number"
+                        inputMode="decimal"
+                        min={1}
+                        step="0.01"
+                        max={remaining}
+                        placeholder={String(remaining)}
+                        className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+                      />
+                    </label>
                     <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
                     </Button>
@@ -199,12 +216,27 @@ export function ContributionCalendar({
                   </Button>
                 )}
                 {!canCover && walletAvailable != null && walletAvailable > 0 ? (
-                  <form action={ahead ? payContributionAheadAction : payContributionAction}>
+                  <form
+                    action={ahead ? payContributionAheadAction : payContributionAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+                  >
                     <input type="hidden" name="contributionId" value={item.id} />
                     <input type="hidden" name="slug" value={slug} />
-                    <input type="hidden" name="amount" value={String(walletAvailable)} />
+                    <label className="block text-xs text-muted-foreground">
+                      Partial amount
+                      <input
+                        name="amount"
+                        type="number"
+                        inputMode="decimal"
+                        min={1}
+                        step="0.01"
+                        max={maxPartial}
+                        defaultValue={maxPartial}
+                        className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+                      />
+                    </label>
                     <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-                      Pay {formatCurrency(walletAvailable, item.currency)} now
+                      Pay partial now
                     </Button>
                   </form>
                 ) : null}

@@ -45,6 +45,10 @@ export function NextContributionCard({
     walletAvailable != null && walletCurrency === currency
       ? Math.max(remaining - walletAvailable, 0)
       : remaining;
+  const maxPartial =
+    walletAvailable != null && walletCurrency === currency
+      ? Math.min(remaining, walletAvailable)
+      : remaining;
 
   return (
     <section
@@ -88,11 +92,12 @@ export function NextContributionCard({
         </p>
       ) : (
         <p className="text-sm text-muted-foreground">
-          Pays from your Amanah wallet into this circle account.
+          Pays from your Amanah wallet into this circle account. Leave amount blank to pay the full
+          remaining balance.
         </p>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
         {canCover ? (
           <form
             action={ahead ? payContributionAheadAction : payContributionAction}
@@ -100,6 +105,19 @@ export function NextContributionCard({
           >
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
+            <label className="block text-xs text-muted-foreground">
+              Amount (optional)
+              <input
+                name="amount"
+                type="number"
+                inputMode="decimal"
+                min={1}
+                step="0.01"
+                max={remaining}
+                placeholder={String(remaining)}
+                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+              />
+            </label>
             <Button type="submit" className="min-h-11 w-full sm:w-auto">
               {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
             </Button>
@@ -117,12 +135,27 @@ export function NextContributionCard({
         )}
 
         {!canCover && walletAvailable != null && walletAvailable > 0 ? (
-          <form action={ahead ? payContributionAheadAction : payContributionAction}>
+          <form
+            action={ahead ? payContributionAheadAction : payContributionAction}
+            className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+          >
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="amount" value={String(walletAvailable)} />
+            <label className="block text-xs text-muted-foreground">
+              Partial amount
+              <input
+                name="amount"
+                type="number"
+                inputMode="decimal"
+                min={1}
+                step="0.01"
+                max={maxPartial}
+                defaultValue={maxPartial}
+                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+              />
+            </label>
             <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-              Pay {formatCurrency(walletAvailable, currency)} now
+              Pay partial now
             </Button>
           </form>
         ) : null}
