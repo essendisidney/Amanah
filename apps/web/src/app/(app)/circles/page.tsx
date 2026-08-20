@@ -117,29 +117,46 @@ export default async function MyCirclesPage() {
         </div>
       ) : (
         <ul className="divide-y divide-border/40">
-          {rows.map((row) => {
+          {rows.map((row, index) => {
             const jamiya = row.jamiya!;
             const amount =
               typeof jamiya.contribution_amount === 'number'
                 ? jamiya.contribution_amount
                 : Number(jamiya.contribution_amount);
+            const identity =
+              index % 3 === 0
+                ? 'amanah-circle-mint'
+                : index % 3 === 1
+                  ? 'amanah-circle-blue'
+                  : 'amanah-circle-lavender';
 
             return (
-              <li key={row.id}>
+              <li key={row.id} className={identity}>
                 <Link
                   href={`/circles/${jamiya.slug}` as Route}
                   className="flex items-start justify-between gap-4 py-5 transition-opacity active:opacity-70"
                 >
-                  <div className="min-w-0">
-                    <p className="truncate text-[15px] font-semibold tracking-tight">
-                      {jamiya.name}
-                    </p>
-                    <p className="mt-1 text-sm capitalize text-muted-foreground">
-                      {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}{' '}
-                      {common.members}
-                    </p>
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span
+                      className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                      style={{
+                        background: 'var(--circle-wash)',
+                        color: 'var(--circle-accent)',
+                      }}
+                    >
+                      <span className="h-2 w-2 rounded-full bg-current" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] font-semibold tracking-tight text-foreground">
+                        {jamiya.name}
+                      </p>
+                      <p className="mt-1 text-sm capitalize text-muted-foreground">
+                        {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}{' '}
+                        {common.members}
+                      </p>
+                    </div>
                   </div>
-                  <p className="amanah-money shrink-0 text-lg font-semibold">
+                  <p className="amanah-money shrink-0 text-lg font-semibold text-foreground">
                     {formatCurrency(amount, jamiya.currency)}
                   </p>
                 </Link>

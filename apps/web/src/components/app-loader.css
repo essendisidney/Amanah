@@ -172,7 +172,7 @@
   position: absolute;
   inset: -20%;
   background:
-    radial-gradient(circle at 28% 18%, rgb(5 150 105 / 0.2), transparent 42%),
+    radial-gradient(circle at 28% 18%, rgb(25 184 121 / 0.2), transparent 42%),
     radial-gradient(circle at 72% 78%, rgb(201 162 39 / 0.16), transparent 40%),
     linear-gradient(165deg, #fbfcfa 0%, #eef5f0 48%, #f5ecd0 100%);
   animation: amanah-mesh 12s ease-in-out infinite;
@@ -183,7 +183,7 @@
   position: absolute;
   inset: 0;
   opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23047857'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2319b879'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 .amanah-loader__glow {
@@ -195,7 +195,7 @@
   width: 12rem;
   margin: -6rem;
   border-radius: 9999px;
-  background: radial-gradient(circle, rgb(5 150 105 / 0.26) 0%, transparent 70%);
+  background: radial-gradient(circle, rgb(25 184 121 / 0.26) 0%, transparent 70%);
   animation: amanah-glow 3.6s ease-in-out infinite;
 }
 
@@ -246,8 +246,8 @@
   width: 0.5rem;
   margin: -0.25rem;
   border-radius: 9999px;
-  background: #047857;
-  box-shadow: 0 0 10px rgb(5 150 105 / 0.45);
+  background: #19b879;
+  box-shadow: 0 0 10px rgb(25 184 121 / 0.45);
 }
 
 .amanah-loader__orbit-dot--1 {
@@ -256,13 +256,13 @@
 }
 
 .amanah-loader__orbit-dot--2 {
-  background: #059669;
+  background: #38c98a;
   transform: rotate(120deg) translateY(-2.4rem);
   animation: amanah-orbit-pulse 2.4s ease-in-out infinite 0.35s;
 }
 
 .amanah-loader__orbit-dot--3 {
-  background: #c9a227;
+  background: #f3c94a;
   transform: rotate(240deg) translateY(-2.4rem);
   animation: amanah-orbit-pulse 2.4s ease-in-out infinite 0.7s;
 }
@@ -293,7 +293,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: linear-gradient(145deg, #047857 0%, #059669 55%, #065f46 100%);
+  background: linear-gradient(145deg, #19b879 0%, #38c98a 55%, #0f9f62 100%);
   box-shadow:
     0 14px 34px rgb(4 120 87 / 0.32),
     inset 0 1px 0 rgb(255 255 255 / 0.22);
@@ -339,7 +339,7 @@
 }
 
 .amanah-loader__svg-ring--c {
-  stroke: rgb(5 150 105 / 0.4);
+  stroke: rgb(25 184 121 / 0.4);
   stroke-dasharray: 70 40;
   animation: amanah-spin 6s linear infinite;
   transform-origin: 60px 60px;
@@ -351,7 +351,7 @@
   font-size: clamp(1.85rem, 5vw, 2.4rem);
   font-weight: 600;
   letter-spacing: -0.03em;
-  color: #047857;
+  color: #19b879;
 }
 
 .amanah-loader__tagline {
@@ -387,7 +387,7 @@
   inset: 0 auto 0 0;
   height: 100%;
   border-radius: 9999px;
-  background: linear-gradient(90deg, #047857, #059669, #c9a227);
+  background: linear-gradient(90deg, #19b879, #38c98a, #f3c94a);
   animation: amanah-progress-fill 2.4s cubic-bezier(0.45, 0.05, 0.25, 1) infinite;
 }
 
@@ -423,8 +423,8 @@
   height: 100%;
   width: 0;
   border-radius: 0 2px 2px 0;
-  background: linear-gradient(90deg, #047857, #059669, #c9a227);
-  box-shadow: 0 0 10px rgb(5 150 105 / 0.45);
+  background: linear-gradient(90deg, #19b879, #38c98a, #f3c94a);
+  box-shadow: 0 0 10px rgb(25 184 121 / 0.45);
   transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 

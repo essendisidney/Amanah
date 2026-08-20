@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 /*
-  Amanah — pixel-matched to liquid-glass mock
-  Paper #f4f4fc · CTA #13cd90 · money #27935b · debit #d26a69 · forest #062213
+  Amanah colour system — IMAGE #2 north star
+  Soft white glass + pale blue/lavender ambient + fresh jade green accents
+  ~70–80% neutral light · colour guides attention only
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -16,6 +17,7 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --color-input: var(--input);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -24,6 +26,7 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
+  --color-primary-muted: var(--primary-muted);
 
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -39,13 +42,21 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
+  --color-blue: var(--blue);
+  --color-blue-muted: var(--blue-muted);
+  --color-purple: var(--purple);
+  --color-purple-muted: var(--purple-muted);
+  --color-gold: var(--gold);
+  --color-gold-muted: var(--gold-muted);
+  --color-coral: var(--coral);
+  --color-coral-muted: var(--coral-muted);
+
   --color-forest: var(--forest);
   --color-forest-foreground: var(--forest-foreground);
 
-  --color-tint-add: var(--tint-add);
-  --color-tint-send: var(--tint-send);
-  --color-tint-pay: var(--tint-pay);
-  --color-tint-withdraw: var(--tint-withdraw);
+  --color-slate: var(--slate);
+  --color-slate-soft: var(--slate-soft);
+  --color-slate-faint: var(--slate-faint);
 
   --radius-sm: 0.75rem;
   --radius-md: 1rem;
@@ -54,124 +65,174 @@
 }
 
 :root {
-  /* Mock phone paper (mode: #f5f5fd) */
-  --background: #f4f4fc;
-  --foreground: #1a1d24;
-  --muted: #e8eaf4;
-  --muted-foreground: #6b7080;
-  --border: rgba(26, 29, 36, 0.07);
-  --ring: #13cd90;
+  /* ——— Canvas (mostly white, soft atmosphere) ——— */
+  --background: #f8fafc;
+  --foreground: #111827;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: rgba(17, 24, 39, 0.06);
+  --input: rgba(17, 24, 39, 0.08);
+  --ring: #19b879;
 
-  --card: rgba(255, 255, 255, 0.78);
-  --card-foreground: #1a1d24;
+  --card: rgba(255, 255, 255, 0.9);
+  --card-foreground: #111827;
 
-  /* Mock Pay CTA / Add icon (#13cd90) */
-  --brand: #13cd90;
-  --primary: #13cd90;
+  /* Text hierarchy */
+  --slate: #111827;
+  --slate-soft: #64748b;
+  --slate-faint: #94a3b8;
+  --slate-disabled: #cbd5e1;
+
+  /* Brand — soft premium jade (not corporate forest / not neon) */
+  --brand: #19b879;
+  --primary: #19b879;
   --primary-foreground: #ffffff;
-  --primary-hover: #0fb87f;
+  --primary-hover: #0f9f62;
+  --primary-soft: #38c98a;
+  --primary-muted: #ddf7ea;
 
-  --secondary: rgba(255, 255, 255, 0.75);
-  --secondary-foreground: #1a1d24;
+  --secondary: rgba(255, 255, 255, 0.72);
+  --secondary-foreground: #111827;
 
-  /* Send blue (mock iconish ~#95cefa → saturated) */
-  --accent: #4da3f5;
+  /* Soft blue (transfers / info) */
+  --accent: #5b8def;
   --accent-foreground: #0b1f3a;
-  --accent-muted: rgba(77, 163, 245, 0.14);
+  --accent-muted: #e8f0ff;
+  --blue: #5b8def;
+  --blue-soft: #7ea7ff;
+  --blue-muted: #e8f0ff;
 
-  /* Debit text (#d26a69) */
-  --destructive: #d26a69;
-  --destructive-foreground: #fff7f7;
+  /* Soft purple / lavender */
+  --purple: #8b7cf6;
+  --purple-soft: #a99cfb;
+  --purple-muted: #f0edff;
 
-  /* Money-in text (#27935b) */
-  --success: #27935b;
+  /* Soft gold */
+  --gold: #f3c94a;
+  --gold-muted: #fff8d9;
+
+  /* Soft coral (money out / warn sparingly) */
+  --coral: #f28b82;
+  --coral-muted: #ffe9e7;
+
+  --destructive: #f28b82;
+  --destructive-foreground: #fff8f7;
+
+  --success: #19b879;
   --warning: #f0b429;
-  --info: #4da3f5;
+  --info: #5b8def;
 
-  /* Score / card (#062213) */
-  --forest: #062213;
-  --forest-foreground: #e8f5ef;
+  /* Deep soft emerald for Pay scan / Score anchors (still premium, not black) */
+  --forest: #0b4a3c;
+  --forest-mid: #0f6b54;
+  --forest-foreground: #eef8f3;
 
-  --tint-add: #13cd90;
-  --tint-send: #4da3f5;
-  --tint-pay: #7b5cf0;
-  --tint-withdraw: #f69494;
-  --tint-request: #13cd90;
+  /* Action identity (icons in tinted glass circles) */
+  --tint-add: #19b879;
+  --tint-send: #5b8def;
+  --tint-pay: #8b7cf6;
+  --tint-withdraw: #f28b82;
+  --tint-request: #19b879;
+  --wash-add: #ddf7ea;
+  --wash-send: #e8f0ff;
+  --wash-pay: #f0edff;
+  --wash-withdraw: #ffe9e7;
 
-  /* Exact pastel washes from mock tiles */
-  --wash-add: #d8f3ea;
-  --wash-send: #cee9f9;
-  --wash-pay: #e4ddfd;
-  --wash-withdraw: #fbd3ce;
+  /* White glass 85–95% */
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-bg-soft: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.65);
+  --glass-shadow: 0 8px 32px rgba(17, 24, 39, 0.04);
+  --nav-glass: rgba(255, 255, 255, 0.88);
 
-  --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 12px 40px rgba(60, 70, 110, 0.08);
-  --nav-glass: rgba(255, 255, 255, 0.82);
-
-  /* Shared ambient stack (mock blobs) */
+  /*
+    Atmospheric light — barely perceptible
+    pale blue · lavender · lilac · blush · faint mint
+  */
   --amanah-ambient-image:
-    radial-gradient(ellipse 95% 60% at 0% -5%, rgba(19, 205, 144, 0.22), transparent 55%),
-    radial-gradient(ellipse 80% 55% at 100% 0%, rgba(77, 163, 245, 0.18), transparent 52%),
-    radial-gradient(ellipse 70% 50% at 85% 100%, rgba(251, 211, 206, 0.45), transparent 55%),
-    radial-gradient(ellipse 65% 45% at 10% 95%, rgba(228, 221, 253, 0.55), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 50% 40%, rgba(255, 255, 255, 0.35), transparent 60%);
+    radial-gradient(ellipse 100% 70% at 0% -20%, rgba(91, 141, 239, 0.09), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 100% -10%, rgba(139, 124, 246, 0.07), transparent 52%),
+    radial-gradient(ellipse 80% 55% at 100% 100%, rgba(248, 180, 200, 0.06), transparent 55%),
+    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(25, 184, 121, 0.05), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(245, 243, 251, 0.5), transparent 70%);
 }
 
 .dark {
-  /* Keep evening usable but still mock-adjacent (score screen DNA) */
-  --background: #062213;
-  --foreground: #e8ebe8;
-  --muted: #0d2e0f;
-  --muted-foreground: #9aa59e;
-  --border: rgba(255, 255, 255, 0.1);
-  --ring: #13cd90;
+  /* Soft deep teal night — still IMAGE #2 DNA, not pure black dashboard */
+  --background: #0a1f1a;
+  --foreground: #eef2f0;
+  --muted: #122821;
+  --muted-foreground: #94a3b8;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #38c98a;
 
-  --card: rgba(14, 40, 32, 0.75);
-  --card-foreground: #e8ebe8;
+  --card: rgba(18, 40, 34, 0.82);
+  --card-foreground: #eef2f0;
 
-  --brand: #13cd90;
-  --primary: #13cd90;
-  --primary-foreground: #062213;
-  --primary-hover: #2ed9a3;
+  --slate: #eef2f0;
+  --slate-soft: #94a3b8;
+  --slate-faint: #64748b;
+  --slate-disabled: #475569;
+
+  --brand: #38c98a;
+  --primary: #38c98a;
+  --primary-foreground: #062a1f;
+  --primary-hover: #4fd49a;
+  --primary-soft: #19b879;
+  --primary-muted: rgba(25, 184, 121, 0.18);
 
   --secondary: rgba(255, 255, 255, 0.06);
-  --secondary-foreground: #e8ebe8;
+  --secondary-foreground: #eef2f0;
 
-  --accent: #4da3f5;
+  --accent: #7ea7ff;
   --accent-foreground: #041018;
-  --accent-muted: rgba(77, 163, 245, 0.16);
+  --accent-muted: rgba(91, 141, 239, 0.16);
+  --blue: #7ea7ff;
+  --blue-soft: #5b8def;
+  --blue-muted: rgba(91, 141, 239, 0.16);
 
-  --destructive: #d26a69;
+  --purple: #a99cfb;
+  --purple-soft: #8b7cf6;
+  --purple-muted: rgba(139, 124, 246, 0.18);
+
+  --gold: #f3c94a;
+  --gold-muted: rgba(243, 201, 74, 0.16);
+
+  --coral: #f28b82;
+  --coral-muted: rgba(242, 139, 130, 0.16);
+
+  --destructive: #f28b82;
   --destructive-foreground: #2a0f0f;
 
-  --success: #13cd90;
+  --success: #38c98a;
   --warning: #f0b429;
-  --info: #4da3f5;
+  --info: #7ea7ff;
 
-  --forest: #04180f;
-  --forest-foreground: #e8f5ef;
+  --forest: #062a1f;
+  --forest-mid: #0b4a3c;
+  --forest-foreground: #eef8f3;
 
-  --tint-add: #13cd90;
-  --tint-send: #4da3f5;
-  --tint-pay: #9b85ff;
-  --tint-withdraw: #f69494;
-  --tint-request: #13cd90;
+  --tint-add: #38c98a;
+  --tint-send: #7ea7ff;
+  --tint-pay: #a99cfb;
+  --tint-withdraw: #f28b82;
+  --tint-request: #38c98a;
+  --wash-add: rgba(25, 184, 121, 0.18);
+  --wash-send: rgba(91, 141, 239, 0.18);
+  --wash-pay: rgba(139, 124, 246, 0.18);
+  --wash-withdraw: rgba(242, 139, 130, 0.16);
 
-  --wash-add: rgba(19, 205, 144, 0.18);
-  --wash-send: rgba(77, 163, 245, 0.18);
-  --wash-pay: rgba(123, 92, 240, 0.2);
-  --wash-withdraw: rgba(246, 148, 148, 0.18);
-
-  --glass-bg: rgba(10, 36, 28, 0.72);
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --nav-glass: rgba(8, 28, 22, 0.86);
+  --glass-bg: rgba(14, 36, 30, 0.78);
+  --glass-bg-soft: rgba(14, 36, 30, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --nav-glass: rgba(10, 28, 24, 0.88);
 
   --amanah-ambient-image:
-    radial-gradient(ellipse 95% 60% at 0% -5%, rgba(19, 205, 144, 0.16), transparent 55%),
-    radial-gradient(ellipse 80% 55% at 100% 0%, rgba(77, 163, 245, 0.1), transparent 52%),
-    radial-gradient(ellipse 70% 50% at 50% 100%, rgba(123, 92, 240, 0.08), transparent 55%);
+    radial-gradient(ellipse 100% 70% at 0% -20%, rgba(25, 184, 121, 0.12), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 100% -10%, rgba(91, 141, 239, 0.08), transparent 52%),
+    radial-gradient(ellipse 80% 55% at 50% 100%, rgba(139, 124, 246, 0.06), transparent 55%);
 }
 
 @layer base {
@@ -195,14 +256,15 @@
     @apply text-foreground antialiased;
     font-family: var(--font-sans);
     min-height: 100dvh;
+    color: var(--foreground);
   }
 
   ::selection {
-    background: color-mix(in oklab, var(--primary) 28%, white);
+    background: color-mix(in oklab, var(--primary) 22%, white);
   }
 
   .dark ::selection {
-    background: color-mix(in oklab, var(--primary) 38%, black);
+    background: color-mix(in oklab, var(--primary) 35%, black);
   }
 }
 
@@ -217,56 +279,58 @@
   }
 
   .amanah-money-out {
-    color: var(--destructive);
+    color: var(--coral);
   }
 
+  .amanah-money-transfer {
+    color: var(--blue);
+  }
+
+  /* White / translucent glass — weightless */
   .amanah-surface {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     background: var(--glass-bg);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
       var(--glass-shadow);
-    backdrop-filter: blur(24px) saturate(1.35);
-    -webkit-backdrop-filter: blur(24px) saturate(1.35);
-  }
-
-  .dark .amanah-surface {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      var(--glass-shadow);
+    backdrop-filter: blur(28px) saturate(1.2);
+    -webkit-backdrop-filter: blur(28px) saturate(1.2);
   }
 
   .amanah-glass {
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
       var(--glass-shadow);
-    backdrop-filter: blur(28px) saturate(1.4);
-    -webkit-backdrop-filter: blur(28px) saturate(1.4);
+    backdrop-filter: blur(32px) saturate(1.25);
+    -webkit-backdrop-filter: blur(32px) saturate(1.25);
   }
 
-  .dark .amanah-glass {
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.1),
-      var(--glass-shadow);
+  .amanah-glass-soft {
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-soft);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(24px) saturate(1.15);
+    -webkit-backdrop-filter: blur(24px) saturate(1.15);
   }
 
   .amanah-glass-pill {
     border: 1px solid var(--glass-border);
-    background: color-mix(in oklab, white 65%, transparent);
+    background: rgba(255, 255, 255, 0.72);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      0 6px 18px rgba(60, 70, 110, 0.05);
-    backdrop-filter: blur(16px) saturate(1.25);
-    -webkit-backdrop-filter: blur(16px) saturate(1.25);
+      0 4px 16px rgba(17, 24, 39, 0.03);
+    backdrop-filter: blur(18px) saturate(1.15);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
   }
 
   .dark .amanah-glass-pill {
-    background: color-mix(in oklab, #0d2e0f 72%, transparent);
+    background: rgba(255, 255, 255, 0.06);
   }
 
+  /* Icon tiles — colour in pale glass circles only */
   .amanah-tint-add,
   .amanah-tint-request {
     background: var(--wash-add);
@@ -285,33 +349,55 @@
     color: var(--tint-withdraw);
   }
 
+  /* Circle identity accents (card stays white glass) */
+  .amanah-circle-mint {
+    --circle-accent: var(--primary);
+    --circle-wash: var(--primary-muted);
+  }
+  .amanah-circle-blue {
+    --circle-accent: var(--blue);
+    --circle-wash: var(--blue-muted);
+  }
+  .amanah-circle-lavender {
+    --circle-accent: var(--purple);
+    --circle-wash: var(--purple-muted);
+  }
+
+  /* Pay / Score deep soft emerald glass */
   .amanah-forest {
     background:
-      radial-gradient(ellipse 80% 60% at 20% 0%, rgba(19, 205, 144, 0.38), transparent 55%),
-      radial-gradient(ellipse 55% 45% at 95% 90%, rgba(77, 163, 245, 0.12), transparent 50%),
-      var(--forest);
+      radial-gradient(ellipse 90% 70% at 20% 0%, rgba(56, 201, 138, 0.35), transparent 55%),
+      radial-gradient(ellipse 60% 50% at 95% 90%, rgba(91, 141, 239, 0.18), transparent 50%),
+      linear-gradient(160deg, var(--forest-mid) 0%, var(--forest) 55%, #08352c 100%);
     color: var(--forest-foreground);
   }
 
   .amanah-ambient {
-    background-color: transparent;
-    background-image: none;
+    background: transparent;
   }
 
   .amanah-nav-glass {
     border: 1px solid var(--glass-border);
     background: var(--nav-glass);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.75),
-      0 10px 32px rgba(60, 70, 110, 0.1);
-    backdrop-filter: blur(28px) saturate(1.35);
-    -webkit-backdrop-filter: blur(28px) saturate(1.35);
+      inset 0 1px 0 rgba(255, 255, 255, 0.7),
+      0 8px 28px rgba(17, 24, 39, 0.06);
+    backdrop-filter: blur(28px) saturate(1.2);
+    -webkit-backdrop-filter: blur(28px) saturate(1.2);
   }
 
   .amanah-pay-glow {
     box-shadow:
-      0 0 0 5px rgba(19, 205, 144, 0.2),
-      0 12px 32px rgba(19, 205, 144, 0.45);
+      0 0 0 5px rgba(25, 184, 121, 0.14),
+      0 10px 28px rgba(25, 184, 121, 0.28);
+  }
+
+  .amanah-btn-primary {
+    background: linear-gradient(180deg, var(--primary-soft) 0%, var(--primary) 100%);
+    color: var(--primary-foreground);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.25),
+      0 8px 20px rgba(25, 184, 121, 0.22);
   }
 
   .amanah-page-enter {
@@ -333,5 +419,13 @@
     background-color: var(--background);
     background-image: var(--amanah-ambient-image);
     background-attachment: fixed;
+  }
+
+  .amanah-progress {
+    background: var(--muted);
+  }
+  .amanah-progress > span,
+  .amanah-progress-fill {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-soft) 100%);
   }
 }

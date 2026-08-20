@@ -77,11 +77,15 @@ export function DashboardView({
           )}
         </header>
 
-        <section className="space-y-1.5 pt-2">
-          <p className="amanah-money text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
+        <section className="relative space-y-1.5 pt-2">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-4 -top-6 h-40 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,_rgba(25,184,121,0.08)_0%,_rgba(91,141,239,0.05)_45%,_transparent_70%)]"
+          />
+          <p className="amanah-money relative text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
             {formatCurrency(available, currency)}
           </p>
-          <p className="text-sm text-muted-foreground">available</p>
+          <p className="relative text-sm text-muted-foreground">available</p>
         </section>
 
         <section className="flex items-start justify-between gap-2 px-1">
@@ -140,11 +144,11 @@ export function DashboardView({
           ) : (
             <Link
               href={`/circles/${circle.jamiya.slug}` as Route}
-              className="amanah-glass block rounded-[1.75rem] px-5 py-4 transition-transform duration-200 active:scale-[0.99]"
+              className="amanah-glass amanah-circle-mint block rounded-[1.75rem] px-5 py-4 transition-transform duration-200 active:scale-[0.99]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-[15px] font-semibold tracking-tight">
+                  <p className="truncate text-[15px] font-semibold tracking-tight text-foreground">
                     {circle.jamiya.name}
                   </p>
                   <p className="mt-1 text-xs capitalize text-muted-foreground">
@@ -152,9 +156,17 @@ export function DashboardView({
                     {common.members}
                   </p>
                 </div>
-                <p className="amanah-money shrink-0 text-lg font-semibold">
+                <p className="amanah-money shrink-0 text-lg font-semibold text-foreground">
                   {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
                 </p>
+              </div>
+              <div className="amanah-progress mt-3 h-1 overflow-hidden rounded-full">
+                <span
+                  className="amanah-progress-fill block h-full rounded-full"
+                  style={{
+                    width: `${Math.min(100, Math.max(8, circle.jamiya.memberCount * 12))}%`,
+                  }}
+                />
               </div>
             </Link>
           )}

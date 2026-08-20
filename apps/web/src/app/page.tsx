@@ -16,7 +16,7 @@ export default async function LandingPage() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] bg-[radial-gradient(ellipse_at_top,_rgba(11,92,66,0.12)_0%,_transparent_58%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] bg-[radial-gradient(ellipse_at_top,_rgba(91,141,239,0.08)_0%,_transparent_58%)]"
       />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-6">
@@ -129,7 +129,7 @@ export default async function LandingPage() {
 
       <section
         id="shariah"
-        className="relative z-10 border-t border-border/60 bg-[linear-gradient(180deg,rgba(11,92,66,0.06)_0%,transparent_55%)]"
+        className="relative z-10 border-t border-border/60 bg-[linear-gradient(180deg,rgba(91,141,239,0.04)_0%,transparent_55%)]"
       >
         <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">
