@@ -14,13 +14,17 @@ function maskPhone(normalized254: string): string {
   return `+${normalized254.slice(0, 5)}***${normalized254.slice(-3)}`;
 }
 
+function digitsOnlyCode(raw: string): string {
+  return String(raw ?? '').replace(/\D/g, '').slice(0, 6);
+}
+
 export function normalizeStepUpPhone(
   raw: string,
 ): { ok: true; phone: string } | { ok: false; error: string } {
   if (!raw.trim() || !isValidKeMobile(raw)) {
     return {
       ok: false,
-      error: 'Add a Kenya mobile on your profile before loading or withdrawing from the wallet.',
+      error: 'Add a Kenya mobile on your profile before loading or withdrawing.',
     };
   }
   return { ok: true, phone: normalizePhone254(raw) };
@@ -53,6 +57,20 @@ async function resolveUserPhone(): Promise<
   }
 
   return { ok: true, phone: normalizePhone254(raw) };
+}
+
+/** Retire unused codes so only the latest SMS can confirm money movement. */
+async function invalidatePriorOtps(
+  admin: ReturnType<typeof createServiceRoleClient>,
+  phone: string,
+  purpose: WalletStepUpPurpose,
+) {
+  await admin
+    .from('otp_codes')
+    .update({ used: true })
+    .eq('phone', phone)
+    .eq('purpose', purpose)
+    .eq('used', false);
 }
 
 export async function sendWalletStepUpOtpToPhone(
@@ -104,6 +122,8 @@ export async function sendWalletStepUpOtpToPhone(
     }
   }
 
+  await invalidatePriorOtps(admin, resolved.phone, purpose);
+
   const code = Math.floor(100000 + Math.random() * 900000).toString();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
   const { error: insertError } = await admin.from('otp_codes').insert({
@@ -115,6 +135,7 @@ export async function sendWalletStepUpOtpToPhone(
   });
 
   if (insertError) {
+    console.error('[wallet/step-up] insert', insertError);
     return { success: false, message: 'Could not start verification. Try again.' };
   }
 
@@ -166,9 +187,9 @@ export async function consumeWalletStepUpOtpForPhone(
   purpose: WalletStepUpPurpose,
   codeRaw: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const code = codeRaw.trim();
+  const code = digitsOnlyCode(codeRaw);
   if (!/^\d{6}$/.test(code)) {
-    return { ok: false, error: 'Enter the 6-digit verification code from SMS.' };
+    return { ok: false, error: 'Enter the 6-digit code from SMS.' };
   }
 
   const resolved = normalizeStepUpPhone(phoneRaw);
@@ -176,7 +197,8 @@ export async function consumeWalletStepUpOtpForPhone(
 
   const admin = createServiceRoleClient();
   const now = new Date().toISOString();
-  const { data: otpRecord, error: lookupError } = await admin
+
+  const { data: rows, error: lookupError } = await admin
     .from('otp_codes')
     .select('id')
     .eq('phone', resolved.phone)
@@ -185,14 +207,19 @@ export async function consumeWalletStepUpOtpForPhone(
     .eq('used', false)
     .gte('expires_at', now)
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
 
   if (lookupError) {
+    console.error('[wallet/step-up] lookup', lookupError);
     return { ok: false, error: 'Could not verify the code. Try again.' };
   }
+
+  const otpRecord = rows?.[0];
   if (!otpRecord) {
-    return { ok: false, error: 'Invalid or expired verification code.' };
+    return {
+      ok: false,
+      error: 'That code is wrong or no longer valid. Use the latest SMS, or request a new code.',
+    };
   }
 
   const { data: claimed, error: claimError } = await admin
@@ -227,7 +254,7 @@ export async function requireApiWalletStepUp(input: {
   | { ok: true }
   | { ok: false; status: number; body: Record<string, unknown> }
 > {
-  const otp = String(input.otp ?? '').trim();
+  const otp = digitsOnlyCode(String(input.otp ?? ''));
   if (!otp) {
     const sent = await sendWalletStepUpOtpToPhone(input.phoneRaw, input.purpose);
     return {

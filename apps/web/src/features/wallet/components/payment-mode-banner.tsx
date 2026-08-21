@@ -2,26 +2,23 @@ import type { PaymentProviderMode } from '@/lib/payments/provider';
 
 const COPY: Record<
   PaymentProviderMode,
-  { title: string; body: string; tone: 'demo' | 'live' | 'warn' }
+  { title: string; body: string; tone: 'demo' | 'live' | 'warn' } | null
 > = {
   simulated: {
-    title: 'Payment mode · Demo (UAT)',
-    body: 'Top-ups credit your wallet instantly for testing. Not real M-Pesa or card money.',
+    title: 'Demo mode',
+    body: 'Top-ups credit your balance instantly for testing — not real M-Pesa.',
     tone: 'demo',
   },
   mpesa: {
-    title: 'Payment mode · M-Pesa STK',
-    body: 'Top-ups send a Safaricom prompt to your phone. Approve to fund your Amanah wallet.',
+    title: 'M-Pesa',
+    body: 'Approve the prompt on your phone to add money.',
     tone: 'live',
   },
-  paystack: {
-    title: 'Payment mode · Paystack',
-    body: 'Top-ups open a Paystack checkout. Funds settle into your wallet after confirmation.',
-    tone: 'live',
-  },
+  // Checkout is obvious from the button — no provider brand banner.
+  paystack: null,
   bank: {
-    title: 'Payment mode · Bank transfer',
-    body: 'Top-ups queue a bank transfer job. Settlement depends on your banking rails.',
+    title: 'Bank transfer',
+    body: 'Top-ups queue a bank transfer for settlement.',
     tone: 'live',
   },
 };
@@ -36,12 +33,26 @@ export function PaymentModeBanner({
   simulatedBlocked: boolean;
 }) {
   const copy = COPY[provider];
+  if (!copy && !requireReal && !simulatedBlocked) return null;
+
   const toneClass =
-    copy.tone === 'demo'
+    !copy || copy.tone === 'demo'
       ? 'border-accent/35 bg-accent/10 text-foreground'
       : copy.tone === 'warn'
         ? 'border-destructive/40 bg-destructive/10 text-destructive'
         : 'border-primary/30 bg-primary/10 text-foreground';
+
+  if (!copy) {
+    return simulatedBlocked || requireReal ? (
+      <div className={`amanah-surface px-4 py-3.5 ${toneClass}`} role="status">
+        <p className="text-xs opacity-80">
+          {simulatedBlocked
+            ? 'Simulated fallbacks are blocked in this environment.'
+            : 'Live providers required.'}
+        </p>
+      </div>
+    ) : null;
+  }
 
   return (
     <div className={`amanah-surface px-4 py-3.5 ${toneClass}`} role="status">
@@ -51,7 +62,7 @@ export function PaymentModeBanner({
         <p className="mt-2 text-xs opacity-80">
           {simulatedBlocked
             ? 'Simulated fallbacks are blocked in this environment.'
-            : 'Live providers required (REQUIRE_REAL_PROVIDERS).'}
+            : 'Live providers required.'}
         </p>
       ) : null}
     </div>

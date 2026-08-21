@@ -40,36 +40,26 @@ export function DashboardView({
     !isValidKeMobile(String(data.profile?.phone ?? '').trim());
   const needsProfile = Boolean(data.profile && !data.profile.profile_completed);
 
-  const withDue = [
-    { href: '/wallet#top-up' as Route, label: labels.quickAdd, icon: Plus, tint: 'amanah-tint-add' },
+  const actions = [
     {
-      href: `/circles/${nextDue!.jamiyaSlug}#pay` as Route,
-      label: labels.quickPayDue,
-      icon: CircleDollarSign,
-      tint: 'amanah-tint-pay',
+      href: '/wallet#top-up' as Route,
+      label: labels.quickAdd,
+      icon: Plus,
+      tint: 'amanah-tint-add',
     },
-    {
-      href: '/circles' as Route,
-      label: labels.quickCircles,
-      icon: LayoutGrid,
-      tint: 'amanah-tint-send',
-    },
-    {
-      href: '/wallet#withdraw' as Route,
-      label: labels.quickWithdraw,
-      icon: ArrowUpFromLine,
-      tint: 'amanah-tint-withdraw',
-    },
-  ] as const;
-
-  const withoutDue = [
-    { href: '/wallet#top-up' as Route, label: labels.quickAdd, icon: Plus, tint: 'amanah-tint-add' },
-    {
-      href: '/wallet' as Route,
-      label: labels.quickMoney,
-      icon: CircleDollarSign,
-      tint: 'amanah-tint-pay',
-    },
+    nextDue
+      ? {
+          href: `/circles/${nextDue.jamiyaSlug}#pay` as Route,
+          label: labels.quickPayDue,
+          icon: CircleDollarSign,
+          tint: 'amanah-tint-pay',
+        }
+      : {
+          href: '/wallet' as Route,
+          label: labels.quickMoney,
+          icon: CircleDollarSign,
+          tint: 'amanah-tint-pay',
+        },
     {
       href: '/circles' as Route,
       label: labels.quickCircles,
@@ -82,9 +72,7 @@ export function DashboardView({
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
     },
-  ] as const;
-
-  const actions = nextDue != null ? withDue : withoutDue;
+  ];
   const circle = data.jamiyas[0] ?? null;
   const recent = data.activity.slice(0, 3);
 

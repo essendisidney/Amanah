@@ -37,6 +37,7 @@ export function TopUpForm({
     <form action={action} className="space-y-4">
       <input type="hidden" name="currency" value={currency} />
       {returnPath ? <input type="hidden" name="next" value={returnPath} /> : null}
+      {needsOtp ? <input type="hidden" name="otp_challenge" value="1" /> : null}
       <div className="space-y-2">
         <Label htmlFor="amount">{t(labels.amount, { currency })}</Label>
         <Input
@@ -72,18 +73,15 @@ export function TopUpForm({
         <p className="rounded-md border border-accent/30 bg-accent-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground">
           <span className="font-semibold text-accent">Demo credit (UAT)</span>
           {' — '}
-          {labels.simulatedHint} Default amount is KES 50,000 for testing. Not real M-Pesa money.
+          {labels.simulatedHint}
         </p>
       )}
-      {provider !== 'simulated' ? (
+      {provider !== 'simulated' && !needsOtp ? (
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
       ) : null}
-      {provider === 'paystack' && !needsOtp ? (
-        <p className="text-xs text-muted-foreground">{labels.paystackReturnHint}</p>
-      ) : null}
-      {returnPath ? (
+      {returnPath && !needsOtp ? (
         <p className="text-xs text-muted-foreground">
-          After top-up you will continue back to pay your contribution.
+          After top-up you will continue to your contribution.
         </p>
       ) : null}
       {needsOtp ? (
@@ -105,28 +103,47 @@ export function TopUpForm({
       {state.message ? (
         <p
           className={
-            state.success ? 'text-sm text-primary' : 'text-sm text-destructive'
+            state.success
+              ? 'text-sm text-primary'
+              : needsOtp && !state.message.toLowerCase().includes('wrong')
+                ? 'text-sm text-muted-foreground'
+                : 'text-sm text-destructive'
           }
           role="status"
         >
           {state.message}
         </p>
       ) : null}
-      <Button type="submit" className="min-h-11 w-full" disabled={pending}>
-        {pending
-          ? labels.processing
-          : needsOtp
-            ? labels.confirmWithCode
-            : provider === 'simulated'
-              ? labels.topUpWallet
-              : provider === 'paystack'
-                ? labels.payPaystack
-                : provider === 'mpesa'
-                  ? labels.payMpesa
-                  : provider === 'bank'
-                    ? labels.startBank
-                    : labels.sendCode}
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button type="submit" className="min-h-11 w-full" disabled={pending}>
+          {pending
+            ? labels.processing
+            : needsOtp
+              ? labels.confirmWithCode
+              : provider === 'simulated'
+                ? labels.topUpWallet
+                : provider === 'paystack'
+                  ? labels.payPaystack
+                  : provider === 'mpesa'
+                    ? labels.payMpesa
+                    : provider === 'bank'
+                      ? labels.startBank
+                      : labels.sendCode}
+        </Button>
+        {needsOtp ? (
+          <Button
+            type="submit"
+            name="resend_otp"
+            value="1"
+            variant="ghost"
+            className="min-h-11 w-full"
+            disabled={pending}
+            formNoValidate
+          >
+            {labels.sendCode}
+          </Button>
+        ) : null}
+      </div>
     </form>
   );
 }

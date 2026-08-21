@@ -162,10 +162,7 @@ export default async function WalletPage({ searchParams }: Props) {
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          {labels.eyebrow}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">{labels.title}</h1>
+        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{labels.title}</h1>
         <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
       </div>
 
@@ -236,7 +233,7 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="grid grid-cols-4 gap-2 sm:gap-3">
         {[
-          { href: '#top-up', label: labels.topUp, icon: Plus },
+          { href: '#top-up', label: 'Add', icon: Plus },
           { href: '/finance/goals', label: labels.quickSave, icon: CamelIcon },
           { href: '/finance/insights', label: labels.quickInsights, icon: ChartNoAxesCombined },
           { href: '#withdraw', label: labels.withdraw, icon: ArrowUpRight },
@@ -319,9 +316,6 @@ export default async function WalletPage({ searchParams }: Props) {
           {displayName.replace(/\s+/g, '').slice(0, 4).toUpperCase().padEnd(4, 'X')}
         </p>
         <p className="mt-6 text-sm font-semibold tracking-wide">{displayName.toUpperCase()}</p>
-        <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-white/55">
-          {labels.memberMoney}
-        </p>
       </section>
 
       <div className="grid gap-6 md:grid-cols-2">

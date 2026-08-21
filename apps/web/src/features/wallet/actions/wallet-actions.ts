@@ -40,13 +40,25 @@ export async function topUpWalletAction(
     };
   }
 
-  const otp = String(formData.get('otp') ?? '').trim();
+  const otp = String(formData.get('otp') ?? '').replace(/\D/g, '').slice(0, 6);
+  const challenge = String(formData.get('otp_challenge') ?? '') === '1';
+  const resend = String(formData.get('resend_otp') ?? '') === '1';
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
   const skipStepUp = provider === 'simulated' && !requireReal;
   if (!skipStepUp) {
+    if (resend) {
+      return sendWalletStepUpOtp('wallet_top_up');
+    }
     if (!otp) {
+      if (challenge) {
+        return {
+          success: false,
+          needsOtp: true,
+          message: 'Enter the 6-digit code from SMS.',
+        };
+      }
       return sendWalletStepUpOtp('wallet_top_up');
     }
     const stepUp = await consumeWalletStepUpOtp('wallet_top_up', otp);
@@ -219,7 +231,7 @@ export async function topUpWalletAction(
     if (!init.ok) {
       return {
         success: false,
-        message: `Paystack failed: ${init.error}`,
+        message: `Checkout failed: ${init.error}`,
         intentId: created.intent_id,
       };
     }
@@ -392,7 +404,7 @@ export async function checkPaystackIntentAction(
     return { success: false, message: 'Payment not found.' };
   }
   if (row.provider !== 'paystack') {
-    return { success: false, message: 'Check status is only for Paystack payments.' };
+    return { success: false, message: 'Check status is only for card/M-Pesa checkout payments.' };
   }
 
   const { paystackReferenceForIntent, settlePaystackReference } = await import(
@@ -411,10 +423,10 @@ export async function checkPaystackIntentAction(
     return { success: true, message: 'Payment confirmed. Wallet updated.' };
   }
   if (settled.status === 'failed' || settled.status === 'abandoned') {
-    return { success: false, message: `Paystack marked this payment as ${settled.status}.` };
+    return { success: false, message: `Payment marked as ${settled.status}.` };
   }
   return {
-    success: true,
-    message: 'Still pending at Paystack. Finish checkout or wait a moment and check again.',
+    success: false,
+    message: 'Still pending. Finish checkout or wait a moment and check again.',
   };
 }

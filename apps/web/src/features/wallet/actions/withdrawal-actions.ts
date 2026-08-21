@@ -41,14 +41,26 @@ export async function requestWithdrawalAction(
     };
   }
 
-  const otp = String(formData.get('otp') ?? '').trim();
+  const otp = String(formData.get('otp') ?? '').replace(/\D/g, '').slice(0, 6);
+  const challenge = String(formData.get('otp_challenge') ?? '') === '1';
+  const resend = String(formData.get('resend_otp') ?? '') === '1';
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
   const skipStepUp =
     paymentProvider() === 'simulated' && process.env.REQUIRE_REAL_PROVIDERS !== 'true';
   if (!skipStepUp) {
+    if (resend) {
+      return sendWalletStepUpOtp('wallet_withdraw');
+    }
     if (!otp) {
+      if (challenge) {
+        return {
+          success: false,
+          needsOtp: true,
+          message: 'Enter the 6-digit code from SMS.',
+        };
+      }
       return sendWalletStepUpOtp('wallet_withdraw');
     }
     const stepUp = await consumeWalletStepUpOtp('wallet_withdraw', otp);

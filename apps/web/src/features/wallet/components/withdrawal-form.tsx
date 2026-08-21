@@ -94,10 +94,16 @@ export function WithdrawalForm({
         </>
       )}
 
+      {needsOtp ? <input type="hidden" name="otp_challenge" value="1" /> : null}
+
       {state.message ? (
         <p
           className={
-            state.success ? 'text-sm text-primary' : 'text-sm text-destructive'
+            state.success
+              ? 'text-sm text-primary'
+              : needsOtp && !state.message.toLowerCase().includes('wrong')
+                ? 'text-sm text-muted-foreground'
+                : 'text-sm text-destructive'
           }
         >
           {state.message}
@@ -121,13 +127,28 @@ export function WithdrawalForm({
         </div>
       ) : null}
 
-      <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
-        {pending
-          ? labels.submitting
-          : needsOtp
-            ? labels.confirmWithCode
-            : labels.requestWithdrawal}
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
+          {pending
+            ? labels.submitting
+            : needsOtp
+              ? labels.confirmWithCode
+              : labels.requestWithdrawal}
+        </Button>
+        {needsOtp ? (
+          <Button
+            type="submit"
+            name="resend_otp"
+            value="1"
+            variant="ghost"
+            className="min-h-11 w-full"
+            disabled={pending}
+            formNoValidate
+          >
+            {labels.sendCode}
+          </Button>
+        ) : null}
+      </div>
     </form>
   );
 }
