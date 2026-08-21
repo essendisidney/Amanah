@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createInvitationAction } from '../actions/invitation-actions';
 import { initialActionState } from '../lib/action-state';
@@ -41,7 +42,7 @@ export function InviteMemberForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+254712345678 or 0712345678"
+            placeholder={KE_PHONE_PLACEHOLDER}
             autoComplete="tel"
           />
           {state.fieldErrors?.phone?.[0] ? (

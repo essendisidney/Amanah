@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { formatPhoneHint, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { linkMpesaPhoneAction } from '../actions/profile-actions';
 import { initialProfileActionState } from '../lib/state';
@@ -17,12 +18,17 @@ export function MpesaLinkForm({
     linkMpesaPhoneAction,
     initialProfileActionState,
   );
+  const phoneDisplay = defaultPhone ? formatPhoneHint(defaultPhone) : '';
 
   return (
     <div className="space-y-4">
       {state.message ? (
         <Alert variant={state.success ? 'success' : 'destructive'}>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>
+            {state.success && phoneDisplay
+              ? `${state.message} · ${phoneDisplay}`
+              : state.message}
+          </AlertDescription>
         </Alert>
       ) : null}
       <form action={formAction} className="space-y-3">
@@ -32,8 +38,8 @@ export function MpesaLinkForm({
             id="mpesaPhone"
             name="mpesaPhone"
             type="tel"
-            placeholder="+254712345678"
-            defaultValue={defaultPhone}
+            placeholder={KE_PHONE_PLACEHOLDER}
+            defaultValue={phoneDisplay}
             required
           />
           <p className="text-xs text-muted-foreground">{labels.mpesaHint}</p>

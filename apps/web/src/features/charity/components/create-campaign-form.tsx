@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { submitCampaignAction, type CharityActionState } from '../actions';
 
 const CATEGORIES = [
@@ -85,7 +86,7 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
           id="beneficiaryPhone"
           name="beneficiaryPhone"
           type="tel"
-          placeholder="+2547…"
+          placeholder={KE_PHONE_PLACEHOLDER}
           required
         />
       </div>

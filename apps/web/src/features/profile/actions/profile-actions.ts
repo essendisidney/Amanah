@@ -40,7 +40,7 @@ export async function updateProfileAction(
         success: false,
         message: 'Please fix the errors below.',
         fieldErrors: {
-          phone: ['Use a Kenya mobile, e.g. 0712345678 or +254712345678.'],
+          phone: ['Use a Kenya mobile, e.g. 07… or +254….'],
         },
       };
     }
@@ -104,7 +104,7 @@ export async function linkMpesaPhoneAction(
   if (!normalized) {
     return {
       success: false,
-      message: 'Use a Kenya mobile, e.g. 0712345678 or +254712345678.',
+      message: 'Use a Kenya mobile, e.g. 07… or +254….',
     };
   }
 

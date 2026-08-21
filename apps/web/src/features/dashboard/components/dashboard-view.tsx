@@ -1,11 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import {
-  Plus,
-  ArrowUpFromLine,
-  LayoutGrid,
-  CircleDollarSign,
-} from 'lucide-react';
+import { Plus, LayoutGrid, CircleDollarSign, Wallet } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
@@ -39,6 +34,15 @@ export function DashboardView({
     Boolean(data.profile) &&
     !isValidKeMobile(String(data.profile?.phone ?? '').trim());
   const needsProfile = Boolean(data.profile && !data.profile.profile_completed);
+  const dueRemaining = nextDue
+    ? Math.max(nextDue.amount - nextDue.amountPaid, 0)
+    : 0;
+  const needsTopUpForDue = Boolean(nextDue && available <= 0 && dueRemaining > 0);
+  const topUpForDueHref = nextDue
+    ? (`/wallet?amount=${Math.ceil(dueRemaining)}&next=${encodeURIComponent(
+        `/circles/${nextDue.jamiyaSlug}#pay`,
+      )}#top-up` as Route)
+    : ('/wallet#top-up' as Route);
 
   const actions = [
     {
@@ -49,14 +53,14 @@ export function DashboardView({
     },
     nextDue
       ? {
-          href: `/circles/${nextDue.jamiyaSlug}#pay` as Route,
+          href: (`/circles/${nextDue.jamiyaSlug}#pay` as Route),
           label: labels.quickPayDue,
           icon: CircleDollarSign,
           tint: 'amanah-tint-pay',
         }
       : {
-          href: '/wallet' as Route,
-          label: labels.quickMoney,
+          href: '/pay' as Route,
+          label: labels.quickPay,
           icon: CircleDollarSign,
           tint: 'amanah-tint-pay',
         },
@@ -67,9 +71,9 @@ export function DashboardView({
       tint: 'amanah-tint-send',
     },
     {
-      href: '/wallet#withdraw' as Route,
-      label: labels.quickWithdraw,
-      icon: ArrowUpFromLine,
+      href: '/wallet' as Route,
+      label: labels.quickMoney,
+      icon: Wallet,
       tint: 'amanah-tint-withdraw',
     },
   ];
@@ -109,12 +113,34 @@ export function DashboardView({
           <p className="relative text-sm text-muted-foreground">{labels.available}</p>
         </section>
 
+        {needsTopUpForDue ? (
+          <Link
+            href={topUpForDueHref}
+            className="amanah-glass flex items-center justify-between gap-3 rounded-[1.35rem] border border-primary/25 bg-primary/10 px-4 py-4 transition-transform active:scale-[0.99]"
+          >
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                {labels.duePrefix}
+              </p>
+              <p className="amanah-money mt-1 text-xl font-bold tracking-tight text-foreground">
+                {formatCurrency(dueRemaining, nextDue!.currency)}
+              </p>
+              <p className="mt-1 truncate text-xs text-muted-foreground">
+                {nextDue?.jamiyaName
+                  ? `${labels.addMoneyToPay} · ${nextDue.jamiyaName}`
+                  : labels.addMoneyToPay}
+              </p>
+            </div>
+            <span className="shrink-0 text-sm font-semibold text-primary">→</span>
+          </Link>
+        ) : null}
+
         <section className="flex items-start justify-between gap-2 px-1">
           {actions.map((action) => {
             const Icon = action.icon;
             return (
               <Link
-                key={action.label}
+                key={`${action.label}-${action.href}`}
                 href={action.href}
                 className="group flex w-[4.5rem] flex-col items-center gap-2"
               >
@@ -129,14 +155,14 @@ export function DashboardView({
           })}
         </section>
 
-        {nextDue ? (
+        {nextDue && !needsTopUpForDue ? (
           <p className="text-sm text-muted-foreground">
             {labels.duePrefix}{' '}
             <Link
               href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}
               className="font-semibold text-foreground"
             >
-              {formatCurrency(nextDue.amount - nextDue.amountPaid, nextDue.currency)}
+              {formatCurrency(dueRemaining, nextDue.currency)}
             </Link>
             {nextDue.jamiyaName ? (
               <span>

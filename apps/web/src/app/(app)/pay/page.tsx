@@ -30,12 +30,16 @@ export default async function PayPage() {
   const dueHref = nextDue
     ? (`/circles/${nextDue.jamiyaSlug}#pay` as Route)
     : null;
+  const remaining = nextDue
+    ? Math.max(nextDue.amount - nextDue.amountPaid, 0)
+    : 0;
   const dueAmountLabel = nextDue
-    ? formatCurrency(
-        Math.max(nextDue.amount - nextDue.amountPaid, 0),
-        nextDue.currency,
-      )
+    ? formatCurrency(remaining, nextDue.currency)
     : null;
+  const dueOverdue =
+    nextDue != null &&
+    (nextDue.status === 'late' ||
+      new Date(nextDue.dueDate).getTime() < Date.now());
 
   return (
     <PaySheet
@@ -44,6 +48,8 @@ export default async function PayPage() {
       currency={currency}
       dueHref={dueHref}
       dueAmountLabel={dueAmountLabel}
+      dueCircleName={nextDue?.jamiyaName ?? null}
+      dueOverdue={dueOverdue}
     />
   );
 }

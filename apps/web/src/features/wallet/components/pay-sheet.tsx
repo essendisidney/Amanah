@@ -7,6 +7,7 @@ import {
   ArrowUpFromLine,
   Calculator,
   ChartNoAxesCombined,
+  ChevronDown,
   ChevronRight,
   HandHeart,
   Landmark,
@@ -36,15 +37,17 @@ function LinkGroup({
   title,
   items,
 }: {
-  title: string;
+  title?: string;
   items: PayLink[];
 }) {
   if (items.length === 0) return null;
   return (
     <section className="space-y-2">
-      <h2 className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        {title}
-      </h2>
+      {title ? (
+        <h2 className="px-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          {title}
+        </h2>
+      ) : null}
       <ul className="overflow-hidden rounded-[1.35rem] bg-white/55 dark:bg-white/[0.04]">
         {items.map((action) => {
           const Icon = action.icon;
@@ -84,40 +87,35 @@ function LinkGroup({
   );
 }
 
-/** Pay — clear map of every money destination (no dead ends). */
+/** Pay — primary map first; extra tools behind “More”. */
 export function PaySheet({
   labels,
   available,
   currency = 'KES',
   dueHref,
   dueAmountLabel,
+  dueCircleName,
+  dueOverdue = false,
 }: {
   labels: PayLabels;
   available?: number | null;
   currency?: string;
   dueHref?: Route | null;
   dueAmountLabel?: string | null;
+  dueCircleName?: string | null;
+  dueOverdue?: boolean;
 }) {
   const [ready, setReady] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const id = window.requestAnimationFrame(() => setReady(true));
     return () => window.cancelAnimationFrame(id);
   }, []);
 
-  const paySend: PayLink[] = [
+  const primary: PayLink[] = [
     ...(dueHref
-      ? [
-          {
-            href: dueHref,
-            label: labels.payDue,
-            hint: dueAmountLabel
-              ? `${labels.payDueHint} · ${dueAmountLabel}`
-              : labels.payDueHint,
-            icon: LayoutGrid,
-            tint: 'amanah-tint-pay',
-          } satisfies PayLink,
-        ]
+      ? []
       : [
           {
             href: '/circles' as Route,
@@ -134,9 +132,6 @@ export function PaySheet({
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
     },
-  ];
-
-  const seePlan: PayLink[] = [
     {
       href: '/finance/insights' as Route,
       label: labels.insights,
@@ -151,6 +146,9 @@ export function PaySheet({
       icon: Wallet,
       tint: 'amanah-tint-add',
     },
+  ];
+
+  const moreTools: PayLink[] = [
     {
       href: '/finance/goals' as Route,
       label: labels.goals,
@@ -158,9 +156,6 @@ export function PaySheet({
       icon: Target,
       tint: 'amanah-tint-send',
     },
-  ];
-
-  const borrowGrow: PayLink[] = [
     {
       href: '/finance/qard' as Route,
       label: labels.qard,
@@ -189,9 +184,6 @@ export function PaySheet({
       icon: Landmark,
       tint: 'amanah-tint-withdraw',
     },
-  ];
-
-  const give: PayLink[] = [
     {
       href: '/sadaka' as Route,
       label: labels.sadaka,
@@ -287,10 +279,63 @@ export function PaySheet({
           <span className="relative text-xs text-white/70">{labels.addMoneyHint}</span>
         </Link>
 
-        <LinkGroup title={labels.sectionPay} items={paySend} />
-        <LinkGroup title={labels.sectionSee} items={seePlan} />
-        <LinkGroup title={labels.sectionGrow} items={borrowGrow} />
-        <LinkGroup title={labels.sectionGive} items={give} />
+        {dueHref && dueAmountLabel ? (
+          <Link
+            href={dueHref}
+            className={cn(
+              'block overflow-hidden rounded-[1.35rem] px-4 py-4 transition-transform active:scale-[0.99]',
+              dueOverdue
+                ? 'border border-destructive/35 bg-destructive/10'
+                : 'border border-primary/25 bg-primary/10',
+            )}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p
+                  className={cn(
+                    'text-[11px] font-semibold uppercase tracking-[0.16em]',
+                    dueOverdue ? 'text-destructive' : 'text-primary',
+                  )}
+                >
+                  {dueOverdue ? labels.overdue : labels.payDue}
+                </p>
+                <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground">
+                  {dueAmountLabel}
+                </p>
+                <p className="mt-1 truncate text-xs text-muted-foreground">
+                  {dueCircleName
+                    ? `${labels.payDueHint} · ${dueCircleName}`
+                    : labels.payDueHint}
+                </p>
+              </div>
+              <ChevronRight
+                className="mt-1 h-5 w-5 shrink-0 text-muted-foreground"
+                strokeWidth={1.5}
+              />
+            </div>
+          </Link>
+        ) : null}
+
+        <LinkGroup items={primary} />
+
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setMoreOpen((open) => !open)}
+            className="flex w-full items-center justify-between rounded-[1.25rem] bg-white/45 px-4 py-3 text-left dark:bg-white/[0.04]"
+            aria-expanded={moreOpen}
+          >
+            <span className="text-sm font-semibold text-foreground">{labels.moreTools}</span>
+            <ChevronDown
+              className={cn(
+                'h-4 w-4 text-muted-foreground transition-transform',
+                moreOpen && 'rotate-180',
+              )}
+              strokeWidth={1.75}
+            />
+          </button>
+          {moreOpen ? <LinkGroup items={moreTools} /> : null}
+        </div>
       </div>
     </div>
   );

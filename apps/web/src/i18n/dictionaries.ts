@@ -166,11 +166,13 @@ export type Dictionary = {
     quickCircles: string;
     quickWithdraw: string;
     quickMoney: string;
+    quickPay: string;
     duePrefix: string;
     recent: string;
     activity: string;
     nothingYet: string;
     addPhone: string;
+    addMoneyToPay: string;
   };
   paySheet: {
     title: string;
@@ -193,6 +195,8 @@ export type Dictionary = {
     sectionSee: string;
     sectionGrow: string;
     sectionGive: string;
+    moreTools: string;
+    overdue: string;
     insights: string;
     insightsHint: string;
     qard: string;
@@ -694,11 +698,13 @@ export const en: Dictionary = {
     quickCircles: 'Circles',
     quickWithdraw: 'Withdraw',
     quickMoney: 'Money',
+    quickPay: 'Pay',
     duePrefix: 'Due',
     recent: 'Recent',
     activity: 'Activity',
     nothingYet: 'Nothing yet',
     addPhone: 'Add phone',
+    addMoneyToPay: 'Add money to pay',
   },
   paySheet: {
     title: 'Pay',
@@ -721,6 +727,8 @@ export const en: Dictionary = {
     sectionSee: 'See & plan',
     sectionGrow: 'Borrow & grow',
     sectionGive: 'Give',
+    moreTools: 'More tools',
+    overdue: 'Overdue',
     insights: 'Insights',
     insightsHint: 'This month’s story and open dues',
     qard: 'Qard Hassan',
@@ -1240,11 +1248,13 @@ export const sw: Dictionary = {
     quickCircles: 'Miduara',
     quickWithdraw: 'Toa',
     quickMoney: 'Pesa',
+    quickPay: 'Lipa',
     duePrefix: 'Inadaiwa',
     recent: 'Hivi karibuni',
     activity: 'Shughuli',
     nothingYet: 'Bado hakuna',
     addPhone: 'Ongeza simu',
+    addMoneyToPay: 'Ongeza pesa ili kulipa',
   },
   paySheet: {
     title: 'Lipa',
@@ -1267,6 +1277,8 @@ export const sw: Dictionary = {
     sectionSee: 'Angalia na panga',
     sectionGrow: 'Kopa na kukuza',
     sectionGive: 'Changia',
+    moreTools: 'Zana zaidi',
+    overdue: 'Imechelewa',
     insights: 'Ufahamu',
     insightsHint: 'Hadithi ya mwezi huu na madeni wazi',
     qard: 'Qard Hassan',

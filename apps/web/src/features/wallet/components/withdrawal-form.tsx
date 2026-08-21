@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import {
   requestWithdrawalAction,
@@ -71,7 +72,7 @@ export function WithdrawalForm({
             name="phone"
             type="tel"
             inputMode="tel"
-            placeholder="0712345678 or +254712345678"
+            placeholder={KE_PHONE_PLACEHOLDER}
             defaultValue={defaultPhone}
             required
             className="h-11 text-base sm:h-10 sm:text-sm"

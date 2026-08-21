@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { addMemberAction } from '../actions/add-member';
 import { initialActionState } from '../lib/action-state';
@@ -58,7 +59,7 @@ export function AddMemberForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+254712345678"
+            placeholder={KE_PHONE_PLACEHOLDER}
             autoComplete="tel"
           />
           {state.fieldErrors?.phone?.[0] ? (

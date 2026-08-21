@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { Button, Input, Label } from '@jamiya/ui';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { tipFormAction } from '@/features/charity/actions';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
@@ -53,7 +54,7 @@ export default async function SupportPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">{labels.phoneOptional}</Label>
-            <Input id="phone" name="phone" type="tel" placeholder="+254712345678" />
+            <Input id="phone" name="phone" type="tel" placeholder={KE_PHONE_PLACEHOLDER} />
           </div>
           <Button type="submit" className="min-h-11">
             {labels.submit}

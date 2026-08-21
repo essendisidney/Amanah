@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { formatCurrency } from '@jamiya/shared';
+import { formatCurrency, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import {
   createAdoptionProfileFormAction,
@@ -102,7 +102,7 @@ export default async function AdoptPage() {
                         className="w-32"
                         required
                       />
-                      <Input name="phone" type="tel" placeholder="+2547…" className="w-40" />
+                      <Input name="phone" type="tel" placeholder={KE_PHONE_PLACEHOLDER} className="w-40" />
                       <Button type="submit" size="sm">
                         Sponsor (sim first month)
                       </Button>

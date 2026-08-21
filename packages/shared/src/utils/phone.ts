@@ -1,5 +1,8 @@
 /** Kenya mobile helpers — same pattern as Creda / Savr / Taifa (254XXXXXXXXX). */
 
+/** Shared form placeholder — both local and E.164 accepted. */
+export const KE_PHONE_PLACEHOLDER = '07… or +254…';
+
 /** Normalize to digits-only Kenya format 254XXXXXXXXX (12 digits). */
 export function normalizePhone254(input: string): string {
   let d = String(input ?? '')
@@ -31,6 +34,7 @@ export function toE164Kenya(raw: string): string | null {
   return `+${normalizePhone254(raw)}`;
 }
 
+/** Pretty display, e.g. +254 712 345 678 */
 export function formatPhoneHint(raw: string): string {
   const e164 = toE164Kenya(raw);
   if (!e164) return raw.trim();

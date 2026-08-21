@@ -36,7 +36,7 @@ export async function topUpWalletAction(
   if (provider === 'mpesa' && phoneRaw && !toE164Kenya(phoneRaw)) {
     return {
       success: false,
-      message: 'Use a Kenya mobile, e.g. 0712345678 or +254712345678.',
+      message: 'Use a Kenya mobile, e.g. 07… or +254….',
     };
   }
 

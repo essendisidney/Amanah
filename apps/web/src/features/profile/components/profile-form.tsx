@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useActionState } from 'react';
+import { formatPhoneHint, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
 import { updateProfileAction } from '../actions/profile-actions';
 import { initialProfileActionState } from '../lib/state';
@@ -37,11 +38,19 @@ export function ProfileForm({
       ? (continueHref as Route)
       : null;
 
+  const phoneDisplay = defaultValues.phone
+    ? formatPhoneHint(defaultValues.phone)
+    : '';
+
   return (
     <div className="space-y-4">
       {state.message ? (
         <Alert variant={state.success ? 'success' : 'destructive'}>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>
+            {state.success && phoneDisplay
+              ? `${state.message} · ${phoneDisplay}`
+              : state.message}
+          </AlertDescription>
         </Alert>
       ) : null}
 
@@ -66,13 +75,13 @@ export function ProfileForm({
             id="phone"
             name="phone"
             type="tel"
-            placeholder="+254712345678"
-            defaultValue={defaultValues.phone}
+            placeholder={KE_PHONE_PLACEHOLDER}
+            defaultValue={phoneDisplay}
             required={requirePhone}
           />
           {requirePhone ? (
             <p className="text-xs text-muted-foreground">
-              Required for wallet verification SMS and M-Pesa / Paystack step-up.
+              Required for wallet verification SMS and M-Pesa step-up.
             </p>
           ) : null}
           {state.fieldErrors?.phone?.[0] ? (

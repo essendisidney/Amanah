@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import { donateAction, type CharityActionState } from '../actions';
 
@@ -92,7 +93,7 @@ export function DonateForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="donorPhone">Phone (optional)</Label>
-        <Input id="donorPhone" name="donorPhone" type="tel" placeholder="+2547…" />
+        <Input id="donorPhone" name="donorPhone" type="tel" placeholder={KE_PHONE_PLACEHOLDER} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="donorEmail">Email (optional)</Label>

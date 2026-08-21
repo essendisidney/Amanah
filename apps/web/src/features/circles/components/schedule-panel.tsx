@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate } from '@jamiya/shared';
+import { formatCurrency, formatDate, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import Link from 'next/link';
 import type { Route } from 'next';
@@ -311,7 +311,7 @@ export function PayoutSchedule({
                   <input
                     name="phone"
                     type="tel"
-                    placeholder="+2547…"
+                    placeholder={KE_PHONE_PLACEHOLDER}
                     className="h-9 w-36 rounded-md border border-input bg-background px-2 text-sm"
                   />
                   <Button type="submit" size="sm">

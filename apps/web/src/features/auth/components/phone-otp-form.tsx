@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { formatPhoneHint, isValidKeMobile } from '@jamiya/shared';
+import { formatPhoneHint, isValidKeMobile, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -250,7 +250,7 @@ export function PhoneOtpForm({
               type="tel"
               autoComplete="tel"
               inputMode="tel"
-              placeholder="0712 345 678"
+              placeholder={KE_PHONE_PLACEHOLDER}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               required
