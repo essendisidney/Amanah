@@ -181,9 +181,34 @@ export type Dictionary = {
     withdrawHint: string;
     payCircle: string;
     payCircleHint: string;
+    payDue: string;
+    payDueHint: string;
     goals: string;
     goalsHint: string;
     close: string;
+    balanceLabel: string;
+    openMoney: string;
+    openMoneyHint: string;
+    sectionPay: string;
+    sectionSee: string;
+    sectionGrow: string;
+    sectionGive: string;
+    insights: string;
+    insightsHint: string;
+    qard: string;
+    qardHint: string;
+    welfare: string;
+    welfareHint: string;
+    invest: string;
+    investHint: string;
+    tawarruq: string;
+    tawarruqHint: string;
+    sadaka: string;
+    sadakaHint: string;
+    zakat: string;
+    zakatHint: string;
+    allFinance: string;
+    allFinanceHint: string;
   };
   contributionCard: {
     nextTitle: string;
@@ -676,17 +701,42 @@ export const en: Dictionary = {
     addPhone: 'Add phone',
   },
   paySheet: {
-    title: 'Move money',
-    subtitle: 'Straight to add, withdraw, or pay a circle.',
+    title: 'Pay',
+    subtitle: 'Add, settle dues, withdraw — or open any money tool from here.',
     addMoney: 'Add money',
-    addMoneyHint: 'Top up your balance',
+    addMoneyHint: 'Top up your Amanah balance',
     withdraw: 'Withdraw',
-    withdrawHint: 'To M-Pesa or bank',
-    payCircle: 'Pay a circle',
-    payCircleHint: 'Contribution dues',
+    withdrawHint: 'Send to M-Pesa or bank',
+    payCircle: 'Circles',
+    payCircleHint: 'Open a circle to pay dues',
+    payDue: 'Pay due',
+    payDueHint: 'Settle your next contribution',
     goals: 'Goals',
-    goalsHint: 'Hajj, Umra, and more',
+    goalsHint: 'Hajj, Umra, and personal saves',
     close: 'Close',
+    balanceLabel: 'Available',
+    openMoney: 'Money',
+    openMoneyHint: 'Balance, history, and top-ups',
+    sectionPay: 'Pay & send',
+    sectionSee: 'See & plan',
+    sectionGrow: 'Borrow & grow',
+    sectionGive: 'Give',
+    insights: 'Insights',
+    insightsHint: 'This month’s story and open dues',
+    qard: 'Qard Hassan',
+    qardHint: 'Interest-free circle loans',
+    welfare: 'Welfare',
+    welfareHint: 'Circle support funds',
+    invest: 'Invest',
+    investHint: 'Shares and partner options',
+    tawarruq: 'Tawarruq',
+    tawarruqHint: 'Shariah financing requests',
+    sadaka: 'Sadaka',
+    sadakaHint: 'Give to endorsed campaigns',
+    zakat: 'Zakat',
+    zakatHint: 'Estimate what you owe',
+    allFinance: 'All money tools',
+    allFinanceHint: 'Full Finance hub',
   },
   contributionCard: {
     nextTitle: 'Your next contribution',
@@ -1197,17 +1247,42 @@ export const sw: Dictionary = {
     addPhone: 'Ongeza simu',
   },
   paySheet: {
-    title: 'Hamisha pesa',
-    subtitle: 'Moja kwa moja ongeza, toa, au lipa mduara.',
+    title: 'Lipa',
+    subtitle: 'Ongeza, lipa deni, toa — au fungua zana yoyote ya pesa kutoka hapa.',
     addMoney: 'Ongeza pesa',
-    addMoneyHint: 'Jaza salio lako',
+    addMoneyHint: 'Jaza salio lako la Amanah',
     withdraw: 'Toa',
-    withdrawHint: 'Kwenda M-Pesa au benki',
-    payCircle: 'Lipa mduara',
-    payCircleHint: 'Michango inayodaiwa',
+    withdrawHint: 'Tuma kwenda M-Pesa au benki',
+    payCircle: 'Miduara',
+    payCircleHint: 'Fungua mduara kulipa michango',
+    payDue: 'Lipa deni',
+    payDueHint: 'Lipa mchango wako unaofuata',
     goals: 'Malengo',
-    goalsHint: 'Hajj, Umra, na zaidi',
+    goalsHint: 'Hajj, Umra, na akiba binafsi',
     close: 'Funga',
+    balanceLabel: 'Inayopatikana',
+    openMoney: 'Pesa',
+    openMoneyHint: 'Salio, historia, na ongezeko',
+    sectionPay: 'Lipa na tuma',
+    sectionSee: 'Angalia na panga',
+    sectionGrow: 'Kopa na kukuza',
+    sectionGive: 'Changia',
+    insights: 'Ufahamu',
+    insightsHint: 'Hadithi ya mwezi huu na madeni wazi',
+    qard: 'Qard Hassan',
+    qardHint: 'Mikopo ya mduara bila riba',
+    welfare: 'Ustawi',
+    welfareHint: 'Hazina za msaada wa mduara',
+    invest: 'Uwekezaji',
+    investHint: 'Hisa na chaguo za washirika',
+    tawarruq: 'Tawarruq',
+    tawarruqHint: 'Maombi ya fedha zinazofuata Sharia',
+    sadaka: 'Sadaka',
+    sadakaHint: 'Changia kampeni zilizoidhinishwa',
+    zakat: 'Zakat',
+    zakatHint: 'Kadiria unachodaiwa',
+    allFinance: 'Zana zote za pesa',
+    allFinanceHint: 'Kituo kamili cha Fedha',
   },
   contributionCard: {
     nextTitle: 'Mchango wako unaofuata',

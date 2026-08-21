@@ -20,9 +20,7 @@ export default async function FinanceInsightsPage() {
     <InsightsView
       data={data}
       contributionLabels={dict.contributionCard}
-      financeBack={dict.finance.backToFinance}
-      moneyCta={dict.notificationsPage.openMoney}
-      circlesCta={dict.notificationsPage.openCircles}
+      payLabels={dict.paySheet}
     />
   );
 }

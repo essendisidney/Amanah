@@ -57,6 +57,10 @@ export default async function FinancePage() {
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
+          <Link href={'/pay' as Route} className="hover:text-primary">
+            {dict.paySheet.title}
+          </Link>
+          <span className="text-muted-foreground"> · </span>
           {labels.eyebrow}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
