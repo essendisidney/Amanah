@@ -2,10 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
-import { setJamiyaStatusAction } from '@/features/admin/actions/admin-actions';
+import { AdminCircleActions } from '@/features/admin/components/admin-circle-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Circles' };
@@ -22,8 +21,6 @@ type JamiyaRow = {
   max_members: number;
   created_at: string;
 };
-
-const STATUSES = ['draft', 'open', 'active', 'paused', 'completed', 'cancelled'] as const;
 
 export default async function AdminCirclesPage() {
   await requireAdminAccess('admin');
@@ -43,56 +40,51 @@ export default async function AdminCirclesPage() {
       <div>
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Circles</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Open, activate, pause, or close circles across the platform.
+          Update status, cancel a chama, or delete draft/cancelled circles. Live circles with
+          members or payments must be cancelled before delete.
         </p>
       </div>
-      <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-        {rows.map((item) => {
-          const amount =
-            typeof item.contribution_amount === 'number'
-              ? item.contribution_amount
-              : Number(item.contribution_amount);
-          return (
-            <li
-              key={item.id}
-              className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <Link
-                  href={`/circles/${item.slug}` as Route}
-                  className="font-medium hover:text-primary"
-                >
-                  {item.name}
-                </Link>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {item.member_count}/{item.max_members} members ·{' '}
-                  {formatCurrency(amount, item.currency)} · {formatDate(item.created_at)}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={item.status} />
-                <form action={setJamiyaStatusAction} className="flex flex-wrap items-center gap-2">
-                  <input type="hidden" name="jamiyaId" value={item.id} />
-                  <select
-                    name="status"
-                    defaultValue={item.status}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm"
-                  >
-                    {STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                  <Button type="submit" size="sm" variant="outline">
-                    Update
-                  </Button>
-                </form>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      {rows.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-border px-5 py-8 text-sm text-muted-foreground">
+          No circles yet.
+        </p>
+      ) : (
+        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          {rows.map((item) => {
+            const amount =
+              typeof item.contribution_amount === 'number'
+                ? item.contribution_amount
+                : Number(item.contribution_amount);
+            return (
+              <li
+                key={item.id}
+                className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Link
+                      href={`/circles/${item.slug}` as Route}
+                      className="font-medium hover:text-primary"
+                    >
+                      {item.name}
+                    </Link>
+                    <StatusBadge status={item.status} />
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {item.member_count}/{item.max_members} members ·{' '}
+                    {formatCurrency(amount, item.currency)} · {formatDate(item.created_at)}
+                  </p>
+                </div>
+                <AdminCircleActions
+                  jamiyaId={item.id}
+                  name={item.name}
+                  status={item.status}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
