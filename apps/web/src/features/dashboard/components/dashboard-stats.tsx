@@ -71,11 +71,16 @@ export function StatusBadge({
   const variant =
     status === 'active' || status === 'paid' || status === 'approved'
       ? 'success'
-      : status === 'late' || status === 'failed' || status === 'rejected'
+      : status === 'late' ||
+          status === 'failed' ||
+          status === 'rejected' ||
+          status === 'cancelled'
         ? 'destructive'
-        : status === 'open' || status === 'scheduled' || status === 'pending'
-          ? 'accent'
-          : 'secondary';
+        : status === 'suspended' || status === 'paused'
+          ? 'secondary'
+          : status === 'open' || status === 'scheduled' || status === 'pending'
+            ? 'accent'
+            : 'secondary';
 
   return (
     <Badge variant={variant} className="capitalize">

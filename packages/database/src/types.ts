@@ -23,6 +23,7 @@ export type JamiyaStatusEnum =
   | 'open'
   | 'active'
   | 'paused'
+  | 'suspended'
   | 'completed'
   | 'cancelled';
 

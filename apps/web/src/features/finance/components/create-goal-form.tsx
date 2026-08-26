@@ -17,7 +17,13 @@ const FAITH_GOALS = [
   { value: 'Udhiyah', blurb: 'Set aside for Qurbani' },
 ] as const;
 
-export function CreateGoalForm() {
+export function CreateGoalForm({
+  circles = [],
+  defaultJamiyaId = '',
+}: {
+  circles?: Array<{ id: string; name: string }>;
+  defaultJamiyaId?: string;
+}) {
   const [title, setTitle] = useState('');
 
   return (
@@ -44,7 +50,7 @@ export function CreateGoalForm() {
           ))}
         </div>
         <p className="text-xs text-muted-foreground">
-          Hajj, Umra, and Udhiyah — or type your own goal below.
+          Hajj, Umra, and Udhiyah — or type your own goal below. Optionally link a circle.
         </p>
       </div>
 
@@ -56,7 +62,7 @@ export function CreateGoalForm() {
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Hajj, Umra, Udhiyah, school fees…"
+          placeholder="Hajj, Umra, school fees, wedding…"
         />
       </div>
       <div className="space-y-2">
@@ -87,6 +93,24 @@ export function CreateGoalForm() {
           ))}
         </select>
       </div>
+      {circles.length > 0 ? (
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="jamiyaId">Link to circle (optional)</Label>
+          <select
+            id="jamiyaId"
+            name="jamiyaId"
+            defaultValue={defaultJamiyaId}
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">No circle — personal goal only</option>
+            {circles.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
       <div className="sm:col-span-2">
         <Button type="submit" className="min-h-11 w-full sm:w-auto">
           Create goal

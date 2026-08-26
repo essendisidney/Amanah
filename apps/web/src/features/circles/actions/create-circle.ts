@@ -20,7 +20,7 @@ function formDataToPayload(formData: FormData): Record<string, unknown> {
     description: formData.get('description') || '',
     contributionAmount: formData.get('contributionAmount'),
     currency: formData.get('currency'),
-    maxMembers: formData.get('maxMembers'),
+    maxMembers: formData.get('maxMembers') || undefined,
     cycleCount: formData.get('cycleCount') || undefined,
     contributionFrequencyDays: formData.get('contributionFrequencyDays'),
     startDate: formData.get('startDate') || '',
@@ -30,6 +30,9 @@ function formDataToPayload(formData: FormData): Record<string, unknown> {
     transactionFeeAmount: formData.get('transactionFeeAmount') || 0,
     gracePeriodDays: formData.get('gracePeriodDays') || 3,
     challengeKind: formData.get('challengeKind') || 'savings',
+    slotPricingEnabled: formData.get('slotPricingEnabled') === 'true' || formData.get('slotPricingEnabled') === 'on',
+    earlySlotFeePct: formData.get('earlySlotFeePct') || 0,
+    lateSlotRebatePct: formData.get('lateSlotRebatePct') || 0,
   };
 }
 
@@ -93,6 +96,9 @@ export async function createCircleAction(
     transaction_fee_amount: input.transactionFeeAmount,
     grace_period_days: input.gracePeriodDays,
     challenge_kind: input.challengeKind ?? 'savings',
+    slot_pricing_enabled: Boolean(input.slotPricingEnabled),
+    early_slot_fee_pct: input.earlySlotFeePct ?? 0,
+    late_slot_rebate_pct: input.lateSlotRebatePct ?? 0,
   };
 
   const { data: jamiya, error } = await supabase
@@ -101,14 +107,25 @@ export async function createCircleAction(
     .select('id, slug')
     .single();
 
-  if (error || !jamiya) {
+  let createdRow = jamiya as unknown as { id: string; slug: string } | null;
+  let insertError = error;
+
+  if (insertError?.message?.includes('slot_pricing') || insertError?.message?.includes('early_slot')) {
+    const { slot_pricing_enabled: _a, early_slot_fee_pct: _b, late_slot_rebate_pct: _c, ...legacy } =
+      insertPayload;
+    const retry = await supabase.from('jamiyas').insert(legacy as never).select('id, slug').single();
+    createdRow = retry.data as unknown as { id: string; slug: string } | null;
+    insertError = retry.error;
+  }
+
+  if (insertError || !createdRow) {
     return {
       success: false,
-      message: error?.message ?? 'Failed to create circle. Please try again.',
+      message: insertError?.message ?? 'Failed to create circle. Please try again.',
     };
   }
 
-  const created = jamiya as unknown as { id: string; slug: string };
+  const created = createdRow;
 
   await supabase.from('audit_logs').insert({
     actor_id: user.id,

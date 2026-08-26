@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { addMemberAction } from '../actions/add-member';
@@ -14,22 +15,40 @@ export function AddMemberForm({
   jamiyaId: string;
   circleName?: string;
 }) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     addMemberAction,
     initialActionState,
   );
 
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [state.success, state.message, router]);
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
         Existing Amanah users join immediately. New people are added to the circle — use{' '}
-        <strong className="font-medium text-foreground">phone only</strong> for members
-        without email (they sign in with SMS OTP), or email if they have one.
+        <strong className="font-medium text-foreground">phone only</strong> for members without
+        email (they sign in with SMS OTP), or email if they have one. After you add someone, they
+        appear in <strong className="font-medium text-foreground">Members</strong> above.
       </p>
 
       {state.message ? (
         <Alert variant={state.success ? 'success' : 'destructive'}>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>
+            {state.message}
+            {state.success ? (
+              <>
+                {' '}
+                <a href="#members" className="font-medium underline">
+                  View members
+                </a>
+              </>
+            ) : null}
+          </AlertDescription>
         </Alert>
       ) : null}
 
@@ -65,6 +84,10 @@ export function AddMemberForm({
           {state.fieldErrors?.phone?.[0] ? (
             <p className="text-sm text-destructive">{state.fieldErrors.phone[0]}</p>
           ) : null}
+          <p className="text-[11px] text-muted-foreground">
+            Phone alone is enough. Share the invite by SMS, copy link/code, or WhatsApp. They open
+            Amanah → Phone login → paste the code.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email (optional)</Label>
@@ -78,10 +101,6 @@ export function AddMemberForm({
           {state.fieldErrors?.email?.[0] ? (
             <p className="text-sm text-destructive">{state.fieldErrors.email[0]}</p>
           ) : null}
-          <p className="text-[11px] text-muted-foreground">
-            Phone alone is enough for elders without email. Share the invite code on
-            WhatsApp; they open Amanah → Phone login → paste the code.
-          </p>
         </div>
         <Button type="submit" disabled={pending}>
           {pending ? 'Adding…' : 'Add member'}

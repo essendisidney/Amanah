@@ -1,6 +1,7 @@
 /**
  * Production cutover helpers.
  * When REQUIRE_REAL_PROVIDERS=true, simulated payment/bank fallbacks are disabled.
+ * Prefer PAYMENT_PROVIDER=paystack|mpesa in production — simulated is local-only.
  */
 
 export function requireRealProviders(): boolean {

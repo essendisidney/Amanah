@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import { dictionaries } from '@/i18n/dictionaries';
 import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale } from '@/i18n/config';
@@ -19,7 +19,6 @@ export default function AppError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const retried = useRef(false);
   const [labels, setLabels] = useState(dictionaries[DEFAULT_LOCALE].errors);
 
   useEffect(() => {
@@ -30,21 +29,22 @@ export default function AppError({
     console.error(error);
   }, [error]);
 
-  useEffect(() => {
-    if (retried.current) return;
-    retried.current = true;
-    reset();
-  }, [reset]);
-
   return (
     <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-card p-6">
       <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
         {labels.title}
       </h1>
       <p className="text-sm text-muted-foreground">{labels.body}</p>
-      <Button type="button" onClick={reset}>
-        {labels.tryAgain}
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={reset}>
+          {labels.tryAgain}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => {
+          window.location.href = '/admin/circles';
+        }}>
+          Back to circles
+        </Button>
+      </div>
     </div>
   );
 }

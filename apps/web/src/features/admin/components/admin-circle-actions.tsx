@@ -6,6 +6,7 @@ import {
   setJamiyaStatusAction,
 } from '@/features/admin/actions/admin-actions';
 
+/** Values that exist on the live DB enum today. Suspend uses paused under the hood. */
 const STATUSES = ['draft', 'open', 'active', 'paused', 'completed', 'cancelled'] as const;
 
 export function AdminCircleActions({
@@ -17,10 +18,16 @@ export function AdminCircleActions({
   name: string;
   status: string;
 }) {
+  const normalizedStatus = status === 'suspended' ? 'paused' : status;
   const canDelete =
-    status === 'draft' ||
-    status === 'cancelled' ||
-    status === 'open';
+    normalizedStatus === 'draft' ||
+    normalizedStatus === 'cancelled' ||
+    normalizedStatus === 'paused' ||
+    normalizedStatus === 'open';
+
+  const selectStatuses = STATUSES.includes(normalizedStatus as (typeof STATUSES)[number])
+    ? STATUSES
+    : ([...STATUSES, normalizedStatus] as string[]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -28,13 +35,14 @@ export function AdminCircleActions({
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <select
           name="status"
-          defaultValue={status}
+          defaultValue={normalizedStatus}
+          key={normalizedStatus}
           className="h-9 rounded-md border border-input bg-background px-2 text-sm"
           aria-label={`Status for ${name}`}
         >
-          {STATUSES.map((value) => (
+          {selectStatuses.map((value) => (
             <option key={value} value={value}>
-              {value}
+              {value === 'paused' ? 'paused / suspended' : value}
             </option>
           ))}
         </select>
@@ -43,7 +51,18 @@ export function AdminCircleActions({
         </Button>
       </form>
 
-      {status !== 'cancelled' ? (
+      {normalizedStatus !== 'paused' && normalizedStatus !== 'cancelled' ? (
+        <form action={setJamiyaStatusAction}>
+          <input type="hidden" name="jamiyaId" value={jamiyaId} />
+          <input type="hidden" name="status" value="paused" />
+          <input type="hidden" name="intent" value="suspend" />
+          <Button type="submit" size="sm" variant="outline">
+            Suspend
+          </Button>
+        </form>
+      ) : null}
+
+      {normalizedStatus !== 'cancelled' ? (
         <form action={setJamiyaStatusAction}>
           <input type="hidden" name="jamiyaId" value={jamiyaId} />
           <input type="hidden" name="status" value="cancelled" />
@@ -58,8 +77,8 @@ export function AdminCircleActions({
         onSubmit={(event) => {
           const ok = window.confirm(
             canDelete
-              ? `Delete “${name}”? This cannot be undone.`
-              : `“${name}” may still be live. Cancel it first if delete is blocked. Continue?`,
+              ? `Delete "${name}"? This cannot be undone.`
+              : `"${name}" may still be live. Cancel or suspend it first if delete is blocked. Continue?`,
           );
           if (!ok) event.preventDefault();
         }}

@@ -325,6 +325,9 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               More tools
             </summary>
             <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
+              <Link href={`/circles/${slug}/books` as Route} className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted">
+                Member payments
+              </Link>
               <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 Shares
               </Link>

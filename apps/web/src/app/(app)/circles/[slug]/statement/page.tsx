@@ -141,6 +141,17 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Circle</Link>
           </Button>
+          {isOfficer ? (
+            <Button asChild size="sm" className="min-h-11">
+              <Link
+                href={
+                  `/circles/${slug}/books${memberId ? `?memberId=${memberId}` : ''}` as Route
+                }
+              >
+                Record books
+              </Link>
+            </Button>
+          ) : null}
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>

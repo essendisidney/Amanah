@@ -284,7 +284,10 @@ export async function revokeInvitationAction(formData: FormData): Promise<void> 
   if (slug) revalidatePath(`/circles/${slug}`);
 }
 
-export async function acceptInvitationAction(token: string): Promise<ActionState> {
+export async function acceptInvitationAction(
+  token: string,
+  payoutPosition?: number | null,
+): Promise<ActionState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -293,10 +296,14 @@ export async function acceptInvitationAction(token: string): Promise<ActionState
     return { success: false, message: 'Sign in to accept this invitation.' };
   }
 
-  const { data, error } = await callRpc(
-    'accept_invitation',
-    invitationRpcArgs(token),
-  );
+  const args = {
+    ...invitationRpcArgs(token),
+    ...(payoutPosition != null && Number.isFinite(payoutPosition)
+      ? { p_payout_position: payoutPosition }
+      : {}),
+  };
+
+  const { data, error } = await callRpc('accept_invitation', args);
 
   if (error) {
     return { success: false, message: error.message };
@@ -315,6 +322,8 @@ export async function acceptInvitationAction(token: string): Promise<ActionState
       EXPIRED: 'This invitation has expired.',
       CIRCLE_FULL: 'This circle is full.',
       UNAUTHENTICATED: 'Sign in to continue.',
+      SLOT_TAKEN: 'That payout slot was just taken — pick another.',
+      INVALID_SLOT: 'That payout slot is not available.',
     };
     return {
       success: false,
@@ -323,9 +332,9 @@ export async function acceptInvitationAction(token: string): Promise<ActionState
   }
 
   if (result.jamiya_id) {
+    await callRpc('charge_early_slot_fee', { p_jamiya_id: result.jamiya_id });
     const fee = await callRpc('charge_join_fee', { p_jamiya_id: result.jamiya_id });
     if (fee.error) {
-      // Membership already created; surface fee issue without rolling back join
       revalidatePath('/dashboard');
       revalidatePath('/circles');
       if (result.slug) revalidatePath(`/circles/${result.slug}`);

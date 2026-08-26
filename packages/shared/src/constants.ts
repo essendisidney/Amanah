@@ -14,8 +14,12 @@ export const JAMIYA_CONSTRAINTS = {
   nameMinLength: 3,
   nameMaxLength: 80,
   descriptionMaxLength: 1000,
+  /** Floor when a member cap is set (a circle needs at least 2 people). */
   minMembers: 2,
+  /** Hard ceiling if someone types a cap (must match DB check). */
   maxMembers: 50,
+  /** Used when "Maximum members" is left blank — open chama. */
+  openMaxMembers: 50,
   minContributionAmount: 100,
   maxContributionAmount: 10_000_000,
   minCycles: 2,

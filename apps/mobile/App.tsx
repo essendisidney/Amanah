@@ -170,7 +170,7 @@ export default function App() {
   const [qardJamiyaId, setQardJamiyaId] = useState('');
   const [newCircleName, setNewCircleName] = useState('');
   const [newCircleAmount, setNewCircleAmount] = useState('1000');
-  const [newCircleMembers, setNewCircleMembers] = useState('5');
+  const [newCircleMembers, setNewCircleMembers] = useState('');
   const [newCircleCycles, setNewCircleCycles] = useState('');
   const [inviteJamiyaId, setInviteJamiyaId] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -283,7 +283,8 @@ export default function App() {
     if (!token) return;
     const name = newCircleName.trim();
     const amount = Number(newCircleAmount);
-    const maxMembers = Number(newCircleMembers);
+    const membersRaw = newCircleMembers.trim();
+    const maxMembers = membersRaw ? Number(membersRaw) : undefined;
     const cycleRaw = newCircleCycles.trim();
     const cycleCount = cycleRaw ? Number(cycleRaw) : undefined;
     if (name.length < 3) {
@@ -294,8 +295,8 @@ export default function App() {
       setError('Contribution must be at least 100');
       return;
     }
-    if (!Number.isFinite(maxMembers) || maxMembers < 2) {
-      setError('Need at least 2 members');
+    if (maxMembers != null && (!Number.isFinite(maxMembers) || maxMembers < 2)) {
+      setError('Member cap must be at least 2, or leave blank for an open chama');
       return;
     }
     if (cycleCount != null && (!Number.isFinite(cycleCount) || cycleCount < 2)) {
@@ -314,7 +315,7 @@ export default function App() {
         name,
         contributionAmount: amount,
         currency: 'KES',
-        maxMembers,
+        ...(maxMembers != null ? { maxMembers } : {}),
         cycleCount,
         challengeKind: 'savings',
         contributionFrequencyDays: 30,
@@ -618,7 +619,7 @@ export default function App() {
                   keyboardType="numeric"
                   value={newCircleMembers}
                   onChangeText={setNewCircleMembers}
-                  placeholder="Max members"
+                  placeholder="Max members (optional — blank = open)"
                 />
                 <TextInput
                   style={styles.input}

@@ -11,10 +11,20 @@ export function redirectWithCircleNotice(
     notice: message,
     noticeType: type,
   });
-  const base = pathSuffix
-    ? `/circles/${slug}${pathSuffix.startsWith('/') ? pathSuffix : `/${pathSuffix}`}`
-    : `/circles/${slug}`;
-  redirect(`${base}?${params.toString()}`);
+  let path = `/circles/${slug}`;
+  if (pathSuffix) {
+    const suffix = pathSuffix.startsWith('/') ? pathSuffix : `/${pathSuffix}`;
+    const q = suffix.indexOf('?');
+    if (q >= 0) {
+      path += suffix.slice(0, q);
+      new URLSearchParams(suffix.slice(q + 1)).forEach((value, key) => {
+        params.set(key, value);
+      });
+    } else {
+      path += suffix;
+    }
+  }
+  redirect(`${path}?${params.toString()}`);
 }
 
 export function mapMoneyError(code: string | undefined | null): string {

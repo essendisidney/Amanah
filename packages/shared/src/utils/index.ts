@@ -10,3 +10,9 @@ export {
   toE164Kenya,
   formatPhoneHint,
 } from './phone';
+export {
+  availablePayoutSlots,
+  describePayoutSlot,
+  slotBand,
+  type SlotEconomics,
+} from './slot-economics';

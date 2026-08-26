@@ -25,7 +25,10 @@ import {
 } from '../actions/create-circle';
 import { initialCreateCircleState } from '../lib/create-circle-state';
 
-type FormValues = CreateCircleInput;
+type FormValues = Omit<CreateCircleInput, 'maxMembers' | 'cycleCount'> & {
+  maxMembers?: number;
+  cycleCount?: number;
+};
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
@@ -49,7 +52,7 @@ export function CreateCircleForm({
       description: '',
       contributionAmount: 5000,
       currency: DEFAULT_CURRENCY,
-      maxMembers: 6,
+      maxMembers: undefined,
       cycleCount: undefined,
       contributionFrequencyDays: 30,
       startDate: '',
@@ -59,6 +62,9 @@ export function CreateCircleForm({
       joinFeeAmount: 0,
       transactionFeeAmount: 0,
       gracePeriodDays: 3,
+      slotPricingEnabled: false,
+      earlySlotFeePct: 0,
+      lateSlotRebatePct: 0,
     },
   });
 
@@ -66,10 +72,67 @@ export function CreateCircleForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = form;
 
   const challengeKind = watch('challengeKind');
+  const slotPricingEnabled = watch('slotPricingEnabled');
+
+  const applyTemplate = (key: 'sisters' | 'school' | 'wedding' | 'boda') => {
+    if (key === 'sisters') {
+      setValue('name', 'Sisters Circle');
+      setValue('segment', 'womens_circle');
+      setValue('challengeKind', 'rotating');
+      setValue('contributionAmount', 2000);
+      setValue('contributionFrequencyDays', 30);
+      setValue('cycleCount', 10);
+      setValue('maxMembers', 10);
+      setValue('slotPricingEnabled', true);
+      setValue('earlySlotFeePct', 5);
+      setValue('lateSlotRebatePct', 3);
+      setValue(
+        'description',
+        'Women’s rotating chama — pick your payout month, contribute monthly, books stay transparent.',
+      );
+    } else if (key === 'school') {
+      setValue('name', 'School Fees Chama');
+      setValue('segment', 'womens_circle');
+      setValue('challengeKind', 'rotating');
+      setValue('contributionAmount', 5000);
+      setValue('contributionFrequencyDays', 30);
+      setValue('cycleCount', 12);
+      setValue('maxMembers', 12);
+      setValue('slotPricingEnabled', false);
+      setValue(
+        'description',
+        'Save together for school fees — each member takes a payout turn for term fees.',
+      );
+    } else if (key === 'wedding') {
+      setValue('name', 'Wedding Savings Circle');
+      setValue('segment', 'womens_circle');
+      setValue('challengeKind', 'savings');
+      setValue('contributionAmount', 3000);
+      setValue('contributionFrequencyDays', 30);
+      setValue('cycleCount', undefined);
+      setValue('maxMembers', undefined);
+      setValue('slotPricingEnabled', false);
+      setValue(
+        'description',
+        'Group savings toward a wedding or nikah — link a goal after you create the circle.',
+      );
+    } else {
+      setValue('name', 'Boda Stage Chama');
+      setValue('segment', 'boda_stage');
+      setValue('challengeKind', 'rotating');
+      setValue('contributionAmount', 1000);
+      setValue('contributionFrequencyDays', 7);
+      setValue('cycleCount', 8);
+      setValue('maxMembers', 8);
+      setValue('slotPricingEnabled', false);
+      setValue('description', 'Weekly stage merry-go-round for riders.');
+    }
+  };
 
   const onValid = (values: FormValues) => {
     const fd = new FormData();
@@ -77,7 +140,9 @@ export function CreateCircleForm({
     fd.set('description', values.description ?? '');
     fd.set('contributionAmount', String(values.contributionAmount));
     fd.set('currency', values.currency);
-    fd.set('maxMembers', String(values.maxMembers));
+    if (values.maxMembers != null && Number.isFinite(values.maxMembers)) {
+      fd.set('maxMembers', String(values.maxMembers));
+    }
     if (values.cycleCount != null) {
       fd.set('cycleCount', String(values.cycleCount));
     }
@@ -89,6 +154,9 @@ export function CreateCircleForm({
     fd.set('joinFeeAmount', String(values.joinFeeAmount ?? 0));
     fd.set('transactionFeeAmount', String(values.transactionFeeAmount ?? 0));
     fd.set('gracePeriodDays', String(values.gracePeriodDays ?? 3));
+    fd.set('slotPricingEnabled', values.slotPricingEnabled ? 'true' : 'false');
+    fd.set('earlySlotFeePct', String(values.earlySlotFeePct ?? 0));
+    fd.set('lateSlotRebatePct', String(values.lateSlotRebatePct ?? 0));
 
     startTransition(() => {
       formAction(fd);
@@ -107,6 +175,33 @@ export function CreateCircleForm({
       ) : null}
 
       <form onSubmit={handleSubmit(onValid)} className="space-y-6" noValidate>
+        <div className="space-y-2">
+          <Label>Quick templates</Label>
+          <div className="flex flex-wrap gap-2">
+            {(
+              [
+                ['sisters', 'Sisters rotating'],
+                ['school', 'School fees'],
+                ['wedding', 'Wedding savings'],
+                ['boda', 'Boda weekly'],
+              ] as const
+            ).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => applyTemplate(key)}
+                className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-muted-foreground hover:border-primary hover:text-foreground"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Templates fill amount, cadence, and women’s/boda segment — edit anything before
+            create.
+          </p>
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="name">Circle name</Label>
           <Input
@@ -161,14 +256,19 @@ export function CreateCircleForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="maxMembers">Maximum members</Label>
+            <Label htmlFor="maxMembers">Maximum members (optional)</Label>
             <Input
               id="maxMembers"
               type="number"
               min={JAMIYA_CONSTRAINTS.minMembers}
               max={JAMIYA_CONSTRAINTS.maxMembers}
+              placeholder="Leave blank for an open chama"
               {...register('maxMembers')}
             />
+            <p className="text-xs text-muted-foreground">
+              Leave blank for an open chama (no fixed size). Only set a number if you want a hard
+              member cap.
+            </p>
             <FieldError message={fieldError('maxMembers')} />
           </div>
 
@@ -210,6 +310,51 @@ export function CreateCircleForm({
           </p>
           <FieldError message={fieldError('challengeKind')} />
         </div>
+
+        {challengeKind === 'rotating' ? (
+          <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1"
+                {...register('slotPricingEnabled')}
+              />
+              <span>
+                <span className="font-medium text-foreground">Early-slot fee / late-slot rebate</span>
+                <span className="mt-0.5 block text-muted-foreground">
+                  Facilitation fee for early payout turns; rebate shown for later savers. Not
+                  interest — review with your Shariah advisor before enabling.
+                </span>
+              </span>
+            </label>
+            {slotPricingEnabled ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="earlySlotFeePct">Early fee (% of contribution)</Label>
+                  <Input
+                    id="earlySlotFeePct"
+                    type="number"
+                    min={0}
+                    max={50}
+                    step="0.5"
+                    {...register('earlySlotFeePct')}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lateSlotRebatePct">Late rebate (%)</Label>
+                  <Input
+                    id="lateSlotRebatePct"
+                    type="number"
+                    min={0}
+                    max={50}
+                    step="0.5"
+                    {...register('lateSlotRebatePct')}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">

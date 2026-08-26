@@ -68,7 +68,7 @@ export default async function InvitationPage({ params }: Props) {
   const { data: circleData } = await supabase
     .from('jamiyas')
     .select(
-      'contribution_amount, currency, contribution_frequency_days, member_count, max_members, status',
+      'contribution_amount, currency, contribution_frequency_days, member_count, max_members, status, challenge_kind, cycle_count',
     )
     .eq('id', preview.jamiya_id)
     .maybeSingle();
@@ -80,6 +80,26 @@ export default async function InvitationPage({ params }: Props) {
     member_count: number;
     max_members: number;
     status: string;
+    challenge_kind: string | null;
+    cycle_count: number | null;
+  } | null;
+
+  const { data: memberPos } = await supabase
+    .from('members')
+    .select('payout_position')
+    .eq('jamiya_id', preview.jamiya_id)
+    .eq('status', 'active');
+
+  const { data: pricingData } = await supabase
+    .from('jamiyas')
+    .select('slot_pricing_enabled, early_slot_fee_pct, late_slot_rebate_pct')
+    .eq('id', preview.jamiya_id)
+    .maybeSingle();
+
+  const pricing = pricingData as {
+    slot_pricing_enabled?: boolean | null;
+    early_slot_fee_pct?: number | string | null;
+    late_slot_rebate_pct?: number | string | null;
   } | null;
 
   const contributionAmount =
@@ -87,6 +107,28 @@ export default async function InvitationPage({ params }: Props) {
     (typeof circle.contribution_amount === 'number'
       ? circle.contribution_amount
       : Number(circle.contribution_amount));
+
+  const maxSlots = Math.max(
+    circle?.cycle_count ?? 0,
+    circle?.max_members ?? 0,
+    1,
+  );
+
+  const slotContext =
+    circle && Number.isFinite(contributionAmount)
+      ? {
+          challengeKind: circle.challenge_kind,
+          contributionAmount: contributionAmount as number,
+          currency: circle.currency,
+          maxSlots,
+          takenPositions: ((memberPos ?? []) as Array<{ payout_position: number | null }>)
+            .map((m) => m.payout_position)
+            .filter((n): n is number => typeof n === 'number'),
+          slotPricingEnabled: Boolean(pricing?.slot_pricing_enabled),
+          earlySlotFeePct: Number(pricing?.early_slot_fee_pct ?? 0),
+          lateSlotRebatePct: Number(pricing?.late_slot_rebate_pct ?? 0),
+        }
+      : null;
 
   const isPending = preview.status === 'pending';
   const isExpired = new Date(preview.expires_at).getTime() < Date.now();
@@ -154,7 +196,7 @@ export default async function InvitationPage({ params }: Props) {
       </div>
 
       {isPending && !isExpired ? (
-        <InvitationDecisionButtons token={token} />
+        <InvitationDecisionButtons token={token} slotContext={slotContext} />
       ) : (
         <Alert>
           <AlertDescription>

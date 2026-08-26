@@ -15,6 +15,7 @@ export type JamiyaStatus =
   | 'open'
   | 'active'
   | 'paused'
+  | 'suspended'
   | 'completed'
   | 'cancelled';
 

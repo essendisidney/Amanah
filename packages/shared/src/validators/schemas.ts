@@ -56,11 +56,22 @@ export const createCircleSchema = z
       )
       .max(JAMIYA_CONSTRAINTS.maxContributionAmount),
     currency: z.enum(SUPPORTED_CURRENCIES),
-    maxMembers: z.coerce
+    maxMembers: z.preprocess((value) => {
+      if (value === '' || value === null || value === undefined) {
+        return JAMIYA_CONSTRAINTS.openMaxMembers;
+      }
+      if (typeof value === 'number' && Number.isNaN(value)) {
+        return JAMIYA_CONSTRAINTS.openMaxMembers;
+      }
+      if (typeof value === 'string' && value.trim() === '') {
+        return JAMIYA_CONSTRAINTS.openMaxMembers;
+      }
+      return value;
+    }, z.coerce
       .number({ invalid_type_error: 'Enter a valid member count' })
       .int()
-      .min(JAMIYA_CONSTRAINTS.minMembers)
-      .max(JAMIYA_CONSTRAINTS.maxMembers),
+      .min(JAMIYA_CONSTRAINTS.minMembers, `At least ${JAMIYA_CONSTRAINTS.minMembers} if you set a cap`)
+      .max(JAMIYA_CONSTRAINTS.maxMembers)),
     cycleCount: z.preprocess((value) => {
       if (value === '' || value === null || value === undefined) return undefined;
       return value;
@@ -88,6 +99,12 @@ export const createCircleSchema = z
     joinFeeAmount: z.coerce.number().min(0).max(1_000_000).default(0),
     transactionFeeAmount: z.coerce.number().min(0).max(100_000).default(0),
     gracePeriodDays: z.coerce.number().int().min(0).max(14).default(3),
+    slotPricingEnabled: z.preprocess(
+      (value) => value === true || value === 'true' || value === 'on' || value === 1 || value === '1',
+      z.boolean(),
+    ).default(false),
+    earlySlotFeePct: z.coerce.number().min(0).max(50).default(0),
+    lateSlotRebatePct: z.coerce.number().min(0).max(50).default(0),
   });
 
 export const updateProfileSchema = z.object({

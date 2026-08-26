@@ -28,6 +28,10 @@ import { OfficerOverviewStrip } from '@/features/circles/components/officer-over
 import { NextPayoutBoard } from '@/features/circles/components/circle-ops-panel';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
+import { ContributionLedger } from '@/features/circles/components/contribution-ledger';
+import { ClaimPayoutSlotForm } from '@/features/circles/components/claim-payout-slot-form';
+import { CircleLinkedGoals } from '@/features/circles/components/circle-linked-goals';
+import { OfficerPaymentsGuide } from '@/features/circles/components/officer-payments-guide';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 import { getSiteUrl } from '@/lib/site-url';
@@ -59,6 +63,9 @@ type JamiyaRow = {
   late_loan_penalty_pct?: number | string | null;
   payout_compliance_mode?: string | null;
   challenge_kind?: string | null;
+  slot_pricing_enabled?: boolean | null;
+  early_slot_fee_pct?: number | string | null;
+  late_slot_rebate_pct?: number | string | null;
 };
 
 type Props = {
@@ -93,6 +100,22 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   if (!data) notFound();
 
   const jamiya = data as unknown as JamiyaRow;
+
+  const { data: pricingRow } = await supabase
+    .from('jamiyas')
+    .select('slot_pricing_enabled, early_slot_fee_pct, late_slot_rebate_pct')
+    .eq('id', jamiya.id)
+    .maybeSingle();
+  const pricing = pricingRow as {
+    slot_pricing_enabled?: boolean | null;
+    early_slot_fee_pct?: number | string | null;
+    late_slot_rebate_pct?: number | string | null;
+  } | null;
+  if (pricing) {
+    jamiya.slot_pricing_enabled = pricing.slot_pricing_enabled;
+    jamiya.early_slot_fee_pct = pricing.early_slot_fee_pct;
+    jamiya.late_slot_rebate_pct = pricing.late_slot_rebate_pct;
+  }
   const amount =
     typeof jamiya.contribution_amount === 'number'
       ? jamiya.contribution_amount
@@ -105,12 +128,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: payoutData },
     graceResult,
     { data: walletData },
+    { data: paymentData },
   ] = await Promise.all([
     supabase
       .from('members')
       .select('id, role, status, payout_position, joined_at, user_id, member_code')
       .eq('jamiya_id', jamiya.id)
-      .order('payout_position', { ascending: true, nullsFirst: false }),
+      .order('joined_at', { ascending: true }),
     supabase
       .from('invitations')
       .select('id, email, phone, status, expires_at, created_at, invite_code')
@@ -119,10 +143,12 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .order('created_at', { ascending: false }),
     supabase
       .from('contributions')
-      .select('id, cycle_number, amount, amount_paid, currency, status, due_date, member_id')
+      .select(
+        'id, cycle_number, amount, amount_paid, currency, status, due_date, member_id, paid_at',
+      )
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
-      .limit(24),
+      .limit(200),
     supabase
       .from('payouts')
       .select(
@@ -142,6 +168,14 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .eq('user_id', user.id)
       .eq('currency', jamiya.currency)
       .maybeSingle(),
+    supabase
+      .from('contribution_payments')
+      .select(
+        'id, amount, currency, paid_at, created_by, contribution_id, contributions!inner(jamiya_id, cycle_number, member_id)',
+      )
+      .eq('contributions.jamiya_id', jamiya.id)
+      .order('paid_at', { ascending: false })
+      .limit(80),
   ]);
 
   const pendingGraceCount = graceResult.count ?? 0;
@@ -206,21 +240,25 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     ]),
   );
 
-  const members: MemberListItem[] = memberRows.map((row) => {
-    const profile = profilesById.get(row.user_id);
-    return {
-      id: row.id,
-      role: row.role,
-      status: row.status,
-      payoutPosition: row.payout_position,
-      joinedAt: row.joined_at,
-      fullName: profile?.full_name ?? null,
-      email: profile?.email ?? null,
-      phone: profile?.phone ?? null,
-      memberCode: row.member_code,
-      vouchStatus: vouchByMember.get(row.id) ?? null,
-    };
-  });
+  const members: MemberListItem[] = memberRows
+    .filter((row) => row.status !== 'removed' && row.status !== 'left')
+    .map((row) => {
+      const profile = profilesById.get(row.user_id);
+      return {
+        id: row.id,
+        role: row.role,
+        status: row.status,
+        payoutPosition: row.payout_position,
+        joinedAt: row.joined_at,
+        fullName: profile?.full_name ?? null,
+        email: profile?.email ?? null,
+        phone: profile?.phone ?? null,
+        memberCode: row.member_code,
+        vouchStatus: vouchByMember.get(row.id) ?? null,
+      };
+    });
+
+  const visibleMemberCount = members.length;
 
   const membersById = new Map(memberRows.map((row) => [row.id, row]));
 
@@ -254,20 +292,98 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       status: string;
       due_date: string;
       member_id: string;
+      paid_at?: string | null;
     }>
-  ).map((row) => ({
-    id: row.id,
-    cycleNumber: row.cycle_number,
-    amount: typeof row.amount === 'number' ? row.amount : Number(row.amount),
-    amountPaid:
-      typeof row.amount_paid === 'number'
-        ? row.amount_paid
-        : Number(row.amount_paid ?? 0),
-    currency: row.currency,
-    status: row.status,
-    dueDate: row.due_date,
-    isMine: membership?.id === row.member_id,
+  ).map((row) => {
+    const member = membersById.get(row.member_id);
+    const profile = member ? profilesById.get(member.user_id) : null;
+    return {
+      id: row.id,
+      cycleNumber: row.cycle_number,
+      amount: typeof row.amount === 'number' ? row.amount : Number(row.amount),
+      amountPaid:
+        typeof row.amount_paid === 'number'
+          ? row.amount_paid
+          : Number(row.amount_paid ?? 0),
+      currency: row.currency,
+      status: row.status,
+      dueDate: row.due_date,
+      isMine: membership?.id === row.member_id,
+      memberLabel:
+        canManageOps || membership?.id === row.member_id
+          ? profile?.full_name || profile?.email || profile?.phone || 'Member'
+          : undefined,
+      memberPhone: canManageOps ? (profile?.phone ?? null) : null,
+      paidAt: row.paid_at ?? null,
+    };
+  });
+
+  const paymentRaw = (paymentData ?? []) as unknown as Array<{
+    id: string;
+    amount: number | string;
+    currency: string;
+    paid_at: string;
+    created_by: string;
+    contribution_id: string;
+    contributions:
+      | { jamiya_id: string; cycle_number: number; member_id: string }
+      | Array<{ jamiya_id: string; cycle_number: number; member_id: string }>;
+  }>;
+
+  const recorderIds = [
+    ...new Set(paymentRaw.map((p) => p.created_by).filter(Boolean)),
+  ];
+  const missingRecorderIds = recorderIds.filter((id) => !profilesById.has(id));
+  if (missingRecorderIds.length > 0) {
+    const { data: recorderRows } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, phone')
+      .in('id', missingRecorderIds);
+    for (const row of (recorderRows ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      email: string | null;
+      phone: string | null;
+    }>) {
+      profilesById.set(row.id, row);
+    }
+  }
+
+  const ledgerRows = contributions.map((c) => ({
+    id: c.id,
+    memberLabel: c.memberLabel ?? 'Member',
+    memberPhone: c.memberPhone ?? null,
+    cycleNumber: c.cycleNumber,
+    amount: c.amount,
+    amountPaid: c.amountPaid,
+    currency: c.currency,
+    status: c.status,
+    dueDate: c.dueDate,
+    paidAt: c.paidAt ?? null,
   }));
+
+  const paymentHistory = paymentRaw.map((row) => {
+    const contrib = Array.isArray(row.contributions)
+      ? row.contributions[0]
+      : row.contributions;
+    const member = contrib ? membersById.get(contrib.member_id) : null;
+    const memberProfile = member ? profilesById.get(member.user_id) : null;
+    const recorder = profilesById.get(row.created_by);
+    return {
+      id: row.id,
+      amount: typeof row.amount === 'number' ? row.amount : Number(row.amount),
+      currency: row.currency,
+      paidAt: row.paid_at,
+      memberLabel:
+        memberProfile?.full_name ||
+        memberProfile?.email ||
+        memberProfile?.phone ||
+        'Member',
+      cycleNumber: contrib?.cycle_number ?? 0,
+      recordedByLabel:
+        recorder?.full_name || recorder?.email || recorder?.phone || 'Officer',
+    };
+  });
 
   const payouts: SchedulePayout[] = (
     (payoutData ?? []) as unknown as Array<{
@@ -336,6 +452,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     <div className="mx-auto w-full max-w-[390px] space-y-8 md:max-w-3xl md:space-y-10">
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
+      {canManageOps ? <OfficerPaymentsGuide slug={slug} /> : null}
+
       <header className="space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -391,6 +509,32 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
+      {membership?.status === 'active' &&
+      (jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind) &&
+      jamiya.status !== 'active' ? (
+        <ClaimPayoutSlotForm
+          jamiyaId={jamiya.id}
+          slug={slug}
+          maxSlots={Math.max(jamiya.cycle_count ?? 0, jamiya.max_members, 1)}
+          takenPositions={memberRows
+            .filter((m) => m.id !== membership.id)
+            .map((m) => m.payout_position)
+            .filter((n): n is number => typeof n === 'number')}
+          contributionAmount={amount}
+          currency={jamiya.currency}
+          slotPricingEnabled={Boolean(jamiya.slot_pricing_enabled)}
+          earlySlotFeePct={Number(jamiya.early_slot_fee_pct ?? 0)}
+          lateSlotRebatePct={Number(jamiya.late_slot_rebate_pct ?? 0)}
+          currentPosition={membership.payout_position}
+        />
+      ) : null}
+
+      <CircleLinkedGoals
+        jamiyaId={jamiya.id}
+        slug={slug}
+        userId={user.id}
+      />
+
       <section className="flex flex-wrap gap-2">
         {[
           {
@@ -400,6 +544,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             label: myOpenDue ? 'Contribute' : 'Calendar',
             primary: Boolean(myOpenDue),
           },
+          ...(canManageOps
+            ? [
+                {
+                  href: `/circles/${slug}/books` as Route,
+                  label: 'Member payments',
+                  primary: true,
+                },
+              ]
+            : []),
           { href: `/circles/${slug}/statement` as Route, label: circleLabels.myStatement },
           { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
           {
@@ -478,6 +631,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <Button asChild variant="ghost" size="sm">
           <Link href={`/circles/${slug}/shares` as Route}>{circleLabels.shares}</Link>
         </Button>
+        {canManageOps ? (
+          <Button asChild variant="ghost" size="sm">
+            <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
+          </Button>
+        ) : null}
         <Button asChild variant="ghost" size="sm">
           <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
         </Button>
@@ -536,6 +694,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       </section>
 
+      {canManageOps ? (
+        <section id="contribution-ledger" className="space-y-4">
+          <h2 className="text-xl font-bold tracking-tight">Contribution ledger</h2>
+          <ContributionLedger rows={ledgerRows} payments={paymentHistory} />
+        </section>
+      ) : null}
+
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Payout schedule
@@ -551,17 +716,81 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       <section className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Members
+            <a href="#members" className="hover:text-primary">
+              Members ({visibleMemberCount})
+            </a>
           </h2>
           {membership?.status === 'active' &&
           ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(
             membership?.role ?? '',
           ) ? (
-            <ExportCircleReportButtons slug={jamiya.slug} />
+            <div className="flex flex-wrap gap-2">
+              <Button asChild size="sm" variant="outline">
+                <a href="#invite-people">Add people</a>
+              </Button>
+              <ExportCircleReportButtons slug={jamiya.slug} />
+            </div>
           ) : null}
         </div>
-        <MembersList members={members} slug={slug} canManage={canManageMembers} />
+        <p className="text-sm text-muted-foreground">
+          Everyone who has joined this chama. After you add or invite someone, pull to refresh or
+          tap Add people — the list updates when they are in the circle.
+        </p>
+        <div id="members">
+          <MembersList
+            members={members}
+            slug={slug}
+            canManage={canManageMembers}
+            canRecordPayments={Boolean(canManageOps)}
+          />
+        </div>
       </section>
+
+      {canManageOps ? (
+        <>
+          <section id="invite-people" className="space-y-4">
+            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+              Add people (manual)
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Create their Amanah account now. They get a join link and code to sign in — then they
+              show in Members above.
+            </p>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+              Join link / invite code
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Share by SMS, copy link/code, email, or WhatsApp. When they accept, they appear under
+              Members.
+            </p>
+            <div className="rounded-xl border border-border bg-card p-6">
+              <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+              Pending invitations ({invitations.length})
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Waiting to accept. Once they join, they leave this list and show under Members.
+            </p>
+            <PendingInvitationsList
+              invitations={invitations}
+              slug={jamiya.slug}
+              canManage={canManageOps}
+              siteUrl={getSiteUrl()}
+              circleName={jamiya.name}
+            />
+          </section>
+        </>
+      ) : null}
 
       {membership?.status === 'active' ? (
         <section className="space-y-4">
@@ -606,10 +835,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               Treasury & books
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Bank accounts, journal, fines, and savings pockets live on dedicated pages for a
-              faster hub.
+              Record each member&apos;s shares, savings, and loans in one place — or open the full
+              cashbook.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
+              {canManageOps ? (
+                <Button asChild size="sm">
+                  <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
+                </Button>
+              ) : null}
               <Button asChild variant="outline" size="sm">
                 <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
               </Button>
@@ -619,47 +853,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             </div>
           </div>
         </section>
-      ) : null}
-
-      {canManageOps ? (
-        <>
-          <section id="invite-people" className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Add people (manual)
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Create their Amanah account now. They get a join link and code to sign in.
-            </p>
-            <div className="rounded-xl border border-border bg-card p-6">
-              <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Join link / invite code
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Share a WhatsApp link or short code. They open it, sign in with phone, and join.
-            </p>
-            <div className="rounded-xl border border-border bg-card p-6">
-              <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Pending invitations
-            </h2>
-            <PendingInvitationsList
-              invitations={invitations}
-              slug={jamiya.slug}
-              canManage={canManageOps}
-              siteUrl={getSiteUrl()}
-              circleName={jamiya.name}
-            />
-          </section>
-        </>
       ) : null}
 
       <Button asChild variant="outline">

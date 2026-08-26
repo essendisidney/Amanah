@@ -81,36 +81,40 @@ export async function reviewKycDocumentAction(formData: FormData): Promise<void>
   );
 }
 
-export async function setJamiyaStatusAction(formData: FormData): Promise<void> {
-  const { userId: actorId } = await requireAdminAccess('admin');
-  const jamiyaId = String(formData.get('jamiyaId') ?? '');
-  const status = String(formData.get('status') ?? '').trim().toLowerCase();
-  const allowed = ['draft', 'open', 'active', 'paused', 'completed', 'cancelled'];
-  if (!jamiyaId || !allowed.includes(status)) {
-    redirect(withNoticeQuery('/admin/circles', 'Pick a valid circle status.', 'error'));
-  }
+const JAMIYA_STATUSES = [
+  'draft',
+  'open',
+  'active',
+  'paused',
+  'suspended',
+  'completed',
+  'cancelled',
+] as const;
 
-  // Prefer RPC (audited). Fall back to service-role update if the RPC is missing/mismatched.
-  const rpc = await callRpc('admin_set_jamiya_status', {
-    p_jamiya_id: jamiyaId,
-    p_status: status,
-  });
+function isNextRedirectError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'digest' in error &&
+    typeof (error as { digest?: unknown }).digest === 'string' &&
+    String((error as { digest: string }).digest).startsWith('NEXT_REDIRECT')
+  );
+}
 
-  let ok = false;
-  let unchanged = false;
-  let failCode: string | null = null;
+function safeNotice(message: string, max = 180): string {
+  return message.replace(/\s+/g, ' ').trim().slice(0, max);
+}
 
-  if (!rpc.error) {
-    const result = rpc.data as { ok?: boolean; error?: string; unchanged?: boolean } | null;
-    if (result?.ok) {
-      ok = true;
-      unchanged = Boolean(result.unchanged);
-    } else {
-      failCode = result?.error ?? 'UPDATE_FAILED';
-    }
-  }
+function circlesNotice(message: string, type: 'success' | 'error' | 'info' = 'success') {
+  return withNoticeQuery('/admin/circles', safeNotice(message), type);
+}
 
-  if (!ok && (!rpc.error || /function|could not find|p_status/i.test(rpc.error.message))) {
+async function setJamiyaStatusViaServiceRole(
+  actorId: string,
+  jamiyaId: string,
+  status: string,
+): Promise<{ ok: boolean; unchanged: boolean; failCode: string | null }> {
+  try {
     const { createServiceRoleClient } = await import('@/lib/supabase/service');
     const admin = createServiceRoleClient();
     const { data: current, error: readError } = await admin
@@ -119,100 +123,130 @@ export async function setJamiyaStatusAction(formData: FormData): Promise<void> {
       .eq('id', jamiyaId)
       .maybeSingle();
     if (readError || !current) {
-      failCode = readError?.message ?? 'NOT_FOUND';
-    } else if (String((current as { status: string }).status) === status) {
-      ok = true;
-      unchanged = true;
-    } else {
-      const { error: updateError } = await admin
-        .from('jamiyas')
-        .update({ status, updated_at: new Date().toISOString() } as never)
-        .eq('id', jamiyaId);
-      if (updateError) {
-        failCode = updateError.message;
-      } else {
-        await admin.from('audit_logs').insert({
-          actor_id: actorId,
-          action: 'jamiya_status_change',
-          entity_type: 'jamiya',
-          entity_id: jamiyaId,
-          jamiya_id: jamiyaId,
-          metadata: { from: (current as { status: string }).status, to: status },
-        } as never);
-        ok = true;
-        failCode = null;
+      return { ok: false, unchanged: false, failCode: readError?.message ?? 'NOT_FOUND' };
+    }
+    const previous = String((current as { status: string }).status);
+    if (previous === status) {
+      return { ok: true, unchanged: true, failCode: null };
+    }
+    const { error: updateError } = await admin
+      .from('jamiyas')
+      .update({ status, updated_at: new Date().toISOString() } as never)
+      .eq('id', jamiyaId);
+    if (updateError) {
+      return { ok: false, unchanged: false, failCode: updateError.message };
+    }
+    await admin.from('audit_logs').insert({
+      actor_id: actorId,
+      action: 'jamiya_status_change',
+      entity_type: 'jamiya',
+      entity_id: jamiyaId,
+      jamiya_id: jamiyaId,
+      metadata: { from: previous, to: status },
+    } as never);
+    return { ok: true, unchanged: false, failCode: null };
+  } catch (error) {
+    return {
+      ok: false,
+      unchanged: false,
+      failCode: error instanceof Error ? error.message : 'UPDATE_FAILED',
+    };
+  }
+}
+
+export async function setJamiyaStatusAction(formData: FormData): Promise<void> {
+  try {
+    const { userId: actorId } = await requireAdminAccess('admin');
+    const jamiyaId = String(formData.get('jamiyaId') ?? '');
+    let status = String(formData.get('status') ?? '').trim().toLowerCase();
+    const intent = String(formData.get('intent') ?? '').trim().toLowerCase();
+
+    // DB enum may not include suspended yet — store as paused.
+    if (status === 'suspended' || intent === 'suspend') {
+      status = 'paused';
+    }
+
+    if (!jamiyaId || !JAMIYA_STATUSES.includes(status as (typeof JAMIYA_STATUSES)[number])) {
+      redirect(circlesNotice('Pick a valid circle status.', 'error'));
+    }
+
+    let { ok, unchanged, failCode } = await setJamiyaStatusViaServiceRole(
+      actorId,
+      jamiyaId,
+      status,
+    );
+
+    if (!ok) {
+      const rpc = await callRpc('admin_set_jamiya_status', {
+        p_jamiya_id: jamiyaId,
+        p_status: status,
+      });
+      if (!rpc.error) {
+        const result = rpc.data as { ok?: boolean; error?: string; unchanged?: boolean } | null;
+        if (result?.ok) {
+          ok = true;
+          unchanged = Boolean(result.unchanged);
+          failCode = null;
+        } else {
+          failCode = result?.error ?? failCode ?? 'UPDATE_FAILED';
+        }
+      } else if (!failCode) {
+        failCode = rpc.error.message;
       }
     }
-  } else if (!ok && rpc.error) {
-    failCode = rpc.error.message;
-  }
 
-  revalidatePath('/admin/circles');
-  revalidatePath('/admin');
-  revalidatePath('/circles');
-  revalidatePath('/dashboard');
+    revalidatePath('/admin/circles');
+    revalidatePath('/admin');
+    revalidatePath('/circles');
+    revalidatePath('/dashboard');
 
-  if (!ok) {
-    const code = failCode ?? 'UPDATE_FAILED';
-    const messages: Record<string, string> = {
-      FORBIDDEN: 'Only platform admins can change circle status.',
-      NOT_FOUND: 'Circle not found.',
-      INVALID_STATUS: 'That status is not allowed.',
-      UNAUTHENTICATED: 'Sign in again, then retry.',
-    };
+    if (!ok) {
+      const code = failCode ?? 'UPDATE_FAILED';
+      const messages: Record<string, string> = {
+        FORBIDDEN: 'Only platform admins can change circle status.',
+        NOT_FOUND: 'Circle not found.',
+        INVALID_STATUS: 'That status is not allowed.',
+        UNAUTHENTICATED: 'Sign in again, then retry.',
+      };
+      redirect(circlesNotice(messages[code] ?? `Could not update status (${code}).`, 'error'));
+    }
+
+    if (intent === 'suspend') {
+      redirect(circlesNotice(unchanged ? 'Chama already suspended.' : 'Chama suspended.', 'success'));
+    }
+    if (status === 'cancelled') {
+      redirect(circlesNotice(unchanged ? 'Chama already cancelled.' : 'Chama cancelled.', 'success'));
+    }
+
     redirect(
-      withNoticeQuery(
-        '/admin/circles',
-        messages[code] ?? `Could not update status (${code}).`,
+      circlesNotice(
+        unchanged ? `Status already ${status}.` : `Circle status set to ${status}.`,
+        'success',
+      ),
+    );
+  } catch (error) {
+    if (isNextRedirectError(error)) throw error;
+    redirect(
+      circlesNotice(
+        error instanceof Error ? error.message : 'Could not update circle status.',
         'error',
       ),
     );
   }
-
-  redirect(
-    withNoticeQuery(
-      '/admin/circles',
-      unchanged
-        ? `Status already ${status}.`
-        : status === 'cancelled'
-          ? 'Chama cancelled.'
-          : `Circle status set to ${status}.`,
-      'success',
-    ),
-  );
 }
 
 export async function deleteJamiyaAction(formData: FormData): Promise<void> {
-  const { userId: actorId } = await requireAdminAccess('admin');
-  const jamiyaId = String(formData.get('jamiyaId') ?? '');
-  if (!jamiyaId) {
-    redirect(withNoticeQuery('/admin/circles', 'Missing circle id.', 'error'));
-  }
-
-  const rpc = await callRpc('admin_delete_jamiya', { p_jamiya_id: jamiyaId });
-  let deletedName: string | null = null;
-  let failCode: string | null = null;
-  let failMessage: string | null = null;
-
-  if (!rpc.error) {
-    const result = rpc.data as {
-      ok?: boolean;
-      error?: string;
-      message?: string;
-      name?: string;
-    } | null;
-    if (result?.ok) {
-      deletedName = result.name ?? null;
-    } else {
-      failCode = result?.error ?? 'DELETE_FAILED';
-      failMessage = result?.message ?? null;
+  try {
+    const { userId: actorId } = await requireAdminAccess('admin');
+    const jamiyaId = String(formData.get('jamiyaId') ?? '');
+    if (!jamiyaId) {
+      redirect(circlesNotice('Missing circle id.', 'error'));
     }
-  }
 
-  const rpcMissing =
-    Boolean(rpc.error) && /function|could not find|schema cache/i.test(rpc.error!.message);
+    let deletedName: string | null = null;
+    let failCode: string | null = null;
+    let failMessage: string | null = null;
 
-  if (!deletedName && (rpcMissing || failCode === 'DELETE_FAILED')) {
     const { createServiceRoleClient } = await import('@/lib/supabase/service');
     const admin = createServiceRoleClient();
     const { data: row, error: readError } = await admin
@@ -249,7 +283,7 @@ export async function deleteJamiyaAction(formData: FormData): Promise<void> {
       ) {
         failCode = 'CANCEL_FIRST';
         failMessage =
-          'Cancel the chama first, then delete. Live circles with members or payments cannot be deleted directly.';
+          'Cancel or suspend the chama first, then delete. Live circles with members or payments cannot be deleted directly.';
       } else {
         await admin.from('audit_logs').insert({
           actor_id: actorId,
@@ -265,9 +299,24 @@ export async function deleteJamiyaAction(formData: FormData): Promise<void> {
             paid_activity: paidActivity ?? 0,
           },
         } as never);
+
+        const childTables = [
+          'invitations',
+          'members',
+          'contributions',
+          'payouts',
+          'penalties',
+          'qard_loans',
+          'circle_subscriptions',
+        ] as const;
+        for (const table of childTables) {
+          await admin.from(table).delete().eq('jamiya_id', jamiyaId);
+        }
+
         const { error: deleteError } = await admin.from('jamiyas').delete().eq('id', jamiyaId);
         if (deleteError) {
-          failCode = deleteError.message;
+          failCode = 'HAS_DEPENDENCIES';
+          failMessage = deleteError.message;
         } else {
           deletedName = circle.name;
           failCode = null;
@@ -275,42 +324,62 @@ export async function deleteJamiyaAction(formData: FormData): Promise<void> {
         }
       }
     }
-  } else if (!deletedName && rpc.error && !rpcMissing) {
-    failCode = rpc.error.message;
-  }
 
-  revalidatePath('/admin/circles');
-  revalidatePath('/admin');
-  revalidatePath('/circles');
-  revalidatePath('/dashboard');
+    if (!deletedName && failCode !== 'CANCEL_FIRST') {
+      const rpc = await callRpc('admin_delete_jamiya', { p_jamiya_id: jamiyaId });
+      if (!rpc.error) {
+        const result = rpc.data as {
+          ok?: boolean;
+          error?: string;
+          message?: string;
+          name?: string;
+        } | null;
+        if (result?.ok) {
+          deletedName = result.name ?? deletedName ?? 'circle';
+          failCode = null;
+          failMessage = null;
+        } else if (!failCode) {
+          failCode = result?.error ?? 'DELETE_FAILED';
+          failMessage = result?.message ?? null;
+        }
+      }
+    }
 
-  if (!deletedName) {
-    const code = failCode ?? 'DELETE_FAILED';
-    if (code === 'CANCEL_FIRST') {
+    revalidatePath('/admin/circles');
+    revalidatePath('/admin');
+    revalidatePath('/circles');
+    revalidatePath('/dashboard');
+
+    if (!deletedName) {
+      const code = failCode ?? 'DELETE_FAILED';
+      if (code === 'CANCEL_FIRST') {
+        redirect(
+          circlesNotice(
+            failMessage ?? 'Cancel or suspend the chama first, then delete.',
+            'error',
+          ),
+        );
+      }
+      const messages: Record<string, string> = {
+        FORBIDDEN: 'Only platform admins can delete circles.',
+        NOT_FOUND: 'Circle not found (maybe already deleted).',
+        UNAUTHENTICATED: 'Sign in again, then retry.',
+        HAS_DEPENDENCIES:
+          'This chama still has linked records that block delete. Cancel or suspend it, then try again.',
+      };
       redirect(
-        withNoticeQuery(
-          '/admin/circles',
-          failMessage ??
-            'Cancel the chama first, then delete. Live circles with members or payments cannot be deleted directly.',
-          'error',
-        ),
+        circlesNotice(messages[code] ?? failMessage ?? `Could not delete (${code}).`, 'error'),
       );
     }
-    const messages: Record<string, string> = {
-      FORBIDDEN: 'Only platform admins can delete circles.',
-      NOT_FOUND: 'Circle not found (maybe already deleted).',
-      UNAUTHENTICATED: 'Sign in again, then retry.',
-    };
+
+    redirect(circlesNotice(`Deleted "${deletedName}".`, 'success'));
+  } catch (error) {
+    if (isNextRedirectError(error)) throw error;
     redirect(
-      withNoticeQuery(
-        '/admin/circles',
-        messages[code] ?? failMessage ?? `Could not delete (${code}).`,
+      circlesNotice(
+        error instanceof Error ? error.message : 'Could not delete circle.',
         'error',
       ),
     );
   }
-
-  redirect(
-    withNoticeQuery('/admin/circles', `Deleted “${deletedName}”.`, 'success'),
-  );
 }

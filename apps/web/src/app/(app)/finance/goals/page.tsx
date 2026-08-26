@@ -22,19 +22,46 @@ type Goal = {
   duration_months: number | null;
 };
 
-export default async function GoalsPage() {
+export default async function GoalsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ jamiyaId?: string }>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect('/phone?next=/finance/goals');
 
+  const qs = (await searchParams) ?? {};
+  const defaultJamiya = String(qs.jamiyaId ?? '');
+
   const { data } = await supabase
     .from('savings_goals')
-    .select('id, title, target_amount, saved_amount, currency, target_date, duration_months')
+    .select('id, title, target_amount, saved_amount, currency, target_date, duration_months, jamiya_id')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
-  const goals = (data ?? []) as unknown as Goal[];
+  const goals = (data ?? []) as unknown as Array<Goal & { jamiya_id?: string | null }>;
+
+  const { data: memberships } = await supabase
+    .from('members')
+    .select('jamiya_id, jamiyas(id, name)')
+    .eq('user_id', user.id)
+    .eq('status', 'active');
+
+  const circles = (
+    (memberships ?? []) as Array<{
+      jamiya_id: string;
+      jamiyas: { id: string; name: string } | { id: string; name: string }[] | null;
+    }>
+  )
+    .map((m) => {
+      const j = Array.isArray(m.jamiyas) ? m.jamiyas[0] : m.jamiyas;
+      return j ? { id: j.id, name: j.name } : null;
+    })
+    .filter(Boolean) as Array<{ id: string; name: string }>;
+
+  const circleName = new Map(circles.map((c) => [c.id, c.name]));
 
   return (
     <div className="space-y-8">
@@ -46,8 +73,8 @@ export default async function GoalsPage() {
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Hajj, Umra, Udhiyah, emergency fund — track progress with a clear target. Top up Money,
-          then update what you have set aside.
+          Hajj, Umra, Udhiyah, emergency fund — track progress and optionally link a circle so
+          payouts stay tied to what you are saving for.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
@@ -60,7 +87,7 @@ export default async function GoalsPage() {
       </div>
 
       <div className="amanah-surface p-5">
-        <CreateGoalForm />
+        <CreateGoalForm circles={circles} defaultJamiyaId={defaultJamiya} />
       </div>
 
       <section className="space-y-3">
@@ -93,6 +120,9 @@ export default async function GoalsPage() {
                     {formatCurrency(saved, goal.currency)} / {formatCurrency(target, goal.currency)}
                     {goal.duration_months ? ` · ${goal.duration_months} months` : ''}
                     {goal.target_date ? ` · by ${goal.target_date}` : ''}
+                    {goal.jamiya_id && circleName.get(goal.jamiya_id)
+                      ? ` · ${circleName.get(goal.jamiya_id)}`
+                      : ''}
                   </p>
                   {reached ? (
                     <p className="mt-1 text-sm font-medium text-primary">Target reached</p>

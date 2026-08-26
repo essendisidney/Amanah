@@ -1,6 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { createInvitationAction } from '../actions/invitation-actions';
@@ -14,6 +15,7 @@ export function InviteMemberForm({
   jamiyaId: string;
   circleName?: string;
 }) {
+  const router = useRouter();
   const [state, formAction, pending] = useActionState(
     createInvitationAction,
     initialActionState,
@@ -23,14 +25,27 @@ export function InviteMemberForm({
   useEffect(() => {
     if (state.success && state.inviteUrl && state.inviteCode) {
       shareRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      router.refresh();
     }
-  }, [state.success, state.inviteUrl, state.inviteCode]);
+  }, [state.success, state.inviteUrl, state.inviteCode, router]);
 
   return (
     <div className="space-y-4">
       {state.message ? (
         <Alert variant={state.success ? 'success' : 'destructive'}>
-          <AlertDescription>{state.message}</AlertDescription>
+          <AlertDescription>
+            {state.message}
+            {state.success ? (
+              <>
+                {' '}
+                When they accept, they show under{' '}
+                <a href="#members" className="font-medium underline">
+                  Members
+                </a>
+                . Until then, check Pending invitations below.
+              </>
+            ) : null}
+          </AlertDescription>
         </Alert>
       ) : null}
 

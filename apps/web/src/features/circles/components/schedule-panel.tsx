@@ -21,6 +21,9 @@ export type ScheduleContribution = {
   status: string;
   dueDate: string;
   isMine: boolean;
+  memberLabel?: string;
+  memberPhone?: string | null;
+  paidAt?: string | null;
 };
 
 export type SchedulePayout = {
@@ -114,6 +117,10 @@ export function ContributionCalendar({
   }
 
   const ordered = [...contributions].sort((a, b) => {
+    if (canManageOps) {
+      if (a.dueDate !== b.dueDate) return a.dueDate.localeCompare(b.dueDate);
+      return (a.memberLabel ?? '').localeCompare(b.memberLabel ?? '');
+    }
     if (a.isMine === b.isMine) return a.cycleNumber - b.cycleNumber;
     return a.isMine ? -1 : 1;
   });
@@ -157,7 +164,10 @@ export function ContributionCalendar({
           >
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium">Cycle {item.cycleNumber}</p>
+                <p className="font-medium">
+                  {item.memberLabel ? `${item.memberLabel} · ` : null}
+                  Cycle {item.cycleNumber}
+                </p>
                 <StatusBadge status={item.status} />
                 {item.isMine ? (
                   <span className="text-xs font-medium text-primary">Yours</span>

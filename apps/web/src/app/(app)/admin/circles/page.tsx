@@ -40,8 +40,8 @@ export default async function AdminCirclesPage() {
       <div>
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Circles</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Update status, cancel a chama, or delete draft/cancelled circles. Live circles with
-          members or payments must be cancelled before delete.
+          Update status, suspend or cancel a chama, or delete draft/cancelled/suspended circles.
+          Live circles with members or payments must be suspended or cancelled before delete.
         </p>
       </div>
       {rows.length === 0 ? (

@@ -120,6 +120,8 @@ export async function createGoalAction(formData: FormData): Promise<FinanceActio
   const targetDate = new Date();
   targetDate.setMonth(targetDate.getMonth() + durationMonths);
 
+  const jamiyaId = String(formData.get('jamiyaId') ?? '').trim() || null;
+
   const { error } = await supabase.from('savings_goals').insert({
     user_id: user.id,
     title,
@@ -128,9 +130,15 @@ export async function createGoalAction(formData: FormData): Promise<FinanceActio
     currency: 'KES',
     duration_months: durationMonths,
     target_date: targetDate.toISOString().slice(0, 10),
+    ...(jamiyaId ? { jamiya_id: jamiyaId } : {}),
   } as never);
   if (error) return { success: false, message: error.message };
   revalidatePath('/finance/goals');
+  if (jamiyaId) {
+    const { data: j } = await supabase.from('jamiyas').select('slug').eq('id', jamiyaId).maybeSingle();
+    const slug = (j as { slug?: string } | null)?.slug;
+    if (slug) revalidatePath(`/circles/${slug}`);
+  }
   return { success: true, message: 'Goal created.' };
 }
 

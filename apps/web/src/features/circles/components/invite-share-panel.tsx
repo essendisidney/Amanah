@@ -88,6 +88,12 @@ export function InviteSharePanel({
             WhatsApp
           </a>
         </Button>
+        <Button type="button" size="sm" variant="outline" className="min-h-11" asChild>
+          <a href={smsHref}>SMS</a>
+        </Button>
+        <Button type="button" size="sm" variant="outline" className="min-h-11" asChild>
+          <a href={emailHref}>Email</a>
+        </Button>
       </div>
     );
   }
@@ -105,7 +111,8 @@ export function InviteSharePanel({
           {inviteCode}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          Share on WhatsApp. They open the link, sign in with phone OTP, then tap Accept.
+          Share by SMS, email, copy link/code, or WhatsApp. They open the link, sign in with phone
+          OTP, then tap Accept.
         </p>
       </div>
 

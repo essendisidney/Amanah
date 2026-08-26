@@ -1,8 +1,17 @@
+'use client';
+
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatDate } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
+import { Button, Input } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { revokeInvitationAction } from '../actions/invitation-actions';
-import { setMemberRoleAction, vouchMemberAction } from '../actions/member-actions';
+import {
+  correctMemberContactAction,
+  removeMemberAction,
+  setMemberRoleAction,
+  vouchMemberAction,
+} from '../actions/member-actions';
 import { InviteSharePanel } from './invite-share-panel';
 
 export type MemberListItem = {
@@ -34,10 +43,12 @@ export function MembersList({
   members,
   slug,
   canManage,
+  canRecordPayments = false,
 }: {
   members: MemberListItem[];
   slug: string;
   canManage: boolean;
+  canRecordPayments?: boolean;
 }) {
   if (members.length === 0) {
     return <p className="text-sm text-muted-foreground">No members yet.</p>;
@@ -45,75 +56,129 @@ export function MembersList({
 
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-      {members.map((member) => (
-        <li key={member.id} className="flex flex-col gap-3 px-5 py-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <p className="font-medium text-foreground">
-                  {member.fullName ?? member.email ?? member.phone ?? 'Member'}
+      {members.map((member) => {
+        const isGone = member.status === 'removed' || member.status === 'left';
+        return (
+          <li key={member.id} className="flex flex-col gap-3 px-5 py-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium text-foreground">
+                    {member.fullName ?? member.email ?? member.phone ?? 'Member'}
+                  </p>
+                  {member.memberCode ? (
+                    <span className="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      {member.memberCode}
+                    </span>
+                  ) : null}
+                  <StatusBadge status={member.role} />
+                  <StatusBadge status={member.status} />
+                  {member.vouchStatus ? (
+                    <StatusBadge status={`vouch:${member.vouchStatus}`} />
+                  ) : null}
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {member.email ?? member.phone ?? '—'}
+                  {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
+                  {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
                 </p>
-                {member.memberCode ? (
-                  <span className="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                    {member.memberCode}
-                  </span>
-                ) : null}
-                <StatusBadge status={member.role} />
-                <StatusBadge status={member.status} />
-                {member.vouchStatus ? <StatusBadge status={`vouch:${member.vouchStatus}`} /> : null}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {member.email ?? member.phone ?? '—'}
-                {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
-                {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
-              </p>
+              {canRecordPayments && !isGone ? (
+                <Link
+                  href={`/circles/${slug}/books?view=member&memberId=${member.id}` as Route}
+                  className="inline-flex min-h-9 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  Enter payments
+                </Link>
+              ) : null}
             </div>
-          </div>
 
-          {canManage ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
-              <form action={setMemberRoleAction} className="flex flex-wrap items-end gap-2">
-                <input type="hidden" name="memberId" value={member.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <label className="text-xs text-muted-foreground">
-                  Role
-                  <select
-                    name="role"
-                    defaultValue={member.role}
-                    className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+            {canManage && !isGone ? (
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
+                  <form action={setMemberRoleAction} className="flex flex-wrap items-end gap-2">
+                    <input type="hidden" name="memberId" value={member.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <label className="text-xs text-muted-foreground">
+                      Role
+                      <select
+                        name="role"
+                        defaultValue={member.role}
+                        className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                      >
+                        {OFFICER_ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <Button type="submit" size="sm" variant="outline">
+                      Update role
+                    </Button>
+                  </form>
+
+                  <form action={vouchMemberAction} className="flex flex-wrap gap-2">
+                    <input type="hidden" name="memberId" value={member.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="approve" value="true" />
+                    <Button type="submit" size="sm">
+                      Vouch
+                    </Button>
+                  </form>
+                  <form action={vouchMemberAction} className="flex flex-wrap gap-2">
+                    <input type="hidden" name="memberId" value={member.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="approve" value="false" />
+                    <Button type="submit" size="sm" variant="outline">
+                      Reject vouch
+                    </Button>
+                  </form>
+
+                  <form
+                    action={removeMemberAction}
+                    onSubmit={(event) => {
+                      const label = member.fullName ?? member.phone ?? member.email ?? 'this member';
+                      if (!window.confirm(`Remove ${label} from this circle?`)) {
+                        event.preventDefault();
+                      }
+                    }}
                   >
-                    {OFFICER_ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <Button type="submit" size="sm" variant="outline">
-                  Update role
-                </Button>
-              </form>
+                    <input type="hidden" name="memberId" value={member.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <Button type="submit" size="sm" variant="destructive">
+                      Remove
+                    </Button>
+                  </form>
+                </div>
 
-              <form action={vouchMemberAction} className="flex flex-wrap gap-2">
-                <input type="hidden" name="memberId" value={member.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="approve" value="true" />
-                <Button type="submit" size="sm">
-                  Vouch
-                </Button>
-              </form>
-              <form action={vouchMemberAction} className="flex flex-wrap gap-2">
-                <input type="hidden" name="memberId" value={member.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="approve" value="false" />
-                <Button type="submit" size="sm" variant="outline">
-                  Reject vouch
-                </Button>
-              </form>
-            </div>
-          ) : null}
-        </li>
-      ))}
+                <form
+                  action={correctMemberContactAction}
+                  className="grid gap-2 rounded-lg border border-dashed border-border p-3 sm:grid-cols-[1fr_1fr_auto]"
+                >
+                  <input type="hidden" name="memberId" value={member.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <Input
+                    name="fullName"
+                    placeholder="Correct name"
+                    defaultValue={member.fullName ?? ''}
+                    aria-label={`Correct name for ${member.fullName ?? 'member'}`}
+                  />
+                  <Input
+                    name="phone"
+                    placeholder="Correct phone (07… or +254…)"
+                    defaultValue={member.phone ?? ''}
+                    aria-label={`Correct phone for ${member.fullName ?? 'member'}`}
+                  />
+                  <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                    Save contact
+                  </Button>
+                </form>
+              </div>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }

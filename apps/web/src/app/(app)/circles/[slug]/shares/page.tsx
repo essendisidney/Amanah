@@ -150,6 +150,11 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
           </Button>
+          {canManage ? (
+            <Button asChild size="sm">
+              <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
+            </Button>
+          ) : null}
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
           </Button>
