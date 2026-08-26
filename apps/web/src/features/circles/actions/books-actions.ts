@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
+import { BOOKS_MEMBER_STATUSES } from '../lib/books-members';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
 
 function booksPath(memberId: string, view: 'member' | 'grid' | 'import' = 'member') {
@@ -374,7 +375,7 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
     .from('members')
     .select('id, user_id, status')
     .eq('jamiya_id', jamiyaId)
-    .in('status', ['active', 'pending', 'suspended']);
+    .in('status', [...BOOKS_MEMBER_STATUSES]);
 
   const membersRaw = (memberRows ?? []) as Array<{
     id: string;

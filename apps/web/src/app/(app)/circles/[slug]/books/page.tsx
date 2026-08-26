@@ -12,10 +12,13 @@ import { MonthlyPaymentsGrid } from '@/features/circles/components/monthly-payme
 import { MemberBooksDetail } from '@/features/circles/components/member-books-detail';
 import { MemberBooksHome } from '@/features/circles/components/member-books-home';
 import { MemberBooksBackBar } from '@/features/circles/components/member-books-back-bar';
-import { resolveBooksView } from '@/features/circles/lib/member-books-view';
+import { BOOKS_MEMBER_STATUSES } from '@/features/circles/lib/books-members';
 import { MemberBooksRecordForms } from '@/features/circles/components/member-books-record-forms';
 import { MemberBooksQuickEntry } from '@/features/circles/components/member-books-quick-entry';
 import { MemberBooksMemberSwitcher } from '@/features/circles/components/member-books-member-switcher';
+import { MemberLoanLedger } from '@/features/circles/components/member-loan-ledger';
+import { resolveBooksView } from '@/features/circles/lib/member-books-view';
+import { callRpc } from '@/lib/supabase/rpc';
 
 export const metadata: Metadata = { title: 'Member payments' };
 export const dynamic = 'force-dynamic';
@@ -90,14 +93,14 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
     redirect(`/circles/${slug}/statement`);
   }
 
-  const { data: membersData } = await supabase
+  const { data: membersData, error: membersError } = await supabase
     .from('members')
-    .select('id, user_id, role, status, member_code')
+    .select('id, user_id, role, status, member_code, joined_at')
     .eq('jamiya_id', jamiya.id)
-    .in('status', ['active', 'pending'])
+    .in('status', [...BOOKS_MEMBER_STATUSES])
     .order('joined_at', { ascending: true });
 
-  const members = (membersData ?? []) as MemberRow[];
+  const members = ((membersError ? [] : membersData) ?? []) as MemberRow[];
   const userIds = members.map((m) => m.user_id);
   const memberIds = members.map((m) => m.id);
 
@@ -326,9 +329,56 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
 
   const memberLabel = selected ? labelFor(selectedProfile, selected) : '';
 
+  let loanLedger: {
+    facility: {
+      id: string;
+      principal_outstanding: number;
+      profit_rate_pct: number;
+      status: string;
+      opened_on: string;
+    } | null;
+    totals: { profit_paid: number; disbursed: number; repaid_principal: number };
+    events: Array<{
+      id: string;
+      event_type: string;
+      amount: number;
+      profit_amount: number;
+      principal_delta: number;
+      effective_date: string;
+      notes: string | null;
+    }>;
+  } = { facility: null, totals: { profit_paid: 0, disbursed: 0, repaid_principal: 0 }, events: [] };
+
+  if (view === 'member' && selectedId) {
+    const { data: ledgerData } = await callRpc('member_loan_ledger_summary', {
+      p_jamiya_id: jamiya.id,
+      p_member_id: selectedId,
+    });
+    const ledger = ledgerData as {
+      ok?: boolean;
+      facility?: typeof loanLedger.facility;
+      totals?: typeof loanLedger.totals;
+      events?: typeof loanLedger.events;
+    } | null;
+    if (ledger?.ok) {
+      loanLedger = {
+        facility: ledger.facility ?? null,
+        totals: ledger.totals ?? loanLedger.totals,
+        events: ledger.events ?? [],
+      };
+    }
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-6 py-10">
       <CircleNoticeBanner notice={qs.notice} noticeType={qs.noticeType} />
+
+      {membersError ? (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          Could not load members: {membersError.message}. Refresh the page or contact support if this
+          continues.
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -382,6 +432,16 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             parValue={parValue}
             defaultMonthAmount={Number(jamiya.contribution_amount) || 2000}
             defaultShareAmount={5000}
+          />
+          <MemberLoanLedger
+            jamiyaId={jamiya.id}
+            slug={slug}
+            memberId={selected.id}
+            memberLabel={memberLabel}
+            currency={currency}
+            facility={loanLedger.facility}
+            totals={loanLedger.totals}
+            events={loanLedger.events}
           />
           <div className="space-y-3">
             <h2 className="text-lg font-semibold">Record so far</h2>
