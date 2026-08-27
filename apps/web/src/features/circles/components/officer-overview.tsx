@@ -29,7 +29,7 @@ export function OfficerOverviewStrip({
     lateCount + pendingGrace + pendingQard + pendingDual + openCases;
 
   return (
-    <section className="rounded-xl border border-border bg-card p-5">
+    <section className="amanah-surface px-5 py-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

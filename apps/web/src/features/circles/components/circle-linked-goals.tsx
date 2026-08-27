@@ -34,7 +34,7 @@ export async function CircleLinkedGoals({
   const mine = goals.filter((g) => g.user_id === userId);
 
   return (
-    <section className="space-y-3 rounded-xl border border-border bg-card p-5">
+    <section className="amanah-surface px-5 py-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">Circle goals</h2>
@@ -42,7 +42,7 @@ export async function CircleLinkedGoals({
             Link a savings goal (school fees, wedding, Hajj) to this chama.
           </p>
         </div>
-        <Button asChild size="sm" variant="outline" className="min-h-11">
+        <Button asChild size="sm" variant="outline" className="min-h-10 rounded-full">
           <Link href={`/finance/goals?jamiyaId=${jamiyaId}` as Route}>Add / manage goals</Link>
         </Button>
       </div>

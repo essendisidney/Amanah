@@ -8,6 +8,7 @@ import {
   MarkNotificationReadButton,
 } from '@/features/dashboard/components/mark-notification-read-button';
 import { notificationHref } from '@/features/dashboard/lib/notification-href';
+import { AppPage, PageCard, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -92,16 +93,18 @@ export default async function NotificationsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-xl">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{labels.title}</h1>
-        {unreadCount > 0 ? (
-          <MarkAllNotificationsReadButton label={labels.markAllRead} />
-        ) : null}
-      </div>
+    <AppPage width="medium">
+      <PageHeader
+        title={labels.title}
+        action={
+          unreadCount > 0 ? (
+            <MarkAllNotificationsReadButton label={labels.markAllRead} />
+          ) : undefined
+        }
+      />
 
-      <section>
-        <ul>
+      <PageCard className="!py-2">
+        <ul className="divide-y divide-border/50">
           {recentTx.length === 0 ? (
             <li className="py-6 text-sm text-muted-foreground">No money movement yet</li>
           ) : (
@@ -132,12 +135,12 @@ export default async function NotificationsPage() {
             })
           )}
         </ul>
-      </section>
+      </PageCard>
 
       {notifications.length > 0 ? (
-        <section className="space-y-1">
-          <h2 className="text-sm font-medium text-muted-foreground">Updates</h2>
-          <ul>
+        <PageCard className="!py-2">
+          <h2 className="mb-2 px-1 text-sm font-semibold text-muted-foreground">Updates</h2>
+          <ul className="divide-y divide-border/50">
             {notifications.slice(0, 12).map((item) => {
               const href = notificationHref(item.type, item.data, slugByJamiyaId, item.title);
               return (
@@ -165,8 +168,8 @@ export default async function NotificationsPage() {
               );
             })}
           </ul>
-        </section>
+        </PageCard>
       ) : null}
-    </div>
+    </AppPage>
   );
 }

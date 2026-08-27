@@ -5,7 +5,6 @@ import { notFound, redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
-import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { InviteMemberForm } from '@/features/circles/components/invite-member-form';
 import { AddMemberForm } from '@/features/circles/components/add-member-form';
 import {
@@ -32,6 +31,10 @@ import { ContributionLedger } from '@/features/circles/components/contribution-l
 import { ClaimPayoutSlotForm } from '@/features/circles/components/claim-payout-slot-form';
 import { CircleLinkedGoals } from '@/features/circles/components/circle-linked-goals';
 import { OfficerPaymentsGuide } from '@/features/circles/components/officer-payments-guide';
+import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
+import { CircleQuickNav } from '@/features/circles/components/circle-quick-nav';
+import { CircleSection } from '@/features/circles/components/circle-section';
+import { AppPage } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 import { getSiteUrl } from '@/lib/site-url';
@@ -448,58 +451,96 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ? contributedTotal
       : amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1);
 
+  const kindLabel =
+    jamiya.challenge_kind === 'share_dividend'
+      ? 'Share / dividend group'
+      : jamiya.challenge_kind === 'savings'
+        ? 'Savings challenge'
+        : null;
+
+  const heroDescription =
+    segmentBlurb ?? jamiya.description ?? (kindLabel ? `${kindLabel}.` : null);
+
+  const memberSummary = `${jamiya.member_count}/${jamiya.max_members} ${circleLabels.members.toLowerCase()}${
+    jamiya.cycle_count != null
+      ? ` · cycle ${jamiya.current_cycle}/${jamiya.cycle_count}`
+      : ` · cycle ${jamiya.current_cycle}`
+  }`;
+
+  const primaryNav = [
+    ...(myOpenDue
+      ? [{ href: `/circles/${slug}#pay` as Route, label: 'Contribute', primary: true }]
+      : [{ href: `/circles/${slug}#calendar` as Route, label: 'Calendar' }]),
+    ...(canManageOps
+      ? [{ href: `/circles/${slug}/books` as Route, label: 'Member payments', primary: true }]
+      : []),
+    { href: `/circles/${slug}/statement` as Route, label: circleLabels.myStatement },
+    { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
+    {
+      href: (canManageMembers ? `/circles/${slug}/officer` : `/circles/${slug}/community`) as Route,
+      label: canManageMembers ? circleLabels.officerConsole : circleLabels.meetingsChat,
+    },
+  ];
+
+  const secondaryNav = [
+    { href: `/circles/${slug}/community` as Route, label: circleLabels.meetingsChat },
+    { href: `/circles/${slug}/elections` as Route, label: circleLabels.elections },
+    { href: `/circles/${slug}/registration` as Route, label: circleLabels.circleKyc },
+    { href: `/circles/${slug}/shares` as Route, label: circleLabels.shares },
+    { href: `/circles/${slug}/journal` as Route, label: circleLabels.journal },
+    { href: `/circles/${slug}/invoices` as Route, label: circleLabels.invoices },
+    ...(canManageMembers
+      ? [{ href: `/circles/${slug}/arrears` as Route, label: circleLabels.arrears }]
+      : []),
+  ];
+
   return (
-    <div className="mx-auto w-full max-w-[390px] space-y-8 md:max-w-3xl md:space-y-10">
+    <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
       {canManageOps ? <OfficerPaymentsGuide slug={slug} /> : null}
 
-      <header className="space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight md:text-3xl">
-              {jamiya.name}
-            </h1>
-            <p className="mt-1 text-sm capitalize text-muted-foreground">
-              {jamiya.status.replaceAll('_', ' ')}
-              {membership ? ` · ${membership.role.replaceAll('_', ' ')}` : ''}
-              {segmentLabel ? ` · ${segmentLabel}` : ''}
-            </p>
-          </div>
-          <StatusBadge status={jamiya.status} />
-        </div>
-        <p className="amanah-money text-4xl font-bold tracking-tight md:text-5xl">
-          {formatCurrency(estimatedPool, jamiya.currency)}
-        </p>
-        <p className="text-sm text-muted-foreground">
-          {jamiya.member_count}/{jamiya.max_members} {circleLabels.members.toLowerCase()}
-          {jamiya.cycle_count != null
-            ? ` · cycle ${jamiya.current_cycle}/${jamiya.cycle_count}`
-            : ` · cycle ${jamiya.current_cycle}`}
-        </p>
-        {canManageOps && jamiya.member_count < 2 ? (
-          <p className="text-sm text-muted-foreground">
-            Invite people to activate.{' '}
-            <a href="#invite-people" className="font-medium text-primary">
-              Invite
-            </a>
-          </p>
-        ) : null}
-      </header>
+      <CircleDetailHero
+        slug={slug}
+        name={jamiya.name}
+        status={jamiya.status}
+        roleLabel={membership ? membership.role.replaceAll('_', ' ') : null}
+        segmentLabel={segmentLabel}
+        kindLabel={kindLabel}
+        description={heroDescription}
+        poolAmount={estimatedPool}
+        currency={jamiya.currency}
+        memberSummary={memberSummary}
+        stats={[
+          {
+            label: circleLabels.contribution,
+            value: formatCurrency(amount, jamiya.currency),
+          },
+          {
+            label: circleLabels.frequency,
+            value: t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days }),
+          },
+          {
+            label: 'Next payout',
+            value: nextPayout?.memberLabel ?? '—',
+          },
+          {
+            label: 'Progress',
+            value: `${cycleProgress}%`,
+          },
+        ]}
+      />
 
-      {(segmentBlurb || jamiya.description) && (
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          {segmentBlurb ?? jamiya.description}
-        </p>
-      )}
-
-      {jamiya.challenge_kind && jamiya.challenge_kind !== 'rotating' ? (
+      {canManageOps && jamiya.member_count < 2 ? (
         <p className="text-sm text-muted-foreground">
-          {jamiya.challenge_kind === 'share_dividend'
-            ? 'Share / dividend group — profits and equity, not rotating payouts.'
-            : 'Savings challenge — contribution rounds only, not a merry-go-round.'}
+          Invite people to activate.{' '}
+          <a href="#invite-people" className="font-medium text-primary hover:underline">
+            Invite
+          </a>
         </p>
       ) : null}
+
+      <CircleQuickNav primary={primaryNav} secondary={secondaryNav} />
 
       {canActivate ? (
         <ActivateCircleButton
@@ -529,75 +570,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      <CircleLinkedGoals
-        jamiyaId={jamiya.id}
-        slug={slug}
-        userId={user.id}
-      />
-
-      <section className="flex flex-wrap gap-2">
-        {[
-          {
-            href: (myOpenDue
-              ? `/circles/${slug}#pay`
-              : `/circles/${slug}#calendar`) as Route,
-            label: myOpenDue ? 'Contribute' : 'Calendar',
-            primary: Boolean(myOpenDue),
-          },
-          ...(canManageOps
-            ? [
-                {
-                  href: `/circles/${slug}/books` as Route,
-                  label: 'Member payments',
-                  primary: true,
-                },
-              ]
-            : []),
-          { href: `/circles/${slug}/statement` as Route, label: circleLabels.myStatement },
-          { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
-          {
-            href: (canManageMembers
-              ? `/circles/${slug}/officer`
-              : `/circles/${slug}/community`) as Route,
-            label: canManageMembers ? circleLabels.officerConsole : circleLabels.meetingsChat,
-          },
-        ].map((action) => (
-          <Link
-            key={action.label}
-            href={action.href}
-            className={
-              action.primary
-                ? 'amanah-glass-pill inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-primary'
-                : 'inline-flex min-h-10 items-center rounded-full px-4 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
-            }
-          >
-            {action.label}
-          </Link>
-        ))}
-      </section>
-
-      <section className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm sm:grid-cols-4">
-        <div>
-          <p className="text-muted-foreground">{circleLabels.contribution}</p>
-          <p className="amanah-money mt-0.5 font-semibold">
-            {formatCurrency(amount, jamiya.currency)}
-          </p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">{circleLabels.frequency}</p>
-          <p className="mt-0.5 font-semibold">
-            {t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days })}
-          </p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Next payout</p>
-          <p className="mt-0.5 truncate font-semibold">{nextPayout?.memberLabel ?? '—'}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground">Progress</p>
-          <p className="mt-0.5 font-semibold">{cycleProgress}%</p>
-        </div>
-      </section>
+      <CircleLinkedGoals jamiyaId={jamiya.id} slug={slug} userId={user.id} />
 
       {myOpenDue ? (
         <NextContributionCard
@@ -618,67 +591,42 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/elections` as Route}>{circleLabels.elections}</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/registration` as Route}>{circleLabels.circleKyc}</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/shares` as Route}>{circleLabels.shares}</Link>
-        </Button>
-        {canManageOps ? (
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
-          </Button>
-        ) : null}
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
-        </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/circles/${slug}/invoices` as Route}>{circleLabels.invoices}</Link>
-        </Button>
+      <div className="grid gap-4 lg:grid-cols-2">
         {canManageMembers ? (
-          <Button asChild variant="ghost" size="sm">
-            <Link href={`/circles/${slug}/arrears` as Route}>{circleLabels.arrears}</Link>
-          </Button>
+          <OfficerOverviewStrip
+            slug={jamiya.slug}
+            lateCount={lateCount}
+            pendingGrace={pendingGraceCount ?? 0}
+            nextPayoutLabel={nextPayout?.memberLabel ?? null}
+            nextPayoutDate={nextPayout?.scheduledDate ?? null}
+            nextPayoutAmount={nextPayout?.amount ?? null}
+            currency={jamiya.currency}
+          />
         ) : null}
+
+        <NextPayoutBoard
+          currency={jamiya.currency}
+          next={
+            nextPayout
+              ? {
+                  memberLabel: nextPayout.memberLabel,
+                  memberCode: nextMember?.member_code ?? null,
+                  cycleNumber: nextPayout.cycleNumber,
+                  amount: nextPayout.amount,
+                  scheduledDate: nextPayout.scheduledDate,
+                  status: nextPayout.status,
+                }
+              : null
+          }
+        />
       </div>
 
-      {canManageMembers ? (
-        <OfficerOverviewStrip
-          slug={jamiya.slug}
-          lateCount={lateCount}
-          pendingGrace={pendingGraceCount ?? 0}
-          nextPayoutLabel={nextPayout?.memberLabel ?? null}
-          nextPayoutDate={nextPayout?.scheduledDate ?? null}
-          nextPayoutAmount={nextPayout?.amount ?? null}
-          currency={jamiya.currency}
-        />
-      ) : null}
-
-      <NextPayoutBoard
-        currency={jamiya.currency}
-        next={
-          nextPayout
-            ? {
-                memberLabel: nextPayout.memberLabel,
-                memberCode: nextMember?.member_code ?? null,
-                cycleNumber: nextPayout.cycleNumber,
-                amount: nextPayout.amount,
-                scheduledDate: nextPayout.scheduledDate,
-                status: nextPayout.status,
-              }
-            : null
-        }
-      />
-
-      <section id="calendar" className="space-y-4">
-        <h2 className="text-xl font-bold tracking-tight">Contribution calendar</h2>
+      <CircleSection
+        id="calendar"
+        title="Contribution calendar"
+        description="Due dates and wallet payments for each cycle."
+        padded={false}
+      >
         <ContributionCalendar
           contributions={contributions}
           slug={jamiya.slug}
@@ -692,95 +640,75 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           canManageOps={Boolean(canManageOps)}
           memberCount={jamiya.member_count}
         />
-      </section>
+      </CircleSection>
 
       {canManageOps ? (
-        <section id="contribution-ledger" className="space-y-4">
-          <h2 className="text-xl font-bold tracking-tight">Contribution ledger</h2>
+        <CircleSection
+          id="contribution-ledger"
+          title="Contribution ledger"
+          description="Who has paid, who owes, and payment history from wallet."
+          padded={false}
+        >
           <ContributionLedger rows={ledgerRows} payments={paymentHistory} />
-        </section>
+        </CircleSection>
       ) : null}
 
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Payout schedule
-        </h2>
+      <CircleSection title="Payout schedule" padded={false}>
         <PayoutSchedule
           payouts={payouts}
           slug={jamiya.slug}
           isCircleAdmin={Boolean(canManageOps)}
           paymentProvider={paymentProvider()}
         />
-      </section>
+      </CircleSection>
 
-      <section className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            <a href="#members" className="hover:text-primary">
-              Members ({visibleMemberCount})
-            </a>
-          </h2>
-          {membership?.status === 'active' &&
-          ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(
-            membership?.role ?? '',
-          ) ? (
+      <CircleSection
+        id="members"
+        title={`Members (${visibleMemberCount})`}
+        description="Everyone who has joined this chama. After you add or invite someone, refresh or tap Add people."
+        action={
+          membership?.status === 'active' &&
+          ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(membership?.role ?? '') ? (
             <div className="flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline">
+              <Button asChild size="sm" variant="outline" className="rounded-full">
                 <a href="#invite-people">Add people</a>
               </Button>
               <ExportCircleReportButtons slug={jamiya.slug} />
             </div>
-          ) : null}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Everyone who has joined this chama. After you add or invite someone, pull to refresh or
-          tap Add people — the list updates when they are in the circle.
-        </p>
-        <div id="members">
-          <MembersList
-            members={members}
-            slug={slug}
-            canManage={canManageMembers}
-            canRecordPayments={Boolean(canManageOps)}
-          />
-        </div>
-      </section>
+          ) : undefined
+        }
+        padded={false}
+      >
+        <MembersList
+          members={members}
+          slug={slug}
+          canManage={canManageMembers}
+          canRecordPayments={Boolean(canManageOps)}
+        />
+      </CircleSection>
 
       {canManageOps ? (
         <>
-          <section id="invite-people" className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Add people (manual)
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Create their Amanah account now. They get a join link and code to sign in — then they
-              show in Members above.
-            </p>
-            <div className="rounded-xl border border-border bg-card p-6">
-              <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-            </div>
-          </section>
+          <CircleSection
+            id="invite-people"
+            title="Add people (manual)"
+            description="Create their Amanah account now. They get a join link and code to sign in."
+          >
+            <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+          </CircleSection>
 
-          <section className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Join link / invite code
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Share by SMS, copy link/code, email, or WhatsApp. When they accept, they appear under
-              Members.
-            </p>
-            <div className="rounded-xl border border-border bg-card p-6">
-              <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-            </div>
-          </section>
+          <CircleSection
+            title="Join link / invite code"
+            description="Share by SMS, copy link/code, email, or WhatsApp."
+          >
+            <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+          </CircleSection>
 
-          <section className="space-y-4">
-            <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-              Pending invitations ({invitations.length})
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Waiting to accept. Once they join, they leave this list and show under Members.
-            </p>
+          <CircleSection
+            title={`Pending invitations (${invitations.length})`}
+            description="Waiting to accept. Once they join, they appear under Members."
+            padded={false}
+          >
             <PendingInvitationsList
               invitations={invitations}
               slug={jamiya.slug}
@@ -788,24 +716,19 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               siteUrl={getSiteUrl()}
               circleName={jamiya.name}
             />
-          </section>
+          </CircleSection>
         </>
       ) : null}
 
       {membership?.status === 'active' ? (
-        <section className="space-y-4">
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Open a dispute
-          </h2>
-          <div className="max-w-xl rounded-xl border border-border bg-card p-6">
-            <OpenDisputeForm jamiyaId={jamiya.id} slug={jamiya.slug} />
-          </div>
-        </section>
+        <CircleSection title="Open a dispute">
+          <OpenDisputeForm jamiyaId={jamiya.id} slug={jamiya.slug} />
+        </CircleSection>
       ) : null}
 
       {membership?.status === 'active' ? (
         <section className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="amanah-surface p-5">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
               Circle finance
             </h2>
@@ -814,23 +737,23 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               possible.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm">
+              <Button asChild size="sm" className="rounded-full">
                 <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard Hassan</Link>
               </Button>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
               </Button>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
               </Button>
               {canManageMembers ? (
-                <Button asChild variant="ghost" size="sm">
+                <Button asChild variant="ghost" size="sm" className="rounded-full">
                   <Link href={`/circles/${slug}/officer` as Route}>Officer queue</Link>
                 </Button>
               ) : null}
             </div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-5">
+          <div className="amanah-surface p-5">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
               Treasury & books
             </h2>
@@ -840,14 +763,14 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {canManageOps ? (
-                <Button asChild size="sm">
+                <Button asChild size="sm" className="rounded-full">
                   <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
                 </Button>
               ) : null}
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
               </Button>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
               </Button>
             </div>
@@ -855,9 +778,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </section>
       ) : null}
 
-      <Button asChild variant="outline">
+      <Button asChild variant="outline" className="rounded-full">
         <Link href={'/circles' as Route}>Back to My circles</Link>
       </Button>
-    </div>
+    </AppPage>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
@@ -131,7 +132,7 @@ export default async function CircleCommunityPage({ params }: Props) {
   const dueRows = (dues ?? []) as Array<{ id: string; cycle_number: number; due_date: string }>;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10">
+    <AppPage>
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Community</p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
@@ -327,6 +328,7 @@ export default async function CircleCommunityPage({ params }: Props) {
           </ul>
         )}
       </section>
-    </div>
+    
+    </AppPage>
   );
 }

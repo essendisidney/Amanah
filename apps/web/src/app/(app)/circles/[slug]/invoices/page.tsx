@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -94,7 +95,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
   const openCount = invoices.filter((i) => i.status === 'open').length;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 px-6 py-10 print:max-w-none print:px-0 print:py-0">
+    <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
@@ -214,6 +215,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
           })}
         </ul>
       )}
-    </div>
+    
+    </AppPage>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -60,7 +61,7 @@ export default async function CircleJournalPage({ params }: Props) {
   const entries = pack?.ok ? (pack.entries ?? []) : [];
 
   return (
-    <main className="mx-auto max-w-4xl space-y-8 px-6 py-10 print:px-0 print:py-0">
+    <AppPage>
       <div className="flex flex-wrap items-end justify-between gap-3 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Journal</p>
@@ -134,6 +135,7 @@ export default async function CircleJournalPage({ params }: Props) {
           </table>
         </div>
       )}
-    </main>
+    
+    </AppPage>
   );
 }

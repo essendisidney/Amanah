@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -116,7 +117,7 @@ export default async function CircleElectionsPage({ params }: Props) {
   );
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10">
+    <AppPage>
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Governance</p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
@@ -296,6 +297,7 @@ export default async function CircleElectionsPage({ params }: Props) {
           })
         )}
       </section>
-    </div>
+    
+    </AppPage>
   );
 }

@@ -17,6 +17,7 @@ import {
   hasValidProfilePhone,
 } from '@/features/profile/components/profile-onboarding-banner';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { AppPage, PageCard, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -138,7 +139,7 @@ export default async function ProfilePage({ searchParams }: Props) {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-2xl">
+    <AppPage width="medium">
       {onboarding ? (
         <ProfileOnboardingBanner
           labels={labels}
@@ -149,14 +150,10 @@ export default async function ProfilePage({ searchParams }: Props) {
         />
       ) : null}
 
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {profile?.full_name?.trim() || labels.youFallback}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {profile?.phone || profile?.email || user.email || '—'}
-        </p>
-      </header>
+      <PageHeader
+        title={profile?.full_name?.trim() || labels.youFallback}
+        subtitle={profile?.phone || profile?.email || user.email || '—'}
+      />
 
       <Link
         href={'/finance/insights' as Route}
@@ -171,12 +168,13 @@ export default async function ProfilePage({ searchParams }: Props) {
         </div>
       </Link>
 
-      <ul className="divide-y divide-border/40">
+      <PageCard className="divide-y divide-border/50 !py-0">
+        <ul>
         {youLinks.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
-              className="flex items-center justify-between gap-3 py-4 text-[15px] font-medium"
+              className="flex items-center justify-between gap-3 px-4 py-4 text-[15px] font-medium sm:px-5"
             >
               <span>{item.title}</span>
               <span className="text-sm font-normal capitalize text-muted-foreground">
@@ -185,16 +183,17 @@ export default async function ProfilePage({ searchParams }: Props) {
             </Link>
           </li>
         ))}
-      </ul>
+        </ul>
+      </PageCard>
 
-      <section className="flex items-center justify-between gap-3 py-1">
+      <PageCard className="flex items-center justify-between gap-3 !py-4">
         <p className="text-sm text-muted-foreground">{labels.appearance}</p>
         <ThemeToggle variant="segmented" />
-      </section>
+      </PageCard>
 
-      <section className="grid gap-8 lg:grid-cols-2">
-        <div id="personal-details" className="space-y-4">
-          <h2 className="text-base font-semibold">{labels.personalDetails}</h2>
+      <section className="grid gap-6 lg:grid-cols-2">
+        <PageCard id="personal-details">
+          <h2 className="mb-4 text-base font-semibold">{labels.personalDetails}</h2>
           <ProfileForm
             labels={labels}
             continueHref={onboarding ? continueHref : undefined}
@@ -206,15 +205,15 @@ export default async function ProfilePage({ searchParams }: Props) {
               countryCode: profile?.country_code ?? '',
             }}
           />
-        </div>
+        </PageCard>
 
-        <div className="space-y-4">
-          <h2 className="text-base font-semibold">{labels.mpesaLinkage}</h2>
+        <PageCard>
+          <h2 className="mb-4 text-base font-semibold">{labels.mpesaLinkage}</h2>
           <MpesaLinkForm
             labels={labels}
             defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
           />
-        </div>
+        </PageCard>
 
         <ReferralPanel
           labels={labels}
@@ -222,23 +221,23 @@ export default async function ProfilePage({ searchParams }: Props) {
           referrals={referrals}
         />
 
-        <div className="space-y-4">
-          <h2 className="text-base font-semibold">IPRS identity</h2>
+        <PageCard>
+          <h2 className="mb-4 text-base font-semibold">IPRS identity</h2>
           <IprsVerifyForm
             defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
             defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
             defaultNationalId={profile?.national_id ?? ''}
             iprsStatus={profile?.iprs_status ?? 'not_checked'}
           />
-        </div>
+        </PageCard>
 
-        <div className="space-y-6 lg:col-span-2">
+        <PageCard className="lg:col-span-2">
           <div id="kyc-documents" className="space-y-4">
             <h2 className="text-base font-semibold">{labels.kycDocuments}</h2>
             <KycUploadForm labels={labels} />
           </div>
 
-          <div className="space-y-3">
+          <div className="mt-6 space-y-3 border-t border-border/50 pt-6">
             <h2 className="text-base font-semibold">{labels.uploadedFiles}</h2>
             {docs.length === 0 ? (
               <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
@@ -260,14 +259,14 @@ export default async function ProfilePage({ searchParams }: Props) {
               </ul>
             )}
           </div>
-        </div>
+        </PageCard>
       </section>
 
-      <form action={signOutAction} className="pb-4">
+      <form action={signOutAction}>
         <Button type="submit" variant="outline" className="min-h-11 w-full rounded-full">
           {dict.common.signOut}
         </Button>
       </form>
-    </div>
+    </AppPage>
   );
 }

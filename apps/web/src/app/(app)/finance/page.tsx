@@ -6,6 +6,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getDashboardData } from '@/features/dashboard';
+import { AppPage, PageHeader } from '@/components/app-page';
 import { t } from '@/i18n/dictionaries';
 
 export const dynamic = 'force-dynamic';
@@ -54,20 +55,12 @@ export default async function FinancePage() {
   ] as const;
 
   return (
-    <div className="space-y-10">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          <Link href={'/pay' as Route} className="hover:text-primary">
-            {dict.paySheet.title}
-          </Link>
-          <span className="text-muted-foreground"> · </span>
-          {labels.eyebrow}
-        </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-          {labels.title}
-        </h1>
-        <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
-      </div>
+    <AppPage className="space-y-10">
+      <PageHeader
+        eyebrow={`${dict.paySheet.title} · ${labels.eyebrow}`}
+        title={labels.title}
+        subtitle={labels.subtitle}
+      />
 
       <section className="amanah-surface flex flex-col gap-4 border-primary/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-5">
         <div>
@@ -161,6 +154,6 @@ export default async function FinancePage() {
           </div>
         )}
       </section>
-    </div>
+    </AppPage>
   );
 }

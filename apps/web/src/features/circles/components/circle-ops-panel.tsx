@@ -548,7 +548,7 @@ export function NextPayoutBoard({
 }) {
   if (!next) {
     return (
-      <section className="rounded-xl border border-dashed border-border bg-card/50 p-5">
+      <section className="amanah-surface border-dashed px-5 py-5">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Merry-go-round
         </p>
@@ -561,7 +561,7 @@ export function NextPayoutBoard({
   }
 
   return (
-    <section className="rounded-xl border border-accent/40 bg-accent/5 p-5">
+    <section className="amanah-surface border-accent/25 px-5 py-5">
       <p className="text-xs font-medium uppercase tracking-wide text-accent">Merry-go-round</p>
       <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">
         NEXT · {next.memberLabel}

@@ -145,8 +145,8 @@ export function AppShell({
 
   return (
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
-      <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)] md:backdrop-blur-xl">
-        <div className="mx-auto flex h-14 w-full max-w-[390px] items-center justify-between gap-3 px-4 md:h-[4.25rem] md:max-w-6xl md:px-10">
+      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:border-transparent md:bg-transparent">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-[4.25rem] md:px-6">
           <AmanahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
           <nav
@@ -202,8 +202,14 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-[390px] px-4 py-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] md:max-w-6xl md:px-10 md:py-12 md:pb-14">
-        <SmoothRouteTransition>{children}</SmoothRouteTransition>
+      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 md:px-6 md:pb-14 md:pt-8">
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.08)_0%,_rgba(91,141,239,0.05)_45%,_transparent_72%)]"
+          aria-hidden
+        />
+        <div className="relative">
+          <SmoothRouteTransition>{children}</SmoothRouteTransition>
+        </div>
       </main>
 
       <nav

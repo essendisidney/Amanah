@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -123,7 +124,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     viewedProfile?.full_name || viewedProfile?.email || stmt.member_code || 'Member';
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-6 py-10 print:px-0 print:py-0">
+    <AppPage>
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
@@ -324,7 +325,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           amount: formatCurrency(Number(b.amount), jamiya.currency),
         }))}
       />
-    </div>
+    </AppPage>
   );
 }
 
@@ -360,7 +361,7 @@ function StatementSection({
           ) : null}
         </div>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/50">
           {rows.map((row) => (
             <li
               key={row.key}

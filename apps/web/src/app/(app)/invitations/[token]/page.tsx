@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
@@ -52,7 +53,7 @@ export default async function InvitationPage({ params }: Props) {
 
   if (error || !preview) {
     return (
-      <div className="mx-auto max-w-lg space-y-4 py-10">
+      <AppPage>
         <Alert variant="destructive">
           <AlertDescription>
             This invitation link is invalid or no longer available.
@@ -61,7 +62,7 @@ export default async function InvitationPage({ params }: Props) {
         <Button asChild variant="outline">
           <Link href={'/dashboard' as Route}>Go to dashboard</Link>
         </Button>
-      </div>
+      </AppPage>
     );
   }
 
@@ -134,7 +135,7 @@ export default async function InvitationPage({ params }: Props) {
   const isExpired = new Date(preview.expires_at).getTime() < Date.now();
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 py-6">
+    <AppPage>
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           Invitation
@@ -222,6 +223,7 @@ export default async function InvitationPage({ params }: Props) {
           <Link href={'/dashboard' as Route}>Dashboard</Link>
         </Button>
       </div>
-    </div>
+    
+    </AppPage>
   );
 }

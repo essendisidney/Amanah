@@ -19,6 +19,7 @@ import { MemberBooksMemberSwitcher } from '@/features/circles/components/member-
 import { MemberLoanLedger } from '@/features/circles/components/member-loan-ledger';
 import { resolveBooksView } from '@/features/circles/lib/member-books-view';
 import { callRpc } from '@/lib/supabase/rpc';
+import { AppPage } from '@/components/app-page';
 
 export const metadata: Metadata = { title: 'Member payments' };
 export const dynamic = 'force-dynamic';
@@ -370,7 +371,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-6 py-10">
+    <AppPage>
       <CircleNoticeBanner notice={qs.notice} noticeType={qs.noticeType} />
 
       {membersError ? (
@@ -531,6 +532,6 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000	2000
         </p>
       ) : null}
 
-    </div>
+    </AppPage>
   );
 }

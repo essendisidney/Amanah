@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -124,7 +125,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
   const bankAccounts = (accountsData ?? []) as Array<{ id: string; name: string }>;
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-6 py-10">
+    <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -467,6 +468,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           </ul>
         )}
       </section>
-    </div>
+    
+    </AppPage>
   );
 }

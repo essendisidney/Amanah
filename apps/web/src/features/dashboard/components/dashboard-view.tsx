@@ -81,8 +81,8 @@ export function DashboardView({
   const recent = data.activity.slice(0, 3);
 
   return (
-    <div className="mx-auto w-full max-w-[390px] space-y-10 md:max-w-none md:grid md:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] md:items-start md:gap-16 md:space-y-0">
-      <div className="space-y-10">
+    <div className="grid items-start gap-10 md:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] md:gap-12">
+      <div className="space-y-8">
         <header className="space-y-1">
           <p className="text-[15px] text-muted-foreground">
             {greeting},{' '}

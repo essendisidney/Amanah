@@ -1,5 +1,6 @@
 'use client';
 
+import { AppPage, PageCard } from '@/components/app-page';
 import { useEffect, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import { dictionaries } from '@/i18n/dictionaries';
@@ -30,12 +31,13 @@ export default function AppError({
   }, [error]);
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 rounded-xl border border-border bg-card p-6">
+    <AppPage width="narrow">
+      <PageCard>
       <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
         {labels.title}
       </h1>
-      <p className="text-sm text-muted-foreground">{labels.body}</p>
-      <div className="flex flex-wrap gap-2">
+      <p className="mt-2 text-sm text-muted-foreground">{labels.body}</p>
+      <div className="mt-4 flex flex-wrap gap-2">
         <Button type="button" onClick={reset}>
           {labels.tryAgain}
         </Button>
@@ -45,6 +47,7 @@ export default function AppError({
           Back to circles
         </Button>
       </div>
-    </div>
+      </PageCard>
+    </AppPage>
   );
 }

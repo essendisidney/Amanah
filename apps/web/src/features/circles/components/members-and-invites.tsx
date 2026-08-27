@@ -39,6 +39,15 @@ export type InvitationListItem = {
 
 const OFFICER_ROLES = ['member', 'secretary', 'treasurer', 'chair', 'circle_admin'] as const;
 
+function memberInitials(member: MemberListItem) {
+  const label = member.fullName ?? member.email ?? member.phone ?? 'M';
+  const parts = label.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]![0] ?? ''}${parts[1]![0] ?? ''}`.toUpperCase();
+  }
+  return label.slice(0, 2).toUpperCase();
+}
+
 export function MembersList({
   members,
   slug,
@@ -55,46 +64,52 @@ export function MembersList({
   }
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="space-y-3">
       {members.map((member) => {
         const isGone = member.status === 'removed' || member.status === 'left';
+        const displayName = member.fullName ?? member.email ?? member.phone ?? 'Member';
         return (
-          <li key={member.id} className="flex flex-col gap-3 px-5 py-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium text-foreground">
-                    {member.fullName ?? member.email ?? member.phone ?? 'Member'}
+          <li
+            key={member.id}
+            className="rounded-xl border border-border/70 bg-card/80 px-4 py-4 shadow-sm transition-colors hover:border-primary/20 sm:px-5"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary">
+                  {memberInitials(member)}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold text-foreground">{displayName}</p>
+                    {member.memberCode ? (
+                      <span className="rounded-md border border-border/80 bg-secondary/40 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {member.memberCode}
+                      </span>
+                    ) : null}
+                    <StatusBadge status={member.role} />
+                    <StatusBadge status={member.status} />
+                    {member.vouchStatus ? (
+                      <StatusBadge status={`vouch:${member.vouchStatus}`} />
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {member.email ?? member.phone ?? '—'}
+                    {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
+                    {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
                   </p>
-                  {member.memberCode ? (
-                    <span className="rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                      {member.memberCode}
-                    </span>
-                  ) : null}
-                  <StatusBadge status={member.role} />
-                  <StatusBadge status={member.status} />
-                  {member.vouchStatus ? (
-                    <StatusBadge status={`vouch:${member.vouchStatus}`} />
-                  ) : null}
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {member.email ?? member.phone ?? '—'}
-                  {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
-                  {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
-                </p>
               </div>
               {canRecordPayments && !isGone ? (
-                <Link
-                  href={`/circles/${slug}/books?view=member&memberId=${member.id}` as Route}
-                  className="inline-flex min-h-9 shrink-0 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                >
-                  Enter payments
-                </Link>
+                <Button asChild size="sm" className="min-h-10 shrink-0 rounded-full px-4">
+                  <Link href={`/circles/${slug}/books?view=member&memberId=${member.id}` as Route}>
+                    Enter payments
+                  </Link>
+                </Button>
               ) : null}
             </div>
 
             {canManage && !isGone ? (
-              <div className="flex flex-col gap-3">
+              <div className="mt-4 flex flex-col gap-3 border-t border-border/50 pt-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
                   <form action={setMemberRoleAction} className="flex flex-wrap items-end gap-2">
                     <input type="hidden" name="memberId" value={member.id} />
@@ -203,7 +218,7 @@ export function PendingInvitationsList({
   const origin = siteUrl.replace(/\/$/, '');
 
   return (
-    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+    <ul className="space-y-3">
       {invitations.map((invite) => {
         const inviteUrl = invite.inviteCode
           ? `${origin}/invitations/${invite.inviteCode}`
@@ -211,7 +226,7 @@ export function PendingInvitationsList({
         return (
           <li
             key={invite.id}
-            className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card/80 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
           >
             <div>
               <div className="flex flex-wrap items-center gap-2">

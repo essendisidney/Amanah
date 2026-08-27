@@ -31,6 +31,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { CamelIcon } from '@/components/camel-icon';
+import { AppPage, PageHeader } from '@/components/app-page';
 
 export const metadata: Metadata = {
   title: 'Money',
@@ -160,11 +161,8 @@ export default async function WalletPage({ searchParams }: Props) {
   );
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{labels.title}</h1>
-        <p className="mt-2 text-muted-foreground">{labels.subtitle}</p>
-      </div>
+    <AppPage>
+      <PageHeader title={labels.title} subtitle={labels.subtitle} />
 
       {notices.notice ? (
         <div className="space-y-2">
@@ -457,6 +455,6 @@ export default async function WalletPage({ searchParams }: Props) {
           </ul>
         )}
       </section>
-    </div>
+    </AppPage>
   );
 }

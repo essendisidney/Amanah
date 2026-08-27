@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
@@ -54,7 +55,7 @@ export default async function CircleRegistrationPage({ params }: Props) {
     .order('created_at', { ascending: false });
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <AppPage>
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           Registered chama
@@ -130,6 +131,7 @@ export default async function CircleRegistrationPage({ params }: Props) {
           ) : null}
         </ul>
       </section>
-    </div>
+    
+    </AppPage>
   );
 }

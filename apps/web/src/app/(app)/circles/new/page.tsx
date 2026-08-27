@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { CreateCircleForm } from '@/features/circles';
@@ -29,7 +30,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
         : null;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <AppPage>
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">New circle</p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-foreground">
@@ -51,6 +52,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
       <div className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(26,31,28,0.04)] md:p-8">
         <CreateCircleForm defaultSegment={defaultSegment} segmentHint={segmentHint} />
       </div>
-    </div>
+    
+    </AppPage>
   );
 }
