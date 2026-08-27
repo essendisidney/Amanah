@@ -36,6 +36,9 @@ export function mapMoneyError(code: string | undefined | null): string {
     INSUFFICIENT_POCKET: 'Not enough balance in this savings pocket.',
     INSUFFICIENT_BALANCE: 'Not enough balance in that circle account.',
     INVALID_AMOUNT: 'Enter a valid amount.',
+    NOT_PAYABLE: 'That contribution is not open for payment.',
+    ALREADY_PAID: 'That contribution is already paid.',
+    FORBIDDEN: 'You do not have permission to do that.',
     SECOND_APPROVER_MUST_DIFFER:
       'A different person must second-approve. You already gave the first approval.',
     FORBIDDEN: 'You do not have permission for this action.',

@@ -121,6 +121,117 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
   if (slug) redirectWithCircleNotice(slug, 'Contribution paid ahead from your wallet.', 'success');
 }
 
+/** Officer records a merry-go-round monthly contribution paid in cash (no wallet debit). */
+export async function officerRecordContributionPaymentAction(
+  formData: FormData,
+): Promise<void> {
+  const contributionId = String(formData.get('contributionId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const amountRaw = String(formData.get('amount') ?? '').trim();
+  const notes = String(formData.get('notes') ?? '').trim() || null;
+  if (!contributionId || !slug) return;
+
+  const p_amount = amountRaw ? Number(amountRaw) : null;
+  if (amountRaw && (!Number.isFinite(p_amount) || (p_amount as number) <= 0)) {
+    redirectWithCircleNotice(slug, 'Enter a valid amount.', 'error');
+  }
+
+  const { data, error } = await callRpc('officer_record_contribution_payment', {
+    p_contribution_id: contributionId,
+    p_amount,
+    p_notes: notes,
+  });
+
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
+  }
+
+  const result = data as { ok?: boolean; error?: string; status?: string } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      mapMoneyError(result?.error) || result?.error || 'Could not record payment.',
+      'error',
+    );
+  }
+
+  revalidateCircle(slug);
+  redirectWithCircleNotice(
+    slug,
+    result?.status === 'partial'
+      ? 'Partial contribution recorded (cash).'
+      : 'Monthly contribution marked paid (cash).',
+    'success',
+  );
+}
+
+/** Officer saves merry-go-round month×member contribution grid (past or present). */
+export async function saveMgrMonthlyPaymentsAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const raw = String(formData.get('rows') ?? '[]');
+  if (!jamiyaId || !slug) return;
+
+  let rows: unknown;
+  try {
+    rows = JSON.parse(raw);
+  } catch {
+    redirectWithCircleNotice(slug, 'Could not read payment grid.', 'error');
+  }
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    redirectWithCircleNotice(slug, 'No changes to save.', 'error');
+  }
+
+  const safe = (rows as Array<Record<string, unknown>>)
+    .filter(
+      (r) =>
+        r &&
+        typeof r.member_id === 'string' &&
+        Number.isFinite(Number(r.cycle_number)) &&
+        Number.isFinite(Number(r.year)) &&
+        Number.isFinite(Number(r.month)) &&
+        Number.isFinite(Number(r.amount)) &&
+        Number(r.amount) >= 0,
+    )
+    .map((r) => ({
+      member_id: String(r.member_id),
+      cycle_number: Number(r.cycle_number),
+      year: Number(r.year),
+      month: Number(r.month),
+      amount: Number(r.amount),
+    }));
+
+  if (safe.length === 0) {
+    redirectWithCircleNotice(slug, 'No valid payment rows to save.', 'error');
+  }
+
+  const { data, error } = await callRpc('officer_save_mgr_monthly_payments', {
+    p_jamiya_id: jamiyaId,
+    p_rows: safe,
+  });
+
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
+  }
+
+  const result = data as { ok?: boolean; error?: string; updated?: number } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      mapMoneyError(result?.error) || result?.error || 'Could not save monthly contributions.',
+      'error',
+    );
+  }
+
+  revalidateCircle(slug);
+  redirectWithCircleNotice(
+    slug,
+    `Saved monthly contributions${result?.updated != null ? ` (${result.updated} updated)` : ''}.`,
+    'success',
+  );
+}
+
 export async function settlePayoutAction(formData: FormData): Promise<void> {
   const payoutId = String(formData.get('payoutId') ?? '');
   const slug = String(formData.get('slug') ?? '');

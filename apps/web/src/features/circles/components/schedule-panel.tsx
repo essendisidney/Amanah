@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import {
   activateCircleAction,
+  officerRecordContributionPaymentAction,
   payContributionAction,
   payContributionAheadAction,
   settlePayoutAction,
@@ -74,6 +75,7 @@ export function ContributionCalendar({
   canActivate = false,
   canManageOps = false,
   memberCount = 0,
+  officerCashCapture = false,
 }: {
   contributions: ScheduleContribution[];
   slug: string;
@@ -82,6 +84,8 @@ export function ContributionCalendar({
   canActivate?: boolean;
   canManageOps?: boolean;
   memberCount?: number;
+  /** Officers can mark any member's due as paid in cash (merry-go-round). */
+  officerCashCapture?: boolean;
 }) {
   if (contributions.length === 0) {
     return (
@@ -130,11 +134,12 @@ export function ContributionCalendar({
       {ordered.map((item) => {
         const paid = item.amountPaid ?? 0;
         const remaining = Math.max(item.amount - paid, 0);
-        const payable =
-          item.isMine &&
-          (item.status === 'pending' ||
-            item.status === 'late' ||
-            item.status === 'partial');
+        const openDue =
+          item.status === 'pending' ||
+          item.status === 'late' ||
+          item.status === 'partial';
+        const payable = item.isMine && openDue;
+        const officerPayable = officerCashCapture && canManageOps && openDue;
         const ahead =
           new Date(item.dueDate) > new Date(new Date().toISOString().slice(0, 10));
         const currency = walletCurrency ?? item.currency;
@@ -157,7 +162,7 @@ export function ContributionCalendar({
             id={item.isMine ? `contrib-${item.id}` : undefined}
             className={[
               'flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between',
-              payable ? 'bg-secondary/35' : '',
+              payable || officerPayable ? 'bg-secondary/35' : '',
             ]
               .filter(Boolean)
               .join(' ')}
@@ -188,70 +193,97 @@ export function ContributionCalendar({
                 </p>
               ) : null}
             </div>
-            {payable ? (
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
-                {canCover ? (
-                  <form
-                    action={ahead ? payContributionAheadAction : payContributionAction}
-                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-                  >
-                    <input type="hidden" name="contributionId" value={item.id} />
-                    <input type="hidden" name="slug" value={slug} />
-                    <label className="block text-xs text-muted-foreground">
-                      Amount (optional)
-                      <input
-                        name="amount"
-                        type="number"
-                        inputMode="decimal"
-                        min={1}
-                        step="0.01"
-                        max={remaining}
-                        placeholder={String(remaining)}
-                        className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
-                      />
-                    </label>
-                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                      {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
-                    </Button>
-                  </form>
-                ) : (
-                  <Button asChild className="min-h-11 w-full sm:w-auto">
-                    <Link
-                      href={
-                        `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
-                      }
-                    >
-                      {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
-                    </Link>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:items-end">
+              {officerPayable ? (
+                <form
+                  action={officerRecordContributionPaymentAction}
+                  className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+                >
+                  <input type="hidden" name="contributionId" value={item.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <label className="block text-xs text-muted-foreground">
+                    Cash amount (optional)
+                    <input
+                      name="amount"
+                      type="number"
+                      inputMode="decimal"
+                      min={1}
+                      step="0.01"
+                      max={remaining}
+                      placeholder={String(remaining)}
+                      className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+                    />
+                  </label>
+                  <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                    Mark paid (cash)
                   </Button>
-                )}
-                {!canCover && walletAvailable != null && walletAvailable > 0 ? (
-                  <form
-                    action={ahead ? payContributionAheadAction : payContributionAction}
-                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-                  >
-                    <input type="hidden" name="contributionId" value={item.id} />
-                    <input type="hidden" name="slug" value={slug} />
-                    <label className="block text-xs text-muted-foreground">
-                      Partial amount
-                      <input
-                        name="amount"
-                        type="number"
-                        inputMode="decimal"
-                        min={1}
-                        step="0.01"
-                        max={maxPartial}
-                        defaultValue={maxPartial}
-                        className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
-                      />
-                    </label>
-                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-                      Pay partial now
+                </form>
+              ) : null}
+              {payable ? (
+                <>
+                  {canCover ? (
+                    <form
+                      action={ahead ? payContributionAheadAction : payContributionAction}
+                      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+                    >
+                      <input type="hidden" name="contributionId" value={item.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <label className="block text-xs text-muted-foreground">
+                        Amount (optional)
+                        <input
+                          name="amount"
+                          type="number"
+                          inputMode="decimal"
+                          min={1}
+                          step="0.01"
+                          max={remaining}
+                          placeholder={String(remaining)}
+                          className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+                        />
+                      </label>
+                      <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                        {ahead ? 'Pay ahead from wallet' : 'Pay from wallet'}
+                      </Button>
+                    </form>
+                  ) : (
+                    <Button asChild className="min-h-11 w-full sm:w-auto">
+                      <Link
+                        href={
+                          `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
+                        }
+                      >
+                        {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
+                      </Link>
                     </Button>
-                  </form>
-                ) : null}
-              </div>
-            ) : null}
+                  )}
+                  {!canCover && walletAvailable != null && walletAvailable > 0 ? (
+                    <form
+                      action={ahead ? payContributionAheadAction : payContributionAction}
+                      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+                    >
+                      <input type="hidden" name="contributionId" value={item.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <label className="block text-xs text-muted-foreground">
+                        Partial amount
+                        <input
+                          name="amount"
+                          type="number"
+                          inputMode="decimal"
+                          min={1}
+                          step="0.01"
+                          max={maxPartial}
+                          defaultValue={maxPartial}
+                          className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
+                        />
+                      </label>
+                      <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
+                        Pay partial now
+                      </Button>
+                    </form>
+                  ) : null}
+                </>
+              ) : null}
+            </div>
           </li>
         );
       })}

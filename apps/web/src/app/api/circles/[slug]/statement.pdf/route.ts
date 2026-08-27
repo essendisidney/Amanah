@@ -82,10 +82,13 @@ export async function GET(request: Request, { params }: Params) {
     member_code?: string | null;
     role?: string;
     status?: string;
+    summary?: Record<string, unknown>;
+    share_lots?: Array<Record<string, unknown>>;
     contributions?: Array<Record<string, unknown>>;
     penalties?: Array<Record<string, unknown>>;
     loans?: Array<Record<string, unknown>>;
     savings_pockets?: Array<Record<string, unknown>>;
+    book_entries?: Array<Record<string, unknown>>;
   } | null;
 
   if (!stmt?.ok) {

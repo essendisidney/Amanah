@@ -31,8 +31,13 @@ import { ContributionLedger } from '@/features/circles/components/contribution-l
 import { ClaimPayoutSlotForm } from '@/features/circles/components/claim-payout-slot-form';
 import { CircleLinkedGoals } from '@/features/circles/components/circle-linked-goals';
 import { OfficerPaymentsGuide } from '@/features/circles/components/officer-payments-guide';
+import {
+  MerryGoRoundBoard,
+  type MerryGoRoundSlot,
+} from '@/features/circles/components/merry-go-round-board';
+import { MerryGoRoundPaymentsGrid } from '@/features/circles/components/merry-go-round-payments-grid';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
-import { CircleQuickNav } from '@/features/circles/components/circle-quick-nav';
+import { CircleActionHub, type CircleHubGroup } from '@/features/circles/components/circle-action-hub';
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { AppPage } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
@@ -151,7 +156,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       )
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
-      .limit(200),
+      .limit(500),
     supabase
       .from('payouts')
       .select(
@@ -451,11 +456,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ? contributedTotal
       : amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1);
 
-  const kindLabel =
-    jamiya.challenge_kind === 'share_dividend'
-      ? 'Share / dividend group'
-      : jamiya.challenge_kind === 'savings'
-        ? 'Savings challenge'
+  const isRotating =
+    jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind;
+  const isShareDividend = jamiya.challenge_kind === 'share_dividend';
+  const isSavings = jamiya.challenge_kind === 'savings';
+
+  const kindLabel = isShareDividend
+    ? 'Share / dividend group'
+    : isSavings
+      ? 'Savings challenge'
+      : isRotating
+        ? 'Merry-go-round'
         : null;
 
   const heroDescription =
@@ -467,38 +478,297 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       : ` · cycle ${jamiya.current_cycle}`
   }`;
 
-  const primaryNav = [
-    ...(myOpenDue
-      ? [{ href: `/circles/${slug}#pay` as Route, label: 'Contribute', primary: true }]
-      : [{ href: `/circles/${slug}#calendar` as Route, label: 'Calendar' }]),
-    ...(canManageOps
-      ? [{ href: `/circles/${slug}/books` as Route, label: 'Member payments', primary: true }]
-      : []),
-    { href: `/circles/${slug}/statement` as Route, label: circleLabels.myStatement },
-    { href: `/circles/${slug}/treasury` as Route, label: circleLabels.treasury },
-    {
-      href: (canManageMembers ? `/circles/${slug}/officer` : `/circles/${slug}/community`) as Route,
-      label: canManageMembers ? circleLabels.officerConsole : circleLabels.meetingsChat,
-    },
-  ];
+  const merryGoRoundSlots: MerryGoRoundSlot[] = isRotating
+    ? (() => {
+        const rawPayouts = (payoutData ?? []) as Array<{
+          id: string;
+          cycle_number: number;
+          member_id: string;
+          amount: number | string;
+          currency: string;
+          status: string;
+          scheduled_date: string;
+        }>;
+        const payoutByCycle = new Map(rawPayouts.map((p) => [p.cycle_number, p]));
+        const contribsByCycle = new Map<number, typeof contributions>();
+        for (const c of contributions) {
+          const list = contribsByCycle.get(c.cycleNumber) ?? [];
+          list.push(c);
+          contribsByCycle.set(c.cycleNumber, list);
+        }
 
-  const secondaryNav = [
-    { href: `/circles/${slug}/community` as Route, label: circleLabels.meetingsChat },
-    { href: `/circles/${slug}/elections` as Route, label: circleLabels.elections },
-    { href: `/circles/${slug}/registration` as Route, label: circleLabels.circleKyc },
-    { href: `/circles/${slug}/shares` as Route, label: circleLabels.shares },
-    { href: `/circles/${slug}/journal` as Route, label: circleLabels.journal },
-    { href: `/circles/${slug}/invoices` as Route, label: circleLabels.invoices },
-    ...(canManageMembers
-      ? [{ href: `/circles/${slug}/arrears` as Route, label: circleLabels.arrears }]
-      : []),
+        const cycleNumbers = new Set<number>([
+          ...payoutByCycle.keys(),
+          ...contribsByCycle.keys(),
+          ...memberRows
+            .map((m) => m.payout_position)
+            .filter((n): n is number => typeof n === 'number'),
+        ]);
+
+        return [...cycleNumbers]
+          .sort((a, b) => a - b)
+          .map((cycleNumber) => {
+            const rawPayout = payoutByCycle.get(cycleNumber);
+            const slotMember =
+              (rawPayout ? membersById.get(rawPayout.member_id) : null) ??
+              memberRows.find((m) => m.payout_position === cycleNumber) ??
+              null;
+            const slotProfile = slotMember
+              ? profilesById.get(slotMember.user_id)
+              : null;
+            const cycleContribs = contribsByCycle.get(cycleNumber) ?? [];
+            const unpaid = cycleContribs.filter((c) =>
+              ['pending', 'late', 'partial'].includes(c.status),
+            );
+            const paid = cycleContribs.filter(
+              (c) => c.status === 'paid' || c.amountPaid > 0,
+            );
+            const memberLabel =
+              slotProfile?.full_name ||
+              slotProfile?.email ||
+              slotProfile?.phone ||
+              (slotMember ? 'Member' : 'Unclaimed');
+
+            return {
+              cycleNumber,
+              memberLabel,
+              memberCode: slotMember?.member_code ?? null,
+              payoutPosition: slotMember?.payout_position ?? cycleNumber,
+              amount: rawPayout
+                ? typeof rawPayout.amount === 'number'
+                  ? rawPayout.amount
+                  : Number(rawPayout.amount)
+                : amount * Math.max(jamiya.member_count, 1),
+              currency: rawPayout?.currency ?? jamiya.currency,
+              scheduledDate: rawPayout?.scheduled_date ?? null,
+              payoutStatus: rawPayout?.status ?? null,
+              paidCount: paid.length,
+              unpaidCount: unpaid.length,
+              unpaidLabels: unpaid
+                .map((c) => c.memberLabel)
+                .filter((label): label is string => Boolean(label)),
+            };
+          });
+      })()
+    : [];
+
+  const mgrGridMembers = members.map((m) => ({
+    id: m.id,
+    label: m.fullName || m.phone || m.email || m.memberCode || 'Member',
+  }));
+
+  const mgrMonthMap = new Map<
+    number,
+    { cycleNumber: number; year: number; month: number; label: string }
+  >();
+  const mgrAmounts: Record<string, Record<number, number>> = {};
+
+  const rawContribs = (contribData ?? []) as unknown as Array<{
+    member_id: string;
+    cycle_number: number;
+    amount_paid?: number | string | null;
+    due_date: string;
+  }>;
+  for (const row of rawContribs) {
+    const due = new Date(row.due_date);
+    const year = due.getFullYear();
+    const month = due.getMonth() + 1;
+    if (!mgrMonthMap.has(row.cycle_number)) {
+      mgrMonthMap.set(row.cycle_number, {
+        cycleNumber: row.cycle_number,
+        year,
+        month,
+        label: due.toLocaleString('en-GB', { month: 'short', year: '2-digit' }),
+      });
+    }
+    const paid =
+      typeof row.amount_paid === 'number' ? row.amount_paid : Number(row.amount_paid ?? 0);
+    if (!mgrAmounts[row.member_id]) mgrAmounts[row.member_id] = {};
+    mgrAmounts[row.member_id]![row.cycle_number] = paid;
+  }
+
+  // If no contributions yet but cycles are planned, seed month columns from start_date.
+  if (isRotating && mgrMonthMap.size === 0 && (jamiya.cycle_count ?? 0) >= 1) {
+    const start = jamiya.start_date ? new Date(jamiya.start_date) : new Date();
+    const freq = Math.max(jamiya.contribution_frequency_days || 30, 1);
+    const cycles = Math.min(jamiya.cycle_count ?? 12, 24);
+    for (let i = 0; i < cycles; i++) {
+      const due = new Date(start);
+      due.setDate(due.getDate() + i * freq);
+      const year = due.getFullYear();
+      const month = due.getMonth() + 1;
+      const cycleNumber = i + 1;
+      mgrMonthMap.set(cycleNumber, {
+        cycleNumber,
+        year,
+        month,
+        label: due.toLocaleString('en-GB', { month: 'short', year: '2-digit' }),
+      });
+    }
+  }
+
+  const mgrMonths = [...mgrMonthMap.values()].sort(
+    (a, b) => a.year - b.year || a.month - b.month || a.cycleNumber - b.cycleNumber,
+  );
+
+  const hubGroups: CircleHubGroup[] = [
+    {
+      title: isRotating
+        ? 'Merry-go-round'
+        : isShareDividend
+          ? 'Table banking'
+          : 'Savings',
+      items: [
+        ...(isRotating
+          ? [
+              {
+                href: `/circles/${slug}#merry-go-round` as Route,
+                label: 'Slots & pot',
+                hint: 'Who gets paid · who still owes',
+                primary: true as const,
+              },
+              ...(canManageOps
+                ? [
+                    {
+                      href: `/circles/${slug}#mgr-payments` as Route,
+                      label: 'Monthly contributions',
+                      hint: 'Enter or fix any month (past or present)',
+                      primary: true as const,
+                    },
+                  ]
+                : []),
+              {
+                href: `/circles/${slug}#calendar` as Route,
+                label: myOpenDue ? 'Pay my due' : 'Contribution calendar',
+                hint: myOpenDue
+                  ? 'Your open merry-go-round payment'
+                  : 'Due dates and wallet pay',
+              },
+            ]
+          : isShareDividend
+            ? [
+                ...(canManageOps
+                  ? [
+                      {
+                        href: `/circles/${slug}/books` as Route,
+                        label: 'Member payments',
+                        hint: 'Shares, monthly savings, loans grid',
+                        primary: true as const,
+                      },
+                    ]
+                  : []),
+                {
+                  href: `/circles/${slug}/shares` as Route,
+                  label: 'Shares',
+                  hint: 'Share capital & lots',
+                },
+                {
+                  href: `/circles/${slug}/treasury` as Route,
+                  label: 'Treasury',
+                  hint: 'Cashbook and bank accounts',
+                },
+              ]
+            : [
+                {
+                  href: `/circles/${slug}#calendar` as Route,
+                  label: myOpenDue ? 'Pay my due' : 'Contribution calendar',
+                  hint: 'Track savings dues',
+                  primary: true as const,
+                },
+                {
+                  href: `/circles/${slug}/treasury` as Route,
+                  label: 'Treasury',
+                  hint: 'Circle cashbook',
+                },
+              ]),
+        {
+          href: `/circles/${slug}/statement` as Route,
+          label: 'My statement',
+          hint: 'Share capital · contributions · penalties · loans',
+        },
+      ],
+    },
+    {
+      title: 'Loans & savings',
+      items: [
+        {
+          href: `/finance/qard?jamiyaId=${jamiya.id}` as Route,
+          label: 'Qard loan',
+          hint: 'Interest-free loan for this circle',
+        },
+        {
+          href: `/finance/welfare?jamiyaId=${jamiya.id}` as Route,
+          label: 'Welfare',
+          hint: 'Support fund',
+        },
+        {
+          href: `/circles/${slug}#goals` as Route,
+          label: 'Circle goals',
+          hint: 'School fees, trips, shared targets',
+        },
+        {
+          href: '/finance/goals' as Route,
+          label: 'All goals',
+          hint: 'Personal and circle savings goals',
+        },
+        {
+          href: '/wallet' as Route,
+          label: 'Wallet',
+          hint: 'Top up and pay from Money',
+        },
+      ],
+    },
+    {
+      title: 'People & ops',
+      items: [
+        {
+          href: `/circles/${slug}#members` as Route,
+          label: 'Members',
+          hint: `${visibleMemberCount} in this circle`,
+        },
+        ...(canManageOps
+          ? [
+              {
+                href: `/circles/${slug}#invite-people` as Route,
+                label: 'Add people',
+                hint: 'Invite or create member accounts',
+              },
+            ]
+          : []),
+        {
+          href: `/circles/${slug}/community` as Route,
+          label: circleLabels.meetingsChat,
+          hint: 'Meetings and chat',
+        },
+        ...(canManageMembers
+          ? [
+              {
+                href: `/circles/${slug}/officer` as Route,
+                label: circleLabels.officerConsole,
+                hint: 'Approvals and circle settings',
+              },
+            ]
+          : []),
+        ...(!isRotating
+          ? [
+              {
+                href: `/circles/${slug}/journal` as Route,
+                label: circleLabels.journal,
+                hint: 'Ledger journal',
+              },
+            ]
+          : []),
+      ],
+    },
   ];
 
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
-      {canManageOps ? <OfficerPaymentsGuide slug={slug} /> : null}
+      {canManageOps ? (
+        <OfficerPaymentsGuide slug={slug} challengeKind={jamiya.challenge_kind} />
+      ) : null}
 
       <CircleDetailHero
         slug={slug}
@@ -540,7 +810,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </p>
       ) : null}
 
-      <CircleQuickNav primary={primaryNav} secondary={secondaryNav} />
+      <CircleActionHub groups={hubGroups} />
 
       {canActivate ? (
         <ActivateCircleButton
@@ -551,7 +821,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ) : null}
 
       {membership?.status === 'active' &&
-      (jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind) &&
+      isRotating &&
       jamiya.status !== 'active' ? (
         <ClaimPayoutSlotForm
           jamiyaId={jamiya.id}
@@ -570,7 +840,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      <CircleLinkedGoals jamiyaId={jamiya.id} slug={slug} userId={user.id} />
+      <div id="goals">
+        <CircleLinkedGoals jamiyaId={jamiya.id} slug={slug} userId={user.id} />
+      </div>
 
       {myOpenDue ? (
         <NextContributionCard
@@ -591,6 +863,43 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
+      {isRotating ? (
+        <CircleSection
+          id="merry-go-round"
+          title="Merry-go-round"
+          description="Payout slots, who has received the pot, and who still owes this round."
+          padded={false}
+        >
+          <MerryGoRoundBoard
+            circleName={jamiya.name}
+            contributionAmount={amount}
+            currency={jamiya.currency}
+            currentCycle={jamiya.current_cycle}
+            slots={merryGoRoundSlots}
+          />
+        </CircleSection>
+      ) : null}
+
+      {canManageOps && isRotating ? (
+        <CircleSection
+          id="mgr-payments"
+          title="Monthly contributions"
+          description="Record what each member paid for any month — past or present. Empty cells mean they did not contribute."
+          padded={false}
+        >
+          <div className="amanah-surface px-4 py-4 sm:px-5">
+            <MerryGoRoundPaymentsGrid
+              jamiyaId={jamiya.id}
+              slug={slug}
+              members={mgrGridMembers}
+              months={mgrMonths}
+              amounts={mgrAmounts}
+              defaultAmount={amount}
+            />
+          </div>
+        </CircleSection>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-2">
         {canManageMembers ? (
           <OfficerOverviewStrip
@@ -604,27 +913,33 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           />
         ) : null}
 
-        <NextPayoutBoard
-          currency={jamiya.currency}
-          next={
-            nextPayout
-              ? {
-                  memberLabel: nextPayout.memberLabel,
-                  memberCode: nextMember?.member_code ?? null,
-                  cycleNumber: nextPayout.cycleNumber,
-                  amount: nextPayout.amount,
-                  scheduledDate: nextPayout.scheduledDate,
-                  status: nextPayout.status,
-                }
-              : null
-          }
-        />
+        {isRotating ? (
+          <NextPayoutBoard
+            currency={jamiya.currency}
+            next={
+              nextPayout
+                ? {
+                    memberLabel: nextPayout.memberLabel,
+                    memberCode: nextMember?.member_code ?? null,
+                    cycleNumber: nextPayout.cycleNumber,
+                    amount: nextPayout.amount,
+                    scheduledDate: nextPayout.scheduledDate,
+                    status: nextPayout.status,
+                  }
+                : null
+            }
+          />
+        ) : null}
       </div>
 
       <CircleSection
         id="calendar"
-        title="Contribution calendar"
-        description="Due dates and wallet payments for each cycle."
+        title={isRotating ? 'Monthly contributions' : 'Contribution calendar'}
+        description={
+          isRotating
+            ? 'Each month’s dues. Officers mark cash received; members can also pay from wallet.'
+            : 'Due dates and wallet payments for each cycle.'
+        }
         padded={false}
       >
         <ContributionCalendar
@@ -639,10 +954,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           canActivate={canActivate}
           canManageOps={Boolean(canManageOps)}
           memberCount={jamiya.member_count}
+          officerCashCapture={isRotating || isSavings}
         />
       </CircleSection>
 
-      {canManageOps ? (
+      {canManageOps && !isRotating ? (
         <CircleSection
           id="contribution-ledger"
           title="Contribution ledger"
@@ -653,14 +969,24 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </CircleSection>
       ) : null}
 
-      <CircleSection title="Payout schedule" padded={false}>
-        <PayoutSchedule
-          payouts={payouts}
-          slug={jamiya.slug}
-          isCircleAdmin={Boolean(canManageOps)}
-          paymentProvider={paymentProvider()}
-        />
-      </CircleSection>
+      {isRotating || isSavings ? (
+        <CircleSection
+          title={isRotating ? 'Who gets the pot' : 'Payout schedule'}
+          description={
+            isRotating
+              ? 'Each slot’s turn to receive the merry-go-round payout.'
+              : undefined
+          }
+          padded={false}
+        >
+          <PayoutSchedule
+            payouts={payouts}
+            slug={jamiya.slug}
+            isCircleAdmin={Boolean(canManageOps)}
+            paymentProvider={paymentProvider()}
+          />
+        </CircleSection>
+      ) : null}
 
       <CircleSection
         id="members"
@@ -683,7 +1009,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           members={members}
           slug={slug}
           canManage={canManageMembers}
-          canRecordPayments={Boolean(canManageOps)}
+          canRecordPayments={Boolean(canManageOps) && isShareDividend}
         />
       </CircleSection>
 
@@ -727,18 +1053,18 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ) : null}
 
       {membership?.status === 'active' ? (
-        <section className="grid gap-4 sm:grid-cols-2">
+        <section id="finance" className="grid gap-4 sm:grid-cols-2">
           <div className="amanah-surface p-5">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Circle finance
+              Loans & welfare
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Qard loans, welfare support, and partner Tawarruq — circle preselected where
+              Qard Hassan, welfare support, and partner Tawarruq — this circle is preselected where
               possible.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button asChild size="sm" className="rounded-full">
-                <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard Hassan</Link>
+                <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
@@ -746,33 +1072,48 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               <Button asChild variant="outline" size="sm" className="rounded-full">
                 <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
               </Button>
-              {canManageMembers ? (
-                <Button asChild variant="ghost" size="sm" className="rounded-full">
-                  <Link href={`/circles/${slug}/officer` as Route}>Officer queue</Link>
-                </Button>
-              ) : null}
+              <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Link href={`/circles/${slug}#goals` as Route}>Goals</Link>
+              </Button>
             </div>
           </div>
           <div className="amanah-surface p-5">
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Treasury & books
+              {isRotating ? 'Statement & people' : 'Treasury & books'}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Record each member&apos;s shares, savings, and loans in one place — or open the full
-              cashbook.
+              {isRotating
+                ? 'See your share of contributions and penalties, or manage members.'
+                : 'Record shares, savings, and loans — or open the full cashbook.'}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              {canManageOps ? (
-                <Button asChild size="sm" className="rounded-full">
+              <Button asChild size="sm" className="rounded-full">
+                <Link href={`/circles/${slug}/statement` as Route}>Statement</Link>
+              </Button>
+              {canManageOps && isShareDividend ? (
+                <Button asChild size="sm" variant="outline" className="rounded-full">
                   <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
                 </Button>
               ) : null}
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
-              </Button>
+              {canManageOps && isRotating ? (
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <a href="#mgr-payments">Monthly contributions</a>
+                </Button>
+              ) : null}
+              {!isRotating ? (
+                <>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
+                  </Button>
+                </>
+              ) : (
+                <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <a href="#members">Members</a>
+                </Button>
+              )}
             </div>
           </div>
         </section>

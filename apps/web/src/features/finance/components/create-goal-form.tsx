@@ -15,7 +15,10 @@ const FAITH_GOALS = [
   { value: 'Hajj', blurb: 'Save for the pilgrimage' },
   { value: 'Umra', blurb: 'Plan your Umrah journey' },
   { value: 'Udhiyah', blurb: 'Set aside for Qurbani' },
+  { value: 'School fees', blurb: 'Often a circle challenge' },
 ] as const;
+
+type Mode = 'personal' | 'circle';
 
 export function CreateGoalForm({
   circles = [],
@@ -25,14 +28,59 @@ export function CreateGoalForm({
   defaultJamiyaId?: string;
 }) {
   const [title, setTitle] = useState('');
+  const [mode, setMode] = useState<Mode>(defaultJamiyaId ? 'circle' : 'personal');
+  const [jamiyaId, setJamiyaId] = useState(defaultJamiyaId);
 
   return (
-    <form
-      action={createGoalFormAction}
-      className="grid max-w-2xl gap-4 rounded-xl border border-border bg-card p-5 sm:grid-cols-2 sm:p-6"
-    >
+    <form action={createGoalFormAction} className="grid max-w-2xl gap-4 sm:grid-cols-2">
       <div className="space-y-2 sm:col-span-2">
-        <Label>Popular savings</Label>
+        <Label>Who is saving?</Label>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('personal');
+              setJamiyaId('');
+            }}
+            className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+              mode === 'personal'
+                ? 'border-primary bg-primary/10 text-foreground'
+                : 'border-border bg-background text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <p className="text-sm font-semibold text-foreground">Just me</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Personal goal — only you track how much you have set aside.
+            </p>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('circle');
+              if (!jamiyaId && circles[0]) setJamiyaId(circles[0].id);
+            }}
+            disabled={circles.length === 0}
+            className={`rounded-xl border px-4 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              mode === 'circle'
+                ? 'border-primary bg-primary/10 text-foreground'
+                : 'border-border bg-background text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <p className="text-sm font-semibold text-foreground">Whole circle</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Shared challenge — each member can save a different amount; officers record deposits.
+            </p>
+          </button>
+        </div>
+        {circles.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Join or create a circle first to start a whole-circle goal.
+          </p>
+        ) : null}
+      </div>
+
+      <div className="space-y-2 sm:col-span-2">
+        <Label>Popular goals</Label>
         <div className="flex flex-wrap gap-2">
           {FAITH_GOALS.map((g) => (
             <button
@@ -49,24 +97,23 @@ export function CreateGoalForm({
             </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">
-          Hajj, Umra, and Udhiyah — or type your own goal below. Optionally link a circle.
-        </p>
       </div>
 
       <div className="space-y-2 sm:col-span-2">
-        <Label htmlFor="title">Goal</Label>
+        <Label htmlFor="title">Goal name</Label>
         <Input
           id="title"
           name="title"
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Hajj, Umra, school fees, wedding…"
+          placeholder="Hajj, school fees, wedding…"
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="targetAmount">Target (KES)</Label>
+        <Label htmlFor="targetAmount">
+          {mode === 'circle' ? 'Circle target (KES)' : 'Your target (KES)'}
+        </Label>
         <Input
           id="targetAmount"
           name="targetAmount"
@@ -93,27 +140,38 @@ export function CreateGoalForm({
           ))}
         </select>
       </div>
-      {circles.length > 0 ? (
+
+      {mode === 'circle' && circles.length > 0 ? (
         <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="jamiyaId">Link to circle (optional)</Label>
+          <Label htmlFor="jamiyaId">Which circle?</Label>
           <select
             id="jamiyaId"
             name="jamiyaId"
-            defaultValue={defaultJamiyaId}
+            required
+            value={jamiyaId}
+            onChange={(e) => setJamiyaId(e.target.value)}
             className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
           >
-            <option value="">No circle — personal goal only</option>
+            <option value="" disabled>
+              Choose a circle…
+            </option>
             {circles.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
+          <p className="text-xs text-muted-foreground">
+            After creating, open the goal on the circle page to record how much each member saved.
+          </p>
         </div>
-      ) : null}
+      ) : (
+        <input type="hidden" name="jamiyaId" value="" />
+      )}
+
       <div className="sm:col-span-2">
-        <Button type="submit" className="min-h-11 w-full sm:w-auto">
-          Create goal
+        <Button type="submit" className="min-h-11 w-full rounded-full sm:w-auto">
+          {mode === 'circle' ? 'Create circle goal' : 'Create personal goal'}
         </Button>
       </div>
     </form>

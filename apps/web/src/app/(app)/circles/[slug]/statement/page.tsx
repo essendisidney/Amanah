@@ -18,6 +18,34 @@ type Props = {
   searchParams?: Promise<{ memberId?: string }>;
 };
 
+type StatementSummary = {
+  share_capital?: number;
+  share_units?: number;
+  schedule_contributions_due?: number;
+  schedule_contributions_paid?: number;
+  schedule_contributions_outstanding?: number;
+  cycles_paid?: number;
+  cycles_open?: number;
+  book_contributions?: number;
+  contributions_so_far?: number;
+  penalties_total?: number;
+  penalties_open?: number;
+  penalties_paid?: number;
+  loan_principal?: number;
+  loan_repaid?: number;
+  loan_outstanding?: number;
+  savings_total?: number;
+};
+
+function money(n: unknown, currency: string) {
+  const v = typeof n === 'number' ? n : Number(n ?? 0);
+  return formatCurrency(Number.isFinite(v) ? v : 0, currency);
+}
+
+function kindLabel(kind: unknown) {
+  return String(kind ?? 'fine').replaceAll('_', ' ');
+}
+
 export default async function MemberStatementPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const qs = (await searchParams) ?? {};
@@ -29,10 +57,16 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, currency')
+    .select('id, name, slug, currency, challenge_kind')
     .eq('slug', slug)
     .maybeSingle();
-  const jamiya = jamiyaData as { id: string; name: string; slug: string; currency: string } | null;
+  const jamiya = jamiyaData as {
+    id: string;
+    name: string;
+    slug: string;
+    currency: string;
+    challenge_kind: string | null;
+  } | null;
   if (!jamiya) notFound();
 
   const { data: myMembership } = await supabase
@@ -73,6 +107,10 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     member_code?: string | null;
     role?: string;
     status?: string;
+    payout_position?: number | null;
+    joined_at?: string | null;
+    summary?: StatementSummary;
+    share_lots?: Array<Record<string, unknown>>;
     contributions?: Array<Record<string, unknown>>;
     penalties?: Array<Record<string, unknown>>;
     loans?: Array<Record<string, unknown>>;
@@ -100,28 +138,81 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   }>;
   const ids = memberRows.map((m) => m.user_id);
   const { data: profiles } = ids.length
-    ? await supabase.from('profiles').select('id, full_name, email').in('id', ids)
+    ? await supabase.from('profiles').select('id, full_name, email, phone').in('id', ids)
     : { data: [] };
   const profileMap = new Map(
-    ((profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
-      (p) => [p.id, p],
-    ),
+    (
+      (profiles ?? []) as Array<{
+        id: string;
+        full_name: string | null;
+        email: string | null;
+        phone: string | null;
+      }>
+    ).map((p) => [p.id, p]),
   );
 
+  const summary = stmt.summary ?? {};
+  const shareLots = stmt.share_lots ?? [];
+  const contributions = stmt.contributions ?? [];
+  const penalties = stmt.penalties ?? [];
   const loans = stmt.loans ?? [];
   const pockets = stmt.savings_pockets ?? [];
-  const loanOutstanding = loans.reduce((sum, l) => {
-    const amount = Number(l.amount ?? 0);
-    const repaid = Number(l.amount_repaid ?? 0);
-    return sum + Math.max(amount - repaid, 0);
-  }, 0);
-  const savingsTotal = pockets.reduce((sum, s) => sum + Number(s.balance ?? 0), 0);
+  const books = stmt.book_entries ?? [];
+  const bookContributions = books.filter((b) => b.entry_type === 'contribution');
+  const otherBooks = books.filter(
+    (b) =>
+      b.entry_type !== 'contribution' &&
+      !(b.entry_type === 'adjustment' && b.source === 'share_capital_grid'),
+  );
+
+  const isShareDividend = jamiya.challenge_kind === 'share_dividend';
+  const isRotating = jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind;
 
   const viewingOther = memberId !== me.id;
   const viewedMember = memberRows.find((m) => m.id === memberId);
   const viewedProfile = viewedMember ? profileMap.get(viewedMember.user_id) : null;
   const viewedName =
-    viewedProfile?.full_name || viewedProfile?.email || stmt.member_code || 'Member';
+    viewedProfile?.full_name ||
+    viewedProfile?.email ||
+    viewedProfile?.phone ||
+    stmt.member_code ||
+    'Member';
+
+  const snapshotCards = [
+    {
+      label: 'Share capital',
+      value: money(summary.share_capital, jamiya.currency),
+      hint:
+        Number(summary.share_units ?? 0) > 0
+          ? `${Number(summary.share_units).toLocaleString()} share units`
+          : 'Buy-in / shares held',
+    },
+    {
+      label: 'Contributions so far',
+      value: money(summary.contributions_so_far, jamiya.currency),
+      hint: isRotating
+        ? `${summary.cycles_paid ?? 0} cycles paid · ${summary.cycles_open ?? 0} open`
+        : 'Schedule + monthly books',
+    },
+    {
+      label: 'Penalties',
+      value: money(summary.penalties_total, jamiya.currency),
+      hint:
+        Number(summary.penalties_open ?? 0) > 0
+          ? `${money(summary.penalties_open, jamiya.currency)} still open`
+          : Number(summary.penalties_total ?? 0) > 0
+            ? 'All settled'
+            : 'No fines recorded',
+    },
+    {
+      label: 'Loan outstanding',
+      value: money(summary.loan_outstanding, jamiya.currency),
+      hint:
+        Number(summary.loan_principal ?? 0) > 0
+          ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
+          : 'No Qard loans',
+    },
+  ];
 
   return (
     <AppPage>
@@ -136,17 +227,19 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <p className="mt-2 text-sm text-muted-foreground">
             {viewingOther ? `${viewedName} · ` : ''}
             Member ID {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
+            {stmt.payout_position != null ? ` · payout slot ${stmt.payout_position}` : ''}
+            {stmt.joined_at ? ` · joined ${formatDate(stmt.joined_at)}` : ''}
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Circle</Link>
           </Button>
-          {isOfficer ? (
+          {isOfficer && isShareDividend ? (
             <Button asChild size="sm" className="min-h-11">
               <Link
                 href={
-                  `/circles/${slug}/books${memberId ? `?memberId=${memberId}` : ''}` as Route
+                  `/circles/${slug}/books${memberId ? `?view=member&memberId=${memberId}` : ''}` as Route
                 }
               >
                 Record books
@@ -190,38 +283,16 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           {jamiya.name}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Member {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · Generated{' '}
-          {formatDate(new Date().toISOString())}
+          {viewedName} · Member {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} ·
+          Generated {formatDate(new Date().toISOString())}
         </p>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-4 print:rounded-none">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Loan outstanding
-          </p>
-          <p className="mt-2 text-2xl font-semibold">
-            {formatCurrency(loanOutstanding, jamiya.currency)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {loans.length === 1 ? '1 loan' : `${loans.length} loans`}
-          </p>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-4 print:rounded-none">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
-            Savings pockets
-          </p>
-          <p className="mt-2 text-2xl font-semibold">
-            {formatCurrency(savingsTotal, jamiya.currency)}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {pockets.length === 1 ? '1 pocket' : `${pockets.length} pockets`}
-          </p>
-        </div>
-      </section>
-
       {isOfficer && memberRows.length ? (
-        <form className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end" method="get">
+        <form
+          className="flex w-full flex-col gap-2 print:hidden sm:flex-row sm:flex-wrap sm:items-end"
+          method="get"
+        >
           <label className="w-full space-y-1 text-sm sm:w-auto">
             <span className="text-muted-foreground">View member</span>
             <select
@@ -233,7 +304,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                 const p = profileMap.get(m.user_id);
                 return (
                   <option key={m.id} value={m.id}>
-                    {p?.full_name || p?.email || m.id.slice(0, 8)}
+                    {p?.full_name || p?.email || p?.phone || m.id.slice(0, 8)}
                     {m.member_code ? ` (${m.member_code})` : ''}
                   </option>
                 );
@@ -246,83 +317,234 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         </form>
       ) : null}
 
+      <section className="space-y-3">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            At a glance
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Key balances for this member — share capital, contributions, penalties, and loans.
+          </p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {snapshotCards.map((card) => (
+            <div key={card.label} className="amanah-surface px-4 py-4 print:rounded-none">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {card.label}
+              </p>
+              <p className="mt-2 text-2xl font-semibold tabular-nums">{card.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
+            </div>
+          ))}
+        </div>
+        {(Number(summary.schedule_contributions_outstanding ?? 0) > 0 ||
+          Number(summary.book_contributions ?? 0) > 0 ||
+          Number(summary.savings_total ?? 0) > 0) && (
+          <dl className="amanah-surface grid gap-3 px-4 py-4 text-sm sm:grid-cols-3">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Schedule paid / due
+              </dt>
+              <dd className="mt-1 font-medium tabular-nums">
+                {money(summary.schedule_contributions_paid, jamiya.currency)}
+                <span className="font-normal text-muted-foreground">
+                  {' '}
+                  / {money(summary.schedule_contributions_due, jamiya.currency)}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Monthly books contributions
+              </dt>
+              <dd className="mt-1 font-medium tabular-nums">
+                {money(summary.book_contributions, jamiya.currency)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Savings pockets
+              </dt>
+              <dd className="mt-1 font-medium tabular-nums">
+                {money(summary.savings_total, jamiya.currency)}
+              </dd>
+            </div>
+          </dl>
+        )}
+      </section>
+
       <StatementSection
-        title="Contributions"
-        empty="No contribution rows yet."
-        emptyHref={`/circles/${slug}#pay` as Route}
-        emptyLabel="Open dues"
-        rows={(stmt.contributions ?? []).map((c) => ({
+        title="Share capital"
+        description="Member buy-in / share lots held in this circle."
+        empty="No share capital recorded for this member."
+        emptyHref={
+          isOfficer && isShareDividend
+            ? (`/circles/${slug}/books?view=grid` as Route)
+            : undefined
+        }
+        emptyLabel={isOfficer && isShareDividend ? 'Record in member payments' : undefined}
+        rows={shareLots.map((lot) => ({
+          key: String(lot.id),
+          title: `${Number(lot.shares ?? 0).toLocaleString()} shares`,
+          meta: [
+            lot.purchased_on ? `Purchased ${formatDate(String(lot.purchased_on))}` : null,
+            lot.unit_price
+              ? `Par ${money(lot.unit_price, jamiya.currency)}`
+              : null,
+            lot.notes ? String(lot.notes) : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(lot.amount, jamiya.currency),
+        }))}
+        footer={
+          shareLots.length > 0
+            ? `Total share capital: ${money(summary.share_capital, jamiya.currency)}`
+            : undefined
+        }
+      />
+
+      <StatementSection
+        title="Schedule contributions"
+        description={
+          isRotating
+            ? 'Merry-go-round monthly dues by cycle — paid vs still owing.'
+            : 'Contribution calendar dues for this member.'
+        }
+        empty="No schedule contributions yet."
+        emptyHref={`/circles/${slug}#calendar` as Route}
+        emptyLabel="Open calendar"
+        rows={contributions.map((c) => ({
           key: String(c.id),
           title: `Cycle ${c.cycle}`,
-          meta: `${c.status} · due ${c.due_date ? formatDate(String(c.due_date)) : '—'}`,
-          amount: formatCurrency(Number(c.amount), jamiya.currency),
+          meta: [
+            c.due_date ? `Due ${formatDate(String(c.due_date))}` : null,
+            Number(c.amount_paid ?? 0) > 0
+              ? `Paid ${money(c.amount_paid, jamiya.currency)} of ${money(c.amount, jamiya.currency)}`
+              : `Due ${money(c.amount, jamiya.currency)}`,
+            c.paid_at ? `Cleared ${formatDate(String(c.paid_at))}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(c.amount_paid ?? 0, jamiya.currency),
           badge: String(c.status),
         }))}
+        footer={
+          contributions.length > 0
+            ? `Paid ${money(summary.schedule_contributions_paid, jamiya.currency)} · Outstanding ${money(summary.schedule_contributions_outstanding, jamiya.currency)}`
+            : undefined
+        }
+      />
+
+      <StatementSection
+        title="Monthly contributions (books)"
+        description="Savings recorded in member books / payment grid (table banking style)."
+        empty="No monthly book contributions recorded."
+        emptyHref={
+          isOfficer && isShareDividend
+            ? (`/circles/${slug}/books?view=grid` as Route)
+            : (`/circles/${slug}` as Route)
+        }
+        emptyLabel={isOfficer && isShareDividend ? 'Open member payments' : 'Back to circle'}
+        rows={bookContributions.map((b) => ({
+          key: String(b.id),
+          title: b.notes ? String(b.notes) : 'Monthly contribution',
+          meta: b.effective_date ? formatDate(String(b.effective_date)) : '',
+          amount: money(b.amount, jamiya.currency),
+        }))}
+        footer={
+          bookContributions.length > 0
+            ? `Total from books: ${money(summary.book_contributions, jamiya.currency)}`
+            : undefined
+        }
       />
 
       <StatementSection
         title="Fines & penalties"
+        description="Late, missed, or other fines assessed against this member."
         empty="No fines on this statement."
         emptyHref={
-          isOfficer
-            ? (`/circles/${slug}/treasury` as Route)
-            : (`/circles/${slug}` as Route)
+          isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
         }
         emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
-        rows={(stmt.penalties ?? []).map((p) => ({
+        rows={penalties.map((p) => ({
           key: String(p.id),
-          title: String(p.notes || p.kind || 'Fine'),
-          meta: `${p.status} · ${p.assessed_at ? formatDate(String(p.assessed_at)) : ''}`,
-          amount: formatCurrency(Number(p.amount), jamiya.currency),
+          title: kindLabel(p.kind),
+          meta: [
+            p.notes ? String(p.notes) : null,
+            p.assessed_at ? `Assessed ${formatDate(String(p.assessed_at))}` : null,
+            p.paid_at ? `Paid ${formatDate(String(p.paid_at))}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(p.amount, jamiya.currency),
           badge: String(p.status),
         }))}
+        footer={
+          penalties.length > 0
+            ? `Open ${money(summary.penalties_open, jamiya.currency)} · Paid ${money(summary.penalties_paid, jamiya.currency)} · Total ${money(summary.penalties_total, jamiya.currency)}`
+            : undefined
+        }
       />
 
       <StatementSection
         title="Loans (Qard)"
+        description="Interest-free loans issued to this member and repayments so far."
         empty="No loans on this statement."
         emptyHref={'/finance/qard' as Route}
         emptyLabel="Open Qard"
-        rows={(stmt.loans ?? []).map((l) => ({
+        rows={loans.map((l) => ({
           key: String(l.id),
-          title: String(l.purpose || 'Loan'),
-          meta: `${l.status} · repaid ${formatCurrency(Number(l.amount_repaid), jamiya.currency)}`,
-          amount: formatCurrency(Number(l.amount), jamiya.currency),
+          title: String(l.purpose || 'Qard Hassan loan'),
+          meta: [
+            l.status ? String(l.status) : null,
+            `Repaid ${money(l.amount_repaid, jamiya.currency)}`,
+            l.due_date ? `Due ${formatDate(String(l.due_date))}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(l.amount, jamiya.currency),
           badge: String(l.status),
         }))}
+        footer={
+          loans.length > 0
+            ? `Outstanding ${money(summary.loan_outstanding, jamiya.currency)}`
+            : undefined
+        }
       />
 
       <StatementSection
         title="Savings pockets"
+        description="Dedicated savings balances held for this member in the circle."
         empty="No savings pockets yet."
         emptyHref={
-          isOfficer
-            ? (`/circles/${slug}/treasury` as Route)
-            : (`/circles/${slug}` as Route)
+          isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
         }
         emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
-        rows={(stmt.savings_pockets ?? []).map((s) => ({
+        rows={pockets.map((s) => ({
           key: String(s.id),
-          title: String(s.label || s.category),
+          title: String(s.label || s.category || 'Pocket'),
           meta: s.target_amount
-            ? `Target ${formatCurrency(Number(s.target_amount), jamiya.currency)}`
-            : String(s.category),
-          amount: formatCurrency(Number(s.balance), jamiya.currency),
+            ? `Target ${money(s.target_amount, jamiya.currency)}`
+            : String(s.category ?? ''),
+          amount: money(s.balance, jamiya.currency),
         }))}
       />
 
       <StatementSection
-        title="Book entries"
-        empty="No book entries linked to this member."
-        emptyHref={`/circles/${slug}/treasury` as Route}
-        emptyLabel="Open treasury"
-        rows={(stmt.book_entries ?? []).map((b) => ({
+        title="Other book entries"
+        description="Adjustments, deposits, and other cashbook lines linked to this member."
+        empty="No other book entries."
+        rows={otherBooks.map((b) => ({
           key: String(b.id),
           title: String(b.entry_type).replaceAll('_', ' '),
-          meta: `${b.effective_date ? formatDate(String(b.effective_date)) : ''}${
-            b.notes ? ` · ${b.notes}` : ''
-          }`,
-          amount: formatCurrency(Number(b.amount), jamiya.currency),
+          meta: [
+            b.effective_date ? formatDate(String(b.effective_date)) : null,
+            b.notes ? String(b.notes) : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(b.amount, jamiya.currency),
         }))}
       />
     </AppPage>
@@ -331,12 +553,15 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
 function StatementSection({
   title,
+  description,
   empty,
   emptyHref,
   emptyLabel,
   rows,
+  footer,
 }: {
   title: string;
+  description?: string;
   empty: string;
   emptyHref?: Route;
   emptyLabel?: string;
@@ -347,37 +572,50 @@ function StatementSection({
     amount: string;
     badge?: string;
   }>;
+  footer?: string;
 }) {
   return (
     <section className="space-y-3">
-      <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">{title}</h2>
+      <div>
+        <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">{title}</h2>
+        {description ? (
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        ) : null}
+      </div>
       {rows.length === 0 ? (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">{empty}</p>
           {emptyHref && emptyLabel ? (
-            <Button asChild size="sm" variant="outline" className="min-h-11">
+            <Button asChild size="sm" variant="outline" className="min-h-11 print:hidden">
               <Link href={emptyHref}>{emptyLabel}</Link>
             </Button>
           ) : null}
         </div>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/50">
-          {rows.map((row) => (
-            <li
-              key={row.key}
-              className="flex flex-wrap items-center justify-between gap-2 px-5 py-3"
-            >
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium capitalize">{row.title}</p>
-                  {row.badge ? <StatusBadge status={row.badge} /> : null}
+        <>
+          <ul className="amanah-surface divide-y divide-border/50">
+            {rows.map((row) => (
+              <li
+                key={row.key}
+                className="flex flex-wrap items-center justify-between gap-2 px-5 py-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium capitalize">{row.title}</p>
+                    {row.badge ? <StatusBadge status={row.badge} /> : null}
+                  </div>
+                  {row.meta ? (
+                    <p className="mt-0.5 text-xs text-muted-foreground">{row.meta}</p>
+                  ) : null}
                 </div>
-                <p className="text-xs text-muted-foreground">{row.meta}</p>
-              </div>
-              <p className="text-sm font-semibold">{row.amount}</p>
-            </li>
-          ))}
-        </ul>
+                <p className="text-sm font-semibold tabular-nums">{row.amount}</p>
+              </li>
+            ))}
+          </ul>
+          {footer ? (
+            <p className="text-sm font-medium text-foreground">{footer}</p>
+          ) : null}
+        </>
       )}
     </section>
   );

@@ -45,23 +45,27 @@ export default async function GoalsPage({
 
   const { data: memberships } = await supabase
     .from('members')
-    .select('jamiya_id, jamiyas(id, name)')
+    .select('jamiya_id, jamiyas(id, name, slug)')
     .eq('user_id', user.id)
     .eq('status', 'active');
 
   const circles = (
     (memberships ?? []) as Array<{
       jamiya_id: string;
-      jamiyas: { id: string; name: string } | { id: string; name: string }[] | null;
+      jamiyas:
+        | { id: string; name: string; slug: string }
+        | { id: string; name: string; slug: string }[]
+        | null;
     }>
   )
     .map((m) => {
       const j = Array.isArray(m.jamiyas) ? m.jamiyas[0] : m.jamiyas;
-      return j ? { id: j.id, name: j.name } : null;
+      return j ? { id: j.id, name: j.name, slug: j.slug } : null;
     })
-    .filter(Boolean) as Array<{ id: string; name: string }>;
+    .filter(Boolean) as Array<{ id: string; name: string; slug: string }>;
 
   const circleName = new Map(circles.map((c) => [c.id, c.name]));
+  const circleSlug = new Map(circles.map((c) => [c.id, c.slug]));
 
   return (
     <div className="space-y-8">
@@ -73,8 +77,9 @@ export default async function GoalsPage({
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Hajj, Umra, Udhiyah, emergency fund — track progress and optionally link a circle so
-          payouts stay tied to what you are saving for.
+          Save <strong className="font-medium text-foreground">on your own</strong>, or as a{' '}
+          <strong className="font-medium text-foreground">whole circle</strong> where each member
+          can put in a different amount toward the same challenge (school fees, Hajj, wedding…).
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
@@ -115,7 +120,18 @@ export default async function GoalsPage({
             <article key={goal.id} className="amanah-surface p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-bold tracking-tight">{goal.title}</h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h2 className="text-xl font-bold tracking-tight">{goal.title}</h2>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        goal.jamiya_id
+                          ? 'bg-primary/15 text-primary'
+                          : 'bg-secondary text-muted-foreground'
+                      }`}
+                    >
+                      {goal.jamiya_id ? 'Circle goal' : 'Personal'}
+                    </span>
+                  </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {formatCurrency(saved, goal.currency)} / {formatCurrency(target, goal.currency)}
                     {goal.duration_months ? ` · ${goal.duration_months} months` : ''}
@@ -151,15 +167,38 @@ export default async function GoalsPage({
               <p className="mt-2 text-xs font-semibold text-primary">{progress}% complete</p>
               {!reached ? (
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                  <Button asChild className="min-h-11">
-                    <Link
-                      href={
-                        `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
-                      }
-                    >
-                      Top up Money toward this
-                    </Link>
-                  </Button>
+                  {goal.jamiya_id && circleSlug.get(goal.jamiya_id) ? (
+                    <Button asChild className="min-h-11">
+                      <Link
+                        href={
+                          `/circles/${circleSlug.get(goal.jamiya_id)}/goals/${goal.id}` as Route
+                        }
+                      >
+                        View by member
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button asChild className="min-h-11">
+                      <Link
+                        href={
+                          `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
+                        }
+                      >
+                        Top up Money toward this
+                      </Link>
+                    </Button>
+                  )}
+                  {goal.jamiya_id && circleSlug.get(goal.jamiya_id) ? (
+                    <Button asChild variant="outline" className="min-h-11">
+                      <Link
+                        href={
+                          `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
+                        }
+                      >
+                        Top up Money
+                      </Link>
+                    </Button>
+                  ) : null}
                   <form action={updateGoalFormAction} className="flex max-w-xs flex-1 gap-2">
                     <input type="hidden" name="goalId" value={goal.id} />
                     <Input
@@ -183,7 +222,9 @@ export default async function GoalsPage({
               )}
               {!reached ? (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Update records how much you have set aside after topping up or transferring.
+                  {goal.jamiya_id
+                    ? 'Circle goal: officers record each member’s deposits under View by member. Personal Update only adjusts the overall total if needed.'
+                    : 'Personal goal: top up Money, then Update with how much you have set aside.'}
                 </p>
               ) : null}
             </article>

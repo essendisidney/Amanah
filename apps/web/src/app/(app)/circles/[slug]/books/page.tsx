@@ -67,7 +67,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, currency, share_par_value, contribution_amount')
+    .select('id, name, slug, currency, share_par_value, contribution_amount, challenge_kind')
     .eq('slug', slug)
     .maybeSingle();
   const jamiya = jamiyaData as {
@@ -77,9 +77,17 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
     currency: string;
     share_par_value: number | string;
     contribution_amount: number | string;
+    challenge_kind: string | null;
   } | null;
   if (!jamiya) notFound();
 
+  if (jamiya.challenge_kind === 'rotating') {
+    redirect(
+      `/circles/${slug}?notice=${encodeURIComponent(
+        'Merry-go-round circles use monthly contributions on the circle page, not table-banking books.',
+      )}&noticeType=success`,
+    );
+  }
   const { data: myMemberData } = await supabase
     .from('members')
     .select('id, role, status')

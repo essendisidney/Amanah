@@ -4,7 +4,7 @@ import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 
-/** Goals linked to this circle (owner or shared via RLS after migration). */
+/** Goals linked to this circle — tap one to see how much each member has saved. */
 export async function CircleLinkedGoals({
   jamiyaId,
   slug,
@@ -31,15 +31,14 @@ export async function CircleLinkedGoals({
     user_id: string;
   }>;
 
-  const mine = goals.filter((g) => g.user_id === userId);
-
   return (
     <section className="amanah-surface px-5 py-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">Circle goals</h2>
           <p className="text-sm text-muted-foreground">
-            Link a savings goal (school fees, wedding, Hajj) to this chama.
+            Shared challenges for the whole chama. Each person can save a different amount — tap a
+            goal anytime to see who has put in what. Personal goals stay under Finance → Goals.
           </p>
         </div>
         <Button asChild size="sm" variant="outline" className="min-h-10 rounded-full">
@@ -47,44 +46,40 @@ export async function CircleLinkedGoals({
         </Button>
       </div>
       {goals.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No goals linked yet. Open Goals and choose this circle when creating one.
+        <p className="mt-3 text-sm text-muted-foreground">
+          No shared circle goals yet. Add one and choose <strong className="font-medium text-foreground">Whole circle</strong>{' '}
+          (e.g. school fees). For your own private target, use Finance → Goals → Just me.
         </p>
       ) : (
-        <ul className="divide-y divide-border rounded-lg border border-border">
+        <ul className="mt-4 divide-y divide-border/60 overflow-hidden rounded-xl border border-border/70">
           {goals.map((g) => {
             const target = Number(g.target_amount);
             const saved = Number(g.saved_amount);
             const pct = target > 0 ? Math.min(100, Math.round((saved / target) * 100)) : 0;
             return (
-              <li key={g.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <div>
-                  <p className="font-medium">
-                    {g.title}
-                    {g.user_id === userId ? (
-                      <span className="ml-2 text-xs font-normal text-primary">Yours</span>
-                    ) : null}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatCurrency(saved, g.currency)} / {formatCurrency(target, g.currency)} ·{' '}
-                    {pct}%
-                  </p>
-                </div>
+              <li key={g.id}>
+                <Link
+                  href={`/circles/${slug}/goals/${g.id}` as Route}
+                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 transition-colors hover:bg-secondary/40"
+                >
+                  <div>
+                    <p className="font-medium">
+                      {g.title}
+                      {g.user_id === userId ? (
+                        <span className="ml-2 text-xs font-normal text-primary">Yours</span>
+                      ) : null}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatCurrency(saved, g.currency)} / {formatCurrency(target, g.currency)} ·{' '}
+                      {pct}% · View by member →
+                    </p>
+                  </div>
+                </Link>
               </li>
             );
           })}
         </ul>
       )}
-      {mine.length === 0 && goals.length > 0 ? (
-        <p className="text-xs text-muted-foreground">
-          Tip: create your own goal linked to{' '}
-          <Link href={`/finance/goals?jamiyaId=${jamiyaId}` as Route} className="text-primary underline-offset-4 hover:underline">
-            /finance/goals
-          </Link>
-          .
-        </p>
-      ) : null}
-      <p className="sr-only">{slug}</p>
     </section>
   );
 }
