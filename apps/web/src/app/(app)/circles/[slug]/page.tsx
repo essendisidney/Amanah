@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { InviteMemberForm } from '@/features/circles/components/invite-member-form';
 import { AddMemberForm } from '@/features/circles/components/add-member-form';
+import { NextOfKinForm } from '@/features/circles/components/next-of-kin-form';
 import {
   MembersList,
   PendingInvitationsList,
@@ -138,6 +139,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     penaltyResult,
     { data: walletData },
     { data: paymentData },
+    { data: nextOfKinData },
   ] = await Promise.all([
     supabase
       .from('members')
@@ -190,6 +192,10 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .eq('contributions.jamiya_id', jamiya.id)
       .order('paid_at', { ascending: false })
       .limit(80),
+    supabase
+      .from('member_next_of_kin')
+      .select('member_id, full_name, phone, relationship, notes')
+      .eq('jamiya_id', jamiya.id),
   ]);
 
   const pendingGraceCount = graceResult.count ?? 0;
@@ -787,8 +793,19 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                 label: 'Add people',
                 hint: 'Invite or create member accounts',
               },
+              {
+                href: `/circles/${slug}#next-of-kin` as Route,
+                label: 'Next of kin',
+                hint: 'Emergency contacts for each member',
+              },
             ]
-          : []),
+          : [
+              {
+                href: `/circles/${slug}/next-of-kin` as Route,
+                label: 'Next of kin',
+                hint: 'View emergency contacts',
+              },
+            ]),
         {
           href: `/circles/${slug}/community` as Route,
           label: circleLabels.meetingsChat,
@@ -815,6 +832,27 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ],
     },
   ];
+
+  const nextOfKinExisting = (
+    (nextOfKinData ?? []) as Array<{
+      member_id: string;
+      full_name: string;
+      phone: string | null;
+      relationship: string;
+      notes: string | null;
+    }>
+  ).map((row) => ({
+    memberId: row.member_id,
+    fullName: row.full_name,
+    phone: row.phone,
+    relationship: row.relationship,
+    notes: row.notes,
+  }));
+
+  const nextOfKinMemberOptions = members.map((m) => ({
+    id: m.id,
+    label: m.fullName || m.phone || m.email || m.memberCode || 'Member',
+  }));
 
   return (
     <AppPage>
@@ -1080,6 +1118,24 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             description="Create their Amanah account now. They get a join link and code to sign in."
           >
             <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+          </CircleSection>
+
+          <CircleSection
+            id="next-of-kin"
+            title="Next of kin"
+            description="Emergency contact for each member — name, phone, and relationship. Works for merry-go-round, savings, and table banking."
+            action={
+              <Button asChild size="sm" variant="outline" className="rounded-full">
+                <Link href={`/circles/${slug}/next-of-kin` as Route}>Open full list</Link>
+              </Button>
+            }
+          >
+            <NextOfKinForm
+              jamiyaId={jamiya.id}
+              slug={slug}
+              members={nextOfKinMemberOptions}
+              existing={nextOfKinExisting}
+            />
           </CircleSection>
 
           <CircleSection
