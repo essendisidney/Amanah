@@ -79,11 +79,20 @@ export function CreateCircleForm({
   const challengeKind = watch('challengeKind');
   const slotPricingEnabled = watch('slotPricingEnabled');
 
-  const applyTemplate = (key: 'sisters' | 'school' | 'wedding' | 'boda') => {
+  const setChallengeKind = (kind: 'rotating' | 'savings' | 'share_dividend') => {
+    setValue('challengeKind', kind, { shouldDirty: true, shouldValidate: true });
+    if (kind !== 'rotating') {
+      setValue('slotPricingEnabled', false);
+      setValue('earlySlotFeePct', 0);
+      setValue('lateSlotRebatePct', 0);
+    }
+  };
+
+  const applyTemplate = (key: 'sisters' | 'school' | 'wedding' | 'boda' | 'table') => {
     if (key === 'sisters') {
       setValue('name', 'Sisters Circle');
       setValue('segment', 'womens_circle');
-      setValue('challengeKind', 'rotating');
+      setChallengeKind('rotating');
       setValue('contributionAmount', 2000);
       setValue('contributionFrequencyDays', 30);
       setValue('cycleCount', 10);
@@ -98,7 +107,7 @@ export function CreateCircleForm({
     } else if (key === 'school') {
       setValue('name', 'School Fees Chama');
       setValue('segment', 'womens_circle');
-      setValue('challengeKind', 'rotating');
+      setChallengeKind('rotating');
       setValue('contributionAmount', 5000);
       setValue('contributionFrequencyDays', 30);
       setValue('cycleCount', 12);
@@ -111,7 +120,7 @@ export function CreateCircleForm({
     } else if (key === 'wedding') {
       setValue('name', 'Wedding Savings Circle');
       setValue('segment', 'womens_circle');
-      setValue('challengeKind', 'savings');
+      setChallengeKind('savings');
       setValue('contributionAmount', 3000);
       setValue('contributionFrequencyDays', 30);
       setValue('cycleCount', undefined);
@@ -121,10 +130,23 @@ export function CreateCircleForm({
         'description',
         'Group savings toward a wedding or nikah — link a goal after you create the circle.',
       );
+    } else if (key === 'table') {
+      setValue('name', 'Table Banking Chama');
+      setValue('segment', 'general');
+      setChallengeKind('share_dividend');
+      setValue('contributionAmount', 2000);
+      setValue('contributionFrequencyDays', 30);
+      setValue('cycleCount', undefined);
+      setValue('maxMembers', undefined);
+      setValue('slotPricingEnabled', false);
+      setValue(
+        'description',
+        'Share capital, monthly savings, and member loans — table banking style books.',
+      );
     } else {
       setValue('name', 'Boda Stage Chama');
       setValue('segment', 'boda_stage');
-      setValue('challengeKind', 'rotating');
+      setChallengeKind('rotating');
       setValue('contributionAmount', 1000);
       setValue('contributionFrequencyDays', 7);
       setValue('cycleCount', 8);
@@ -175,15 +197,70 @@ export function CreateCircleForm({
       ) : null}
 
       <form onSubmit={handleSubmit(onValid)} className="space-y-6" noValidate>
+        <div className="space-y-3">
+          <div>
+            <Label>How will this circle work?</Label>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pick one first. Templates below fill amounts and cadence — they will not hide this
+              choice.
+            </p>
+          </div>
+          <input type="hidden" {...register('challengeKind')} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {(
+              [
+                {
+                  value: 'rotating' as const,
+                  title: 'Merry-go-round',
+                  hint: 'Monthly contributions · payout slots · who gets the pot',
+                },
+                {
+                  value: 'share_dividend' as const,
+                  title: 'Table banking',
+                  hint: 'Share capital · monthly savings grid · loans',
+                },
+                {
+                  value: 'savings' as const,
+                  title: 'Savings',
+                  hint: 'Contribution calendar · goals · no rotating pot',
+                },
+              ] as const
+            ).map((card) => {
+              const selected = challengeKind === card.value;
+              return (
+                <button
+                  key={card.value}
+                  type="button"
+                  onClick={() => setChallengeKind(card.value)}
+                  className={[
+                    'rounded-xl border px-4 py-4 text-left transition-colors',
+                    selected
+                      ? 'border-primary bg-primary/10 shadow-sm'
+                      : 'border-border bg-background hover:border-primary/40',
+                  ].join(' ')}
+                >
+                  <p className="text-sm font-semibold text-foreground">{card.title}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
+                  {selected ? (
+                    <p className="mt-2 text-xs font-semibold text-primary">Selected</p>
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+          <FieldError message={fieldError('challengeKind')} />
+        </div>
+
         <div className="space-y-2">
           <Label>Quick templates</Label>
           <div className="flex flex-wrap gap-2">
             {(
               [
-                ['sisters', 'Sisters rotating'],
-                ['school', 'School fees'],
-                ['wedding', 'Wedding savings'],
-                ['boda', 'Boda weekly'],
+                ['sisters', 'Sisters (merry-go-round)'],
+                ['school', 'School fees (merry-go-round)'],
+                ['table', 'Table banking'],
+                ['wedding', 'Wedding (savings)'],
+                ['boda', 'Boda weekly (merry-go-round)'],
               ] as const
             ).map(([key, label]) => (
               <button
@@ -197,8 +274,8 @@ export function CreateCircleForm({
             ))}
           </div>
           <p className="text-xs text-muted-foreground">
-            Templates fill amount, cadence, and women’s/boda segment — edit anything before
-            create.
+            Templates set name, amount, and cadence — and update the circle type cards above so you
+            always see what you are creating.
           </p>
         </div>
 
@@ -273,42 +350,24 @@ export function CreateCircleForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cycleCount">Number of cycles (optional)</Label>
+            <Label htmlFor="cycleCount">
+              {challengeKind === 'rotating' ? 'Number of cycles' : 'Number of cycles (optional)'}
+            </Label>
             <Input
               id="cycleCount"
               type="number"
               min={JAMIYA_CONSTRAINTS.minCycles}
               max={JAMIYA_CONSTRAINTS.maxCycles}
-              placeholder="Leave blank"
+              placeholder={challengeKind === 'rotating' ? 'e.g. 10 or 12' : 'Leave blank'}
               {...register('cycleCount')}
             />
             <p className="text-xs text-muted-foreground">
-              Leave blank unless this is a merry-go-round. Savings and share groups do not need a
-              fixed cycle count.
+              {challengeKind === 'rotating'
+                ? 'Usually matches how many members take a payout turn.'
+                : 'Not needed for savings or table banking.'}
             </p>
             <FieldError message={fieldError('cycleCount')} />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="challengeKind">Challenge type</Label>
-          <select
-            id="challengeKind"
-            className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            {...register('challengeKind')}
-          >
-            <option value="savings">Savings challenge (no rotating payouts)</option>
-            <option value="share_dividend">Share / dividend group</option>
-            <option value="rotating">Rotating payouts (merry-go-round)</option>
-          </select>
-          <p className="text-xs text-muted-foreground">
-            {challengeKind === 'share_dividend'
-              ? 'Members buy shares and take dividends or profits. Activation will not create merry-go-round payouts.'
-              : challengeKind === 'rotating'
-                ? 'Classic rotating circle: one scheduled payout turn per cycle.'
-                : 'Contribution rounds only. Number of cycles is not the number of people.'}
-          </p>
-          <FieldError message={fieldError('challengeKind')} />
         </div>
 
         {challengeKind === 'rotating' ? (
