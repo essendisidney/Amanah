@@ -5,6 +5,8 @@ import {
   recordMonthlySavingsAction,
 } from '@/features/circles/actions/books-actions';
 
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
 type Props = {
   jamiyaId: string;
   slug: string;
@@ -20,6 +22,7 @@ export function MemberBooksRecordForms({
   currency,
   parValue,
 }: Props) {
+  const today = todayIso();
   return (
     <section className="grid gap-6 lg:grid-cols-2">
       <form
@@ -45,7 +48,7 @@ export function MemberBooksRecordForms({
           </div>
           <div className="space-y-1">
             <Label htmlFor="purchasedOn">Date</Label>
-            <Input id="purchasedOn" name="purchasedOn" type="date" defaultValue="2026-02-05" required />
+            <Input id="purchasedOn" name="purchasedOn" type="date" defaultValue={today} required />
           </div>
           <div className="space-y-1">
             <Label htmlFor="shareNotes">Notes</Label>
@@ -77,7 +80,7 @@ export function MemberBooksRecordForms({
           </div>
           <div className="space-y-1">
             <Label htmlFor="startDate">First date</Label>
-            <Input id="startDate" name="startDate" type="date" defaultValue="2026-02-05" required />
+            <Input id="startDate" name="startDate" type="date" defaultValue={today} required />
           </div>
           <div className="space-y-1">
             <Label htmlFor="savingsNotes">Notes</Label>
@@ -134,7 +137,7 @@ export function MemberBooksRecordForms({
           </div>
           <div className="space-y-1">
             <Label htmlFor="loanDate">Date</Label>
-            <Input id="loanDate" name="effectiveDate" type="date" defaultValue="2026-02-05" required />
+            <Input id="loanDate" name="effectiveDate" type="date" defaultValue={today} required />
           </div>
           <div className="space-y-1 sm:col-span-2">
             <Label htmlFor="loanNotes">Notes</Label>
@@ -162,7 +165,7 @@ export function MemberBooksRecordForms({
           </div>
           <div className="space-y-1">
             <Label htmlFor="repayDate">Date</Label>
-            <Input id="repayDate" name="effectiveDate" type="date" defaultValue="2026-02-05" required />
+            <Input id="repayDate" name="effectiveDate" type="date" defaultValue={today} required />
           </div>
           <div className="space-y-1">
             <Label htmlFor="repayNotes">Notes</Label>

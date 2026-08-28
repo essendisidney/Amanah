@@ -135,6 +135,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: contribData },
     { data: payoutData },
     graceResult,
+    penaltyResult,
     { data: walletData },
     { data: paymentData },
   ] = await Promise.all([
@@ -171,6 +172,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .eq('jamiya_id', jamiya.id)
       .eq('status', 'pending'),
     supabase
+      .from('penalties')
+      .select('id', { count: 'exact', head: true })
+      .eq('jamiya_id', jamiya.id)
+      .eq('status', 'open'),
+    supabase
       .from('wallets')
       .select('available_balance, currency')
       .eq('user_id', user.id)
@@ -187,6 +193,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   ]);
 
   const pendingGraceCount = graceResult.count ?? 0;
+  const openPenaltyCount = penaltyResult.count ?? 0;
   const walletRow = walletData as
     | { available_balance: number | string; currency: string }
     | null;
@@ -588,7 +595,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   }
 
   // If no contributions yet but cycles are planned, seed month columns from start_date.
-  if (isRotating && mgrMonthMap.size === 0 && (jamiya.cycle_count ?? 0) >= 1) {
+  if ((isRotating || isSavings) && mgrMonthMap.size === 0 && (jamiya.cycle_count ?? 0) >= 1) {
     const start = jamiya.start_date ? new Date(jamiya.start_date) : new Date();
     const freq = Math.max(jamiya.contribution_frequency_days || 30, 1);
     const cycles = Math.min(jamiya.cycle_count ?? 12, 24);
@@ -611,6 +618,43 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     (a, b) => a.year - b.year || a.month - b.month || a.cycleNumber - b.cycleNumber,
   );
 
+  const currentRoundSlot =
+    merryGoRoundSlots.find(
+      (s) => s.payoutStatus === 'scheduled' || s.payoutStatus === 'processing',
+    ) ??
+    merryGoRoundSlots.find((s) => s.cycleNumber === Math.max(jamiya.current_cycle, 1)) ??
+    null;
+
+  const unpaidMemberLabels = isRotating
+    ? (currentRoundSlot?.unpaidLabels ?? [])
+    : [
+        ...new Set(
+          contributions
+            .filter((c) => ['pending', 'late', 'partial'].includes(c.status) && c.memberLabel)
+            .map((c) => c.memberLabel as string),
+        ),
+      ];
+
+  const recordPaymentHref = canManageOps
+    ? isShareDividend
+      ? (`/circles/${slug}/books?view=grid` as Route)
+      : (`/circles/${slug}#monthly-payments` as Route)
+    : undefined;
+
+  const recordPaymentLabel = isShareDividend
+    ? 'Open payment grid'
+    : isRotating
+      ? 'Record contributions'
+      : 'Record savings';
+
+  const officerCycleLabel = isRotating
+    ? currentRoundSlot
+      ? `Round ${currentRoundSlot.cycleNumber} · ${currentRoundSlot.memberLabel} gets the pot`
+      : null
+    : isSavings
+      ? `${unpaidMemberLabels.length} member${unpaidMemberLabels.length === 1 ? '' : 's'} with open savings dues`
+      : null;
+
   const hubGroups: CircleHubGroup[] = [
     {
       title: isRotating
@@ -630,7 +674,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               ...(canManageOps
                 ? [
                     {
-                      href: `/circles/${slug}#mgr-payments` as Route,
+                      href: `/circles/${slug}#monthly-payments` as Route,
                       label: 'Monthly contributions',
                       hint: 'Enter or fix any month (past or present)',
                       primary: true as const,
@@ -675,6 +719,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   hint: 'Track savings dues',
                   primary: true as const,
                 },
+                ...(canManageOps
+                  ? [
+                      {
+                        href: `/circles/${slug}#monthly-payments` as Route,
+                        label: 'Monthly savings grid',
+                        hint: 'Enter or fix any month for every member',
+                        primary: true as const,
+                      },
+                    ]
+                  : []),
                 {
                   href: `/circles/${slug}/treasury` as Route,
                   label: 'Treasury',
@@ -810,7 +864,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </p>
       ) : null}
 
-      <CircleActionHub groups={hubGroups} />
+      <CircleActionHub groups={hubGroups} challengeKind={jamiya.challenge_kind} />
 
       {canActivate ? (
         <ActivateCircleButton
@@ -880,10 +934,10 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </CircleSection>
       ) : null}
 
-      {canManageOps && isRotating ? (
+      {canManageOps && (isRotating || isSavings) ? (
         <CircleSection
-          id="mgr-payments"
-          title="Monthly contributions"
+          id="monthly-payments"
+          title={isRotating ? 'Monthly contributions' : 'Monthly savings grid'}
           description="Record what each member paid for any month — past or present. Empty cells mean they did not contribute."
           padded={false}
         >
@@ -906,6 +960,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             slug={jamiya.slug}
             lateCount={lateCount}
             pendingGrace={pendingGraceCount ?? 0}
+            openPenaltyCount={openPenaltyCount}
+            unpaidMemberLabels={unpaidMemberLabels}
+            recordPaymentHref={recordPaymentHref}
+            recordPaymentLabel={recordPaymentLabel}
+            cycleLabel={officerCycleLabel}
             nextPayoutLabel={nextPayout?.memberLabel ?? null}
             nextPayoutDate={nextPayout?.scheduledDate ?? null}
             nextPayoutAmount={nextPayout?.amount ?? null}
@@ -1095,9 +1154,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
                 </Button>
               ) : null}
-              {canManageOps && isRotating ? (
+              {canManageOps && (isRotating || isSavings) ? (
                 <Button asChild size="sm" variant="outline" className="rounded-full">
-                  <a href="#mgr-payments">Monthly contributions</a>
+                  <a href="#monthly-payments">Monthly contributions</a>
                 </Button>
               ) : null}
               {!isRotating ? (

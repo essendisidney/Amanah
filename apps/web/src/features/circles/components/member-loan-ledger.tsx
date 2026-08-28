@@ -55,6 +55,7 @@ export function MemberLoanLedger({
   const principal = facility?.principal_outstanding ?? 0;
   const rate = facility?.profit_rate_pct ?? 10;
   const suggestedProfit = Math.round((principal * rate) / 100);
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <section className="space-y-4 rounded-xl border border-border bg-card p-5">
@@ -115,7 +116,7 @@ export function MemberLoanLedger({
           slug={slug}
           memberId={memberId}
           eventType="disbursement"
-          defaultDate="2026-02-05"
+          defaultDate={today}
         />
         <LoanEventForm
           title="Pay profit only"
@@ -124,7 +125,7 @@ export function MemberLoanLedger({
           memberId={memberId}
           eventType="profit"
           defaultAmount={suggestedProfit > 0 ? suggestedProfit : undefined}
-          defaultDate="2026-02-05"
+          defaultDate={today}
         />
         <LoanEventForm
           title="Repayment (principal + profit)"
@@ -133,7 +134,7 @@ export function MemberLoanLedger({
           memberId={memberId}
           eventType="repayment"
           showProfitSplit
-          defaultDate="2026-02-05"
+          defaultDate={today}
         />
         <LoanEventForm
           title="Rollover + top-up"
@@ -142,7 +143,7 @@ export function MemberLoanLedger({
           memberId={memberId}
           eventType="rollover"
           showRollover
-          defaultDate="2026-02-05"
+          defaultDate={today}
           helpText="Profit paid on closing the old loan, then new balance after rollover (e.g. Sarah 50,000 → 40,300 with top-up)."
         />
       </div>

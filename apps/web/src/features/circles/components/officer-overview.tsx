@@ -1,6 +1,7 @@
+import { formatCurrency, formatDate } from '@jamiya/shared';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { formatCurrency, formatDate } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 
 export function OfficerOverviewStrip({
   slug,
@@ -13,6 +14,11 @@ export function OfficerOverviewStrip({
   nextPayoutDate,
   nextPayoutAmount,
   currency,
+  unpaidMemberLabels = [],
+  openPenaltyCount = 0,
+  recordPaymentHref,
+  recordPaymentLabel = 'Record payment',
+  cycleLabel,
 }: {
   slug: string;
   lateCount: number;
@@ -24,45 +30,83 @@ export function OfficerOverviewStrip({
   nextPayoutDate: string | null;
   nextPayoutAmount: number | null;
   currency: string;
+  /** Members who still owe this round / have open dues */
+  unpaidMemberLabels?: string[];
+  openPenaltyCount?: number;
+  recordPaymentHref?: string;
+  recordPaymentLabel?: string;
+  cycleLabel?: string | null;
 }) {
   const attention =
-    lateCount + pendingGrace + pendingQard + pendingDual + openCases;
+    lateCount + pendingGrace + pendingQard + pendingDual + openCases + openPenaltyCount;
+  const unpaidPreview = unpaidMemberLabels.slice(0, 4);
+  const unpaidMore = Math.max(unpaidMemberLabels.length - unpaidPreview.length, 0);
 
   return (
     <section className="amanah-surface px-5 py-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Officer overview
+            Today
           </p>
           <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold">
-            Treasurer snapshot
+            Officer snapshot
           </h2>
+          {cycleLabel ? (
+            <p className="mt-1 text-sm text-muted-foreground">{cycleLabel}</p>
+          ) : null}
           {attention > 0 ? (
             <p className="mt-1 text-sm font-medium text-accent">
               {attention} item{attention === 1 ? '' : 's'} need attention
             </p>
           ) : (
-            <p className="mt-1 text-sm text-muted-foreground">Queues look clear</p>
+            <p className="mt-1 text-sm text-muted-foreground">All caught up for now</p>
           )}
         </div>
-        <Link
-          href={`/circles/${slug}` as Route}
-          className="text-sm font-medium text-accent hover:underline"
-        >
-          Back to circle
-        </Link>
+        {recordPaymentHref ? (
+          <Button asChild size="sm" className="min-h-11 rounded-full">
+            <Link href={recordPaymentHref as Route}>{recordPaymentLabel}</Link>
+          </Button>
+        ) : null}
       </div>
+
+      {unpaidMemberLabels.length > 0 ? (
+        <div className="mt-4 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Still owing ({unpaidMemberLabels.length})
+          </p>
+          <p className="mt-1 text-sm font-medium text-foreground">
+            {unpaidPreview.join(', ')}
+            {unpaidMore > 0 ? ` +${unpaidMore} more` : ''}
+          </p>
+        </div>
+      ) : null}
 
       {attention > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
+          {unpaidMemberLabels.length > 0 && recordPaymentHref ? (
+            <Link
+              href={recordPaymentHref as Route}
+              className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+            >
+              Collect {unpaidMemberLabels.length}
+            </Link>
+          ) : null}
           {lateCount > 0 ? (
             <a
-              href="#officer-dues"
+              href="#calendar"
               className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
             >
-              Dues {lateCount}
+              Late {lateCount}
             </a>
+          ) : null}
+          {openPenaltyCount > 0 ? (
+            <Link
+              href={`/circles/${slug}/statement` as Route}
+              className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
+            >
+              Fines {openPenaltyCount}
+            </Link>
           ) : null}
           {pendingGrace > 0 ? (
             <a
@@ -80,34 +124,16 @@ export function OfficerOverviewStrip({
               Qard {pendingQard}
             </a>
           ) : null}
-          {pendingDual > 0 ? (
-            <a
-              href="#officer-dual"
-              className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
-            >
-              Dual {pendingDual}
-            </a>
-          ) : null}
-          {openCases > 0 ? (
-            <a
-              href="#officer-cases"
-              className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
-            >
-              Cases {openCases}
-            </a>
-          ) : null}
         </div>
       ) : null}
 
       <dl className="mt-4 grid gap-4 sm:grid-cols-3">
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Late dues</dt>
-          <dd className="mt-1 text-2xl font-semibold">{lateCount}</dd>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Open dues</dt>
+          <dd className="mt-1 text-2xl font-semibold">{unpaidMemberLabels.length || lateCount}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-            Pending grace
-          </dt>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Pending grace</dt>
           <dd className="mt-1 text-2xl font-semibold">{pendingGrace}</dd>
         </div>
         <div>

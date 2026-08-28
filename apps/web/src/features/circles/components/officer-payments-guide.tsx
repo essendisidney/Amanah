@@ -40,7 +40,7 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
         </ol>
         <div className="mt-5 flex flex-wrap gap-2">
           <Button asChild size="lg" className="min-h-11 rounded-full px-6">
-            <a href="#mgr-payments">Enter payments</a>
+            <a href="#monthly-payments">Enter payments</a>
           </Button>
           <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
             <a href="#merry-go-round">View slots</a>

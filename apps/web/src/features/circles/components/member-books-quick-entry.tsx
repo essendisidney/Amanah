@@ -28,10 +28,11 @@ export function MemberBooksQuickEntry({
   parValue,
   defaultShareAmount = 5000,
   defaultMonthAmount = 2000,
-  defaultShareDate = '2026-02-05',
-  defaultStartDate = '2026-02-05',
   defaultMonths = 6,
 }: Props) {
+  const today = new Date().toISOString().slice(0, 10);
+  const shareDate = defaultShareDate ?? today;
+  const startDate = defaultStartDate ?? today;
   return (
     <section className="space-y-4 rounded-xl border border-accent/30 bg-accent/5 p-5">
       <div>
@@ -71,7 +72,7 @@ export function MemberBooksQuickEntry({
                 id="purchasedOn"
                 name="purchasedOn"
                 type="date"
-                defaultValue={defaultShareDate}
+                defaultValue={shareDate}
                 required
               />
             </div>
@@ -120,7 +121,7 @@ export function MemberBooksQuickEntry({
                 id="startDate"
                 name="startDate"
                 type="date"
-                defaultValue={defaultStartDate}
+                defaultValue={startDate}
                 required
               />
             </div>
@@ -150,7 +151,7 @@ export function MemberBooksQuickEntry({
                 id="loanDate"
                 name="effectiveDate"
                 type="date"
-                defaultValue={defaultShareDate}
+                defaultValue={shareDate}
               />
             </div>
             <div className="space-y-1">

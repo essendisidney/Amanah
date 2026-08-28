@@ -64,6 +64,7 @@ export function MerryGoRoundPaymentsGrid({
   const [pending, startTransition] = useTransition();
   const [months, setMonths] = useState(() => sortMonths(initialMonths));
   const [fillAmount, setFillAmount] = useState(String(defaultAmount || 0));
+  const [mobileMemberId, setMobileMemberId] = useState(members[0]?.id ?? '');
   const [draft, setDraft] = useState<Record<string, string>>(() => {
     const next: Record<string, string> = {};
     for (const m of members) {
@@ -271,7 +272,59 @@ export function MerryGoRoundPaymentsGrid({
           <strong className="text-foreground">Add month</strong> to start recording.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <>
+          {/* Mobile: one member at a time — easier thumb entry */}
+          <div className="space-y-3 md:hidden">
+            <Label htmlFor="mgrMobileMember">Member</Label>
+            <select
+              id="mgrMobileMember"
+              value={mobileMemberId}
+              onChange={(e) => setMobileMemberId(e.target.value)}
+              className="block h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+            >
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.label}
+                </option>
+              ))}
+            </select>
+            <ul className="space-y-2">
+              {months.map((col) => {
+                const key = cellKey(mobileMemberId, col.cycleNumber);
+                const raw = draft[key] ?? '';
+                const paid = Number(raw || 0) > 0;
+                return (
+                  <li
+                    key={key}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{col.label}</p>
+                      <p className="text-xs text-muted-foreground">Cycle {col.cycleNumber}</p>
+                    </div>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="1"
+                      inputMode="decimal"
+                      placeholder="—"
+                      value={raw}
+                      onChange={(e) =>
+                        setDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                      }
+                      className={[
+                        'min-h-12 w-28 text-base',
+                        paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
+                      ].join(' ')}
+                      aria-label={`${col.label} amount`}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
           <table className="min-w-full border-collapse text-sm">
             <thead>
               <tr className="bg-secondary/50 text-left">
@@ -323,6 +376,7 @@ export function MerryGoRoundPaymentsGrid({
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">

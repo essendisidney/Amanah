@@ -15,12 +15,22 @@ export type CircleHubGroup = {
 
 type Props = {
   groups: CircleHubGroup[];
+  /** rotating | share_dividend | savings */
+  challengeKind?: string | null;
 };
 
 /** Near-reach action hub: everything important for this circle in one glance. */
-export function CircleActionHub({ groups }: Props) {
+export function CircleActionHub({ groups, challengeKind }: Props) {
   const visible = groups.filter((g) => g.items.length > 0);
   if (visible.length === 0) return null;
+
+  const isRotating = challengeKind === 'rotating' || !challengeKind;
+  const isShareDividend = challengeKind === 'share_dividend';
+  const subtitle = isRotating
+    ? 'Slots, monthly contributions, statement, and loans — merry-go-round only.'
+    : isShareDividend
+      ? 'Shares, member payments grid, treasury, statement, and loans.'
+      : 'Savings calendar, goals, statement, and loans for this circle.';
 
   return (
     <nav className="amanah-surface space-y-5 px-4 py-5 sm:px-5" aria-label="Circle actions">
@@ -28,9 +38,7 @@ export function CircleActionHub({ groups }: Props) {
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Quick actions
         </p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Contributions, merry-go-round, loans, savings — all from here.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
