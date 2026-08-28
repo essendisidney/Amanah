@@ -60,6 +60,7 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
     { data: membersData },
     { data: entriesData },
     { data: alertsData },
+    { data: openPenaltiesData },
   ] = await Promise.all([
     callRpc('treasury_snapshot', { p_jamiya_id: jamiya.id }),
     supabase
@@ -105,6 +106,15 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           .eq('jamiya_id', jamiya.id)
           .order('created_at', { ascending: false })
           .limit(15)
+      : Promise.resolve({ data: [] as never[] }),
+    canManage
+      ? supabase
+          .from('penalties')
+          .select('id, member_id, kind, amount, currency, notes, assessed_at, status')
+          .eq('jamiya_id', jamiya.id)
+          .eq('status', 'open')
+          .order('assessed_at', { ascending: false })
+          .limit(50)
       : Promise.resolve({ data: [] as never[] }),
   ]);
 
@@ -263,6 +273,24 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           alertText: (a.alert_text as string | null) ?? null,
           createdAt: String(a.created_at),
         }))}
+        openPenalties={((openPenaltiesData ?? []) as Array<Record<string, unknown>>).map((p) => {
+          const memberId = String(p.member_id);
+          const member = memberRows.find((m) => m.id === memberId);
+          const profile = member ? profileMap.get(member.user_id) : undefined;
+          return {
+            id: String(p.id),
+            memberLabel:
+              profile?.full_name ||
+              profile?.email ||
+              member?.member_code ||
+              memberId.slice(0, 8),
+            kind: String(p.kind ?? 'fine'),
+            amount: Number(p.amount),
+            currency: String(p.currency ?? jamiya.currency),
+            notes: (p.notes as string | null) ?? null,
+            assessedAt: (p.assessed_at as string | null) ?? null,
+          };
+        })}
       />
     
     </AppPage>

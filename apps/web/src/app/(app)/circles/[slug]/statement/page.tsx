@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
+import { OpenPenaltiesPanel } from '@/features/circles/components/open-penalties-panel';
 
 export const metadata: Metadata = { title: 'Member statement' };
 export const dynamic = 'force-dynamic';
@@ -486,6 +487,30 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             : undefined
         }
       />
+
+      {isOfficer &&
+      penalties.some((p) => String(p.status) === 'open') ? (
+        <div className="space-y-2 print:hidden">
+          <h3 className="text-sm font-medium text-foreground">Resolve open fines</h3>
+          <OpenPenaltiesPanel
+            slug={slug}
+            returnPath={
+              qs.memberId ? `/statement?memberId=${qs.memberId}` : '/statement'
+            }
+            rows={penalties
+              .filter((p) => String(p.status) === 'open')
+              .map((p) => ({
+                id: String(p.id),
+                memberLabel: 'This member',
+                kind: String(p.kind ?? 'fine'),
+                amount: Number(p.amount),
+                currency: jamiya.currency,
+                notes: p.notes ? String(p.notes) : null,
+                assessedAt: p.assessed_at ? String(p.assessed_at) : null,
+              }))}
+          />
+        </div>
+      ) : null}
 
       <StatementSection
         title="Loans (Qard)"

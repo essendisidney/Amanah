@@ -206,6 +206,48 @@ export async function levyFineAction(formData: FormData): Promise<void> {
   redirectWithCircleNotice(slug, 'Fine added to member statement.', 'success', '/treasury');
 }
 
+export async function resolveMemberPenaltyAction(formData: FormData): Promise<void> {
+  const penaltyId = String(formData.get('penaltyId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const action = String(formData.get('action') ?? '').trim().toLowerCase();
+  const notes = String(formData.get('notes') ?? '').trim() || null;
+  const returnPath = String(formData.get('returnPath') ?? '/treasury').trim() || '/treasury';
+  if (!penaltyId || !slug) return;
+
+  if (action !== 'paid' && action !== 'waived') {
+    redirectWithCircleNotice(slug, 'Choose mark paid or waive.', 'error', returnPath);
+  }
+
+  const { data, error } = await callRpc('resolve_member_penalty', {
+    p_penalty_id: penaltyId,
+    p_action: action,
+    p_notes: notes,
+  });
+
+  if (error) {
+    redirectWithCircleNotice(slug, error.message || 'Could not update fine.', 'error', returnPath);
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    const msg =
+      result?.error === 'NOT_OPEN'
+        ? 'That fine is no longer open.'
+        : result?.error === 'FORBIDDEN'
+          ? 'Only officers can resolve fines.'
+          : result?.error || 'Could not update fine.';
+    redirectWithCircleNotice(slug, msg, 'error', returnPath);
+  }
+
+  revalidateTreasury(slug);
+  redirectWithCircleNotice(
+    slug,
+    action === 'paid' ? 'Fine marked paid.' : 'Fine waived.',
+    'success',
+    returnPath,
+  );
+}
+
 export async function importBookEntriesAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');

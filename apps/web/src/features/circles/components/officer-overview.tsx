@@ -102,7 +102,7 @@ export function OfficerOverviewStrip({
           ) : null}
           {openPenaltyCount > 0 ? (
             <Link
-              href={`/circles/${slug}/statement` as Route}
+              href={`/circles/${slug}/treasury` as Route}
               className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
             >
               Fines {openPenaltyCount}

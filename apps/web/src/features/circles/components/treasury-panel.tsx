@@ -17,6 +17,10 @@ import {
   levyFineAction,
   recordTreasuryEntryAction,
 } from '../actions/treasury-actions';
+import {
+  OpenPenaltiesPanel,
+  type OpenPenaltyRow,
+} from './open-penalties-panel';
 
 export type TreasuryAccount = {
   id: string;
@@ -102,6 +106,7 @@ export function TreasuryPanel({
   members,
   recentEntries,
   bankAlerts = [],
+  openPenalties = [],
 }: {
   jamiyaId: string;
   slug: string;
@@ -115,6 +120,7 @@ export function TreasuryPanel({
   members: TreasuryMember[];
   recentEntries: CashbookRow[];
   bankAlerts?: BankAlertRow[];
+  openPenalties?: OpenPenaltyRow[];
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const incomeCats = categories.filter((c) => c.kind === 'income');
@@ -390,6 +396,10 @@ export function TreasuryPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Member fining
           </h2>
+          <div id="open-fines" className="space-y-2 scroll-mt-24">
+            <h3 className="text-sm font-medium text-foreground">Open fines</h3>
+            <OpenPenaltiesPanel slug={slug} rows={openPenalties} returnPath="/treasury" />
+          </div>
           <form
             action={levyFineAction}
             className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
