@@ -1,6 +1,7 @@
 import { Button, Input, Label } from '@jamiya/ui';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { recordMemberLoanEventAction } from '@/features/circles/actions/loan-actions';
+import { VoidLedgerButton } from '@/features/circles/components/void-ledger-button';
 
 export type LoanLedgerEvent = {
   id: string;
@@ -87,20 +88,28 @@ export function MemberLoanLedger({
         <ul className="divide-y divide-border rounded-lg border border-border">
           {events.map((e) => (
             <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
-              <div>
+              <div className="min-w-0">
                 <p className="font-medium">{EVENT_LABELS[e.event_type] ?? e.event_type}</p>
                 <p className="text-xs text-muted-foreground">
                   {formatDate(e.effective_date)}
                   {e.notes ? ` · ${e.notes}` : ''}
                 </p>
               </div>
-              <div className="text-right tabular-nums">
-                <p className="font-semibold">{formatCurrency(Number(e.amount), currency)}</p>
-                {Number(e.profit_amount) > 0 ? (
-                  <p className="text-xs text-muted-foreground">
-                    incl. profit {formatCurrency(Number(e.profit_amount), currency)}
-                  </p>
-                ) : null}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="text-right tabular-nums">
+                  <p className="font-semibold">{formatCurrency(Number(e.amount), currency)}</p>
+                  {Number(e.profit_amount) > 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      incl. profit {formatCurrency(Number(e.profit_amount), currency)}
+                    </p>
+                  ) : null}
+                </div>
+                <VoidLedgerButton
+                  slug={slug}
+                  memberId={memberId}
+                  kind="loan_event"
+                  id={e.id}
+                />
               </div>
             </li>
           ))}

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import { VoidLedgerButton } from './void-ledger-button';
 
 type ShareLot = {
   id?: string;
@@ -47,14 +48,27 @@ type Props = {
   };
 };
 
+type EntryRow = {
+  id: string;
+  date: string;
+  amount: number;
+  label: string;
+  notes: string | null;
+  voidKind?: 'book_entry' | 'share_lot';
+};
+
 function EntryTable({
   rows,
   currency,
   emptyMessage,
+  slug,
+  memberId,
 }: {
-  rows: Array<{ id: string; date: string; amount: number; label: string; notes: string | null }>;
+  rows: EntryRow[];
   currency: string;
   emptyMessage: string;
+  slug: string;
+  memberId: string;
 }) {
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyMessage}</p>;
@@ -63,14 +77,24 @@ function EntryTable({
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">
       {rows.map((row) => (
         <li key={row.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-          <div>
+          <div className="min-w-0">
             <p className="font-medium text-foreground">{row.label}</p>
             <p className="text-xs text-muted-foreground">
               {row.date ? formatDate(row.date) : 'Facility'}
               {row.notes ? ` · ${row.notes}` : ''}
             </p>
           </div>
-          <p className="font-semibold tabular-nums">{formatCurrency(row.amount, currency)}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold tabular-nums">{formatCurrency(row.amount, currency)}</p>
+            {row.voidKind ? (
+              <VoidLedgerButton
+                slug={slug}
+                memberId={memberId}
+                kind={row.voidKind}
+                id={row.id}
+              />
+            ) : null}
+          </div>
         </li>
       ))}
     </ul>
@@ -94,15 +118,18 @@ export function MemberBooksDetail({
     0,
   );
 
-  const shareRows = shareLots.map((lot, i) => ({
-    id: lot.id ?? `lot-${i}`,
-    date: lot.purchased_on,
-    amount: Number(lot.amount) || 0,
-    label: `${Number(lot.shares).toLocaleString()} shares`,
-    notes: lot.notes,
-  }));
+  const shareRows: EntryRow[] = shareLots
+    .filter((lot) => Boolean(lot.id))
+    .map((lot) => ({
+      id: String(lot.id),
+      date: lot.purchased_on,
+      amount: Number(lot.amount) || 0,
+      label: `${Number(lot.shares).toLocaleString()} shares`,
+      notes: lot.notes,
+      voidKind: 'share_lot' as const,
+    }));
 
-  const contributionRows = contributions
+  const contributionRows: EntryRow[] = contributions
     .slice()
     .sort((a, b) => b.effective_date.localeCompare(a.effective_date))
     .map((b) => ({
@@ -111,15 +138,17 @@ export function MemberBooksDetail({
       amount: Number(b.amount) || 0,
       label: 'Monthly savings',
       notes: b.notes,
+      voidKind: 'book_entry' as const,
     }));
 
-  const loanRows = [
+  const loanRows: EntryRow[] = [
     ...loans.map((b) => ({
       id: b.id,
       date: b.effective_date,
       amount: Number(b.amount) || 0,
       label: 'Loan disbursed',
       notes: b.notes,
+      voidKind: 'book_entry' as const,
     })),
     ...repayments.map((b) => ({
       id: b.id,
@@ -127,6 +156,7 @@ export function MemberBooksDetail({
       amount: Number(b.amount) || 0,
       label: 'Loan repayment',
       notes: b.notes,
+      voidKind: 'book_entry' as const,
     })),
     ...qardLoans.map((l) => ({
       id: l.id,
@@ -173,6 +203,8 @@ export function MemberBooksDetail({
             rows={shareRows}
             currency={currency}
             emptyMessage="No share capital recorded yet."
+            slug={slug}
+            memberId={memberId}
           />
           {shareRows.length > 0 ? (
             <p className="text-right text-sm font-medium text-foreground">
@@ -190,6 +222,8 @@ export function MemberBooksDetail({
             rows={contributionRows}
             currency={currency}
             emptyMessage="No monthly contributions recorded yet."
+            slug={slug}
+            memberId={memberId}
           />
           {contributionRows.length > 0 ? (
             <p className="text-right text-sm font-medium text-foreground">
@@ -207,6 +241,8 @@ export function MemberBooksDetail({
             rows={loanRows}
             currency={currency}
             emptyMessage="No loans recorded for this member."
+            slug={slug}
+            memberId={memberId}
           />
           {loanRows.length > 0 ? (
             <div className="flex flex-wrap justify-end gap-4 text-sm">

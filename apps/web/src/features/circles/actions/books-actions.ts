@@ -683,3 +683,42 @@ export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise
     '/books?view=grid',
   );
 }
+
+/** Void a mistaken book entry, share lot, or loan ledger event. */
+export async function voidLedgerLineAction(formData: FormData): Promise<void> {
+  const slug = String(formData.get('slug') ?? '');
+  const memberId = String(formData.get('memberId') ?? '');
+  const kind = String(formData.get('kind') ?? '').trim().toLowerCase();
+  const id = String(formData.get('id') ?? '').trim();
+  const reason = String(formData.get('reason') ?? '').trim() || null;
+
+  if (!slug || !id || !['book_entry', 'share_lot', 'loan_event'].includes(kind)) {
+    return;
+  }
+
+  const returnPath = memberId ? booksPath(memberId) : '/books';
+
+  const { data, error } = await callRpc('officer_void_ledger_line', {
+    p_kind: kind,
+    p_id: id,
+    p_reason: reason,
+  });
+
+  if (error) {
+    redirectWithCircleNotice(slug, error.message || 'Could not void line.', 'error', returnPath);
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    const msg =
+      result?.error === 'FORBIDDEN'
+        ? 'Only officers can void ledger lines.'
+        : result?.error === 'NOT_FOUND'
+          ? 'That line was already removed.'
+          : result?.error || 'Could not void line.';
+    redirectWithCircleNotice(slug, msg, 'error', returnPath);
+  }
+
+  revalidateBooks(slug);
+  redirectWithCircleNotice(slug, 'Line voided.', 'success', returnPath);
+}
