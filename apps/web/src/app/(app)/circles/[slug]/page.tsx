@@ -7,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { InviteMemberForm } from '@/features/circles/components/invite-member-form';
 import { AddMemberForm } from '@/features/circles/components/add-member-form';
+import { BulkPhoneInviteForm } from '@/features/circles/components/bulk-phone-invite-form';
 import { NextOfKinForm } from '@/features/circles/components/next-of-kin-form';
 import {
   MembersList,
@@ -794,6 +795,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                 hint: 'Invite or create member accounts',
               },
               {
+                href: `/circles/${slug}#bulk-invite` as Route,
+                label: 'Bulk phone invite',
+                hint: 'Paste many numbers at once',
+              },
+              {
                 href: `/circles/${slug}#next-of-kin` as Route,
                 label: 'Next of kin',
                 hint: 'Emergency contacts for each member',
@@ -1117,7 +1123,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             title="Add people (manual)"
             description="Create their Amanah account now. They get a join link and code to sign in."
           >
-            <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+            <div className="space-y-8">
+              <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+              <div id="bulk-invite" className="space-y-3 border-t border-border pt-6">
+                <h3 className="text-sm font-semibold text-foreground">Bulk phone invite</h3>
+                <BulkPhoneInviteForm jamiyaId={jamiya.id} circleName={jamiya.name} />
+              </div>
+            </div>
           </CircleSection>
 
           <CircleSection

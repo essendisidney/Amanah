@@ -9,6 +9,15 @@ export type ActionState = {
   fieldErrors?: Record<string, string[]>;
 };
 
+export type BulkAddResultRow = {
+  phone: string;
+  fullName: string | null;
+  success: boolean;
+  message: string;
+  inviteUrl?: string;
+  inviteCode?: string;
+};
+
 export const initialActionState: ActionState = { success: false };
 
 export function mapZodFieldErrors(

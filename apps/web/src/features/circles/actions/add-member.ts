@@ -11,8 +11,9 @@ import {
   getInvitationExpiry,
   hashInvitationToken,
 } from '../lib/invitation-token';
-import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
+import { mapZodFieldErrors, type ActionState, type BulkAddResultRow } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
+import { BULK_PHONE_MAX_ROWS, parseBulkPhoneLines } from '../lib/parse-bulk-phones';
 
 async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;
@@ -100,25 +101,22 @@ function mapAddError(code?: string): string {
   return messages[code ?? ''] ?? 'Could not add member.';
 }
 
-export async function addMemberAction(
-  _prev: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const parsed = addCircleMemberSchema.safeParse({
-    jamiyaId: formData.get('jamiyaId'),
-    email: formData.get('email') || '',
-    phone: formData.get('phone') || '',
-    fullName: formData.get('fullName') || '',
-  });
+export type AddOneMemberResult = {
+  success: boolean;
+  message: string;
+  inviteUrl?: string;
+  inviteCode?: string;
+  mode?: 'added' | 'invited';
+  fieldErrors?: Record<string, string[]>;
+};
 
-  if (!parsed.success) {
-    return {
-      success: false,
-      message: 'Please fix the errors below.',
-      fieldErrors: mapZodFieldErrors(parsed.error),
-    };
-  }
-
+/** Shared add-or-invite path for one contact (used by single + bulk forms). */
+export async function addOneCircleMember(args: {
+  jamiyaId: string;
+  email?: string | null;
+  phone?: string | null;
+  fullName?: string | null;
+}): Promise<AddOneMemberResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -128,10 +126,10 @@ export async function addMemberAction(
     return { success: false, message: 'Authentication required.' };
   }
 
-  const jamiyaId = parsed.data.jamiyaId;
-  const email = (parsed.data.email || '').trim().toLowerCase();
-  const phone = (parsed.data.phone || '').trim() || null;
-  const fullName = (parsed.data.fullName || '').trim() || null;
+  const jamiyaId = args.jamiyaId;
+  const email = (args.email || '').trim().toLowerCase();
+  const phone = (args.phone || '').trim() || null;
+  const fullName = (args.fullName || '').trim() || null;
 
   const { data: jamiya } = await supabase
     .from('jamiyas')
@@ -144,7 +142,6 @@ export async function addMemberAction(
     return { success: false, message: 'Circle not found.' };
   }
 
-  // Try existing profile via definer RPC (email/phone lookup)
   const { data: existingData, error: existingErr } = await callRpc(
     'admin_add_circle_member',
     {
@@ -167,8 +164,6 @@ export async function addMemberAction(
   } | null;
 
   if (existing?.ok) {
-    revalidatePath(`/circles/${circle.slug}`);
-    revalidatePath('/circles');
     return {
       success: true,
       mode: 'added',
@@ -182,7 +177,6 @@ export async function addMemberAction(
     return { success: false, message: mapAddError(existing.error) };
   }
 
-  // Provision new Auth user (email invite and/or phone-only account)
   if (!email && !phone) {
     return {
       success: false,
@@ -233,7 +227,6 @@ export async function addMemberAction(
       provisionError = inviteErr?.message ?? createErr?.message;
     }
   } else if (phone) {
-    // Phone-only: elders without email — claim via SMS OTP on /phone
     const { data: created, error: createErr } = await service.auth.admin.createUser({
       phone,
       phone_confirm: true,
@@ -245,7 +238,6 @@ export async function addMemberAction(
     provisionError = createErr?.message;
 
     if (!newUserId) {
-      // Phone may already exist — reuse that profile
       const { data: byPhone } = await service
         .from('profiles')
         .select('id')
@@ -327,9 +319,6 @@ export async function addMemberAction(
     slug: circle.slug,
   });
 
-  revalidatePath(`/circles/${circle.slug}`);
-  revalidatePath('/circles');
-
   if ('error' in claim) {
     return {
       success: true,
@@ -338,9 +327,10 @@ export async function addMemberAction(
     };
   }
 
-  const phoneHint = !email && phone
-    ? ' They can sign in with phone OTP on Amanah, then paste the code.'
-    : '';
+  const phoneHint =
+    !email && phone
+      ? ' They can sign in with phone OTP on Amanah, then paste the code.'
+      : '';
 
   return {
     success: true,
@@ -348,5 +338,143 @@ export async function addMemberAction(
     message: `Member added. Share the claim link or invite code so they can sign in.${phoneHint}`,
     inviteUrl: claim.inviteUrl,
     inviteCode: claim.inviteCode,
+  };
+}
+
+export async function addMemberAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const parsed = addCircleMemberSchema.safeParse({
+    jamiyaId: formData.get('jamiyaId'),
+    email: formData.get('email') || '',
+    phone: formData.get('phone') || '',
+    fullName: formData.get('fullName') || '',
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Please fix the errors below.',
+      fieldErrors: mapZodFieldErrors(parsed.error),
+    };
+  }
+
+  const result = await addOneCircleMember({
+    jamiyaId: parsed.data.jamiyaId,
+    email: parsed.data.email || '',
+    phone: parsed.data.phone || '',
+    fullName: parsed.data.fullName || '',
+  });
+
+  if (result.success) {
+    const { data: jamiya } = await (await createClient())
+      .from('jamiyas')
+      .select('slug')
+      .eq('id', parsed.data.jamiyaId)
+      .maybeSingle();
+    const slug = (jamiya as { slug: string } | null)?.slug;
+    if (slug) {
+      revalidatePath(`/circles/${slug}`);
+      revalidatePath('/circles');
+    }
+  }
+
+  return result;
+}
+
+export type BulkAddMembersState = ActionState & {
+  results?: BulkAddResultRow[];
+};
+
+export const initialBulkAddState: BulkAddMembersState = { success: false };
+
+export async function bulkAddMembersByPhoneAction(
+  _prev: BulkAddMembersState,
+  formData: FormData,
+): Promise<BulkAddMembersState> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '').trim();
+  const phonesText = String(formData.get('phones') ?? '');
+
+  if (!jamiyaId) {
+    return { success: false, message: 'Circle is required.' };
+  }
+
+  const rows = parseBulkPhoneLines(phonesText);
+  if (rows.length === 0) {
+    return {
+      success: false,
+      message: 'Paste at least one Kenya mobile number.',
+      fieldErrors: { phones: ['Paste phone numbers (one per line).'] },
+    };
+  }
+
+  if (rows.length > BULK_PHONE_MAX_ROWS) {
+    return {
+      success: false,
+      message: `Paste at most ${BULK_PHONE_MAX_ROWS} numbers at a time.`,
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, message: 'Authentication required.' };
+  }
+
+  const { data: jamiya } = await supabase
+    .from('jamiyas')
+    .select('id, slug')
+    .eq('id', jamiyaId)
+    .maybeSingle();
+  const circle = jamiya as { id: string; slug: string } | null;
+  if (!circle) {
+    return { success: false, message: 'Circle not found.' };
+  }
+
+  const results: BulkAddResultRow[] = [];
+
+  for (const row of rows) {
+    if (!row.phone) {
+      results.push({
+        phone: row.raw,
+        fullName: row.fullName,
+        success: false,
+        message: 'Invalid Kenya mobile (use 07… or +254…).',
+      });
+      continue;
+    }
+
+    const outcome = await addOneCircleMember({
+      jamiyaId,
+      phone: row.phone,
+      fullName: row.fullName,
+    });
+
+    results.push({
+      phone: row.phone,
+      fullName: row.fullName,
+      success: outcome.success,
+      message: outcome.message,
+      inviteUrl: outcome.inviteUrl,
+      inviteCode: outcome.inviteCode,
+    });
+  }
+
+  const okCount = results.filter((r) => r.success).length;
+  const failCount = results.length - okCount;
+
+  revalidatePath(`/circles/${circle.slug}`);
+  revalidatePath('/circles');
+
+  return {
+    success: okCount > 0,
+    message:
+      failCount === 0
+        ? `Added ${okCount} member${okCount === 1 ? '' : 's'}.`
+        : `Added ${okCount}, ${failCount} failed. Check the list below.`,
+    results,
   };
 }
