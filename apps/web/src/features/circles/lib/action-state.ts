@@ -18,7 +18,12 @@ export type BulkAddResultRow = {
   inviteCode?: string;
 };
 
+export type BulkAddMembersState = ActionState & {
+  results?: BulkAddResultRow[];
+};
+
 export const initialActionState: ActionState = { success: false };
+export const initialBulkAddState: BulkAddMembersState = { success: false };
 
 export function mapZodFieldErrors(
   error: { flatten: () => { fieldErrors: Record<string, string[] | undefined> } },

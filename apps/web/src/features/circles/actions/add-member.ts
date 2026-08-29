@@ -11,7 +11,7 @@ import {
   getInvitationExpiry,
   hashInvitationToken,
 } from '../lib/invitation-token';
-import { mapZodFieldErrors, type ActionState, type BulkAddResultRow } from '../lib/action-state';
+import { mapZodFieldErrors, type ActionState, type BulkAddResultRow, type BulkAddMembersState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
 import { BULK_PHONE_MAX_ROWS, parseBulkPhoneLines } from '../lib/parse-bulk-phones';
 
@@ -382,12 +382,6 @@ export async function addMemberAction(
 
   return result;
 }
-
-export type BulkAddMembersState = ActionState & {
-  results?: BulkAddResultRow[];
-};
-
-export const initialBulkAddState: BulkAddMembersState = { success: false };
 
 export async function bulkAddMembersByPhoneAction(
   _prev: BulkAddMembersState,

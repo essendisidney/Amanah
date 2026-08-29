@@ -6,8 +6,8 @@ import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Label, Textarea } from '@jamiya/ui';
 import {
   bulkAddMembersByPhoneAction,
-  initialBulkAddState,
 } from '../actions/add-member';
+import { initialBulkAddState } from '../lib/action-state';
 import { InviteSharePanel } from './invite-share-panel';
 
 export function BulkPhoneInviteForm({
