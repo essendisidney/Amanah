@@ -77,7 +77,6 @@ function buildGlanceLines(
 ): string[] {
   const isTb = kind === 'share_dividend';
   const isSavings = kind === 'savings';
-  const isMgr = !isTb && !isSavings;
 
   if (isTb) {
     return [
