@@ -179,41 +179,101 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     stmt.member_code ||
     'Member';
 
-  const snapshotCards = [
-    {
-      label: 'Share capital',
-      value: money(summary.share_capital, jamiya.currency),
-      hint:
-        Number(summary.share_units ?? 0) > 0
-          ? `${Number(summary.share_units).toLocaleString()} share units`
-          : 'Buy-in / shares held',
-    },
-    {
-      label: 'Contributions so far',
-      value: money(summary.contributions_so_far, jamiya.currency),
-      hint: isRotating
-        ? `${summary.cycles_paid ?? 0} cycles paid · ${summary.cycles_open ?? 0} open`
-        : 'Schedule + monthly books',
-    },
-    {
-      label: 'Penalties',
-      value: money(summary.penalties_total, jamiya.currency),
-      hint:
-        Number(summary.penalties_open ?? 0) > 0
-          ? `${money(summary.penalties_open, jamiya.currency)} still open`
-          : Number(summary.penalties_total ?? 0) > 0
-            ? 'All settled'
-            : 'No fines recorded',
-    },
-    {
-      label: 'Loan outstanding',
-      value: money(summary.loan_outstanding, jamiya.currency),
-      hint:
-        Number(summary.loan_principal ?? 0) > 0
-          ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-          : 'No Qard loans',
-    },
-  ];
+  const snapshotCards = isShareDividend
+    ? [
+        {
+          label: 'Share capital',
+          value: money(summary.share_capital, jamiya.currency),
+          hint:
+            Number(summary.share_units ?? 0) > 0
+              ? `${Number(summary.share_units).toLocaleString()} share units`
+              : 'Buy-in / shares held',
+        },
+        {
+          label: 'Books contributions',
+          value: money(summary.book_contributions ?? summary.contributions_so_far, jamiya.currency),
+          hint: 'Monthly member books',
+        },
+        {
+          label: 'Penalties',
+          value: money(summary.penalties_total, jamiya.currency),
+          hint:
+            Number(summary.penalties_open ?? 0) > 0
+              ? `${money(summary.penalties_open, jamiya.currency)} still open`
+              : Number(summary.penalties_total ?? 0) > 0
+                ? 'All settled'
+                : 'No fines recorded',
+        },
+        {
+          label: 'Loan outstanding',
+          value: money(summary.loan_outstanding, jamiya.currency),
+          hint:
+            Number(summary.loan_principal ?? 0) > 0
+              ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
+              : 'No Qard loans',
+        },
+      ]
+    : isRotating
+      ? [
+          {
+            label: 'Contributions so far',
+            value: money(summary.contributions_so_far, jamiya.currency),
+            hint: `${summary.cycles_paid ?? 0} cycles paid · ${summary.cycles_open ?? 0} open`,
+          },
+          {
+            label: 'Payout slot',
+            value: stmt.payout_position != null ? String(stmt.payout_position) : '—',
+            hint: 'Merry-go-round pot position',
+          },
+          {
+            label: 'Penalties',
+            value: money(summary.penalties_total, jamiya.currency),
+            hint:
+              Number(summary.penalties_open ?? 0) > 0
+                ? `${money(summary.penalties_open, jamiya.currency)} still open`
+                : Number(summary.penalties_total ?? 0) > 0
+                  ? 'All settled'
+                  : 'No fines recorded',
+          },
+          {
+            label: 'Loan outstanding',
+            value: money(summary.loan_outstanding, jamiya.currency),
+            hint:
+              Number(summary.loan_principal ?? 0) > 0
+                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
+                : 'No Qard loans',
+          },
+        ]
+      : [
+          {
+            label: 'Contributions so far',
+            value: money(summary.contributions_so_far, jamiya.currency),
+            hint: 'Schedule + monthly books',
+          },
+          {
+            label: 'Savings pockets',
+            value: money(summary.savings_total, jamiya.currency),
+            hint: 'Dedicated pocket balances',
+          },
+          {
+            label: 'Penalties',
+            value: money(summary.penalties_total, jamiya.currency),
+            hint:
+              Number(summary.penalties_open ?? 0) > 0
+                ? `${money(summary.penalties_open, jamiya.currency)} still open`
+                : Number(summary.penalties_total ?? 0) > 0
+                  ? 'All settled'
+                  : 'No fines recorded',
+          },
+          {
+            label: 'Loan outstanding',
+            value: money(summary.loan_outstanding, jamiya.currency),
+            hint:
+              Number(summary.loan_principal ?? 0) > 0
+                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
+                : 'No Qard loans',
+          },
+        ];
 
   return (
     <AppPage>
@@ -278,7 +338,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <header className="hidden border-b border-border pb-4 print:block">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
-          Amanah · Member statement
+          Amanah ·{' '}
+          {isShareDividend
+            ? 'Table banking statement'
+            : isRotating
+              ? 'Merry-go-round statement'
+              : 'Savings circle statement'}
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold">
           {jamiya.name}
@@ -324,7 +389,11 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             At a glance
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Key balances for this member — share capital, contributions, penalties, and loans.
+            {isShareDividend
+              ? 'Share capital, monthly books, penalties, and loans for this member.'
+              : isRotating
+                ? 'Merry-go-round cycles, pot slot, penalties, and loans for this member.'
+                : 'Savings contributions, pockets, penalties, and loans for this member.'}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

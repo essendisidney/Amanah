@@ -21,7 +21,7 @@ export async function GET(request: Request, { params }: Params) {
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, currency')
+    .select('id, name, slug, currency, challenge_kind')
     .eq('slug', slug)
     .maybeSingle();
   const jamiya = jamiyaData as {
@@ -29,6 +29,7 @@ export async function GET(request: Request, { params }: Params) {
     name: string;
     slug: string;
     currency: string;
+    challenge_kind: string | null;
   } | null;
   if (!jamiya) {
     return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
@@ -101,6 +102,7 @@ export async function GET(request: Request, { params }: Params) {
     memberLabel: stmt.member_code ?? memberId.slice(0, 8),
     generatedAt: new Date().toISOString().slice(0, 10),
     stmt,
+    challengeKind: jamiya.challenge_kind,
   });
 
   return new NextResponse(Buffer.from(bytes), {
