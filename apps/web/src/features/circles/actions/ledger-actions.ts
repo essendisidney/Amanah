@@ -6,6 +6,7 @@ import {
   mapMoneyError,
   redirectWithCircleNotice,
 } from '../lib/circle-notice';
+import type { GridSaveResult } from '../lib/action-state';
 
 function revalidateCircle(slug?: string) {
   revalidatePath('/dashboard');
@@ -166,21 +167,25 @@ export async function officerRecordContributionPaymentAction(
 }
 
 /** Officer saves merry-go-round month×member contribution grid (past or present). */
-export async function saveMgrMonthlyPaymentsAction(formData: FormData): Promise<void> {
+export async function saveMgrMonthlyPaymentsAction(
+  formData: FormData,
+): Promise<GridSaveResult> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
   const raw = String(formData.get('rows') ?? '[]');
-  if (!jamiyaId || !slug) return;
+  if (!jamiyaId || !slug) {
+    return { success: false, message: 'Missing circle.' };
+  }
 
   let rows: unknown;
   try {
     rows = JSON.parse(raw);
   } catch {
-    redirectWithCircleNotice(slug, 'Could not read payment grid.', 'error');
+    return { success: false, message: 'Could not read payment grid.' };
   }
 
   if (!Array.isArray(rows) || rows.length === 0) {
-    redirectWithCircleNotice(slug, 'No changes to save.', 'error');
+    return { success: false, message: 'No changes to save.' };
   }
 
   const safe = (rows as Array<Record<string, unknown>>)
@@ -203,7 +208,7 @@ export async function saveMgrMonthlyPaymentsAction(formData: FormData): Promise<
     }));
 
   if (safe.length === 0) {
-    redirectWithCircleNotice(slug, 'No valid payment rows to save.', 'error');
+    return { success: false, message: 'No valid payment rows to save.' };
   }
 
   const { data, error } = await callRpc('officer_save_mgr_monthly_payments', {
@@ -212,24 +217,23 @@ export async function saveMgrMonthlyPaymentsAction(formData: FormData): Promise<
   });
 
   if (error) {
-    redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message, 'error');
+    return { success: false, message: mapMoneyError(error.message) || error.message };
   }
 
   const result = data as { ok?: boolean; error?: string; updated?: number } | null;
   if (!result?.ok) {
-    redirectWithCircleNotice(
-      slug,
-      mapMoneyError(result?.error) || result?.error || 'Could not save monthly contributions.',
-      'error',
-    );
+    return {
+      success: false,
+      message:
+        mapMoneyError(result?.error) || result?.error || 'Could not save monthly contributions.',
+    };
   }
 
   revalidateCircle(slug);
-  redirectWithCircleNotice(
-    slug,
-    `Saved monthly contributions${result?.updated != null ? ` (${result.updated} updated)` : ''}.`,
-    'success',
-  );
+  return {
+    success: true,
+    message: `Saved monthly contributions${result?.updated != null ? ` (${result.updated} updated)` : ''}.`,
+  };
 }
 
 export async function settlePayoutAction(formData: FormData): Promise<void> {

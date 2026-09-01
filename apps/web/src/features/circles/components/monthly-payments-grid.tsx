@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useMemo, useState, useTransition } from 'react';
-import { Button, Input, Label } from '@jamiya/ui';
+import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { saveMonthlyPaymentsGridAction } from '@/features/circles/actions/books-actions';
 import { booksHref } from '@/features/circles/lib/member-books-view';
 
@@ -50,6 +51,11 @@ export function MonthlyPaymentsGrid({
   defaultShareDate,
 }: Props) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const [saveNotice, setSaveNotice] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [months, setMonths] = useState(initialMonths);
   const [shareDate, setShareDate] = useState(defaultShareDate);
   const [fillMonth, setFillMonth] = useState(String(defaultMonthAmount || 2000));
@@ -182,8 +188,13 @@ export function MonthlyPaymentsGrid({
     fd.set('shareRows', JSON.stringify(shareRows));
     fd.set('monthRows', JSON.stringify(monthRows));
 
-    startTransition(() => {
-      void saveMonthlyPaymentsGridAction(fd);
+    startTransition(async () => {
+      const result = await saveMonthlyPaymentsGridAction(fd);
+      setSaveNotice({
+        type: result.success ? 'success' : 'error',
+        message: result.message,
+      });
+      if (result.success) router.refresh();
     });
   }
 
@@ -197,6 +208,11 @@ export function MonthlyPaymentsGrid({
 
   return (
     <div className="space-y-4">
+      {saveNotice ? (
+        <Alert variant={saveNotice.type === 'success' ? 'success' : 'destructive'}>
+          <AlertDescription>{saveNotice.message}</AlertDescription>
+        </Alert>
+      ) : null}
       <p className="text-sm text-muted-foreground">
         Left column <strong className="font-medium text-foreground">Shares</strong> = one-off buy-in
         (usually 5,000 on 5 Feb). Month columns = monthly savings (usually 2,000). Tap a name to

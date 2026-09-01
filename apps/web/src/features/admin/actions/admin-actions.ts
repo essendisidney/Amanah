@@ -383,3 +383,64 @@ export async function deleteJamiyaAction(formData: FormData): Promise<void> {
     );
   }
 }
+
+export async function resetCircleDataAction(formData: FormData): Promise<void> {
+  try {
+    await requireAdminAccess('admin');
+    const jamiyaId = String(formData.get('jamiyaId') ?? '');
+    const keepUserId = String(formData.get('keepUserId') ?? '').trim() || null;
+
+    if (!jamiyaId) {
+      redirect(circlesNotice('Missing circle id.', 'error'));
+    }
+
+    const { data, error } = await callRpc('platform_admin_reset_circle_data', {
+      p_jamiya_id: jamiyaId,
+      p_keep_user_id: keepUserId,
+    });
+
+    revalidatePath('/admin/circles');
+    revalidatePath('/admin');
+    revalidatePath('/circles');
+    revalidatePath('/dashboard');
+
+    if (error) {
+      redirect(circlesNotice(error.message, 'error'));
+    }
+
+    const result = data as {
+      ok?: boolean;
+      error?: string;
+      slug?: string;
+      removed_members?: number;
+    } | null;
+
+    if (!result?.ok) {
+      const messages: Record<string, string> = {
+        FORBIDDEN: 'Only platform admins can reset circle data.',
+        NOT_FOUND: 'Circle not found.',
+        NO_KEEP_USER: 'Could not find an admin user to keep on this circle.',
+        UNAUTHENTICATED: 'Sign in again, then retry.',
+      };
+      const code = result?.error ?? 'RESET_FAILED';
+      redirect(circlesNotice(messages[code] ?? `Could not reset circle (${code}).`, 'error'));
+    }
+
+    const slug = result.slug ?? 'circle';
+    const removed = result.removed_members ?? 0;
+    redirect(
+      circlesNotice(
+        `Reset "${slug}": cleared ledger and removed ${removed} member${removed === 1 ? '' : 's'}. One admin kept.`,
+        'success',
+      ),
+    );
+  } catch (error) {
+    if (isNextRedirectError(error)) throw error;
+    redirect(
+      circlesNotice(
+        error instanceof Error ? error.message : 'Could not reset circle data.',
+        'error',
+      ),
+    );
+  }
+}

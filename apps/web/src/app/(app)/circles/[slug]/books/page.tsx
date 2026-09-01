@@ -2,12 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { Button, Label, Textarea } from '@jamiya/ui';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
-import {
-  importTbSheetAction,
-} from '@/features/circles/actions/books-actions';
+import { TbSheetImportForm } from '@/features/circles/components/tb-sheet-import-form';
 import { MonthlyPaymentsGrid } from '@/features/circles/components/monthly-payments-grid';
 import { MemberBooksDetail } from '@/features/circles/components/member-books-detail';
 import { MemberBooksHome } from '@/features/circles/components/member-books-home';
@@ -517,42 +515,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
                 Add members on the circle page before importing a sheet.
               </p>
             )}
-            <form action={importTbSheetAction} className="mt-4 space-y-4">
-              <input type="hidden" name="jamiyaId" value={jamiya.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <input type="hidden" name="parValue" value={parValue || 100} />
-              <input type="hidden" name="year" value="2026" />
-              <div className="space-y-1">
-                <Label htmlFor="contributionsPaste">Contributions (AMANAH TEST rows 1–10)</Label>
-                <Textarea
-                  id="contributionsPaste"
-                  name="contributionsPaste"
-                  rows={10}
-                  className="font-mono text-xs"
-                  placeholder={`NEXT OF KIN	NAME	SHARES	CONTRIBUTION
-		ONE OFF	5TH FEB	5TH MARCH	5TH APRIL
-HUSBAE…	KHADIJA ALADINA	5000	2000	2000	2000
-…	VIOLA CHUMBA	5000	2000	3000	2000
-…	JULLIET	5000	2000	2000	CLOSED`}
-                />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="loansPaste">Loans (AMANAH TEST from row 17 downward)</Label>
-                <Textarea
-                  id="loansPaste"
-                  name="loansPaste"
-                  rows={8}
-                  className="font-mono text-xs"
-                  placeholder={`FEB	LOANS
-5TH FEB	JULIET	16000	paid 3k contribution plus profit
-5TH FEB	KHADIJA ALADINA	25000	9161 1st installment
-5TH MARCH	VIOLA	15000`}
-                />
-              </div>
-              <Button type="submit" className="min-h-11">
-                Import sheet
-              </Button>
-            </form>
+            <TbSheetImportForm jamiyaId={jamiya.id} slug={slug} parValue={parValue} />
           </div>
         </section>
       ) : null}

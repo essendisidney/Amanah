@@ -7,6 +7,7 @@ import { AppPage } from '@/components/app-page';
 import { createClient } from '@/lib/supabase/server';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { NextOfKinForm } from '@/features/circles/components/next-of-kin-form';
+import { NokBulkImportForm } from '@/features/circles/components/nok-bulk-import-form';
 import { deleteMemberNextOfKinAction } from '@/features/circles/actions/next-of-kin-actions';
 
 export const metadata: Metadata = { title: 'Next of kin' };
@@ -219,6 +220,15 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
             existing={existing}
             returnTo="next-of-kin"
           />
+        </section>
+      ) : null}
+
+      {isOfficer ? (
+        <section className="amanah-surface space-y-3 px-5 py-5">
+          <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+            Bulk import
+          </h2>
+          <NokBulkImportForm jamiyaId={jamiya.id} slug={slug} />
         </section>
       ) : null}
 

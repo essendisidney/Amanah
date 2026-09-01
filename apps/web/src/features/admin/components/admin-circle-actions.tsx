@@ -3,6 +3,7 @@
 import { Button } from '@jamiya/ui';
 import {
   deleteJamiyaAction,
+  resetCircleDataAction,
   setJamiyaStatusAction,
 } from '@/features/admin/actions/admin-actions';
 
@@ -71,6 +72,21 @@ export function AdminCircleActions({
           </Button>
         </form>
       ) : null}
+
+      <form
+        action={resetCircleDataAction}
+        onSubmit={(event) => {
+          const ok = window.confirm(
+            `Reset data for "${name}"? This removes all members except one admin, clears ledger/invites, and cannot be undone.`,
+          );
+          if (!ok) event.preventDefault();
+        }}
+      >
+        <input type="hidden" name="jamiyaId" value={jamiyaId} />
+        <Button type="submit" size="sm" variant="outline">
+          Reset data
+        </Button>
+      </form>
 
       <form
         action={deleteJamiyaAction}

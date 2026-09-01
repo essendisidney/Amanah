@@ -1,7 +1,8 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
-import { Button, Input, Label } from '@jamiya/ui';
+import { useRouter } from 'next/navigation';
+import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { saveMgrMonthlyPaymentsAction } from '@/features/circles/actions/ledger-actions';
 import { VoidLedgerButton } from '@/features/circles/components/void-ledger-button';
 
@@ -68,6 +69,11 @@ export function MerryGoRoundPaymentsGrid({
   defaultAmount,
 }: Props) {
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
+  const [saveNotice, setSaveNotice] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [months, setMonths] = useState(() => sortMonths(initialMonths));
   const [fillAmount, setFillAmount] = useState(String(defaultAmount || 0));
   const [mobileMemberId, setMobileMemberId] = useState(members[0]?.id ?? '');
@@ -216,8 +222,13 @@ export function MerryGoRoundPaymentsGrid({
     fd.set('slug', slug);
     fd.set('rows', JSON.stringify(rows));
 
-    startTransition(() => {
-      void saveMgrMonthlyPaymentsAction(fd);
+    startTransition(async () => {
+      const result = await saveMgrMonthlyPaymentsAction(fd);
+      setSaveNotice({
+        type: result.success ? 'success' : 'error',
+        message: result.message,
+      });
+      if (result.success) router.refresh();
     });
   }
 
@@ -231,6 +242,11 @@ export function MerryGoRoundPaymentsGrid({
 
   return (
     <div className="space-y-4">
+      {saveNotice ? (
+        <Alert variant={saveNotice.type === 'success' ? 'success' : 'destructive'}>
+          <AlertDescription>{saveNotice.message}</AlertDescription>
+        </Alert>
+      ) : null}
       <p className="text-sm text-muted-foreground">
         Enter what each person paid for any month (past or present). Empty = did not contribute.
         Use <strong className="font-medium text-foreground">Add past month</strong> to backfill

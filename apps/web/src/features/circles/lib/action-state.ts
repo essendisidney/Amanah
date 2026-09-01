@@ -25,6 +25,8 @@ export type BulkAddMembersState = ActionState & {
 export const initialActionState: ActionState = { success: false };
 export const initialBulkAddState: BulkAddMembersState = { success: false };
 
+export type GridSaveResult = { success: boolean; message: string };
+
 export function mapZodFieldErrors(
   error: { flatten: () => { fieldErrors: Record<string, string[] | undefined> } },
 ): Record<string, string[]> {

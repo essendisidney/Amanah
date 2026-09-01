@@ -5,6 +5,7 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
 import { BOOKS_MEMBER_STATUSES } from '../lib/books-members';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
+import type { GridSaveResult } from '../lib/action-state';
 
 function booksPath(memberId: string, view: 'member' | 'grid' | 'import' = 'member') {
   const params = new URLSearchParams({ view, memberId });
@@ -556,6 +557,120 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
   );
 }
 
+export type TbImportPreview = {
+  ok: boolean;
+  matched: Array<{ sheetName: string; memberLabel: string }>;
+  unmatched: string[];
+  error?: string;
+};
+
+async function loadBooksMemberMatchers(jamiyaId: string) {
+  const supabase = await createClient();
+  const { data: memberRows } = await supabase
+    .from('members')
+    .select('id, user_id, status')
+    .eq('jamiya_id', jamiyaId)
+    .in('status', [...BOOKS_MEMBER_STATUSES]);
+
+  const membersRaw = (memberRows ?? []) as Array<{
+    id: string;
+    user_id: string;
+    status: string;
+  }>;
+  const userIds = membersRaw.map((m) => m.user_id);
+  const { data: profiles } = userIds.length
+    ? await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds)
+    : { data: [] };
+
+  const profileById = new Map(
+    ((profiles ?? []) as Array<{
+      id: string;
+      full_name: string | null;
+      email: string | null;
+      phone: string | null;
+    }>).map((p) => [p.id, p]),
+  );
+
+  return membersRaw.map((m) => {
+    const p = profileById.get(m.user_id);
+    const label = p?.full_name || p?.email || p?.phone || m.id.slice(0, 8);
+    return { id: m.id, label, norm: normalizeName(label) };
+  });
+}
+
+/** Dry-run TB sheet paste: show which names match members before import. */
+export async function previewTbSheetImportAction(
+  formData: FormData,
+): Promise<TbImportPreview> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const contribPaste = String(formData.get('contributionsPaste') ?? '');
+  const loansPaste = String(formData.get('loansPaste') ?? '');
+  const year = Number(formData.get('year') ?? 2026);
+
+  if (!jamiyaId) {
+    return { ok: false, matched: [], unmatched: [], error: 'Missing circle.' };
+  }
+  if (!contribPaste.trim() && !loansPaste.trim()) {
+    return { ok: false, matched: [], unmatched: [], error: 'Paste contributions and/or loans first.' };
+  }
+
+  const members = await loadBooksMemberMatchers(jamiyaId);
+  const sheetNames = new Set<string>();
+
+  const contribLines = contribPaste
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith('#'));
+
+  if (contribLines.length) {
+    const parsed = parseContributionHeaders(contribLines, year);
+    if (!parsed) {
+      return {
+        ok: false,
+        matched: [],
+        unmatched: [],
+        error: 'Contribution paste needs a header row with NAME and SHARES.',
+      };
+    }
+    const { nameIdx, dataStart } = parsed;
+    for (const line of contribLines.slice(dataStart)) {
+      if (/^FEB\s+LOANS|^MARCH\s+LOANS|^APRIL\s+LOANS|^MAY\s+LOANS|^LOANS/i.test(line)) break;
+      const cells = splitRow(line);
+      const name = cells[nameIdx] ?? '';
+      if (!name || /NEXT OF KIN/i.test(name)) continue;
+      sheetNames.add(name.trim());
+    }
+  }
+
+  for (const line of loansPaste
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#') && !/LOANS/i.test(l))) {
+    const cells = splitRow(line);
+    if (cells.length < 3) continue;
+    let name = cells[1] ?? '';
+    if (monthHeaderToDate(name, year) && !monthHeaderToDate(cells[0] ?? '', year)) {
+      name = cells[0] ?? '';
+    }
+    if (name.trim()) sheetNames.add(name.trim());
+  }
+
+  const matched: TbImportPreview['matched'] = [];
+  const unmatched: string[] = [];
+
+  for (const sheetName of sheetNames) {
+    const memberId = matchMemberId(sheetName, members);
+    if (memberId) {
+      const member = members.find((m) => m.id === memberId);
+      matched.push({ sheetName, memberLabel: member?.label ?? sheetName });
+    } else {
+      unmatched.push(sheetName);
+    }
+  }
+
+  return { ok: true, matched, unmatched };
+}
+
 type MonthGridCell = {
   member_id: string;
   year: number;
@@ -573,14 +688,16 @@ type ShareGridCell = {
  * Save Member books grid: share capital column + monthly savings cells.
  * Payload JSON in form fields `monthRows` and `shareRows`.
  */
-export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise<void> {
+export async function saveMonthlyPaymentsGridAction(
+  formData: FormData,
+): Promise<GridSaveResult> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
   const monthRaw = String(formData.get('monthRows') ?? '[]');
   const shareRaw = String(formData.get('shareRows') ?? '[]');
 
   if (!jamiyaId || !slug) {
-    return;
+    return { success: false, message: 'Missing circle.' };
   }
 
   let monthRows: MonthGridCell[] = [];
@@ -589,7 +706,7 @@ export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise
     monthRows = JSON.parse(monthRaw) as MonthGridCell[];
     shareRows = JSON.parse(shareRaw) as ShareGridCell[];
   } catch {
-    redirectWithCircleNotice(slug, 'Could not read grid changes.', 'error', '/books?view=grid');
+    return { success: false, message: 'Could not read grid changes.' };
   }
 
   if (!Array.isArray(monthRows)) monthRows = [];
@@ -629,7 +746,7 @@ export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise
     }));
 
   if (safeMonths.length === 0 && safeShares.length === 0) {
-    redirectWithCircleNotice(slug, 'No changes to save.', 'error', '/books?view=grid');
+    return { success: false, message: 'No changes to save.' };
   }
 
   let shareUpdated = 0;
@@ -641,16 +758,14 @@ export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise
       p_rows: safeShares,
     });
     if (error) {
-      redirectWithCircleNotice(slug, error.message, 'error', '/books?view=grid');
+      return { success: false, message: error.message };
     }
     const result = data as { ok?: boolean; error?: string; updated?: number } | null;
     if (!result?.ok) {
-      redirectWithCircleNotice(
-        slug,
-        result?.error ?? 'Could not save share capital.',
-        'error',
-        '/books?view=grid',
-      );
+      return {
+        success: false,
+        message: result?.error ?? 'Could not save share capital.',
+      };
     }
     shareUpdated = result.updated ?? safeShares.length;
   }
@@ -661,27 +776,23 @@ export async function saveMonthlyPaymentsGridAction(formData: FormData): Promise
       p_rows: safeMonths,
     });
     if (error) {
-      redirectWithCircleNotice(slug, error.message, 'error', '/books?view=grid');
+      return { success: false, message: error.message };
     }
     const result = data as { ok?: boolean; error?: string; updated?: number } | null;
     if (!result?.ok) {
-      redirectWithCircleNotice(
-        slug,
-        result?.error ?? 'Could not save monthly payments.',
-        'error',
-        '/books?view=grid',
-      );
+      return {
+        success: false,
+        message: result?.error ?? 'Could not save monthly payments.',
+      };
     }
     monthUpdated = result.updated ?? safeMonths.length;
   }
 
   revalidateBooks(slug);
-  redirectWithCircleNotice(
-    slug,
-    `Saved: ${shareUpdated} share capital, ${monthUpdated} monthly payments.`,
-    'success',
-    '/books?view=grid',
-  );
+  return {
+    success: true,
+    message: `Saved: ${shareUpdated} share capital, ${monthUpdated} monthly payments.`,
+  };
 }
 
 /** Void a mistaken book entry, share lot, or loan ledger event. */
