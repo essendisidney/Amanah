@@ -21,6 +21,10 @@ import {
   OpenPenaltiesPanel,
   type OpenPenaltyRow,
 } from './open-penalties-panel';
+import {
+  PenaltySettingsPanel,
+  type PenaltySettings,
+} from './penalty-settings-panel';
 
 export type TreasuryAccount = {
   id: string;
@@ -107,6 +111,7 @@ export function TreasuryPanel({
   recentEntries,
   bankAlerts = [],
   openPenalties = [],
+  penaltySettings,
 }: {
   jamiyaId: string;
   slug: string;
@@ -121,6 +126,7 @@ export function TreasuryPanel({
   recentEntries: CashbookRow[];
   bankAlerts?: BankAlertRow[];
   openPenalties?: OpenPenaltyRow[];
+  penaltySettings?: PenaltySettings | null;
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const incomeCats = categories.filter((c) => c.kind === 'income');
@@ -389,6 +395,14 @@ export function TreasuryPanel({
             </div>
           </form>
         </section>
+      ) : null}
+
+      {canManage && penaltySettings ? (
+        <PenaltySettingsPanel
+          jamiyaId={jamiyaId}
+          slug={slug}
+          settings={penaltySettings}
+        />
       ) : null}
 
       {canManage ? (

@@ -75,7 +75,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, currency, contribution_amount')
+    .select('id, name, slug, currency, contribution_amount, challenge_kind')
     .eq('slug', slug)
     .maybeSingle();
   if (!jamiyaData) notFound();
@@ -86,7 +86,11 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     slug: string;
     currency: string;
     contribution_amount: number | string;
+    challenge_kind?: string | null;
   };
+
+  const isRotating =
+    jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind;
 
   const { data: membership } = await supabase
     .from('members')
@@ -326,9 +330,18 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               More tools
             </summary>
             <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
-              <Link href={`/circles/${slug}/books` as Route} className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted">
-                Member payments
-              </Link>
+              {isRotating ? (
+                <Link
+                  href={`/circles/${slug}#monthly-payments` as Route}
+                  className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted"
+                >
+                  Monthly contributions
+                </Link>
+              ) : (
+                <Link href={`/circles/${slug}/books` as Route} className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted">
+                  Member payments
+                </Link>
+              )}
               <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 Shares
               </Link>

@@ -692,11 +692,18 @@ export async function voidLedgerLineAction(formData: FormData): Promise<void> {
   const id = String(formData.get('id') ?? '').trim();
   const reason = String(formData.get('reason') ?? '').trim() || null;
 
-  if (!slug || !id || !['book_entry', 'share_lot', 'loan_event'].includes(kind)) {
+  if (
+    !slug ||
+    !id ||
+    !['book_entry', 'share_lot', 'loan_event', 'contribution'].includes(kind)
+  ) {
     return;
   }
 
-  const returnPath = memberId ? booksPath(memberId) : '/books';
+  const customReturn = String(formData.get('returnPath') ?? '').trim();
+  const returnPath =
+    customReturn ||
+    (kind === 'contribution' ? '' : memberId ? booksPath(memberId) : '/books');
 
   const { data, error } = await callRpc('officer_void_ledger_line', {
     p_kind: kind,

@@ -28,6 +28,7 @@ import { paymentProvider } from '@/lib/payments/provider';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { NextPayoutBoard } from '@/features/circles/components/circle-ops-panel';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { ContributionLedger } from '@/features/circles/components/contribution-ledger';
 import { ClaimPayoutSlotForm } from '@/features/circles/components/claim-payout-slot-form';
@@ -576,8 +577,10 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { cycleNumber: number; year: number; month: number; label: string }
   >();
   const mgrAmounts: Record<string, Record<number, number>> = {};
+  const mgrContributionIds: Record<string, Record<number, string>> = {};
 
   const rawContribs = (contribData ?? []) as unknown as Array<{
+    id: string;
     member_id: string;
     cycle_number: number;
     amount_paid?: number | string | null;
@@ -599,6 +602,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       typeof row.amount_paid === 'number' ? row.amount_paid : Number(row.amount_paid ?? 0);
     if (!mgrAmounts[row.member_id]) mgrAmounts[row.member_id] = {};
     mgrAmounts[row.member_id]![row.cycle_number] = paid;
+    if (!mgrContributionIds[row.member_id]) mgrContributionIds[row.member_id] = {};
+    mgrContributionIds[row.member_id]![row.cycle_number] = row.id;
   }
 
   // If no contributions yet but cycles are planned, seed month columns from start_date.
@@ -864,6 +869,10 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
 
+      {canManageOps && paymentProvider() === 'simulated' ? (
+        <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />
+      ) : null}
+
       {canManageOps ? (
         <OfficerPaymentsGuide slug={slug} challengeKind={jamiya.challenge_kind} />
       ) : null}
@@ -992,6 +1001,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               members={mgrGridMembers}
               months={mgrMonths}
               amounts={mgrAmounts}
+              contributionIds={mgrContributionIds}
+              canManage
               defaultAmount={amount}
             />
           </div>

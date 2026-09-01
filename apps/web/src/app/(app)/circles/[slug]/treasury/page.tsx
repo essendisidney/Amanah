@@ -31,10 +31,22 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, currency')
+    .select(
+      'id, name, slug, currency, late_contribution_penalty, missed_contribution_penalty, late_loan_penalty_fixed, late_loan_penalty_pct, payout_compliance_mode',
+    )
     .eq('slug', slug)
     .maybeSingle();
-  const jamiya = jamiyaData as { id: string; name: string; slug: string; currency: string } | null;
+  const jamiya = jamiyaData as {
+    id: string;
+    name: string;
+    slug: string;
+    currency: string;
+    late_contribution_penalty?: number | string | null;
+    missed_contribution_penalty?: number | string | null;
+    late_loan_penalty_fixed?: number | string | null;
+    late_loan_penalty_pct?: number | string | null;
+    payout_compliance_mode?: string | null;
+  } | null;
   if (!jamiya) notFound();
 
   const { data: membershipData } = await supabase
@@ -291,6 +303,17 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
             assessedAt: (p.assessed_at as string | null) ?? null,
           };
         })}
+        penaltySettings={
+          canManage
+            ? {
+                lateContributionPenalty: Number(jamiya.late_contribution_penalty ?? 0),
+                missedContributionPenalty: Number(jamiya.missed_contribution_penalty ?? 0),
+                lateLoanPenaltyFixed: Number(jamiya.late_loan_penalty_fixed ?? 0),
+                lateLoanPenaltyPct: Number(jamiya.late_loan_penalty_pct ?? 0),
+                payoutComplianceMode: jamiya.payout_compliance_mode ?? 'block',
+              }
+            : null
+        }
       />
     
     </AppPage>

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from 'react';
 import { Button, Input, Label } from '@jamiya/ui';
 import { saveMgrMonthlyPaymentsAction } from '@/features/circles/actions/ledger-actions';
+import { VoidLedgerButton } from '@/features/circles/components/void-ledger-button';
 
 export type MgrGridMember = {
   id: string;
@@ -23,6 +24,9 @@ type Props = {
   months: MgrMonthColumn[];
   /** memberId -> cycleNumber -> amount paid */
   amounts: Record<string, Record<number, number>>;
+  /** memberId -> cycleNumber -> contribution id (for void) */
+  contributionIds?: Record<string, Record<number, string>>;
+  canManage?: boolean;
   defaultAmount: number;
 };
 
@@ -59,6 +63,8 @@ export function MerryGoRoundPaymentsGrid({
   members,
   months: initialMonths,
   amounts,
+  contributionIds = {},
+  canManage = false,
   defaultAmount,
 }: Props) {
   const [pending, startTransition] = useTransition();
@@ -293,6 +299,7 @@ export function MerryGoRoundPaymentsGrid({
                 const key = cellKey(mobileMemberId, col.cycleNumber);
                 const raw = draft[key] ?? '';
                 const paid = Number(raw || 0) > 0;
+                const contribId = contributionIds[mobileMemberId]?.[col.cycleNumber];
                 return (
                   <li
                     key={key}
@@ -302,22 +309,33 @@ export function MerryGoRoundPaymentsGrid({
                       <p className="text-sm font-medium">{col.label}</p>
                       <p className="text-xs text-muted-foreground">Cycle {col.cycleNumber}</p>
                     </div>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="1"
-                      inputMode="decimal"
-                      placeholder="—"
-                      value={raw}
-                      onChange={(e) =>
-                        setDraft((prev) => ({ ...prev, [key]: e.target.value }))
-                      }
-                      className={[
-                        'min-h-12 w-28 text-base',
-                        paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
-                      ].join(' ')}
-                      aria-label={`${col.label} amount`}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        min={0}
+                        step="1"
+                        inputMode="decimal"
+                        placeholder="—"
+                        value={raw}
+                        onChange={(e) =>
+                          setDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                        }
+                        className={[
+                          'min-h-12 w-28 text-base',
+                          paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
+                        ].join(' ')}
+                        aria-label={`${col.label} amount`}
+                      />
+                      {canManage && paid && contribId ? (
+                        <VoidLedgerButton
+                          slug={slug}
+                          memberId={mobileMemberId}
+                          kind="contribution"
+                          id={contribId}
+                          label="Void"
+                        />
+                      ) : null}
+                    </div>
                   </li>
                 );
               })}
@@ -350,24 +368,36 @@ export function MerryGoRoundPaymentsGrid({
                     const key = cellKey(m.id, col.cycleNumber);
                     const raw = draft[key] ?? '';
                     const paid = Number(raw || 0) > 0;
+                    const contribId = contributionIds[m.id]?.[col.cycleNumber];
                     return (
                       <td key={key} className="px-2 py-1.5">
-                        <Input
-                          type="number"
-                          min={0}
-                          step="1"
-                          inputMode="decimal"
-                          placeholder="—"
-                          value={raw}
-                          onChange={(e) =>
-                            setDraft((prev) => ({ ...prev, [key]: e.target.value }))
-                          }
-                          className={[
-                            'min-h-10 w-full',
-                            paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
-                          ].join(' ')}
-                          aria-label={`${m.label} ${col.label}`}
-                        />
+                        <div className="flex items-center gap-1">
+                          <Input
+                            type="number"
+                            min={0}
+                            step="1"
+                            inputMode="decimal"
+                            placeholder="—"
+                            value={raw}
+                            onChange={(e) =>
+                              setDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                            }
+                            className={[
+                              'min-h-10 w-full min-w-[4.5rem]',
+                              paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
+                            ].join(' ')}
+                            aria-label={`${m.label} ${col.label}`}
+                          />
+                          {canManage && paid && contribId ? (
+                            <VoidLedgerButton
+                              slug={slug}
+                              memberId={m.id}
+                              kind="contribution"
+                              id={contribId}
+                              label="Void"
+                            />
+                          ) : null}
+                        </div>
                       </td>
                     );
                   })}

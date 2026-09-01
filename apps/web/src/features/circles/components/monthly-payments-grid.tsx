@@ -54,6 +54,7 @@ export function MonthlyPaymentsGrid({
   const [shareDate, setShareDate] = useState(defaultShareDate);
   const [fillMonth, setFillMonth] = useState(String(defaultMonthAmount || 2000));
   const [fillShare, setFillShare] = useState(String(defaultShareAmount || 5000));
+  const [mobileMemberId, setMobileMemberId] = useState(members[0]?.id ?? '');
 
   const [shareDraft, setShareDraft] = useState<Record<string, string>>(() => {
     const next: Record<string, string> = {};
@@ -260,7 +261,73 @@ export function MonthlyPaymentsGrid({
         </Button>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      {/* Mobile: one member at a time */}
+      <div className="space-y-3 md:hidden">
+        <Label htmlFor="tbMobileMember">Member</Label>
+        <select
+          id="tbMobileMember"
+          value={mobileMemberId}
+          onChange={(e) => setMobileMemberId(e.target.value)}
+          className="block h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+        >
+          {members.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+        <div className="rounded-xl border border-accent/25 bg-accent/5 px-3 py-3">
+          <Label htmlFor={`tbMobileShare-${mobileMemberId}`}>Share buy-in</Label>
+          <Input
+            id={`tbMobileShare-${mobileMemberId}`}
+            type="number"
+            min={0}
+            step="1"
+            inputMode="decimal"
+            value={shareDraft[mobileMemberId] ?? ''}
+            onChange={(e) =>
+              setShareDraft((prev) => ({ ...prev, [mobileMemberId]: e.target.value }))
+            }
+            className={`mt-1 min-h-12 text-base ${
+              dirtyShareIds.has(mobileMemberId) ? 'border-accent ring-1 ring-accent/40' : ''
+            }`}
+          />
+        </div>
+        <ul className="space-y-2">
+          {months.map((col) => {
+            const key = cellKey(mobileMemberId, col.year, col.month);
+            const raw = monthDraft[key] ?? '';
+            const paid = Number(raw || 0) > 0;
+            return (
+              <li
+                key={key}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2"
+              >
+                <p className="text-sm font-medium">{col.label}</p>
+                <Input
+                  type="number"
+                  min={0}
+                  step="1"
+                  inputMode="decimal"
+                  placeholder="—"
+                  value={raw}
+                  onChange={(e) =>
+                    setMonthDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                  }
+                  className={[
+                    'min-h-12 w-28 text-base',
+                    paid ? 'border-primary/40 bg-primary/5' : 'bg-muted/30',
+                    dirtyMonthKeys.has(key) ? 'ring-1 ring-accent/40' : '',
+                  ].join(' ')}
+                  aria-label={`${col.label} amount`}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
         <table className="min-w-full border-collapse text-sm">
           <thead>
             <tr className="bg-secondary/50 text-left">

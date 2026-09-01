@@ -89,11 +89,18 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
       </h2>
       <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
         <li>Add members, then activate to generate the contribution calendar.</li>
-        <li>Members pay from wallet, or you mark cash received on the calendar.</li>
+        <li>
+          Open <strong className="font-medium text-foreground">Monthly contributions</strong> to enter
+          what each person saved for any month — empty means they did not contribute.
+        </li>
+        <li>Members can also pay from wallet, or you mark cash on the calendar.</li>
         <li>Check statements and goals for progress toward shared targets.</li>
       </ol>
-      <div className="mt-5">
+      <div className="mt-5 flex flex-wrap gap-2">
         <Button asChild size="lg" className="min-h-11 rounded-full px-6">
+          <a href="#monthly-payments">Enter monthly savings</a>
+        </Button>
+        <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
           <a href="#calendar">Open calendar</a>
         </Button>
       </div>
