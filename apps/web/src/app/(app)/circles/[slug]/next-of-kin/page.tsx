@@ -142,6 +142,16 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
     notes: k.notes,
   }));
 
+  const kinByMember = new Set(kinList.map((k) => k.member_id));
+  const activeMembers = members.filter((m) => m.status === 'active');
+  const withKin = activeMembers.filter((m) => kinByMember.has(m.id)).length;
+  const missingKin = activeMembers
+    .filter((m) => !kinByMember.has(m.id))
+    .map((m) => {
+      const p = profileMap.get(m.user_id);
+      return p?.full_name || p?.phone || p?.email || m.member_code || 'Member';
+    });
+
   const kindLabel =
     jamiya.challenge_kind === 'share_dividend'
       ? 'Table banking'
@@ -169,6 +179,30 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
           <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
         </Button>
       </div>
+
+      {isOfficer && activeMembers.length > 0 ? (
+        <section className="amanah-surface px-5 py-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <p className="text-sm font-medium text-foreground">
+              Completion: {withKin}/{activeMembers.length} members have next of kin
+            </p>
+            {withKin === activeMembers.length ? (
+              <span className="text-xs font-medium text-primary">All done</span>
+            ) : (
+              <span className="text-xs text-muted-foreground">
+                {activeMembers.length - withKin} missing
+              </span>
+            )}
+          </div>
+          {missingKin.length > 0 ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              Still needed:{' '}
+              <span className="text-foreground">{missingKin.slice(0, 8).join(', ')}</span>
+              {missingKin.length > 8 ? ` and ${missingKin.length - 8} more` : ''}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       {isOfficer ? (
         <section className="amanah-surface space-y-3 px-5 py-5">

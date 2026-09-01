@@ -55,8 +55,8 @@ export async function GET(request: Request, { params }: Params) {
   let memberId = me.id;
   if (memberIdParam && isOfficer) memberId = memberIdParam;
 
-  // Officers exporting another member's PDF requires Starter/Pro exports entitlement.
-  if (memberId !== me.id) {
+  // Officers can export any member PDF; other members need Starter/Pro for others' statements.
+  if (memberId !== me.id && !isOfficer) {
     const { data: planPack } = await callRpc('get_circle_plan', { p_jamiya_id: jamiya.id });
     const plan = planPack as {
       ok?: boolean;
@@ -67,7 +67,7 @@ export async function GET(request: Request, { params }: Params) {
         {
           error: 'EXPORTS_NOT_INCLUDED',
           message:
-            'Officer PDF exports for other members require Starter or Pro. Upgrade in Officer → Circle plan.',
+            'PDF exports for other members require Starter or Pro. Upgrade in Officer → Circle plan.',
         },
         { status: 402 },
       );

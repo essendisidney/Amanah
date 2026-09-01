@@ -63,7 +63,7 @@ export function BulkPhoneInviteForm({
             <p className="text-sm text-destructive">{state.fieldErrors.phones[0]}</p>
           ) : null}
           <p className="text-[11px] text-muted-foreground">
-            Up to 40 numbers. Duplicates in the paste are skipped.
+            Up to 100 numbers. Duplicates in the paste are skipped.
           </p>
         </div>
         <Button type="submit" disabled={pending} className="min-h-11">

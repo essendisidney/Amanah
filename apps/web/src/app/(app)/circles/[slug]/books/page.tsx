@@ -492,8 +492,31 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
               From <strong className="font-medium text-foreground">HALAL CHAMA INVESTMENT.xlsx</strong>{' '}
               → tab <strong className="font-medium text-foreground">AMANAH TEST</strong>: select rows
               1–10 (header + members), copy, paste below. Include both header rows. Names must match
-              members on the circle page.
+              members on the circle page exactly.
             </p>
+            {members.length > 0 ? (
+              <div className="mt-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Members on this circle ({members.length})
+                </p>
+                <p className="mt-2 text-sm text-foreground">
+                  {members
+                    .map((m) => {
+                      const p = profilesById.get(m.user_id);
+                      return labelFor(p, m);
+                    })
+                    .join(' · ')}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Paste rows must use these names (or close spelling). Unmatched names are skipped and
+                  listed after import.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-destructive">
+                Add members on the circle page before importing a sheet.
+              </p>
+            )}
             <form action={importTbSheetAction} className="mt-4 space-y-4">
               <input type="hidden" name="jamiyaId" value={jamiya.id} />
               <input type="hidden" name="slug" value={slug} />

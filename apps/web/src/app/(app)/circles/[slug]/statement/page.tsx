@@ -96,7 +96,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     ok?: boolean;
     plan?: { exports_included?: boolean; name?: string };
   } | null;
-  const canExportOthers = Boolean(planInfo?.plan?.exports_included);
+  const canExportOthers = isOfficer || Boolean(planInfo?.plan?.exports_included);
 
   const { data } = await callRpc('member_circle_statement', {
     p_jamiya_id: jamiya.id,
