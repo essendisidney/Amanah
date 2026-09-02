@@ -22,22 +22,29 @@ export function TbSheetImportForm({
   const [pending, startTransition] = useTransition();
   const [previewPending, startPreview] = useTransition();
   const [preview, setPreview] = useState<TbImportPreview | null>(null);
-  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const [importNotice, setImportNotice] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   function runPreview(form: HTMLFormElement) {
     const fd = new FormData(form);
     startPreview(async () => {
       const result = await previewTbSheetImportAction(fd);
       setPreview(result);
-      setImportMsg(null);
+      setImportNotice(null);
     });
   }
 
   function runImport(form: HTMLFormElement) {
     const fd = new FormData(form);
     startTransition(async () => {
-      await importTbSheetAction(fd);
-      router.refresh();
+      const result = await importTbSheetAction(fd);
+      setImportNotice({
+        type: result.success ? 'success' : 'error',
+        message: result.message,
+      });
+      if (result.success) router.refresh();
     });
   }
 
@@ -106,9 +113,9 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
         </div>
       ) : null}
 
-      {importMsg ? (
-        <Alert variant="destructive">
-          <AlertDescription>{importMsg}</AlertDescription>
+      {importNotice ? (
+        <Alert variant={importNotice.type === 'success' ? 'success' : 'destructive'}>
+          <AlertDescription>{importNotice.message}</AlertDescription>
         </Alert>
       ) : null}
 

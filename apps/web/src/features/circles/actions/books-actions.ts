@@ -358,7 +358,7 @@ function parseContributionHeaders(
  * Paste Asha's TB contribution table + optional loans block.
  * Members must already exist (matched by name).
  */
-export async function importTbSheetAction(formData: FormData): Promise<void> {
+export async function importTbSheetAction(formData: FormData): Promise<GridSaveResult> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
   const year = Number(formData.get('year') ?? 2026);
@@ -366,42 +366,14 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
   const loansPaste = String(formData.get('loansPaste') ?? '');
   const parValue = Number(formData.get('parValue') ?? 100);
 
-  if (!jamiyaId || !slug) return;
+  if (!jamiyaId || !slug) {
+    return { success: false, message: 'Missing circle.' };
+  }
   if (!contribPaste.trim() && !loansPaste.trim()) {
-    redirectWithCircleNotice(slug, 'Paste the contribution table and/or loans first.', 'error', '/books?view=import');
+    return { success: false, message: 'Paste the contribution table and/or loans first.' };
   }
 
-  const supabase = await createClient();
-  const { data: memberRows } = await supabase
-    .from('members')
-    .select('id, user_id, status')
-    .eq('jamiya_id', jamiyaId)
-    .in('status', [...BOOKS_MEMBER_STATUSES]);
-
-  const membersRaw = (memberRows ?? []) as Array<{
-    id: string;
-    user_id: string;
-    status: string;
-  }>;
-  const userIds = membersRaw.map((m) => m.user_id);
-  const { data: profiles } = userIds.length
-    ? await supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds)
-    : { data: [] };
-
-  const profileById = new Map(
-    ((profiles ?? []) as Array<{
-      id: string;
-      full_name: string | null;
-      email: string | null;
-      phone: string | null;
-    }>).map((p) => [p.id, p]),
-  );
-
-  const members = membersRaw.map((m) => {
-    const p = profileById.get(m.user_id);
-    const label = p?.full_name || p?.email || p?.phone || m.id.slice(0, 8);
-    return { id: m.id, label, norm: normalizeName(label) };
-  });
+  const members = await loadBooksMemberMatchers(jamiyaId);
 
   let sharesDone = 0;
   const contribRows: Array<Record<string, string>> = [];
@@ -415,15 +387,14 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
   if (contribLines.length) {
     const parsed = parseContributionHeaders(contribLines, year);
     if (!parsed) {
-      redirectWithCircleNotice(
-        slug,
-        'Contribution paste needs a header row with NAME and SHARES (copy rows 1–2 from AMANAH TEST).',
-        'error',
-        '/books?view=import',
-      );
+      return {
+        success: false,
+        message:
+          'Contribution paste needs a header row with NAME and SHARES (copy rows 1–2 from AMANAH TEST).',
+      };
     }
 
-    const { nameIdx, sharesIdx, monthCols, dataStart } = parsed!;
+    const { nameIdx, sharesIdx, monthCols, dataStart } = parsed;
 
     for (const line of contribLines.slice(dataStart)) {
       if (/^FEB\s+LOANS|^MARCH\s+LOANS|^APRIL\s+LOANS|^MAY\s+LOANS|^LOANS/i.test(line)) break;
@@ -531,12 +502,10 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
   if (bookRows.length) {
     const result = await importRows(jamiyaId, bookRows);
     if (!result.ok) {
-      redirectWithCircleNotice(
-        slug,
-        result.error ?? 'Sheet import failed while saving book rows.',
-        'error',
-        '/books?view=grid',
-      );
+      return {
+        success: false,
+        message: result.error ?? 'Sheet import failed while saving book rows.',
+      };
     }
     imported = result.imported ?? bookRows.length;
   }
@@ -547,14 +516,12 @@ export async function importTbSheetAction(formData: FormData): Promise<void> {
       ? ` Unmatched (add on Members first): ${[...new Set(unmatched)].join(', ')}.`
       : '';
   const worked = sharesDone > 0 || imported > 0;
-  redirectWithCircleNotice(
-    slug,
-    worked
+  return {
+    success: worked,
+    message: worked
       ? `Imported: ${sharesDone} share lots, ${imported} book rows.${miss}`
       : `Nothing imported.${miss || ' Check names match Members and paste includes a NAME header.'}`,
-    worked && unmatched.length === 0 ? 'success' : worked ? 'success' : 'error',
-    worked ? '/books' : '/books?view=import',
-  );
+  };
 }
 
 export type TbImportPreview = {
