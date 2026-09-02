@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { mpesaHealth } from '@/lib/payments/mpesa';
+import { bankHealth } from '@/lib/payments/bank';
 import { paymentProvider } from '@/lib/payments/provider';
 import {
   requireRealProviders,
@@ -29,6 +30,7 @@ export default async function AdminObservabilityPage() {
     pendingIntents,
     failedIntents,
     mpesa,
+    bank,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('jamiyas').select('id', { count: 'exact', head: true }),
@@ -70,6 +72,7 @@ export default async function AdminObservabilityPage() {
       .select('id', { count: 'exact', head: true })
       .in('status', ['failed', 'expired', 'cancelled']),
     mpesaHealth(),
+    bankHealth(),
   ]);
 
   const cards = [
@@ -106,6 +109,18 @@ export default async function AdminObservabilityPage() {
       label: 'B2C configured',
       value: mpesa.b2c_configured ? 'yes' : 'no',
     },
+    {
+      label: 'payments-bank health',
+      value: bank.ok ? 'ok' : `${bank.error ?? 'down'}${provider === 'bank' ? '' : ' (info)'}`,
+    },
+    {
+      label: 'Bank API configured',
+      value: bank.bank_configured ? 'yes' : 'no',
+    },
+    {
+      label: 'Bank SMS webhook secret',
+      value: process.env.BANK_ALERT_WEBHOOK_SECRET?.trim() ? 'set' : 'missing',
+    },
   ];
 
   return (
@@ -116,7 +131,9 @@ export default async function AdminObservabilityPage() {
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Operational snapshot including aged withdrawals, failed outbox, and payment cutover.
-          Health: <code className="text-xs">/api/v1/payments/mpesa-health</code>.
+          Health:{' '}
+          <code className="text-xs">/api/v1/payments/mpesa-health</code> ·{' '}
+          <code className="text-xs">/api/v1/payments/bank-health</code>.
         </p>
       </div>
 
@@ -135,6 +152,11 @@ export default async function AdminObservabilityPage() {
             </div>
           ))}
         </dl>
+        {provider === 'bank' && bank.hint ? (
+          <p className="rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+            {bank.hint}
+          </p>
+        ) : null}
         {mpesa.hint && provider === 'mpesa' ? (
           <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {mpesa.hint}

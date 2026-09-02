@@ -3,10 +3,10 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import {
-  importBankAlertAction,
   matchBankAlertsAction,
   setBankAlertStatusAction,
 } from '../actions/shares-actions';
+import { BankSmsImportForm } from './bank-sms-import-form';
 import {
   createBankAccountAction,
   createFineCategoryAction,
@@ -593,11 +593,11 @@ export function TreasuryPanel({
       {canManage ? (
         <section className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Bank SMS / alerts (scaffold)
+            Bank SMS / alerts
           </h2>
           <p className="text-sm text-muted-foreground">
-            Paste Equity/M-Pesa style alerts, then auto-match by amount, direction, account, and date
-            window (±3 days).
+            Paste Equity, KCB, Co-op, Absa, NCBA, Stanbic, or M-Pesa SMS. We parse amount, direction,
+            and reference, then you can auto-match to cashbook rows (±3 days).
           </p>
           <form action={matchBankAlertsAction} className="flex flex-wrap gap-2">
             <input type="hidden" name="jamiyaId" value={jamiyaId} />
@@ -606,69 +606,12 @@ export function TreasuryPanel({
               Auto-match pending alerts
             </Button>
           </form>
-          <form
-            action={importBankAlertAction}
-            className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
-          >
-            <input type="hidden" name="jamiyaId" value={jamiyaId} />
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="currency" value={currency} />
-            <div className="space-y-1">
-              <Label htmlFor="alertAmount">Amount</Label>
-              <Input id="alertAmount" name="amount" type="number" min="1" step="0.01" required />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="direction">Direction</Label>
-              <select
-                id="direction"
-                name="direction"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                defaultValue="credit"
-              >
-                <option value="credit">Credit</option>
-                <option value="debit">Debit</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="provider">Provider</Label>
-              <select
-                id="provider"
-                name="provider"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                defaultValue="manual"
-              >
-                <option value="manual">Manual</option>
-                <option value="equity">Equity</option>
-                <option value="mpesa">M-Pesa</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="alertAccount">Account</Label>
-              <select
-                id="alertAccount"
-                name="bankAccountId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
-                defaultValue=""
-              >
-                <option value="">—</option>
-                {accounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="alertText">Alert text</Label>
-              <Textarea id="alertText" name="alertText" rows={2} placeholder="Raw SMS body…" />
-            </div>
-            <div className="sm:col-span-2">
-              <Button type="submit" size="sm" variant="outline">
-                Queue alert
-              </Button>
-            </div>
-          </form>
+          <BankSmsImportForm
+            jamiyaId={jamiyaId}
+            slug={slug}
+            currency={currency}
+            accounts={accounts.map((a) => ({ id: a.id, name: a.name }))}
+          />
           {bankAlerts.length > 0 ? (
             <ul className="divide-y divide-border rounded-xl border border-border bg-card">
               {bankAlerts.map((alert) => (

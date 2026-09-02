@@ -78,8 +78,24 @@ Deno.serve(async (req) => {
       auth: { persistSession: false, autoRefreshToken: false },
     });
 
-    const body = await req.json();
-    const action = body.action as string | undefined;
+    const body = await req.json().catch(() => ({} as Record<string, unknown>));
+    const action = (body as { action?: string }).action as string | undefined;
+
+    if (action === "health") {
+      const hasBank = Boolean(env("BANK_API_KEY") && env("BANK_API_URL"));
+      const requireReal = env("REQUIRE_REAL_PROVIDERS") === "true";
+      return Response.json({
+        ok: true,
+        bank_configured: hasBank,
+        require_real: requireReal,
+        simulated_fallback: !hasBank && !requireReal,
+        hint: hasBank
+          ? null
+          : requireReal
+            ? "Set BANK_API_URL and BANK_API_KEY on the Edge function."
+            : "Bank API not set; initiate falls back to simulated complete.",
+      });
+    }
 
     if (action === "initiate") {
       const intentId = body.intent_id as string | undefined;

@@ -213,35 +213,116 @@ export async function importBankAlertAction(formData: FormData): Promise<void> {
 
   if (!jamiyaId || !slug || !Number.isFinite(amount) || amount <= 0) return;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return;
+  const { parseBankSms } = await import('@/lib/bank-sms-parse');
+  const { normalizeBankProvider } = await import('../lib/split-bank-sms');
+  const parsed = alertText ? parseBankSms(alertText) : null;
 
-  const { error } = await supabase.from('circle_bank_alerts').insert({
-    jamiya_id: jamiyaId,
-    bank_account_id: bankAccountId,
-    provider: ['manual', 'equity', 'mpesa', 'other'].includes(provider) ? provider : 'manual',
-    alert_text: alertText || null,
-    amount,
-    currency,
-    direction: direction === 'debit' ? 'debit' : 'credit',
-    occurred_at: new Date().toISOString(),
-    status: 'pending',
-    created_by: user.id,
-  } as never);
+  const { data, error } = await callRpc('ingest_bank_alert', {
+    p_jamiya_id: jamiyaId,
+    p_provider: normalizeBankProvider(provider || parsed?.provider || 'manual'),
+    p_alert_text: alertText || null,
+    p_amount: amount || parsed?.amount || null,
+    p_direction: direction === 'debit' ? 'debit' : 'credit',
+    p_currency: currency || parsed?.currency || 'KES',
+    p_external_ref: parsed?.externalRef ?? null,
+    p_bank_account_id: bankAccountId,
+    p_occurred_at: new Date().toISOString(),
+  });
 
   if (error) {
     redirectWithCircleNotice(slug, error.message, 'error', '/treasury');
+    return;
+  }
+  const result = data as { ok?: boolean; error?: string; duplicate?: boolean } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(slug, result?.error ?? 'Could not save alert.', 'error', '/treasury');
     return;
   }
 
   revalidatePath(`/circles/${slug}/treasury`);
   redirectWithCircleNotice(
     slug,
-    'Bank alert saved as pending (auto-reconcile comes later).',
+    result.duplicate
+      ? 'Alert already queued (same reference).'
+      : 'Bank alert queued. Run auto-match when ready.',
     'success',
     '/treasury',
   );
+}
+
+/** Officers paste one or many Kenya bank / M-Pesa SMS bodies; parse + ingest with dedupe. */
+export async function bulkImportBankSmsAction(
+  formData: FormData,
+): Promise<{ success: boolean; message: string }> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const paste = String(formData.get('smsPaste') ?? '');
+  const bankAccountId = String(formData.get('bankAccountId') ?? '').trim() || null;
+  const currency = String(formData.get('currency') ?? 'KES');
+
+  if (!jamiyaId || !slug) {
+    return { success: false, message: 'Missing circle.' };
+  }
+
+  const { splitAndParseBankSms, normalizeBankProvider } = await import('../lib/split-bank-sms');
+  const chunks = splitAndParseBankSms(paste);
+  if (!chunks.length) {
+    return { success: false, message: 'Paste at least one SMS message.' };
+  }
+  if (chunks.length > 50) {
+    return { success: false, message: 'Paste at most 50 SMS messages at a time.' };
+  }
+
+  let saved = 0;
+  let duplicates = 0;
+  let skipped = 0;
+
+  for (const chunk of chunks) {
+    if (chunk.parsed.amount == null || chunk.parsed.amount <= 0) {
+      skipped += 1;
+      continue;
+    }
+    const { data, error } = await callRpc('ingest_bank_alert', {
+      p_jamiya_id: jamiyaId,
+      p_provider: normalizeBankProvider(chunk.parsed.provider),
+      p_alert_text: chunk.text,
+      p_amount: chunk.parsed.amount,
+      p_direction: chunk.parsed.direction,
+      p_currency: chunk.parsed.currency || currency,
+      p_external_ref: chunk.parsed.externalRef,
+      p_bank_account_id: bankAccountId,
+      p_occurred_at: new Date().toISOString(),
+    });
+    if (error) {
+      skipped += 1;
+      continue;
+    }
+    const result = data as { ok?: boolean; duplicate?: boolean } | null;
+    if (!result?.ok) {
+      skipped += 1;
+      continue;
+    }
+    if (result.duplicate) duplicates += 1;
+    else saved += 1;
+  }
+
+  revalidatePath(`/circles/${slug}/treasury`);
+  revalidatePath(`/circles/${slug}/journal`);
+
+  if (!saved && !duplicates) {
+    return {
+      success: false,
+      message:
+        skipped > 0
+          ? `No alerts saved. ${skipped} message(s) missing a clear amount.`
+          : 'Nothing to save.',
+    };
+  }
+
+  const parts = [
+    saved > 0 ? `Queued ${saved}` : null,
+    duplicates > 0 ? `${duplicates} duplicate(s) skipped` : null,
+    skipped > 0 ? `${skipped} without amount skipped` : null,
+  ].filter(Boolean);
+  return { success: true, message: `${parts.join(' · ')}. Run auto-match when ready.` };
 }

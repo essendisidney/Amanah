@@ -8,6 +8,24 @@ type Props = {
   challengeKind?: string | null;
 };
 
+function Checklist({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-4 space-y-1.5 rounded-lg border border-border/70 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+      <li className="text-xs font-semibold uppercase tracking-wide text-foreground">
+        First-week checklist
+      </li>
+      {items.map((item) => (
+        <li key={item} className="flex gap-2">
+          <span aria-hidden className="text-primary">
+            ○
+          </span>
+          <span>{item}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
   const isRotating = challengeKind === 'rotating' || !challengeKind;
   const isShareDividend = challengeKind === 'share_dividend';
@@ -38,12 +56,24 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
             see slots, who already received the pot, and who still owes this round.
           </li>
         </ol>
+        <Checklist
+          items={[
+            'Members + payout slots set',
+            'Circle activated',
+            'This month’s payments entered',
+            'Next of kin for every member',
+            'Treasury accounts seeded (optional bank SMS)',
+          ]}
+        />
         <div className="mt-5 flex flex-wrap gap-2">
           <Button asChild size="lg" className="min-h-11 rounded-full px-6">
             <a href="#monthly-payments">Enter payments</a>
           </Button>
           <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
             <a href="#merry-go-round">View slots</a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
+            <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>
           </Button>
         </div>
       </section>
@@ -72,9 +102,24 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
           </li>
           <li>Check <strong className="font-medium text-foreground">Statements</strong> when done.</li>
         </ol>
-        <div className="mt-5">
+        <Checklist
+          items={[
+            'All members invited',
+            'Share buy-in + monthly grid filled',
+            'Excel paste previewed before import (if used)',
+            'Next of kin complete',
+            'Treasury: bank SMS matched when cash hits the account',
+          ]}
+        />
+        <div className="mt-5 flex flex-wrap gap-2">
           <Button asChild size="lg" className="min-h-11 rounded-full px-6">
             <Link href={`/circles/${slug}/books` as Route}>Open member payments</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
+            <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
+            <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>
           </Button>
         </div>
       </section>
@@ -96,12 +141,24 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
         <li>Members can also pay from wallet, or you mark cash on the calendar.</li>
         <li>Check statements and goals for progress toward shared targets.</li>
       </ol>
+      <Checklist
+        items={[
+          'Members added + circle activated',
+          'Monthly savings grid up to date',
+          'Goals created if the group has targets',
+          'Next of kin complete',
+          'Treasury accounts ready for bank deposits',
+        ]}
+      />
       <div className="mt-5 flex flex-wrap gap-2">
         <Button asChild size="lg" className="min-h-11 rounded-full px-6">
           <a href="#monthly-payments">Enter monthly savings</a>
         </Button>
         <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
           <a href="#calendar">Open calendar</a>
+        </Button>
+        <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
+          <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
         </Button>
       </div>
     </section>
