@@ -137,11 +137,11 @@ export default async function QardPage({ searchParams }: Props) {
           </Link>
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-          Qard Hassan
+          Member loan
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Interest-free circle loans. Cap is 50% of your paid contributions in that circle
-          (minimum KES 5,000 if you have no paid history yet).
+          Ask. The officer approves. You repay. No interest (Qard Hassan). You can borrow up to
+          half of what you have already paid in that circle.
         </p>
       </div>
 
@@ -218,7 +218,7 @@ export default async function QardPage({ searchParams }: Props) {
           className="max-w-xl space-y-4 rounded-xl border border-border bg-card p-6"
         >
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Request a loan
+            Ask for a loan
           </h2>
           <div className="space-y-2">
             <Label htmlFor="jamiyaId">Circle</Label>
@@ -257,7 +257,7 @@ export default async function QardPage({ searchParams }: Props) {
             <Textarea id="purpose" name="purpose" minLength={5} required />
           </div>
           <Button type="submit" className="min-h-11">
-            Submit request
+            Send request
           </Button>
         </form>
       ) : null}
@@ -389,8 +389,8 @@ export default async function QardPage({ searchParams }: Props) {
           </ul>
         ) : (
           <EmptyState
-            title="No Qard requests yet"
-            description="Request an interest-free loan from a circle where you are an active member."
+            title="No loans yet"
+            description="Ask for an interest-free loan from this circle. The treasurer approves, then you repay."
             actionLabel="Back to Finance"
             actionHref={'/finance' as Route}
           />

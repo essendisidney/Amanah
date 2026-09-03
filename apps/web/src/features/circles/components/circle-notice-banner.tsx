@@ -10,12 +10,12 @@ export function CircleNoticeBanner({
   noticeType?: string;
 }) {
   if (!notice?.trim()) return null;
-  const success = noticeType === 'success';
+  const error = noticeType === 'error' || noticeType === 'destructive';
   const needsWallet =
-    /wallet|insufficient|top up/i.test(notice) && !success;
+    /wallet|insufficient|top up/i.test(notice) && error;
 
   return (
-    <Alert variant={success ? 'success' : 'destructive'}>
+    <Alert variant={error ? 'destructive' : 'success'}>
       <AlertDescription>
         {notice}
         {needsWallet ? (

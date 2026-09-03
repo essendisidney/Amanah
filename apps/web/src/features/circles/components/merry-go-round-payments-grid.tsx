@@ -185,6 +185,42 @@ export function MerryGoRoundPaymentsGrid({
     });
   }
 
+  /** One tap: set every empty cell in this month to the fill amount (or default). */
+  function markMonthPaid(cycleNumber: number) {
+    const amount = Number(fillAmount);
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    setDraft((prev) => {
+      const next = { ...prev };
+      for (const m of members) {
+        const key = cellKey(m.id, cycleNumber);
+        if (!next[key]?.trim()) next[key] = String(amount);
+      }
+      return next;
+    });
+  }
+
+  /** Empty cell tap → fill default contribution (one less step). */
+  function fillCellIfEmpty(key: string) {
+    setDraft((prev) => {
+      if (prev[key]?.trim()) return prev;
+      const amount = Number(fillAmount);
+      if (!Number.isFinite(amount) || amount <= 0) return prev;
+      return { ...prev, [key]: String(amount) };
+    });
+  }
+
+  /** First month that still has empty cells — for the big CTA. */
+  const quickMonth = useMemo(() => {
+    for (const col of months) {
+      const anyEmpty = members.some((m) => {
+        const key = cellKey(m.id, col.cycleNumber);
+        return !(Number(draft[key] || 0) > 0);
+      });
+      if (anyEmpty) return col;
+    }
+    return months[0] ?? null;
+  }, [months, members, draft]);
+
   function onSave() {
     const cyclesToSave = new Set<number>();
     for (const key of dirtyKeys) {
@@ -248,14 +284,32 @@ export function MerryGoRoundPaymentsGrid({
         </Alert>
       ) : null}
       <p className="text-sm text-muted-foreground">
-        Enter what each person paid for any month (past or present). Empty = did not contribute.
-        Use <strong className="font-medium text-foreground">Add past month</strong> to backfill
-        history (like Asha’s books).
+        Tap an empty cell to fill {fillAmount || defaultAmount || 'the amount'}, or use{' '}
+        <strong className="font-medium text-foreground">Mark month paid</strong> for everyone at
+        once. Then Save.
       </p>
+
+      {quickMonth ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-primary/25 bg-primary/5 px-4 py-3">
+          <p className="flex-1 text-sm text-foreground">
+            Record <strong>{quickMonth.label}</strong> for everyone at{' '}
+            <strong>KES {fillAmount || defaultAmount}</strong>?
+          </p>
+          <Button
+            type="button"
+            className="min-h-11"
+            onClick={() => {
+              markMonthPaid(quickMonth.cycleNumber);
+            }}
+          >
+            Mark {quickMonth.label} paid
+          </Button>
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="space-y-1">
-          <Label htmlFor="mgrFill">Fill empty with</Label>
+          <Label htmlFor="mgrFill">Default amount</Label>
           <div className="flex gap-2">
             <Input
               id="mgrFill"
@@ -267,7 +321,7 @@ export function MerryGoRoundPaymentsGrid({
               className="min-h-11 w-28"
             />
             <Button type="button" variant="outline" className="min-h-11" onClick={fillEmpty}>
-              Apply
+              Fill all empty
             </Button>
           </div>
         </div>
@@ -326,6 +380,17 @@ export function MerryGoRoundPaymentsGrid({
                       <p className="text-xs text-muted-foreground">Cycle {col.cycleNumber}</p>
                     </div>
                     <div className="flex items-center gap-2">
+                      {!paid ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="min-h-11"
+                          onClick={() => fillCellIfEmpty(key)}
+                        >
+                          Paid
+                        </Button>
+                      ) : null}
                       <Input
                         type="number"
                         min={0}
@@ -333,6 +398,7 @@ export function MerryGoRoundPaymentsGrid({
                         inputMode="decimal"
                         placeholder="—"
                         value={raw}
+                        onFocus={() => fillCellIfEmpty(key)}
                         onChange={(e) =>
                           setDraft((prev) => ({ ...prev, [key]: e.target.value }))
                         }
@@ -366,12 +432,19 @@ export function MerryGoRoundPaymentsGrid({
                 {months.map((col) => (
                   <th
                     key={`${col.cycleNumber}-${col.year}-${col.month}`}
-                    className="min-w-[6.5rem] px-2 py-2 font-medium"
+                    className="min-w-[7.5rem] px-2 py-2 font-medium"
                   >
                     <span className="block">{col.label}</span>
                     <span className="block text-xs font-normal text-muted-foreground">
                       Cycle {col.cycleNumber}
                     </span>
+                    <button
+                      type="button"
+                      className="mt-1 text-xs font-medium text-primary underline-offset-2 hover:underline"
+                      onClick={() => markMonthPaid(col.cycleNumber)}
+                    >
+                      Mark paid
+                    </button>
                   </th>
                 ))}
               </tr>
@@ -395,6 +468,7 @@ export function MerryGoRoundPaymentsGrid({
                             inputMode="decimal"
                             placeholder="—"
                             value={raw}
+                            onFocus={() => fillCellIfEmpty(key)}
                             onChange={(e) =>
                               setDraft((prev) => ({ ...prev, [key]: e.target.value }))
                             }

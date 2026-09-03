@@ -18,6 +18,7 @@ export function OfficerOverviewStrip({
   openPenaltyCount = 0,
   recordPaymentHref,
   recordPaymentLabel = 'Record payment',
+  finesHref,
   cycleLabel,
 }: {
   slug: string;
@@ -35,6 +36,7 @@ export function OfficerOverviewStrip({
   openPenaltyCount?: number;
   recordPaymentHref?: string;
   recordPaymentLabel?: string;
+  finesHref?: string;
   cycleLabel?: string | null;
 }) {
   const attention =
@@ -102,7 +104,7 @@ export function OfficerOverviewStrip({
           ) : null}
           {openPenaltyCount > 0 ? (
             <Link
-              href={`/circles/${slug}/treasury` as Route}
+              href={(finesHref ?? `/circles/${slug}/treasury`) as Route}
               className="rounded-full border border-border bg-secondary/60 px-3 py-1 text-xs font-semibold"
             >
               Fines {openPenaltyCount}

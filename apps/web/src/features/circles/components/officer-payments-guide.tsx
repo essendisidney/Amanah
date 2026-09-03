@@ -62,7 +62,6 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
             'Circle activated',
             'This month’s payments entered',
             'Next of kin for every member',
-            'Treasury accounts seeded (optional bank SMS)',
           ]}
         />
         <div className="mt-5 flex flex-wrap gap-2">
@@ -133,32 +132,28 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
         Track savings contributions
       </h2>
       <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-muted-foreground">
-        <li>Add members, then activate to generate the contribution calendar.</li>
+        <li>Add members, then activate to generate dues.</li>
         <li>
-          Open <strong className="font-medium text-foreground">Monthly contributions</strong> to enter
-          what each person saved for any month — empty means they did not contribute.
+          Open <strong className="font-medium text-foreground">Monthly savings</strong> and enter
+          what each person paid. Empty means they did not contribute.
         </li>
-        <li>Members can also pay from wallet, or you mark cash on the calendar.</li>
-        <li>Check statements and goals for progress toward shared targets.</li>
+        <li>
+          Add <strong className="font-medium text-foreground">next of kin</strong> for every member.
+        </li>
       </ol>
       <Checklist
         items={[
-          'Members added + circle activated',
-          'Monthly savings grid up to date',
-          'Goals created if the group has targets',
-          'Next of kin complete',
-          'Treasury accounts ready for bank deposits',
+          'Members added',
+          'This month’s savings entered',
+          'Next of kin for every member',
         ]}
       />
       <div className="mt-5 flex flex-wrap gap-2">
         <Button asChild size="lg" className="min-h-11 rounded-full px-6">
-          <a href="#monthly-payments">Enter monthly savings</a>
+          <a href="#monthly-payments">Enter savings</a>
         </Button>
         <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
-          <a href="#calendar">Open calendar</a>
-        </Button>
-        <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
-          <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+          <a href="#next-of-kin">Next of kin</a>
         </Button>
       </div>
     </section>

@@ -19,6 +19,7 @@ import { decideQardAction } from '@/features/finance/actions';
 import { Input, Label } from '@jamiya/ui';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { isRotatingKind } from '@/features/circles/lib/circle-mode';
 
 export const metadata: Metadata = { title: 'Officer console' };
 export const dynamic = 'force-dynamic';
@@ -89,8 +90,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     challenge_kind?: string | null;
   };
 
-  const isRotating =
-    jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind;
+  const isRotating = isRotatingKind(jamiya.challenge_kind);
 
   const { data: membership } = await supabase
     .from('members')
@@ -313,12 +313,21 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           >
             {dict.circle.arrears}
           </Link>
-          <Link
-            href={`/circles/${slug}/treasury` as Route}
-            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-          >
-            Treasury
-          </Link>
+          {isRotating ? (
+            <Link
+              href={`/circles/${slug}/statement` as Route}
+              className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
+            >
+              Statements
+            </Link>
+          ) : (
+            <Link
+              href={`/circles/${slug}/treasury` as Route}
+              className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
+            >
+              Treasury
+            </Link>
+          )}
           <Link
             href={`/circles/${slug}/community` as Route}
             className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
@@ -331,31 +340,41 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
             </summary>
             <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
               {isRotating ? (
-                <Link
-                  href={`/circles/${slug}#monthly-payments` as Route}
-                  className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted"
-                >
-                  Monthly contributions
-                </Link>
+                <>
+                  <Link
+                    href={`/circles/${slug}#monthly-payments` as Route}
+                    className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted"
+                  >
+                    Monthly contributions
+                  </Link>
+                  <Link
+                    href={`/circles/${slug}#merry-go-round` as Route}
+                    className="rounded px-2 py-1.5 text-sm hover:bg-muted"
+                  >
+                    Slots & pot
+                  </Link>
+                </>
               ) : (
-                <Link href={`/circles/${slug}/books` as Route} className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted">
-                  Member payments
-                </Link>
+                <>
+                  <Link href={`/circles/${slug}/books` as Route} className="rounded px-2 py-1.5 text-sm font-medium hover:bg-muted">
+                    Member payments
+                  </Link>
+                  <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                    Shares
+                  </Link>
+                  <Link href={`/circles/${slug}/journal` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                    Journal
+                  </Link>
+                  <Link href={`/circles/${slug}/report` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
+                    GL report
+                  </Link>
+                </>
               )}
-              <Link href={`/circles/${slug}/shares` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
-                Shares
-              </Link>
-              <Link href={`/circles/${slug}/journal` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
-                Journal
-              </Link>
               <Link href={`/circles/${slug}/invoices` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 Invoices
               </Link>
               <Link href={`/circles/${slug}/statement` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 Statements
-              </Link>
-              <Link href={`/circles/${slug}/report` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
-                GL report
               </Link>
               <Link href={`/circles/${slug}/audit` as Route} className="rounded px-2 py-1.5 text-sm hover:bg-muted">
                 {dict.circle.auditTrail}
@@ -378,6 +397,15 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           nextPayout ? Number(nextPayout.amount) : null
         }
         currency={jamiyaRow.currency}
+        finesHref={
+          isRotating
+            ? (`/circles/${slug}/statement` as Route)
+            : (`/circles/${slug}/treasury` as Route)
+        }
+        recordPaymentHref={
+          isRotating ? (`/circles/${slug}#monthly-payments` as Route) : (`/circles/${slug}/books` as Route)
+        }
+        recordPaymentLabel={isRotating ? 'Record contributions' : 'Record payment'}
       />
 
       <section className="grid gap-6 lg:grid-cols-2">

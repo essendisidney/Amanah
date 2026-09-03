@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 export function redirectWithCircleNotice(
   slug: string,
   message: string,
-  type: 'success' | 'error' = 'error',
+  type: 'success' | 'error' | 'info' = 'error',
   pathSuffix = '',
 ): never {
   const params = new URLSearchParams({
