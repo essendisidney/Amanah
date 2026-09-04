@@ -12,6 +12,7 @@ import {
   setMemberRoleAction,
   vouchMemberAction,
 } from '../actions/member-actions';
+import { assignPayoutSlotAction } from '../actions/slot-actions';
 import { InviteSharePanel } from './invite-share-panel';
 
 export type MemberListItem = {
@@ -53,21 +54,43 @@ export function MembersList({
   slug,
   canManage,
   canRecordPayments = false,
+  jamiyaId,
+  canAssignSlots = false,
+  maxSlots = 0,
+  slotsLocked = false,
 }: {
   members: MemberListItem[];
   slug: string;
   canManage: boolean;
   canRecordPayments?: boolean;
+  jamiyaId?: string;
+  canAssignSlots?: boolean;
+  maxSlots?: number;
+  slotsLocked?: boolean;
 }) {
   if (members.length === 0) {
     return <p className="text-sm text-muted-foreground">No members yet.</p>;
   }
+
+  const takenByOthers = (memberId: string) =>
+    new Set(
+      members
+        .filter((m) => m.id !== memberId && m.payoutPosition != null && m.status === 'active')
+        .map((m) => m.payoutPosition as number),
+    );
 
   return (
     <ul className="space-y-3">
       {members.map((member) => {
         const isGone = member.status === 'removed' || member.status === 'left';
         const displayName = member.fullName ?? member.email ?? member.phone ?? 'Member';
+        const taken = takenByOthers(member.id);
+        const openSlots =
+          maxSlots > 0
+            ? Array.from({ length: maxSlots }, (_, i) => i + 1).filter(
+                (pos) => !taken.has(pos) || member.payoutPosition === pos,
+              )
+            : [];
         return (
           <li
             key={member.id}
@@ -132,6 +155,38 @@ export function MembersList({
                       Update role
                     </Button>
                   </form>
+
+                  {canAssignSlots && jamiyaId && !slotsLocked && openSlots.length > 0 ? (
+                    <form action={assignPayoutSlotAction} className="flex flex-wrap items-end gap-2">
+                      <input type="hidden" name="jamiyaId" value={jamiyaId} />
+                      <input type="hidden" name="memberId" value={member.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <label className="text-xs text-muted-foreground">
+                        Payout slot
+                        <select
+                          name="payoutPosition"
+                          defaultValue={member.payoutPosition ?? openSlots[0]}
+                          required
+                          className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                        >
+                          {openSlots.map((pos) => (
+                            <option key={pos} value={pos}>
+                              #{pos}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <Button type="submit" size="sm" variant="outline">
+                        Assign slot
+                      </Button>
+                    </form>
+                  ) : null}
+                  {canAssignSlots && slotsLocked ? (
+                    <p className="text-xs text-muted-foreground">
+                      Slots locked after activation
+                      {member.payoutPosition ? ` · #${member.payoutPosition}` : ''}.
+                    </p>
+                  ) : null}
 
                   <form action={vouchMemberAction} className="flex flex-wrap gap-2">
                     <input type="hidden" name="memberId" value={member.id} />

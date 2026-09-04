@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { redirectWithCircleNotice } from '../lib/circle-notice';
 
 export async function setMemberRoleAction(formData: FormData): Promise<void> {
   const memberId = String(formData.get('memberId') ?? '');
@@ -25,15 +26,39 @@ export async function vouchMemberAction(formData: FormData): Promise<void> {
   const approve = String(formData.get('approve') ?? 'true') === 'true';
   const notes = String(formData.get('notes') ?? '').trim();
   const slug = String(formData.get('slug') ?? '');
-  if (!memberId) return;
+  if (!memberId || !slug) return;
 
-  await callRpc('vouch_for_member', {
+  const { data, error } = await callRpc('vouch_for_member', {
     p_member_id: memberId,
     p_approve: approve,
     p_notes: notes || null,
   });
 
-  if (slug) revalidatePath(`/circles/${slug}`);
+  if (error) {
+    redirectWithCircleNotice(slug, error.message || 'Could not save vouch.', 'error');
+  }
+
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    const messages: Record<string, string> = {
+      FORBIDDEN: 'Only circle admins can vouch for members.',
+      NOT_FOUND: 'Member not found.',
+      UNAUTHENTICATED: 'Sign in again, then retry.',
+    };
+    redirectWithCircleNotice(
+      slug,
+      messages[result?.error ?? ''] ?? result?.error ?? 'Could not save vouch.',
+      'error',
+    );
+  }
+
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath(`/circles/${slug}/officer`);
+  redirectWithCircleNotice(
+    slug,
+    approve ? 'Member vouched.' : 'Vouch rejected.',
+    'success',
+  );
 }
 
 function isNextRedirectError(error: unknown): boolean {

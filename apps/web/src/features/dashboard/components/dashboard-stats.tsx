@@ -69,22 +69,29 @@ export function StatusBadge({
   status: string;
 }) {
   const variant =
-    status === 'active' || status === 'paid' || status === 'approved'
+    status === 'active' ||
+    status === 'paid' ||
+    status === 'approved' ||
+    status === 'vouch:approved'
       ? 'success'
       : status === 'late' ||
           status === 'failed' ||
           status === 'rejected' ||
+          status === 'vouch:rejected' ||
           status === 'cancelled'
         ? 'destructive'
         : status === 'suspended' || status === 'paused'
           ? 'secondary'
-          : status === 'open' || status === 'scheduled' || status === 'pending'
+          : status === 'open' ||
+              status === 'scheduled' ||
+              status === 'pending' ||
+              status === 'vouch:pending'
             ? 'accent'
             : 'secondary';
 
   return (
     <Badge variant={variant} className="capitalize">
-      {status.replaceAll('_', ' ')}
+      {status.replaceAll('_', ' ').replace('vouch:', 'vouch ')}
     </Badge>
   );
 }

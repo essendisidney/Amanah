@@ -41,13 +41,34 @@ async function vouchFormAction(formData: FormData) {
   const slug = String(formData.get('slug') ?? '');
   const memberId = String(formData.get('memberId') ?? '');
   const approve = String(formData.get('approve') ?? '') === '1';
-  await callRpc('vouch_for_member', {
+  const { redirectWithCircleNotice } = await import('@/features/circles/lib/circle-notice');
+  const { data, error } = await callRpc('vouch_for_member', {
     p_member_id: memberId,
     p_approve: approve,
     p_notes: null,
   });
+  if (error) {
+    redirectWithCircleNotice(slug, error.message || 'Could not save vouch.', 'error', '/officer');
+  }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      result?.error === 'FORBIDDEN'
+        ? 'Only circle admins can vouch for members.'
+        : result?.error ?? 'Could not save vouch.',
+      'error',
+      '/officer',
+    );
+  }
   revalidatePath(`/circles/${slug}/officer`);
   revalidatePath(`/circles/${slug}`);
+  redirectWithCircleNotice(
+    slug,
+    approve ? 'Member vouched.' : 'Vouch rejected.',
+    'success',
+    '/officer',
+  );
 }
 
 async function decideQardFormAction(formData: FormData) {
