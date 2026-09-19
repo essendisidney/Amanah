@@ -22,7 +22,7 @@ export default function WelcomePage() {
           Prosper together.
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          What brings you to Amanah today?
+          What brings you to Jameiyah today?
         </p>
       </div>
       <WelcomeIntentForm />

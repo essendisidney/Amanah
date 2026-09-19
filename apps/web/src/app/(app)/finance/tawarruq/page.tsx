@@ -71,7 +71,7 @@ export default async function TawarruqPage() {
           New application
         </h2>
         <p className="text-sm text-muted-foreground">
-          After you submit, Amanah reviews the request, then may hand it to a partner. You will see
+          After you submit, Jameiyah reviews the request, then may hand it to a partner. You will see
           status updates below.
         </p>
         <div className="space-y-2">

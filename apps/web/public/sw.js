@@ -1,4 +1,4 @@
-/* Amanah PWA — installability + light offline shell. */
+/* Jameiyah PWA — installability + light offline shell. */
 const SHELL = 'amanah-shell-v8';
 const PRECACHE = [
   '/manifest.webmanifest',

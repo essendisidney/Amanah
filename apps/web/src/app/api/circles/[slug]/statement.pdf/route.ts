@@ -109,7 +109,7 @@ export async function GET(request: Request, { params }: Params) {
     status: 200,
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="amanah-${slug}-statement.pdf"`,
+      'Content-Disposition': `attachment; filename="jameiyah-${slug}-statement.pdf"`,
       'Cache-Control': 'private, no-store',
     },
   });

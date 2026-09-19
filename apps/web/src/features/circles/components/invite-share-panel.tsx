@@ -16,8 +16,8 @@ function buildShareText(
   inviteCode: string,
   circleName?: string,
 ): string {
-  const name = circleName?.trim() || 'an Amanah savings circle';
-  return `You're invited to join ${name} on Amanah.\n\nOpen this link, sign in with your phone (SMS code), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
+  const name = circleName?.trim() || 'an Jameiyah savings circle';
+  return `You're invited to join ${name} on Jameiyah.\n\nOpen this link, sign in with your phone (SMS code), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
 }
 
 function qrImageUrl(data: string): string {
@@ -47,7 +47,7 @@ export function InviteSharePanel({
     if (typeof navigator === 'undefined' || !navigator.share) return;
     try {
       await navigator.share({
-        title: 'Amanah invitation',
+        title: 'Jameiyah invitation',
         text: shareText,
         url: inviteUrl,
       });
@@ -58,7 +58,7 @@ export function InviteSharePanel({
 
   const whatsappHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   const smsHref = `sms:?body=${encodeURIComponent(shareText)}`;
-  const emailHref = `mailto:?subject=${encodeURIComponent('Amanah circle invitation')}&body=${encodeURIComponent(shareText)}`;
+  const emailHref = `mailto:?subject=${encodeURIComponent('Jameiyah circle invitation')}&body=${encodeURIComponent(shareText)}`;
   const canNativeShare =
     typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 

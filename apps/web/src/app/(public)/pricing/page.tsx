@@ -9,7 +9,7 @@ import { LanguageSwitcher } from '@/i18n/language-switcher';
 
 export const metadata: Metadata = {
   title: 'Pricing',
-  description: 'Clear group plans for Amanah circles — Free, Starter, and Pro.',
+  description: 'Clear group plans for Jameiyah circles — Free, Starter, and Pro.',
 };
 
 export const revalidate = 3600;
@@ -37,7 +37,7 @@ export default async function PricingPage() {
       </h1>
       <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
         Pick a plan that matches your chama size. Officers change the plan from the
-        officer console. Starter and Pro collect fees from the officer&apos;s Amanah
+        officer console. Starter and Pro collect fees from the officer&apos;s Jameiyah
         wallet (top up with Paystack or M-Pesa when those providers are on).
       </p>
 

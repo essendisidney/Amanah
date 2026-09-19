@@ -30,7 +30,7 @@ export function AddMemberForm({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Existing Amanah users join immediately. New people are added to the circle — use{' '}
+        Existing Jameiyah users join immediately. New people are added to the circle — use{' '}
         <strong className="font-medium text-foreground">phone only</strong> for members without
         email (they sign in with SMS OTP), or email if they have one. After you add someone, they
         appear in <strong className="font-medium text-foreground">Members</strong> above.
@@ -86,7 +86,7 @@ export function AddMemberForm({
           ) : null}
           <p className="text-[11px] text-muted-foreground">
             Phone alone is enough. Share the invite by SMS, copy link/code, or WhatsApp. They open
-            Amanah → Phone login → paste the code.
+            Jameiyah → Phone login → paste the code.
           </p>
         </div>
         <div className="space-y-2">

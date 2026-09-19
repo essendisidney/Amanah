@@ -121,7 +121,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
 
       <header className="hidden border-b border-border pb-4 print:block">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
-          Amanah contribution invoices
+          Jameiyah contribution invoices
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold">
           {jamiya.name}

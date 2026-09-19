@@ -1,6 +1,6 @@
 import type { SVGProps } from 'react';
 
-/** Lucide-style camel for Save — culturally fitting for Amanah. */
+/** Lucide-style camel for Save — culturally fitting for Jameiyah. */
 export function CamelIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg

@@ -62,7 +62,7 @@ async function createClaimInvitation(args: {
         type: 'invitation',
         channel: 'in_app',
         title: `Invitation to ${args.circleName}`,
-        body: 'You were added to this Amanah circle. Use the invite link or code to sign in.',
+        body: 'You were added to this Jameiyah circle. Use the invite link or code to sign in.',
         data: {
           jamiya_id: args.jamiyaId,
           slug: args.slug,
@@ -252,7 +252,7 @@ export async function addOneCircleMember(args: {
       success: false,
       message:
         provisionError ??
-        'Could not create an Amanah account. For phone-only members, enable Phone auth in Supabase.',
+        'Could not create an Jameiyah account. For phone-only members, enable Phone auth in Supabase.',
     };
   }
 
@@ -329,7 +329,7 @@ export async function addOneCircleMember(args: {
 
   const phoneHint =
     !email && phone
-      ? ' They can sign in with phone OTP on Amanah, then paste the code.'
+      ? ' They can sign in with phone OTP on Jameiyah, then paste the code.'
       : '';
 
   return {

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useActionState } from 'react';
 import Link from 'next/link';
@@ -94,7 +94,7 @@ export function LoginForm({
       <GoogleSignInButton next={next} />
 
       <AuthFormMessage>
-        New to Amanah?{' '}
+        New to Jameiyah?{' '}
         <Link
           href={`/phone?next=${encodeURIComponent(next)}` as Route}
           className="font-medium text-primary hover:underline"

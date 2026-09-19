@@ -86,7 +86,7 @@ export default function ZakatPage() {
               </Link>
             </Button>
             <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/support' as Route}>Support Amanah</Link>
+              <Link href={'/support' as Route}>Support Jameiyah</Link>
             </Button>
           </div>
         </div>

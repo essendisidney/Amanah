@@ -46,7 +46,7 @@ async function sendEmail(to: string, subject: string, body: string): Promise<voi
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from, to: [to], subject: subject || "Amanah", text: body }),
+    body: JSON.stringify({ from, to: [to], subject: subject || "Jameiyah", text: body }),
   });
   if (!res.ok) {
     throw new Error(`Resend ${res.status}: ${await res.text()}`);

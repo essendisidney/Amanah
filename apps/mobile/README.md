@@ -1,4 +1,4 @@
-# Amanah Mobile (Expo)
+# Jameiyah Mobile (Expo)
 
 Phase 13 client: Home, Circles, Dues, **Wallet**, **Finance**, **Officer**, Invites, KYC — backed by `/api/v1`.
 

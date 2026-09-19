@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 import type { Route } from 'next';
 import { APP_NAME } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
@@ -16,7 +16,7 @@ export default async function LandingPage() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] bg-[radial-gradient(ellipse_at_top,_rgba(91,141,239,0.08)_0%,_transparent_58%)]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[70vh] bg-[radial-gradient(ellipse_at_top,_rgba(13,92,69,0.10)_0%,_transparent_58%)]"
       />
 
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:py-6">
@@ -67,7 +67,7 @@ export default async function LandingPage() {
           <div className="amanah-surface overflow-hidden p-4 sm:p-5">
             <div className="amanah-forest rounded-2xl p-5 text-white">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-                Total Amanah
+                Total balance
               </p>
               <p className="amanah-money mt-2 text-3xl font-bold tracking-tight">KES 84,250.00</p>
               <p className="mt-1 text-sm text-white/80">↑ KES 12,400 this month</p>
@@ -116,7 +116,7 @@ export default async function LandingPage() {
             },
             {
               title: 'Built for trust',
-              body: 'KYC, audit trails, dual approval, and an Amanah Score that reflects consistency — not hype.',
+              body: 'KYC, audit trails, dual approval, and an Jameiyah Score that reflects consistency — not hype.',
             },
           ].map((item) => (
             <div key={item.title}>

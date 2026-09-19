@@ -1,7 +1,7 @@
 /**
  * @jamiya/types
  *
- * Shared domain types and enums for the Amanah platform.
+ * Shared domain types and enums for the Jameiyah platform.
  * Database-generated types live in @jamiya/database; this package
  * holds application-level contracts shared across apps and packages.
  */

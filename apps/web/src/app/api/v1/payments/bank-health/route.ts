@@ -15,7 +15,7 @@ export async function GET() {
 
   const body = {
     ok: bankRequired ? health.ok && (health.bank_configured || health.simulated_fallback) : true,
-    service: 'amanah-bank',
+    service: 'jameiyah-bank',
     bank_configured: health.bank_configured ?? false,
     simulated_fallback: health.simulated_fallback ?? false,
     bank_alert_webhook: webhookSecret,

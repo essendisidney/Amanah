@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Amanah",
-    "slug": "amanah",
+    "name": "Jameiyah",
+    "slug": "jameiyah",
     "version": "0.1.0",
     "orientation": "portrait",
-    "scheme": "amanah",
+    "scheme": "jameiyah",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.amanah.mobile"
+      "bundleIdentifier": "app.jameiyah.mobile"
     },
     "android": {
-      "package": "app.amanah.mobile"
+      "package": "app.jameiyah.mobile"
     },
     "extra": {
       "apiBaseUrl": "http://127.0.0.1:3000",

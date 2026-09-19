@@ -1,6 +1,6 @@
 # Phase 10 — Feature-doc gap closures
 
-Closes the highest-value leftovers from `Amanah_Platform_Features`.
+Closes the highest-value leftovers from `Jameiyah_Platform_Features`.
 
 ## Delivered
 

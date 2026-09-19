@@ -2,7 +2,7 @@
 
 ## Overview
 
-Normalized PostgreSQL schema for the Amanah ROSCA platform, layered on the Phase 1.2 auth bootstrap (`profiles`).
+Normalized PostgreSQL schema for the Jameiyah ROSCA platform, layered on the Phase 1.2 auth bootstrap (`profiles`).
 
 ## Entity relationship (simplified)
 

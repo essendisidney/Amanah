@@ -374,7 +374,7 @@ export default function App() {
   async function shareInvite(channel: 'system' | 'whatsapp' | 'sms') {
     if (!lastInviteUrl) return;
     const codeLine = lastInviteCode ? `Invite code: ${lastInviteCode}\n` : '';
-    const body = `You're invited to join an Amanah savings circle.\n\n${codeLine}Or open: ${lastInviteUrl}`;
+    const body = `You're invited to join an Jameiyah savings circle.\n\n${codeLine}Or open: ${lastInviteUrl}`;
     try {
       if (channel === 'whatsapp') {
         await Linking.openURL(`https://wa.me/?text=${encodeURIComponent(body)}`);
@@ -384,7 +384,7 @@ export default function App() {
         await Linking.openURL(`sms:?body=${encodeURIComponent(body)}`);
         return;
       }
-      await Share.share({ message: body, url: lastInviteUrl, title: 'Amanah invitation' });
+      await Share.share({ message: body, url: lastInviteUrl, title: 'Jameiyah invitation' });
     } catch {
       setError('Could not open share sheet');
     }
@@ -525,7 +525,7 @@ export default function App() {
     <SafeAreaView style={styles.root}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.brand}>Amanah</Text>
+        <Text style={styles.brand}>Jameiyah</Text>
         <Text style={styles.sub}>Create circles, invite members, wallet &amp; dues</Text>
 
         {!token ? (

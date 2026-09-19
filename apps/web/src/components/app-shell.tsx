@@ -23,7 +23,7 @@ import {
 } from '@/lib/notification-events';
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { AmanahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/amanah-logo';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
@@ -147,7 +147,7 @@ export function AppShell({
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:border-transparent md:bg-transparent">
         <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-[4.25rem] md:px-6">
-          <AmanahLogo href={'/dashboard' as Route} size="md" tone="brand" />
+          <JameiyahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
           <nav
             className="amanah-nav-glass hidden items-center gap-1 rounded-full px-1.5 py-1 md:flex"

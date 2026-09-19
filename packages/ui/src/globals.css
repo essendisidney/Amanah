@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
 /*
-  Amanah colour system — IMAGE #2 north star
-  Soft white glass + pale blue/lavender ambient + fresh jade green accents
-  ~70–80% neutral light · colour guides attention only
+  Jameiyah colour system — deep emerald + gold (brand lockup)
+  Soft white canvas · green for trust · gold for accents
 */
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -72,7 +71,7 @@
   --muted-foreground: #64748b;
   --border: rgba(17, 24, 39, 0.06);
   --input: rgba(17, 24, 39, 0.08);
-  --ring: #19b879;
+  --ring: #0d5c45;
 
   --card: rgba(255, 255, 255, 0.9);
   --card-foreground: #111827;
@@ -83,13 +82,13 @@
   --slate-faint: #94a3b8;
   --slate-disabled: #cbd5e1;
 
-  /* Brand — soft premium jade (not corporate forest / not neon) */
-  --brand: #19b879;
-  --primary: #19b879;
+  /* Brand — deep emerald (logo green) */
+  --brand: #0d5c45;
+  --primary: #0d5c45;
   --primary-foreground: #ffffff;
-  --primary-hover: #0f9f62;
-  --primary-soft: #38c98a;
-  --primary-muted: #ddf7ea;
+  --primary-hover: #0a4a37;
+  --primary-soft: #1a7a5c;
+  --primary-muted: #e6f2ed;
 
   --secondary: rgba(255, 255, 255, 0.72);
   --secondary-foreground: #111827;
@@ -107,9 +106,9 @@
   --purple-soft: #a99cfb;
   --purple-muted: #f0edff;
 
-  /* Soft gold */
-  --gold: #f3c94a;
-  --gold-muted: #fff8d9;
+  /* Soft gold (logo gold) */
+  --gold: #c5a044;
+  --gold-muted: #f7f0de;
 
   /* Soft coral (money out / warn sparingly) */
   --coral: #f28b82;
@@ -118,24 +117,24 @@
   --destructive: #f28b82;
   --destructive-foreground: #fff8f7;
 
-  --success: #19b879;
-  --warning: #f0b429;
+  --success: #0d5c45;
+  --warning: #c5a044;
   --info: #5b8def;
 
-  /* Deep soft emerald for Pay scan / Score anchors (still premium, not black) */
+  /* Deep emerald anchors */
   --forest: #0b4a3c;
-  --forest-mid: #0f6b54;
+  --forest-mid: #0d5c45;
   --forest-foreground: #eef8f3;
 
   /* Action identity (icons in tinted glass circles) */
-  --tint-add: #19b879;
+  --tint-add: #0d5c45;
   --tint-send: #5b8def;
-  --tint-pay: #8b7cf6;
+  --tint-pay: #c5a044;
   --tint-withdraw: #f28b82;
-  --tint-request: #19b879;
-  --wash-add: #ddf7ea;
+  --tint-request: #0d5c45;
+  --wash-add: #e6f2ed;
   --wash-send: #e8f0ff;
-  --wash-pay: #f0edff;
+  --wash-pay: #f7f0de;
   --wash-withdraw: #ffe9e7;
 
   /* White glass 85–95% */
@@ -150,11 +149,11 @@
     pale blue · lavender · lilac · blush · faint mint
   */
   --amanah-ambient-image:
-    radial-gradient(ellipse 100% 70% at 0% -20%, rgba(91, 141, 239, 0.09), transparent 55%),
-    radial-gradient(ellipse 90% 60% at 100% -10%, rgba(139, 124, 246, 0.07), transparent 52%),
-    radial-gradient(ellipse 80% 55% at 100% 100%, rgba(248, 180, 200, 0.06), transparent 55%),
-    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(25, 184, 121, 0.05), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(245, 243, 251, 0.5), transparent 70%);
+    radial-gradient(ellipse 100% 70% at 0% -20%, rgba(13, 92, 69, 0.08), transparent 55%),
+    radial-gradient(ellipse 90% 60% at 100% -10%, rgba(197, 160, 68, 0.08), transparent 52%),
+    radial-gradient(ellipse 80% 55% at 100% 100%, rgba(13, 92, 69, 0.05), transparent 55%),
+    radial-gradient(ellipse 75% 50% at 0% 100%, rgba(197, 160, 68, 0.05), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 50% 50%, rgba(246, 248, 247, 0.5), transparent 70%);
 }
 
 .dark {
@@ -165,7 +164,7 @@
   --muted-foreground: #94a3b8;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.1);
-  --ring: #38c98a;
+  --ring: #1a7a5c;
 
   --card: rgba(18, 40, 34, 0.82);
   --card-foreground: #eef2f0;
@@ -175,12 +174,12 @@
   --slate-faint: #64748b;
   --slate-disabled: #475569;
 
-  --brand: #38c98a;
-  --primary: #38c98a;
+  --brand: #2d9b72;
+  --primary: #2d9b72;
   --primary-foreground: #062a1f;
-  --primary-hover: #4fd49a;
-  --primary-soft: #19b879;
-  --primary-muted: rgba(25, 184, 121, 0.18);
+  --primary-hover: #3daf84;
+  --primary-soft: #0d5c45;
+  --primary-muted: rgba(13, 92, 69, 0.22);
 
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #eef2f0;

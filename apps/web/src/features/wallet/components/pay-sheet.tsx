@@ -19,7 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { formatCurrency } from '@jamiya/shared';
-import { AmanahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/amanah-logo';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { cn } from '@/lib/utils';
 
@@ -222,7 +222,7 @@ export function PaySheet({
       <div className="amanah-glass relative space-y-5 rounded-[1.75rem] px-5 pb-6 pt-5 shadow-[0_12px_40px_rgba(17,24,39,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-3">
-            <AmanahLogo href={'/dashboard' as Route} size="sm" tone="brand" />
+            <JameiyahLogo href={'/dashboard' as Route} size="sm" tone="brand" />
             <div>
               <h1 className="text-[1.75rem] font-semibold tracking-tight text-foreground">
                 {labels.title}

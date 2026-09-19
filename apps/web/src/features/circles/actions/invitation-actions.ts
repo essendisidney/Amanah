@@ -220,7 +220,7 @@ export async function createInvitationAction(
       type: 'invitation',
       channel: 'in_app',
       title: `Invitation to ${circle.name}`,
-      body: 'You have been invited to join a savings circle on Amanah.',
+      body: 'You have been invited to join a savings circle on Jameiyah.',
       data: {
         jamiya_id: circle.id,
         slug: circle.slug,

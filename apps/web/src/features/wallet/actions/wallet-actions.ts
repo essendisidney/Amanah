@@ -245,7 +245,7 @@ export async function topUpWalletAction(
     intentId: created.intent_id,
     amount,
     phone,
-    description: 'Amanah top-up',
+    description: 'Jameiyah top-up',
   });
 
   revalidatePath('/wallet');

@@ -90,7 +90,7 @@ async function circleSummary(userId: string): Promise<string> {
 
 async function dueSummary(userId: string): Promise<string> {
   const supabase = await serviceClient();
-  if (!supabase) return 'Open the Amanah app to pay.';
+  if (!supabase) return 'Open the Jameiyah app to pay.';
   const { data: members } = await supabase
     .from('members')
     .select('id')
@@ -181,7 +181,7 @@ async function menu(text: string, phone: string): Promise<string> {
   const profile = await resolveUser(phone);
   const greet = profile?.full_name
     ? `CON Habari ${profile.full_name.split(' ')[0]}\n`
-    : 'CON Welcome to Amanah\n';
+    : 'CON Welcome to Jameiyah\n';
 
   if (parts.length === 0) {
     return `${greet}1. Balance\n2. Circles\n3. Dues\n4. Next payout\n5. Grace\n6. Help`;
@@ -189,12 +189,12 @@ async function menu(text: string, phone: string): Promise<string> {
 
   switch (parts[0]) {
     case '1': {
-      if (!profile) return 'END Link this phone in the Amanah app (Profile → phone).';
+      if (!profile) return 'END Link this phone in the Jameiyah app (Profile → phone).';
       const bal = await walletBalance(profile.id);
       return `END Wallet: ${bal}`;
     }
     case '2': {
-      if (!profile) return 'END Link this phone in the Amanah app first.';
+      if (!profile) return 'END Link this phone in the Jameiyah app first.';
       const circles = await circleSummary(profile.id);
       return `END Your circles:\n${circles}`;
     }
@@ -203,19 +203,19 @@ async function menu(text: string, phone: string): Promise<string> {
         return 'CON Dues\n1. View pending\n2. How to pay';
       }
       if (parts[1] === '1') {
-        if (!profile) return 'END Link this phone in the Amanah app first.';
+        if (!profile) return 'END Link this phone in the Jameiyah app first.';
         const dues = await dueSummary(profile.id);
         return `END ${dues}`;
       }
-      return 'END Pay in the Amanah app (Circles → Pay) or top up wallet first. USSD cannot move money yet.';
+      return 'END Pay in the Jameiyah app (Circles → Pay) or top up wallet first. USSD cannot move money yet.';
     }
     case '4': {
-      if (!profile) return 'END Link this phone in the Amanah app first.';
+      if (!profile) return 'END Link this phone in the Jameiyah app first.';
       const payouts = await nextPayoutSummary(profile.id);
       return `END ${payouts}`;
     }
     case '5': {
-      if (!profile) return 'END Link this phone in the Amanah app first.';
+      if (!profile) return 'END Link this phone in the Jameiyah app first.';
       const grace = await graceSummary(profile.id);
       return `END Grace:\n${grace}`;
     }

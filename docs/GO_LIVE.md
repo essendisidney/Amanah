@@ -1,4 +1,4 @@
-# Amanah go-live checklist
+# Jameiyah go-live checklist
 
 Production URL: https://amanah-liart.vercel.app  
 Supabase project: `vzpnixfqkvovbniaoudx`
@@ -50,7 +50,7 @@ Edge deploy steps: [DEPLOY_PAYMENTS_MPESA.md](./DEPLOY_PAYMENTS_MPESA.md)
 |-----|--------|---------|
 | `TAWARRUQ_PARTNER_API_URL` | Supabase Edge | Partner bank applications API |
 | `TAWARRUQ_PARTNER_API_KEY` | Supabase Edge | Partner auth |
-| `TAWARRUQ_WEBHOOK_SECRET` | Supabase Edge | Partner → Amanah status webhooks |
+| `TAWARRUQ_WEBHOOK_SECRET` | Supabase Edge | Partner → Jameiyah status webhooks |
 | `USSD_CALLBACK_SECRET` | Vercel | Africa’s Talking callback auth |
 | `AT_USSD_SHORTCODE` | Vercel | Optional serviceCode check |
 | `AT_USERNAME` / `AT_API_KEY` | AT console | Shortcode provisioning (docs only) |

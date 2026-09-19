@@ -1,10 +1,10 @@
-# Chamasoft-style parity (Amanah)
+# Chamasoft-style parity (Jameiyah)
 
-Amanah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, and phone/PWA. These waves add the classic **investment-group treasurer** surface that Chamasoft is known for.
+Jameiyah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections, and phone/PWA. These waves add the classic **investment-group treasurer** surface that Chamasoft is known for.
 
 ## Mapped modules
 
-| Chamasoft | Amanah |
+| Chamasoft | Jameiyah |
 |-----------|--------|
 | Transactions / online treasurer | `/circles/[slug]/treasury` cashbook (`record_treasury_entry`) |
 | Bank account management | `circle_bank_accounts` (bank / M-Pesa / petty cash) |

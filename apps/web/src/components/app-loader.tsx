@@ -1,5 +1,5 @@
 import { APP_NAME, APP_TAGLINE } from '@jamiya/shared';
-import { AmanahMark } from '@/components/amanah-logo';
+import { JameiyahMark } from '@/components/amanah-logo';
 
 type AppLoaderProps = {
   message?: string;
@@ -21,7 +21,7 @@ function TrustEmblem() {
         </svg>
       </div>
       <div className="relative z-10">
-        <AmanahMark size={72} />
+        <JameiyahMark size={72} />
       </div>
     </div>
   );
@@ -68,7 +68,7 @@ export function AppLoader({
 export function BootSplashMarkup() {
   return (
     <div id="boot-splash" className="amanah-boot-splash" aria-hidden>
-      <AppLoader message="Starting Amanah…" variant="fullscreen" />
+      <AppLoader message="Starting Jameiyah…" variant="fullscreen" />
     </div>
   );
 }

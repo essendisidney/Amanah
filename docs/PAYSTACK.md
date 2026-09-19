@@ -1,6 +1,6 @@
 # Paystack payments
 
-Amanah can take wallet top-ups (and charity/tips when `PAYMENT_PROVIDER=paystack`) via [Paystack Checkout](https://paystack.com/docs/payments/accept-payments/).
+Jameiyah can take wallet top-ups (and charity/tips when `PAYMENT_PROVIDER=paystack`) via [Paystack Checkout](https://paystack.com/docs/payments/accept-payments/).
 
 ## Flow
 
@@ -38,7 +38,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 Use Paystack test cards / test mobile money from their docs. Amounts are sent in subunits (KES × 100).
 
-Phone OTP accounts use synthetic emails (`…@amanah.internal`). Paystack rejects those, so Amanah maps them to `{phoneDigits}@customers.amanah.app` (or `user-{id}@…`) before Checkout initialize.
+Phone OTP accounts use synthetic emails (`…@amanah.internal`). Paystack rejects those, so Jameiyah maps them to `{phoneDigits}@customers.amanah.app` (or `user-{id}@…`) before Checkout initialize.
 
 ## Schema
 

@@ -521,9 +521,9 @@ export type Dictionary = {
 export const en: Dictionary = {
   langName: 'English',
   brand: {
-    tagline: 'Your money. Your people. Your Amanah.',
+    tagline: 'Community Finance · Digital · For All Kenyans',
     description:
-      'Save, contribute and grow together through trusted financial circles — the operating system for community finance.',
+      'Community finance, digital, for all Kenyans — trusted circles, wallet, and savings.',
   },
   common: {
     sadaka: 'Sadaka',
@@ -564,13 +564,13 @@ export const en: Dictionary = {
   },
   landing: {
     startWithPhone: 'Sign in with phone',
-    joinCircle: 'How Amanah works',
+    joinCircle: 'How Jameiyah works',
     preferEmail: 'Prefer email?',
     createAccount: 'Create account',
     shariaEyebrow: 'Shariah',
-    shariaTitle: 'How Amanah stays Shariah-conscious',
+    shariaTitle: 'How Jameiyah stays Shariah-conscious',
     shariaLead:
-      'Amanah is built for communities that want money tools without riba at the centre — with clear records and mutual support.',
+      'Jameiyah is built for communities that want money tools without riba at the centre — with clear records and mutual support.',
     shariaNoRibaTitle: 'No interest in your circles',
     shariaNoRibaBody:
       'Circle contributions, payouts, and Qard Hassan are designed without charging interest between members.',
@@ -710,7 +710,7 @@ export const en: Dictionary = {
     title: 'Pay',
     subtitle: 'Add, settle dues, withdraw — or open any money tool from here.',
     addMoney: 'Add money',
-    addMoneyHint: 'Top up your Amanah balance',
+    addMoneyHint: 'Top up your Jameiyah balance',
     withdraw: 'Withdraw',
     withdrawHint: 'Send to M-Pesa or bank',
     payCircle: 'Circles',
@@ -756,7 +756,7 @@ export const en: Dictionary = {
     needWallet: 'Add money to your wallet, then pay this contribution.',
     needMore: 'You need about {amount} more to pay in full.',
     paysFromBalance:
-      'Pays from your Amanah balance into this circle. Leave amount blank for the full remaining balance.',
+      'Pays from your Jameiyah balance into this circle. Leave amount blank for the full remaining balance.',
     amountOptional: 'Amount (optional)',
     pay: 'Pay',
     payAhead: 'Pay ahead',
@@ -890,7 +890,7 @@ export const en: Dictionary = {
       'Join or create a circle for shares and treasury records.',
     investEmptyCta: 'Circles',
     backToFinance: 'Finance',
-    shariaTitle: 'Shariah on Amanah',
+    shariaTitle: 'Shariah on Jameiyah',
     shariaLead:
       'Circles avoid riba between members. Qard is interest-free. Welfare and giving support mutual care. Partner Tawarruq is offered as a separate Sharia finance path — not a fatwa.',
     welfareOverview: 'Welfare overview',
@@ -902,7 +902,7 @@ export const en: Dictionary = {
     title: 'You',
     subtitle: 'Name, phone, and verification.',
     youFallback: 'You',
-    amanahScore: 'Amanah Score',
+    amanahScore: 'Jameiyah Score',
     scoreExcellent: 'Excellent',
     scoreStrong: 'Strong',
     scoreBuilding: 'Building',
@@ -913,7 +913,7 @@ export const en: Dictionary = {
     linkZakat: 'Zakat',
     linkSupport: 'Support',
     onboardingEyebrow: 'Almost ready',
-    onboardingTitle: 'Welcome to Amanah',
+    onboardingTitle: 'Welcome to Jameiyah',
     onboardingBody:
       'Add your name and Kenya mobile for secure money moves. Verification is recommended before larger transfers.',
     onboardingStepName: 'Save your full name',
@@ -974,8 +974,8 @@ export const en: Dictionary = {
     openItem: 'Open',
   },
   support: {
-    eyebrow: 'Support Amanah',
-    title: 'Support Amanah',
+    eyebrow: 'Support Jameiyah',
+    title: 'Support Jameiyah',
     body: 'A voluntary tip for the platform — not sadaka, and not a charity campaign.',
     tipLabel: 'Tip (KES)',
     phoneOptional: 'Phone (optional)',
@@ -1051,8 +1051,8 @@ export const en: Dictionary = {
     auditTitle: 'Platform audit',
   },
   install: {
-    title: 'Add Amanah to your device',
-    detailNative: 'Install Amanah for quick access on your phone or desktop.',
+    title: 'Add Jameiyah to your device',
+    detailNative: 'Install Jameiyah for quick access on your phone or desktop.',
     detailIos: 'Share → Add to Home Screen for one-tap access to your circles and wallet.',
     detailAndroid:
       'Chrome may hide Install until you visit a few times. Use the menu (⋮) → Install app or Add to Home screen. Open in Chrome (not in-app browsers).',
@@ -1070,9 +1070,9 @@ export const en: Dictionary = {
 export const sw: Dictionary = {
   langName: 'Kiswahili',
   brand: {
-    tagline: 'Pesa yako. Watu wako. Amanah yako.',
+    tagline: 'Fedha za Jamii · Kidijitali · Kwa Wakenya Wote',
     description:
-      'Okoa, changia na kueni pamoja kupitia miduara ya fedha yenye uaminifu — mfumo wa fedha kwa jamii.',
+      'Fedha za jamii, kidijitali, kwa Wakenya wote — miduara yenye uaminifu, pochi, na akiba.',
   },
   common: {
     sadaka: 'Sadaka',
@@ -1113,13 +1113,13 @@ export const sw: Dictionary = {
   },
   landing: {
     startWithPhone: 'Anza sasa',
-    joinCircle: 'Gundua Amanah',
+    joinCircle: 'Gundua Jameiyah',
     preferEmail: 'Unapendelea barua pepe?',
     createAccount: 'Fungua akaunti',
     shariaEyebrow: 'Shariah',
-    shariaTitle: 'Jinsi Amanah inavyofuata Shariah',
+    shariaTitle: 'Jinsi Jameiyah inavyofuata Shariah',
     shariaLead:
-      'Amanah imeundwa kwa jamii zinazotaka zana za fedha bila riba kuwa kiini — na rekodi wazi na msaada wa pamoja.',
+      'Jameiyah imeundwa kwa jamii zinazotaka zana za fedha bila riba kuwa kiini — na rekodi wazi na msaada wa pamoja.',
     shariaNoRibaTitle: 'Hakuna riba katika miduara yako',
     shariaNoRibaBody:
       'Michango, malipo, na Qard Hassan zimeundwa bila kutoza riba kati ya wanachama.',
@@ -1260,7 +1260,7 @@ export const sw: Dictionary = {
     title: 'Lipa',
     subtitle: 'Ongeza, lipa deni, toa — au fungua zana yoyote ya pesa kutoka hapa.',
     addMoney: 'Ongeza pesa',
-    addMoneyHint: 'Jaza salio lako la Amanah',
+    addMoneyHint: 'Jaza salio lako la Jameiyah',
     withdraw: 'Toa',
     withdrawHint: 'Tuma kwenda M-Pesa au benki',
     payCircle: 'Miduara',
@@ -1306,7 +1306,7 @@ export const sw: Dictionary = {
     needWallet: 'Ongeza pesa kwenye pochi yako, kisha lipa mchango huu.',
     needMore: 'Unahitaji takriban {amount} zaidi ili kulipa kamili.',
     paysFromBalance:
-      'Hulipwa kutoka salio lako la Amanah kwenda mduara. Acha kiasi tupu kwa salio lote lililobaki.',
+      'Hulipwa kutoka salio lako la Jameiyah kwenda mduara. Acha kiasi tupu kwa salio lote lililobaki.',
     amountOptional: 'Kiasi (si lazima)',
     pay: 'Lipa',
     payAhead: 'Lipa mapema',
@@ -1441,7 +1441,7 @@ export const sw: Dictionary = {
       'Jiunge au unda mduara ili ufikie hisa na rekodi za uwekezaji wa hazina.',
     investEmptyCta: 'Nenda Miduara',
     backToFinance: 'Rudi Fedha',
-    shariaTitle: 'Shariah kwenye Amanah',
+    shariaTitle: 'Shariah kwenye Jameiyah',
     shariaLead:
       'Miduara huepuka riba kati ya wanachama. Qard haina riba. Ustawi na kutoa huunga mkono utunzaji wa pamoja. Tawarruq ya washirika ni njia tofauti ya fedha za Sharia — si fatwa.',
     welfareOverview: 'Muhtasari wa ustawi',
@@ -1453,7 +1453,7 @@ export const sw: Dictionary = {
     title: 'Wewe',
     subtitle: 'Jina, simu, na uthibitisho.',
     youFallback: 'Wewe',
-    amanahScore: 'Alama ya Amanah',
+    amanahScore: 'Alama ya Jameiyah',
     scoreExcellent: 'Bora',
     scoreStrong: 'Imara',
     scoreBuilding: 'Inajengwa',
@@ -1464,7 +1464,7 @@ export const sw: Dictionary = {
     linkZakat: 'Zakat',
     linkSupport: 'Msaada',
     onboardingEyebrow: 'Karibu tayari',
-    onboardingTitle: 'Karibu Amanah',
+    onboardingTitle: 'Karibu Jameiyah',
     onboardingBody:
       'Ongeza jina na simu ya Kenya kwa uhamishaji salama wa pesa. Uthibitisho unapendekezwa kabla ya uhamishaji mkubwa.',
     onboardingStepName: 'Hifadhi jina lako kamili',
@@ -1525,12 +1525,12 @@ export const sw: Dictionary = {
     openItem: 'Fungua',
   },
   support: {
-    eyebrow: 'Saidia Amanah kukua',
-    title: 'Saidia jukwaa la Amanah',
-    body: 'Hii ni tipu ya hiari kuendeleza teknolojia, msaada, na shughuli za jamii za Amanah. Si sadaka na haifadhili kampeni ya hisani.',
+    eyebrow: 'Saidia Jameiyah kukua',
+    title: 'Saidia jukwaa la Jameiyah',
+    body: 'Hii ni tipu ya hiari kuendeleza teknolojia, msaada, na shughuli za jamii za Jameiyah. Si sadaka na haifadhili kampeni ya hisani.',
     tipLabel: 'Tipu ya jukwaa (KES)',
     phoneOptional: 'Simu (si lazima)',
-    submit: 'Saidia Amanah',
+    submit: 'Saidia Jameiyah',
   },
   circle: {
     meetingsChat: 'Mikutano na gumzo',
@@ -1602,8 +1602,8 @@ export const sw: Dictionary = {
     auditTitle: 'Ukaguzi wa jukwaa',
   },
   install: {
-    title: 'Ongeza Amanah kwenye kifaa chako',
-    detailNative: 'Sakinisha Amanah kwa ufikiaji wa haraka kwenye simu au kompyuta.',
+    title: 'Ongeza Jameiyah kwenye kifaa chako',
+    detailNative: 'Sakinisha Jameiyah kwa ufikiaji wa haraka kwenye simu au kompyuta.',
     detailIos:
       'Shiriki → Ongeza kwenye Skrini ya Nyumbani kwa kufungua miduara na pochi kwa mguso mmoja.',
     detailAndroid:

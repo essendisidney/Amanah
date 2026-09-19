@@ -156,7 +156,7 @@ export async function sendWalletStepUpOtpToPhone(
   try {
     await sendSMS(
       resolved.phone,
-      `Amanah: ${code} confirms your wallet ${action}. Valid 10 min. Do not share.`,
+      `Jameiyah: ${code} confirms your wallet ${action}. Valid 10 min. Do not share.`,
     );
   } catch (err) {
     console.error('[wallet/step-up] sms', err);

@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    await sendSMS(normalized, `Your Amanah code is ${code}. Valid 15 min. Do not share.`);
+    await sendSMS(normalized, `Your Jameiyah code is ${code}. Valid 15 min. Do not share.`);
 
     return NextResponse.json({
       success: true,

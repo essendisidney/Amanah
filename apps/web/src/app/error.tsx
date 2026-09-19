@@ -8,7 +8,7 @@ export default function ErrorPage({
 }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
-      <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Amanah</p>
+      <p className="text-xs font-medium uppercase tracking-[0.16em] text-accent">Jameiyah</p>
       <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
         Could not open this page
       </h1>

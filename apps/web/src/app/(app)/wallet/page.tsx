@@ -306,7 +306,7 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white">
         <div className="flex items-start justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Amanah</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Jameiyah</p>
           <span className="text-accent">✦</span>
         </div>
         <p className="mt-8 font-mono text-lg tracking-[0.22em] text-white/90">

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { AmanahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/amanah-logo';
 import { cn } from '@/lib/utils';
 
 const SADAKA_LINKS = [
@@ -37,7 +37,7 @@ export function SadakaSiteHeader({ signedIn, pathname = '' }: SadakaSiteHeaderPr
   return (
     <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 pt-[env(safe-area-inset-top)] backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 md:h-16 md:gap-3 md:px-6">
-        <AmanahLogo href={homeHref} size="sm" tone="brand" />
+        <JameiyahLogo href={homeHref} size="sm" tone="brand" />
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Sadaka">
           {SADAKA_LINKS.map((item) => {

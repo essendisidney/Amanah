@@ -338,7 +338,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <header className="hidden border-b border-border pb-4 print:block">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
-          Amanah ·{' '}
+          Jameiyah ·{' '}
           {isShareDividend
             ? 'Table banking statement'
             : isRotating

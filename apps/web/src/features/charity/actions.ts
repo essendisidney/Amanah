@@ -102,7 +102,7 @@ async function initiateAndSettleCharityPayment(input: {
       amount: input.amount,
       phone: input.phone,
       description:
-        input.kind === 'platform_tip' ? 'Amanah support' : 'Amanah sadaka',
+        input.kind === 'platform_tip' ? 'Jameiyah support' : 'Jameiyah sadaka',
     });
     if (!stk.ok) {
       return {
@@ -242,7 +242,7 @@ export async function tipAction(formData: FormData): Promise<CharityActionState>
     if (!result?.ok) {
       return { success: false, message: result?.error ?? 'Could not record tip.' };
     }
-    return { success: true, message: 'Tip recorded. Thank you for supporting Amanah.' };
+    return { success: true, message: 'Tip recorded. Thank you for supporting Jameiyah.' };
   }
 
   return paid;
@@ -461,7 +461,7 @@ export async function startSponsorshipAction(
       intentId: result.intent_id,
       amount: Number(result.amount),
       phone: result.phone,
-      description: 'Amanah adopt',
+      description: 'Jameiyah adopt',
     });
     if (!stk.ok) {
       return {

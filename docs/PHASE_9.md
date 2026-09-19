@@ -97,7 +97,7 @@ Set `REQUIRE_REAL_PROVIDERS=true` only after live B2C works in sandbox.
 ### Custody
 
 - `custody_mode=amanah_pass_through` (default) — Option B short hold + auto B2C
-- `custody_mode=psp_subaccount` — Option A reserved; Amanah will not auto-disburse from float
+- `custody_mode=psp_subaccount` — Option A reserved; Jameiyah will not auto-disburse from float
 
 ### Sponsorship renewals
 

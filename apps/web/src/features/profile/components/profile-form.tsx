@@ -114,7 +114,7 @@ export function ProfileForm({
           </Button>
           {state.success && next ? (
             <Button asChild variant="outline">
-              <Link href={next}>Continue to Amanah</Link>
+              <Link href={next}>Continue to Jameiyah</Link>
             </Button>
           ) : null}
         </div>

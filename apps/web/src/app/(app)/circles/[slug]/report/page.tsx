@@ -188,7 +188,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
       </div>
       <header className="border-b border-border pb-4">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
-          Amanah · Branded circle report
+          Jameiyah · Branded circle report
         </p>
         <h1 className="mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold">
           {jamiya.name}

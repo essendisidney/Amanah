@@ -208,7 +208,7 @@ export async function buildStatementPdf(opts: {
 
   const summary = opts.stmt.summary ?? {};
 
-  line(page, bold, 'Amanah', 50, y, 18);
+  line(page, bold, 'Jameiyah', 50, y, 18);
   y -= 22;
   line(page, bold, opts.circleName, 50, y, 14);
   y -= 16;
@@ -252,10 +252,10 @@ export async function buildStatementPdf(opts: {
   ensureSpace(40);
   const footer =
     kind === 'share_dividend'
-      ? 'Shariah-compliant table banking · amanah.app'
+      ? 'Shariah-compliant table banking · Jameiyah'
       : kind === 'savings'
-        ? 'Shariah-compliant savings circle · amanah.app'
-        : 'Shariah-compliant merry-go-round · amanah.app';
+        ? 'Shariah-compliant savings circle · Jameiyah'
+        : 'Shariah-compliant merry-go-round · Jameiyah';
   line(page, font, footer, 50, y, 8);
 
   return doc.save();

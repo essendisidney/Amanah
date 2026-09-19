@@ -1,4 +1,4 @@
-# Amanah
+# Jameiyah
 
 Shariah-compliant digital rotating savings platform (ROSCA).
 

@@ -16,7 +16,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ['standalone', 'minimal-ui'],
     orientation: 'any',
     background_color: '#f8fafc',
-    theme_color: '#19b879',
+    theme_color: '#0d5c45',
     categories: ['finance', 'business'],
     prefer_related_applications: false,
     icons: [

@@ -8,7 +8,7 @@ import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 
 export const metadata: Metadata = {
-  title: 'Support Amanah',
+  title: 'Support Jameiyah',
 };
 
 export const dynamic = 'force-dynamic';
