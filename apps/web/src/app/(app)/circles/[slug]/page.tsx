@@ -5,9 +5,7 @@ import { notFound, redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
-import { InviteMemberForm } from '@/features/circles/components/invite-member-form';
-import { AddMemberForm } from '@/features/circles/components/add-member-form';
-import { BulkPhoneInviteForm } from '@/features/circles/components/bulk-phone-invite-form';
+import { AddPeoplePanel } from '@/features/circles/components/add-people-panel';
 import { NextOfKinForm } from '@/features/circles/components/next-of-kin-form';
 import {
   MembersList,
@@ -539,6 +537,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
             return {
               cycleNumber,
+              payoutId: rawPayout?.id ?? null,
               memberLabel,
               memberCode: slotMember?.member_code ?? null,
               payoutPosition: slotMember?.payout_position ?? cycleNumber,
@@ -1020,6 +1019,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             currency={jamiya.currency}
             currentCycle={jamiya.current_cycle}
             slots={merryGoRoundSlots}
+            slug={slug}
+            canManage={Boolean(canManageOps)}
           />
         </CircleSection>
       ) : null}
@@ -1128,7 +1129,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           jamiyaId={jamiya.id}
           canAssignSlots={Boolean(canManageOps) && isRotating}
           maxSlots={Math.max(jamiya.cycle_count ?? 0, jamiya.max_members, 1)}
-          slotsLocked={jamiya.status === 'active'}
         />
       </CircleSection>
 
@@ -1137,15 +1137,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           <CircleSection
             id="invite-people"
             title="Add people"
-            description="Create their account, or share a join link."
+            description="Add one person, paste many phones, or share a join link — all in one place."
           >
-            <div className="space-y-8">
-              <AddMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-              <div id="bulk-invite" className="space-y-3 border-t border-border pt-6">
-                <h3 className="text-sm font-semibold text-foreground">Bulk phone invite</h3>
-                <BulkPhoneInviteForm jamiyaId={jamiya.id} circleName={jamiya.name} />
-              </div>
-            </div>
+            <AddPeoplePanel jamiyaId={jamiya.id} circleName={jamiya.name} />
           </CircleSection>
 
           <CircleSection
@@ -1164,13 +1158,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               members={nextOfKinMemberOptions}
               existing={nextOfKinExisting}
             />
-          </CircleSection>
-
-          <CircleSection
-            title="Join link / invite code"
-            description="Share by SMS, copy link/code, email, or WhatsApp."
-          >
-            <InviteMemberForm jamiyaId={jamiya.id} circleName={jamiya.name} />
           </CircleSection>
 
           <CircleSection

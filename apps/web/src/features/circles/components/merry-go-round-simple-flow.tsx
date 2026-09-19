@@ -31,10 +31,10 @@ export function MerryGoRoundSimpleFlow({
           n: '2',
           title: 'Start the round',
           body: circleActive
-            ? 'Slots are live. Check who gets the pot this month.'
+            ? 'Slots are live — change a month under Members if needed (before that pot is paid).'
             : 'Assign each person a payout month under Members, then start the circle.',
-          href: circleActive ? '#merry-go-round' : '#members',
-          label: circleActive ? 'See slots' : 'Assign slots',
+          href: '#members',
+          label: 'Assign slots',
           done: circleActive,
         },
         {

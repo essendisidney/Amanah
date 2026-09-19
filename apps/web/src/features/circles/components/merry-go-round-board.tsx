@@ -1,8 +1,11 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { markMgrPotPaidAction } from '../actions/slot-actions';
 
 export type MerryGoRoundSlot = {
   cycleNumber: number;
+  payoutId: string | null;
   memberLabel: string;
   memberCode: string | null;
   payoutPosition: number | null;
@@ -23,6 +26,8 @@ type Props = {
   currency: string;
   currentCycle: number;
   slots: MerryGoRoundSlot[];
+  slug?: string;
+  canManage?: boolean;
 };
 
 function payoutLabel(status: string | null): string {
@@ -39,14 +44,16 @@ export function MerryGoRoundBoard({
   currency,
   currentCycle,
   slots,
+  slug,
+  canManage = false,
 }: Props) {
   if (slots.length === 0) {
     return (
       <div className="amanah-surface space-y-2 px-5 py-5 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">No merry-go-round slots yet</p>
         <p>
-          After members claim payout months and the circle is activated, each round shows here —
-          who collects, and who still owes their monthly contribution.
+          Assign payout months under Members, then activate — each round shows here: who
+          collects, and who still owes.
         </p>
       </div>
     );
@@ -72,6 +79,14 @@ export function MerryGoRoundBoard({
             slot.payoutStatus === 'processing' ||
             slot.cycleNumber === currentCycle;
           const received = slot.payoutStatus === 'paid';
+          const canMarkPot =
+            canManage &&
+            slug &&
+            slot.payoutId &&
+            !received &&
+            (slot.payoutStatus === 'scheduled' || slot.payoutStatus === 'processing') &&
+            slot.unpaidCount === 0 &&
+            slot.paidCount > 0;
 
           return (
             <li
@@ -120,9 +135,21 @@ export function MerryGoRoundBoard({
                   </p>
                 ) : null}
               </div>
-              <p className="shrink-0 text-sm font-semibold text-foreground sm:pt-1">
-                {received ? 'Got pot' : payoutLabel(slot.payoutStatus)}
-              </p>
+              <div className="flex shrink-0 flex-col items-stretch gap-2 sm:items-end sm:pt-1">
+                {canMarkPot ? (
+                  <form action={markMgrPotPaidAction}>
+                    <input type="hidden" name="payoutId" value={slot.payoutId!} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <Button type="submit" size="sm" className="min-h-11 w-full rounded-full sm:w-auto">
+                      Mark pot paid
+                    </Button>
+                  </form>
+                ) : (
+                  <p className="text-sm font-semibold text-foreground">
+                    {received ? 'Got pot' : payoutLabel(slot.payoutStatus)}
+                  </p>
+                )}
+              </div>
             </li>
           );
         })}

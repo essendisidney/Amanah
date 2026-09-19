@@ -57,7 +57,6 @@ export function MembersList({
   jamiyaId,
   canAssignSlots = false,
   maxSlots = 0,
-  slotsLocked = false,
 }: {
   members: MemberListItem[];
   slug: string;
@@ -66,7 +65,6 @@ export function MembersList({
   jamiyaId?: string;
   canAssignSlots?: boolean;
   maxSlots?: number;
-  slotsLocked?: boolean;
 }) {
   if (members.length === 0) {
     return <p className="text-sm text-muted-foreground">No members yet.</p>;
@@ -156,7 +154,7 @@ export function MembersList({
                     </Button>
                   </form>
 
-                  {canAssignSlots && jamiyaId && !slotsLocked && openSlots.length > 0 ? (
+                  {canAssignSlots && jamiyaId && openSlots.length > 0 ? (
                     <form action={assignPayoutSlotAction} className="flex flex-wrap items-end gap-2">
                       <input type="hidden" name="jamiyaId" value={jamiyaId} />
                       <input type="hidden" name="memberId" value={member.id} />
@@ -177,15 +175,9 @@ export function MembersList({
                         </select>
                       </label>
                       <Button type="submit" size="sm" variant="outline">
-                        Assign slot
+                        {member.payoutPosition ? 'Change slot' : 'Assign slot'}
                       </Button>
                     </form>
-                  ) : null}
-                  {canAssignSlots && slotsLocked ? (
-                    <p className="text-xs text-muted-foreground">
-                      Slots locked after activation
-                      {member.payoutPosition ? ` · #${member.payoutPosition}` : ''}.
-                    </p>
                   ) : null}
 
                   <form action={vouchMemberAction} className="flex flex-wrap gap-2">
