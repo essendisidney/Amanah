@@ -1,10 +1,12 @@
-import { formatCurrency, formatDate } from '@jamiya/shared';
 import Link from 'next/link';
 import type { Route } from 'next';
+import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { nudgeCircleDuesAction } from '@/features/circles/actions/invoice-actions';
 
 export function OfficerOverviewStrip({
   slug,
+  jamiyaId,
   lateCount,
   pendingGrace,
   pendingQard = 0,
@@ -22,6 +24,7 @@ export function OfficerOverviewStrip({
   cycleLabel,
 }: {
   slug: string;
+  jamiyaId?: string;
   lateCount: number;
   pendingGrace: number;
   pendingQard?: number;
@@ -31,7 +34,6 @@ export function OfficerOverviewStrip({
   nextPayoutDate: string | null;
   nextPayoutAmount: number | null;
   currency: string;
-  /** Members who still owe this round / have open dues */
   unpaidMemberLabels?: string[];
   openPenaltyCount?: number;
   recordPaymentHref?: string;
@@ -65,11 +67,24 @@ export function OfficerOverviewStrip({
             <p className="mt-1 text-sm text-muted-foreground">All caught up for now</p>
           )}
         </div>
-        {recordPaymentHref ? (
-          <Button asChild size="sm" className="min-h-11 rounded-full">
-            <Link href={recordPaymentHref as Route}>{recordPaymentLabel}</Link>
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap gap-2">
+          {jamiyaId ? (
+            <form action={nudgeCircleDuesAction}>
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="dueWithinDays" value="7" />
+              <input type="hidden" name="returnTo" value="circle" />
+              <Button type="submit" size="sm" variant="outline" className="min-h-11 rounded-full">
+                Nudge dues
+              </Button>
+            </form>
+          ) : null}
+          {recordPaymentHref ? (
+            <Button asChild size="sm" className="min-h-11 rounded-full">
+              <Link href={recordPaymentHref as Route}>{recordPaymentLabel}</Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       {unpaidMemberLabels.length > 0 ? (

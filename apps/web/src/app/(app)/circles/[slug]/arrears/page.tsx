@@ -12,7 +12,7 @@ import {
   runAutoFinesAction,
   setCircleAutoFineAction,
 } from '@/features/circles/actions/billing-actions';
-import { remindInvoicesAction } from '@/features/circles/actions/invoice-actions';
+import { remindInvoicesAction, nudgeCircleDuesAction } from '@/features/circles/actions/invoice-actions';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 
@@ -119,12 +119,21 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
           <p className="mt-1 text-sm text-muted-foreground">{dict.officer.arrearsIntro}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <form action={nudgeCircleDuesAction}>
+            <input type="hidden" name="jamiyaId" value={jamiya.id} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="dueWithinDays" value="7" />
+            <input type="hidden" name="returnTo" value="arrears" />
+            <Button type="submit" size="sm" className="min-h-11">
+              Nudge dues (7 days)
+            </Button>
+          </form>
           <form action={remindInvoicesAction}>
             <input type="hidden" name="jamiyaId" value={jamiya.id} />
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="returnTo" value="arrears" />
-            <Button type="submit" size="sm" disabled={!members.length}>
-              Remind all (SMS)
+            <Button type="submit" size="sm" variant="outline" disabled={!members.length}>
+              Remind open invoices
             </Button>
           </form>
           <Button asChild variant="outline" size="sm">

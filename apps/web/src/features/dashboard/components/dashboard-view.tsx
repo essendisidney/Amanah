@@ -156,21 +156,26 @@ export function DashboardView({
         </section>
 
         {nextDue && !needsTopUpForDue ? (
-          <p className="text-sm text-muted-foreground">
-            {labels.duePrefix}{' '}
-            <Link
-              href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}
-              className="font-semibold text-foreground"
-            >
-              {formatCurrency(dueRemaining, nextDue.currency)}
-            </Link>
-            {nextDue.jamiyaName ? (
-              <span>
-                {' '}
-                · {nextDue.jamiyaName}
-              </span>
-            ) : null}
-          </p>
+          <Link
+            href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}
+            className="amanah-glass flex items-center justify-between gap-3 rounded-[1.35rem] border border-primary/20 px-4 py-4 transition-transform active:scale-[0.99]"
+          >
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">
+                {labels.duePrefix}
+              </p>
+              <p className="amanah-money mt-1 text-xl font-bold tracking-tight text-foreground">
+                {formatCurrency(dueRemaining, nextDue.currency)}
+              </p>
+              <p className="mt-1 truncate text-xs text-muted-foreground">
+                {nextDue.jamiyaName}
+                {data.stats.pendingContributions > 1
+                  ? ` · ${data.stats.pendingContributions} open dues`
+                  : ''}
+              </p>
+            </div>
+            <span className="shrink-0 text-sm font-semibold text-primary">{labels.quickPayDue} →</span>
+          </Link>
         ) : null}
 
         <section className="space-y-3">

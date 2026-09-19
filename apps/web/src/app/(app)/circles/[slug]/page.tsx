@@ -1052,6 +1052,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         {canManageMembers ? (
           <OfficerOverviewStrip
             slug={jamiya.slug}
+            jamiyaId={jamiya.id}
             lateCount={lateCount}
             pendingGrace={pendingGraceCount ?? 0}
             openPenaltyCount={openPenaltyCount}

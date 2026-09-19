@@ -11,6 +11,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import {
   issueInvoicesAction,
+  nudgeCircleDuesAction,
   remindInvoicesAction,
 } from '@/features/circles/actions/invoice-actions';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
@@ -132,21 +133,47 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
       </header>
 
       {isOfficer ? (
-        <div className="flex flex-wrap gap-2 print:hidden">
-          <form action={issueInvoicesAction}>
+        <div className="space-y-3 print:hidden">
+          <form action={nudgeCircleDuesAction} className="amanah-surface space-y-3 border-primary/25 px-4 py-4">
             <input type="hidden" name="jamiyaId" value={jamiya.id} />
             <input type="hidden" name="slug" value={slug} />
-            <Button type="submit" size="sm" className="min-h-11">
-              Issue invoices for open dues
+            <input type="hidden" name="dueWithinDays" value="7" />
+            <input type="hidden" name="returnTo" value="invoices" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Nudge dues due this week</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Issues invoices only for dues due within 7 days, then reminds members in-app and by
+                SMS/WhatsApp. Skips future months so nobody is billed early.
+              </p>
+            </div>
+            <Button type="submit" className="min-h-11">
+              Issue + remind (7 days)
             </Button>
           </form>
-          <form action={remindInvoicesAction}>
-            <input type="hidden" name="jamiyaId" value={jamiya.id} />
-            <input type="hidden" name="slug" value={slug} />
-            <Button type="submit" size="sm" variant="outline" className="min-h-11">
-              Remind open invoices
-            </Button>
-          </form>
+          <div className="flex flex-wrap gap-2">
+            <form action={issueInvoicesAction}>
+              <input type="hidden" name="jamiyaId" value={jamiya.id} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="dueWithinDays" value="7" />
+              <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                Issue invoices (7 days)
+              </Button>
+            </form>
+            <form action={issueInvoicesAction}>
+              <input type="hidden" name="jamiyaId" value={jamiya.id} />
+              <input type="hidden" name="slug" value={slug} />
+              <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                Issue all open dues
+              </Button>
+            </form>
+            <form action={remindInvoicesAction}>
+              <input type="hidden" name="jamiyaId" value={jamiya.id} />
+              <input type="hidden" name="slug" value={slug} />
+              <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                Remind open invoices
+              </Button>
+            </form>
+          </div>
         </div>
       ) : null}
 
