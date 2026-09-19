@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { formatDate } from '@jamiya/shared';
 import { Button, Input } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
-import { revokeInvitationAction } from '../actions/invitation-actions';
+import { revokeInvitationAction, resendPendingInvitationsAction } from '../actions/invitation-actions';
 import {
   correctMemberContactAction,
   removeMemberAction,
@@ -248,12 +248,14 @@ export function MembersList({
 export function PendingInvitationsList({
   invitations,
   slug,
+  jamiyaId,
   canManage,
   siteUrl,
   circleName,
 }: {
   invitations: InvitationListItem[];
   slug: string;
+  jamiyaId?: string;
   canManage: boolean;
   siteUrl: string;
   circleName?: string;
@@ -263,8 +265,20 @@ export function PendingInvitationsList({
   }
 
   const origin = siteUrl.replace(/\/$/, '');
+  const pendingCount = invitations.filter((i) => i.status === 'pending').length;
 
   return (
+    <div className="space-y-3">
+      {canManage && jamiyaId && pendingCount > 0 ? (
+        <form action={resendPendingInvitationsAction} className="flex flex-wrap items-center gap-2">
+          <input type="hidden" name="jamiyaId" value={jamiyaId} />
+          <input type="hidden" name="slug" value={slug} />
+          <Button type="submit" size="sm" variant="outline" className="min-h-11">
+            Resend all pending ({pendingCount})
+          </Button>
+          <p className="text-xs text-muted-foreground">SMS/email again · skips if sent in the last hour</p>
+        </form>
+      ) : null}
     <ul className="space-y-3">
       {invitations.map((invite) => {
         const inviteUrl = invite.inviteCode
@@ -314,5 +328,6 @@ export function PendingInvitationsList({
         );
       })}
     </ul>
+    </div>
   );
 }

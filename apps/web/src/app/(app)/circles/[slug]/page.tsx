@@ -1169,6 +1169,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <PendingInvitationsList
               invitations={invitations}
               slug={jamiya.slug}
+              jamiyaId={jamiya.id}
               canManage={canManageOps}
               siteUrl={getSiteUrl()}
               circleName={jamiya.name}

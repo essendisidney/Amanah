@@ -16,7 +16,7 @@ function buildShareText(
   inviteCode: string,
   circleName?: string,
 ): string {
-  const name = circleName?.trim() || 'an Jameiyah savings circle';
+  const name = circleName?.trim() || 'a Jameiyah savings circle';
   return `You're invited to join ${name} on Jameiyah.\n\nOpen this link, sign in with your phone (SMS code), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
 }
 

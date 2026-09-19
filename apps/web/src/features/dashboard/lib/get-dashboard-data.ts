@@ -258,6 +258,16 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       })
       .filter((item): item is DashboardContribution => item !== null);
 
+    // Wave 9: Home only surfaces near-term dues (overdue or due within 14 days).
+    const horizon = new Date();
+    horizon.setHours(0, 0, 0, 0);
+    horizon.setDate(horizon.getDate() + 14);
+    contributions = contributions.filter((item) => {
+      if (!item.dueDate) return true;
+      const due = new Date(item.dueDate);
+      return !Number.isNaN(due.getTime()) && due <= horizon;
+    });
+
     payouts = ((payoutsResult.data ?? []) as unknown as PayoutRow[])
       .map((row) => {
         const jamiya = asSingle(row.jamiya);

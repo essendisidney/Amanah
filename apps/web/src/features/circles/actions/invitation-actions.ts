@@ -14,6 +14,7 @@ import {
 } from '../lib/invitation-token';
 import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
+import { redirectWithCircleNotice } from '../lib/circle-notice';
 
 async function findInviteeUserId(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -282,6 +283,44 @@ export async function revokeInvitationAction(formData: FormData): Promise<void> 
   } as never);
 
   if (slug) revalidatePath(`/circles/${slug}`);
+}
+
+/** Re-queue SMS/email for all pending, unexpired invites (Wave 9). */
+export async function resendPendingInvitationsAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  if (!jamiyaId || !slug) return;
+
+  const { data, error } = await callRpc('resend_pending_invitations', {
+    p_jamiya_id: jamiyaId,
+    p_base_url: getSiteUrl(),
+  });
+  if (error) {
+    redirectWithCircleNotice(slug, error.message, 'error');
+    return;
+  }
+  const result = data as {
+    ok?: boolean;
+    sent?: number;
+    skipped?: number;
+    failed?: number;
+    error?: string;
+  } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(slug, result?.error ?? 'Could not resend invites.', 'error');
+    return;
+  }
+
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath('/notifications');
+  const skipped = result.skipped ?? 0;
+  redirectWithCircleNotice(
+    slug,
+    skipped > 0
+      ? `Resent ${result.sent ?? 0} invite(s); skipped ${skipped} (recently sent).`
+      : `Resent ${result.sent ?? 0} pending invite(s).`,
+    'success',
+  );
 }
 
 export async function acceptInvitationAction(
