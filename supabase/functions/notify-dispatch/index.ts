@@ -34,7 +34,7 @@ function normalizePhone254(raw: string): string {
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
   const apiKey = env("RESEND_API_KEY");
-  const from = env("EMAIL_FROM") || "Amanah <noreply@amanah.app>";
+  const from = env("EMAIL_FROM") || "Jameiyah <noreply@jameiyah.app>";
   if (!apiKey) {
     console.info("email skipped (no RESEND_API_KEY)", { to, subject });
     return;
@@ -239,7 +239,7 @@ async function sendExpoPush(
     },
     body: JSON.stringify({
       to,
-      title: title || "Amanah",
+      title: title || "Jameiyah",
       body,
       data: data ?? {},
       sound: "default",
@@ -282,7 +282,7 @@ Deno.serve(async (req) => {
     for (const row of rows ?? []) {
       try {
         if (row.channel === "email") {
-          await sendEmail(row.recipient, row.subject ?? "Amanah", row.body);
+          await sendEmail(row.recipient, row.subject ?? "Jameiyah", row.body);
         } else if (row.channel === "sms") {
           await sendSms(row.recipient, row.body);
         } else if (row.channel === "whatsapp") {

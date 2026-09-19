@@ -34,7 +34,7 @@ async function callPartnerApi(payload: Record<string, unknown>): Promise<Partner
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
-      "X-Amanah-Idempotency-Key": String(payload.idempotency_key ?? crypto.randomUUID()),
+      "X-Jameiyah-Idempotency-Key": String(payload.idempotency_key ?? crypto.randomUUID()),
     },
     body: JSON.stringify(payload),
   });

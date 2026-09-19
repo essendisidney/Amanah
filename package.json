@@ -1,8 +1,8 @@
 {
-  "name": "amanah",
+  "name": "jamiya",
   "version": "0.1.0",
   "private": true,
-  "description": "Amanah — Shariah-compliant digital rotating savings platform (ROSCA)",
+  "description": "Jameiyah — Shariah-compliant digital community finance platform (circles, sadaka, qard hassan, tawarruq)",
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20.0.0",

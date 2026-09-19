@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
           intent_id: intentId,
           amount,
           phone,
-          description: "Amanah adopt",
+          description: "Jameiyah adopt",
         });
         chargeResults.push({ intent_id: intentId, mode: "stk", result: stk });
       } else {

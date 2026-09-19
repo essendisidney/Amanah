@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       const body =
-        `Amanah collections: you have an overdue contribution ` +
+        `Jameiyah collections: you have an overdue contribution ` +
         `(${row.days_overdue} days, ${row.amount_due} ${row.currency}). ` +
         `Please top up and pay from the app.`;
 
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
           user_id: row.user_id,
           channel: "email",
           recipient: profile.email,
-          subject: "Overdue Amanah contribution",
+          subject: "Overdue Jameiyah contribution",
           body,
           metadata: { collection_case_id: row.id, kind: "collections" },
         });

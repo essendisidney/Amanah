@@ -137,13 +137,13 @@ function descForKind(kind: string | undefined, fallback?: string): string {
   if (fallback) return fallback.slice(0, 13);
   switch (kind) {
     case "sadaka":
-      return "Amanah sadaka";
+      return "Jameiyah sadaka";
     case "sponsorship":
-      return "Amanah adopt";
+      return "Jameiyah adopt";
     case "platform_tip":
-      return "Amanah support";
+      return "Jameiyah support";
     default:
-      return "Amanah top-up";
+      return "Jameiyah top-up";
   }
 }
 
@@ -263,7 +263,7 @@ Deno.serve(async (req) => {
           Amount: Math.max(1, Math.round(amount)),
           PartyA: shortcode,
           PartyB: msisdn,
-          Remarks: "Amanah sadaka",
+          Remarks: "Jameiyah sadaka",
           QueueTimeOutURL: timeoutUrl,
           ResultURL: resultUrl,
           Occasion: String(body.disbursement_id).replace(/-/g, "").slice(0, 20),
