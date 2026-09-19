@@ -131,16 +131,21 @@ export default async function AdminOverviewPage() {
         </p>
         <p className="max-w-xl text-sm text-muted-foreground">
           {totalWaiting === 0
-            ? 'Nothing needs you right now. Check More for users, circles, and health.'
+            ? 'Nothing needs you right now. Check Insights for activation and payment health.'
             : `${actionable.length} queue${actionable.length === 1 ? '' : 's'} need attention. Start at the top.`}
         </p>
-        {actionable[0] ? (
-          <Button asChild className="min-h-11 w-full sm:w-auto">
-            <Link href={actionable[0].href}>
-              Start with {actionable[0].title} ({actionable[0].count})
-            </Link>
+        <div className="flex flex-wrap gap-2">
+          {actionable[0] ? (
+            <Button asChild className="min-h-11 w-full sm:w-auto">
+              <Link href={actionable[0].href}>
+                Start with {actionable[0].title} ({actionable[0].count})
+              </Link>
+            </Button>
+          ) : null}
+          <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+            <Link href={'/admin/insights' as Route}>Open Insights</Link>
           </Button>
-        ) : null}
+        </div>
       </section>
 
       {actionable.length > 0 ? (
