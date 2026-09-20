@@ -16,3 +16,10 @@ export {
   slotBand,
   type SlotEconomics,
 } from './slot-economics';
+export {
+  mgrCyclePot,
+  remainingDue,
+  roundMoney,
+  slotFeeAmount,
+  wasPaidOnTime,
+} from './circle-math';

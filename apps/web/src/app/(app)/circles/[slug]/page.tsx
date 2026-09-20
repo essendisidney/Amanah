@@ -24,6 +24,7 @@ import { ExportCircleReportButtons } from '@/features/circles/components/export-
 import { paymentProvider } from '@/lib/payments/provider';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { MemberTodayStrip } from '@/features/circles/components/member-today-strip';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { ContributionLedger } from '@/features/circles/components/contribution-ledger';
@@ -79,12 +80,13 @@ type JamiyaRow = {
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+  searchParams?: Promise<{ notice?: string; noticeType?: string; welcome?: string }>;
 };
 
 export default async function CircleDetailsPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const notices = (await searchParams) ?? {};
+  const welcome = notices.welcome === '1' || notices.welcome === 'true';
   const [{ supabase, user }, { dict }] = await Promise.all([getAuthUser(), getDictionary()]);
 
   if (!user) {
@@ -877,6 +879,31 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+
+      {membership?.status === 'active' ? (
+        <MemberTodayStrip
+          welcome={welcome}
+          circleName={jamiya.name}
+          slug={jamiya.slug}
+          currency={jamiya.currency}
+          due={
+            myOpenDue
+              ? {
+                  id: myOpenDue.id,
+                  amount: myOpenDue.amount,
+                  amountPaid: myOpenDue.amountPaid,
+                  dueDate: myOpenDue.dueDate,
+                  status: myOpenDue.status,
+                }
+              : null
+          }
+          walletAvailable={
+            walletAvailable != null && Number.isFinite(walletAvailable)
+              ? walletAvailable
+              : null
+          }
+        />
+      ) : null}
 
       {canManageOps && paymentProvider() === 'simulated' ? (
         <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />

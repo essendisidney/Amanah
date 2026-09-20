@@ -380,8 +380,8 @@ export async function acceptInvitationAction(
       return {
         success: true,
         message:
-          'Joined the circle, but join fee could not be charged yet — top up your wallet and retry from the circle page.',
-        inviteUrl: result.slug ? `/circles/${result.slug}` : '/circles',
+          'Joined — top up your wallet, then pay your first due on the circle page.',
+        inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1#pay-due` : '/circles',
       };
     }
   }
@@ -393,8 +393,8 @@ export async function acceptInvitationAction(
 
   return {
     success: true,
-    message: 'Welcome to the circle.',
-    inviteUrl: result.slug ? `/circles/${result.slug}` : '/circles',
+    message: 'Welcome — pay your first due to get started.',
+    inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1#pay-due` : '/circles',
   };
 }
 

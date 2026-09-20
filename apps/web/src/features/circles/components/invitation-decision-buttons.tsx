@@ -117,6 +117,8 @@ export function InvitationDecisionButtons({
               if (result.inviteUrl) {
                 router.push(result.inviteUrl as Route);
                 router.refresh();
+              } else {
+                router.push('/dashboard' as Route);
               }
             });
           }}
