@@ -69,7 +69,7 @@ export default async function RootLayout({
         <BootSplashMarkup />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{if(sessionStorage.getItem('jameiyah-booted')==='1'){var s0=document.getElementById('boot-splash');if(s0){s0.setAttribute('data-out','1');s0.classList.add('amanah-boot-splash--out');s0.remove();return}}}catch(e){}function h(){var s=document.getElementById('boot-splash');if(!s||s.getAttribute('data-out'))return;s.setAttribute('data-out','1');s.classList.add('amanah-boot-splash--out');try{sessionStorage.setItem('jameiyah-booted','1')}catch(e){}setTimeout(function(){try{s.remove()}catch(e){}},700)}if(document.readyState==='complete'){setTimeout(h,520)}else{window.addEventListener('load',function(){setTimeout(h,520)},{once:true})}setTimeout(h,1800)})();`,
+            __html: `(function(){try{if(sessionStorage.getItem('jameiyah-booted')==='1'){var s0=document.getElementById('boot-splash');if(s0){s0.remove();return}}}catch(e){}function h(hard){var s=document.getElementById('boot-splash');if(!s)return;if(s.getAttribute('data-out')&&!hard)return;s.setAttribute('data-out','1');s.classList.add('amanah-boot-splash--out');s.style.pointerEvents='none';try{sessionStorage.setItem('jameiyah-booted','1')}catch(e){}var done=function(){try{s.remove()}catch(e){}};if(hard){done();return}setTimeout(done,480)}if(document.readyState==='complete'){setTimeout(function(){h(false)},400)}else{window.addEventListener('load',function(){setTimeout(function(){h(false)},400)},{once:true})}setTimeout(function(){h(false)},1400);setTimeout(function(){h(true)},2000)})();`,
           }}
         />
         <Providers>

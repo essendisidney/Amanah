@@ -205,7 +205,7 @@ export default async function LandingPage() {
               Ready for your circle?
             </h2>
             <p className="mt-2 max-w-lg text-base text-[#5a6f66]">
-              Sign in with your Kenyan phone number and start in minutes.
+              Sign in with phone SMS, email, or Google — and start in minutes.
             </p>
           </div>
           <Button

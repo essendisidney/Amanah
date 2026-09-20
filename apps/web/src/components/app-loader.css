@@ -141,7 +141,7 @@
   opacity: 0;
   transform: translateZ(0) scale(1.02);
   visibility: hidden;
-  pointer-events: none;
+  pointer-events: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
