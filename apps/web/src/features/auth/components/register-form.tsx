@@ -9,9 +9,11 @@ import { initialAuthActionState } from '../lib/types';
 import { GoogleSignInButton } from './google-sign-in-button';
 import { AuthFormMessage } from './auth-form-message';
 
-export function RegisterForm() {
+export function RegisterForm({ next = '/dashboard' }: { next?: string }) {
   const [state, formAction, pending] = useActionState(registerAction, initialAuthActionState);
   const existsHint = Boolean(state.message?.toLowerCase().includes('already exists'));
+  const phoneHref = `/phone?next=${encodeURIComponent(next)}` as Route;
+  const loginHref = `/login?next=${encodeURIComponent(next)}` as Route;
 
   if (state.success) {
     return (
@@ -25,7 +27,7 @@ export function RegisterForm() {
     <div className="space-y-6">
       <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
         You can also{' '}
-        <Link href={'/phone' as Route} className="font-medium text-primary hover:underline">
+        <Link href={phoneHref} className="font-medium text-primary hover:underline">
           join with phone SMS
         </Link>
         , or use Google below — email is optional.
@@ -42,7 +44,7 @@ export function RegisterForm() {
                   Reset password
                 </Link>
                 {' · '}
-                <Link href={'/login' as Route} className="font-medium underline">
+                <Link href={loginHref} className="font-medium underline">
                   Sign in
                 </Link>
               </>
@@ -52,6 +54,7 @@ export function RegisterForm() {
       ) : null}
 
       <form action={formAction} className="space-y-4">
+        <input type="hidden" name="next" value={next} />
         <div className="space-y-2">
           <Label htmlFor="fullName">Full name</Label>
           <Input id="fullName" name="fullName" autoComplete="name" required />
@@ -104,15 +107,15 @@ export function RegisterForm() {
         </Button>
       </form>
 
-      <GoogleSignInButton next="/dashboard" label="Continue with Google" />
+      <GoogleSignInButton next={next} label="Continue with Google" />
 
       <AuthFormMessage>
         Already have an account?{' '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link href={loginHref} className="font-medium text-primary hover:underline">
           Sign in
         </Link>
         {' · '}
-        <Link href="/phone" className="font-medium text-primary hover:underline">
+        <Link href={phoneHref} className="font-medium text-primary hover:underline">
           Phone SMS
         </Link>
       </AuthFormMessage>

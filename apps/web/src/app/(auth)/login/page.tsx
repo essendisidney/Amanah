@@ -13,8 +13,10 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const joining =
     next.includes('/invitations/') ||
     next.includes('/circles/new') ||
-    next.includes('redeem-invite') ||
-    next.includes('/welcome');
+    next.includes('redeem') ||
+    next.includes('/welcome') ||
+    next.includes('/finance/goals') ||
+    next.includes('/wallet');
 
   return (
     <AuthCard

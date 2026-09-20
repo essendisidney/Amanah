@@ -7,9 +7,11 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { RedeemInviteCodeForm } from '@/features/circles/components/redeem-invite-code-form';
+import { FocusRedeemInvite } from '@/features/circles/components/focus-redeem-invite';
 import { circleAccentClass } from '@/features/circles/lib/circle-accent';
 import { AppPage } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Circles',
@@ -38,14 +40,20 @@ type MembershipRow = {
   } | null;
 };
 
-export default async function MyCirclesPage() {
+export default async function MyCirclesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ redeem?: string }>;
+}) {
+  const params = (await searchParams) ?? {};
+  const focusRedeem = params.redeem === '1' || params.redeem === 'true';
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?next=/circles');
+    redirect(`/login?next=${encodeURIComponent(focusRedeem ? '/circles?redeem=1' : '/circles')}`);
   }
 
   const [{ dict }, { data }] = await Promise.all([
@@ -85,13 +93,16 @@ export default async function MyCirclesPage() {
 
   return (
     <AppPage>
+        <FocusRedeemInvite active={focusRedeem} />
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight">
               {labels.title}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Your chamas, savings groups, and table banking circles.
+              {focusRedeem
+                ? 'Enter your invite code to join the circle.'
+                : 'Your chamas, savings groups, and table banking circles.'}
             </p>
           </div>
           <Button asChild size="sm" className="h-10 rounded-full px-4">
@@ -100,7 +111,17 @@ export default async function MyCirclesPage() {
         </div>
 
         <section id="redeem-invite" className="scroll-mt-24">
-          <div className="amanah-surface px-4 py-4 sm:px-5">
+          <div
+            className={cn(
+              'amanah-surface px-4 py-4 sm:px-5',
+              focusRedeem && 'border-primary/40 ring-2 ring-primary/20',
+            )}
+          >
+            {focusRedeem ? (
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-primary">
+                Continue joining
+              </p>
+            ) : null}
             <RedeemInviteCodeForm
               title={labels.redeemTitle}
               hint={labels.redeemHint}

@@ -41,6 +41,7 @@ export async function registerAction(
   }
 
   const { fullName, email, password } = parsed.data;
+  const next = getSafeRedirectPath(String(formData.get('next') ?? '/dashboard'));
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signUp({
@@ -50,7 +51,7 @@ export async function registerAction(
       data: {
         full_name: sanitizePlainText(fullName, 120),
       },
-      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=/dashboard`,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 

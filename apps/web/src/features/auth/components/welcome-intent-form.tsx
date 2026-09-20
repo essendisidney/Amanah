@@ -11,58 +11,50 @@ const INTENTS = [
     id: 'family',
     title: 'Save with my family',
     hint: 'Start or join a trusted family circle',
+    // Query (not hash) so server redirects keep the destination.
+    next: '/circles/new?intent=family',
   },
   {
     id: 'join',
     title: 'Join a savings circle',
     hint: 'I already have an invite code',
+    next: '/circles?redeem=1',
   },
   {
     id: 'build',
     title: 'Build my savings',
     hint: 'Personal goals and Money first',
+    next: '/finance/goals',
   },
   {
     id: 'manage',
     title: 'Manage my money',
     hint: 'Send, receive, and track activity',
+    next: '/wallet',
   },
   {
     id: 'business',
     title: 'Create a business circle',
     hint: 'Stage, chama, or workplace group',
+    next: '/circles/new?intent=business',
   },
 ] as const;
 
-function loginWithNext(path: string): Route {
-  return `/login?next=${encodeURIComponent(path)}` as Route;
-}
-
 export function WelcomeIntentForm() {
-  const [intent, setIntent] = useState<(typeof INTENTS)[number]['id']>('family');
-  const next =
-    intent === 'join'
-      ? loginWithNext('/circles#redeem-invite')
-      : intent === 'build'
-        ? loginWithNext('/finance/goals')
-        : intent === 'manage'
-          ? loginWithNext('/wallet')
-          : intent === 'business'
-            ? loginWithNext('/circles/new?intent=business')
-            : intent === 'family'
-              ? loginWithNext('/circles/new?intent=family')
-              : loginWithNext('/dashboard');
+  const [intentId, setIntentId] = useState<(typeof INTENTS)[number]['id']>('family');
+  const intent = INTENTS.find((item) => item.id === intentId) ?? INTENTS[0];
+  const href = `/login?next=${encodeURIComponent(intent.next)}` as Route;
 
   return (
     <div className="space-y-6">
       <ul className="space-y-2">
         {INTENTS.map((item) => {
-          const active = intent === item.id;
+          const active = intentId === item.id;
           return (
             <li key={item.id}>
               <button
                 type="button"
-                onClick={() => setIntent(item.id)}
+                onClick={() => setIntentId(item.id)}
                 className={cn(
                   'amanah-surface flex w-full flex-col items-start gap-0.5 px-4 py-3.5 text-left transition-colors',
                   active ? 'border-primary/40 bg-secondary/60' : 'hover:border-primary/20',
@@ -76,10 +68,10 @@ export function WelcomeIntentForm() {
         })}
       </ul>
       <Button asChild className="min-h-12 w-full">
-        <Link href={next}>Continue</Link>
+        <Link href={href}>Continue</Link>
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        Join with phone SMS, email, or Google on the next step.
+        After you sign in, we’ll take you straight to that next step.
       </p>
     </div>
   );

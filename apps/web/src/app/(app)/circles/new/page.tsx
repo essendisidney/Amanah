@@ -40,7 +40,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
         <p className="mt-3 text-sm text-muted-foreground">
           Have an invite?{' '}
           <Link
-            href={'/circles#redeem-invite' as Route}
+            href={'/circles?redeem=1' as Route}
             className="text-accent underline-offset-4 hover:underline"
           >
             Enter your code instead
