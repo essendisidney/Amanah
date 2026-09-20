@@ -8,7 +8,7 @@ import { PublicSiteHeader } from '@/components/public-site-header';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} — ${APP_TAGLINE}`,
+  title: `${APP_NAME} - ${APP_TAGLINE}`,
   description: APP_DESCRIPTION,
   openGraph: {
     title: APP_NAME,
@@ -26,21 +26,16 @@ export default async function LandingPage() {
 
   return (
     <div className="relative min-h-dvh overflow-x-hidden bg-[#f6f8f7] text-foreground">
-      {/* Atmosphere — emerald + gold, not flat */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
-          background: `
-            radial-gradient(ellipse 90% 60% at 50% -10%, rgba(13, 92, 69, 0.14), transparent 55%),
-            radial-gradient(ellipse 50% 40% at 100% 20%, rgba(197, 160, 68, 0.12), transparent 50%),
-            radial-gradient(ellipse 45% 35% at 0% 80%, rgba(13, 92, 69, 0.08), transparent 50%),
-            linear-gradient(180deg, #f6f8f7 0%, #eef4f1 45%, #f6f8f7 100%)
-          `,
+          backgroundImage:
+            'radial-gradient(ellipse 90% 60% at 50% -10%, rgba(13, 92, 69, 0.14), transparent 55%), radial-gradient(ellipse 50% 40% at 100% 20%, rgba(197, 160, 68, 0.12), transparent 50%), linear-gradient(180deg, #f6f8f7 0%, #eef4f1 45%, #f6f8f7 100%)',
         }}
       />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-6 sm:pt-6">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 sm:pt-6">
         <PublicSiteHeader
           locale={locale}
           languageLabel={dict.common.language}
@@ -56,17 +51,13 @@ export default async function LandingPage() {
         />
       </div>
 
-      {/* Hero — brand first, one composition */}
-      <section className="relative z-10 mx-auto flex min-h-[min(88dvh,920px)] w-full max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 lg:pt-6">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+      <section className="relative z-10 mx-auto flex min-h-[88dvh] w-full max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 lg:pt-6">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-8">
           <div className="order-2 lg:order-1">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]/
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
               {dict.brand.tagline}
             </p>
-            <h1
-              className="max-w-xl text-5xl font-bold leading-[0.98] tracking-tight text-[#0b4a3c] sm:text-6xl md:text-7xl"
-              style={{ fontFamily: 'var(--font-sans), system-ui, sans-serif' }}
-            >
+            <h1 className="max-w-xl text-5xl font-bold leading-none tracking-tight text-[#0b4a3c] sm:text-6xl md:text-7xl">
               {APP_NAME}
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-[#3d524a] sm:text-lg">
@@ -105,7 +96,11 @@ export default async function LandingPage() {
             <div className="relative">
               <div
                 aria-hidden
-                className="absolute -inset-8 rounded-full bg-[radial-gradient(circle,rgba(197,160,68,0.22)_0%,transparent_68%)] blur-2xl"
+                className="absolute -inset-8 rounded-full blur-2xl"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(197, 160, 68, 0.22) 0%, transparent 68%)',
+                }}
               />
               <Image
                 src="/brand/jameiyah-mark.png"
@@ -113,21 +108,21 @@ export default async function LandingPage() {
                 width={420}
                 height={420}
                 priority
-                className="relative h-auto w-[min(72vw,22rem)] object-contain drop-shadow-[0_24px_48px_rgba(11,74,60,0.18)] sm:w-[26rem] lg:w-[28rem]"
+                className="relative h-auto w-72 object-contain sm:w-[26rem] lg:w-[28rem]"
+                style={{ filter: 'drop-shadow(0 24px 48px rgba(11, 74, 60, 0.18))' }}
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* How it works */}
       <section id="how" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
             How it works
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
-            Circles, wallet, and trust — in one place
+            Circles, wallet, and trust - in one place
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#5a6f66]">
             Create or join a savings circle, contribute on schedule, and keep every shilling
@@ -138,7 +133,7 @@ export default async function LandingPage() {
               {
                 step: '01',
                 title: 'Start or join a circle',
-                body: 'Merry-go-round, savings, or table banking — invite members with a link or code.',
+                body: 'Merry-go-round, savings, or table banking - invite members with a link or code.',
               },
               {
                 step: '02',
@@ -161,7 +156,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Shariah */}
       <section
         id="shariah"
         className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-[#0b4a3c] text-[#eef8f3]"
@@ -203,7 +197,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* Closing CTA */}
       <section className="relative z-10 border-t border-[#0d5c45]/10">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
