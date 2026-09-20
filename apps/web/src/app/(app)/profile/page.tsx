@@ -157,14 +157,14 @@ export default async function ProfilePage({ searchParams }: Props) {
 
       <Link
         href={'/finance/insights' as Route}
-        className="amanah-forest block rounded-[1.5rem] px-5 py-5 transition-transform active:scale-[0.99]"
+        className="amanah-forest block rounded-[1.5rem] px-5 py-5 text-white transition-transform active:scale-[0.99]"
       >
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
           {labels.amanahScore}
         </p>
         <div className="mt-2 flex items-end justify-between gap-3">
-          <p className="amanah-money text-4xl font-bold tracking-tight text-primary">{amanahScore}</p>
-          <span className="text-sm font-medium text-primary">{scoreLabel}</span>
+          <p className="amanah-money text-4xl font-bold tracking-tight text-white">{amanahScore}</p>
+          <span className="text-sm font-medium text-white/80">{scoreLabel}</span>
         </div>
       </Link>
 
