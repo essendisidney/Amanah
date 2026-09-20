@@ -29,7 +29,7 @@ export default async function InvitationPage({ params }: Props) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/phone?next=${encodeURIComponent(`/invitations/${token}`)}`);
+    redirect(`/login?next=${encodeURIComponent(`/invitations/${token}`)}`);
   }
 
   const { data, error } = await callRpc(

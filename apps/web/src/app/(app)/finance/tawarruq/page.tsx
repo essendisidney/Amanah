@@ -26,7 +26,7 @@ export default async function TawarruqPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/phone?next=/finance/tawarruq');
+  if (!user) redirect('/login?next=/finance/tawarruq');
 
   const { dict } = await getDictionary();
   const labels = dict.finance;

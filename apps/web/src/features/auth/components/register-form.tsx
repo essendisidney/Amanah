@@ -24,11 +24,11 @@ export function RegisterForm() {
   return (
     <div className="space-y-6">
       <p className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-        In Kenya, most members should{' '}
+        You can also{' '}
         <Link href={'/phone' as Route} className="font-medium text-primary hover:underline">
-          sign in with phone OTP
-        </Link>{' '}
-        — no password needed.
+          join with phone SMS
+        </Link>
+        , or use Google below — email is optional.
       </p>
 
       {state.message ? (
@@ -42,8 +42,8 @@ export function RegisterForm() {
                   Reset password
                 </Link>
                 {' · '}
-                <Link href={'/phone' as Route} className="font-medium underline">
-                  Phone OTP
+                <Link href={'/login' as Route} className="font-medium underline">
+                  Sign in
                 </Link>
               </>
             ) : null}
@@ -108,12 +108,12 @@ export function RegisterForm() {
 
       <AuthFormMessage>
         Already have an account?{' '}
-        <Link href="/phone" className="font-medium text-primary hover:underline">
-          Phone OTP
+        <Link href="/login" className="font-medium text-primary hover:underline">
+          Sign in
         </Link>
         {' · '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
-          Email sign in
+        <Link href="/phone" className="font-medium text-primary hover:underline">
+          Phone SMS
         </Link>
       </AuthFormMessage>
     </div>

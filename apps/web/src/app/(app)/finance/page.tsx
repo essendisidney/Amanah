@@ -23,7 +23,7 @@ export default async function FinancePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/phone?next=/finance');
+  if (!user) redirect('/login?next=/finance');
 
   const [{ dict }, { data }, dashboard] = await Promise.all([
     getDictionary(),

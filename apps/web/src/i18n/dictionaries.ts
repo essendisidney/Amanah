@@ -563,9 +563,9 @@ export const en: Dictionary = {
     profileShort: 'You',
   },
   landing: {
-    startWithPhone: 'Sign in with phone',
+    startWithPhone: 'Get started',
     joinCircle: 'How Jameiyah works',
-    preferEmail: 'Prefer email?',
+    preferEmail: 'Prefer email or Google?',
     createAccount: 'Create account',
     shariaEyebrow: 'Shariah',
     shariaTitle: 'How Jameiyah stays Shariah-conscious',
@@ -1114,7 +1114,7 @@ export const sw: Dictionary = {
   landing: {
     startWithPhone: 'Anza sasa',
     joinCircle: 'Gundua Jameiyah',
-    preferEmail: 'Unapendelea barua pepe?',
+    preferEmail: 'Unapendelea barua pepe au Google?',
     createAccount: 'Fungua akaunti',
     shariaEyebrow: 'Shariah',
     shariaTitle: 'Jinsi Jameiyah inavyofuata Shariah',

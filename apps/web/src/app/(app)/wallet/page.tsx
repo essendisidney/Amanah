@@ -81,7 +81,7 @@ export default async function WalletPage({ searchParams }: Props) {
     if (notices.next) q.set('next', notices.next);
     if (notices.amount) q.set('amount', notices.amount);
     const walletNext = q.toString() ? `/wallet?${q.toString()}` : '/wallet';
-    redirect(`/phone?next=${encodeURIComponent(walletNext)}`);
+    redirect(`/login?next=${encodeURIComponent(walletNext)}`);
   }
 
   const [{ dict }, walletResult, txResult, intentResult, pendingResult, profileResult] =

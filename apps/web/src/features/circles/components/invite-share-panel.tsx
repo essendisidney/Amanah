@@ -17,7 +17,7 @@ function buildShareText(
   circleName?: string,
 ): string {
   const name = circleName?.trim() || 'a Jameiyah savings circle';
-  return `You're invited to join ${name} on Jameiyah.\n\nOpen this link, sign in with your phone (SMS code), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
+  return `You're invited to join ${name} on Jameiyah.\n\nOpen this link, sign in (phone SMS, email, or Google), then Accept:\n${inviteUrl}\n\nOr in the app: Circles → Enter invite code: ${inviteCode}`;
 }
 
 function qrImageUrl(data: string): string {
@@ -111,8 +111,8 @@ export function InviteSharePanel({
           {inviteCode}
         </p>
         <p className="text-[11px] text-muted-foreground">
-          Share by SMS, email, copy link/code, or WhatsApp. They open the link, sign in with phone
-          OTP, then tap Accept.
+          Share by SMS, email, copy link/code, or WhatsApp. They open the link, sign in with
+          phone, email, or Google, then tap Accept.
         </p>
       </div>
 

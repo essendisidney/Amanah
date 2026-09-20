@@ -61,7 +61,7 @@ export function SadakaSiteHeader({ signedIn, pathname = '' }: SadakaSiteHeaderPr
 
         <div className="flex shrink-0 items-center gap-1">
           <Link
-            href={(signedIn ? '/dashboard' : '/phone?next=/sadaka') as Route}
+            href={(signedIn ? '/dashboard' : '/login?next=/sadaka') as Route}
             className="hidden rounded-md border border-border px-3 py-1.5 text-sm font-medium sm:inline-flex"
           >
             {signedIn ? 'Dashboard' : 'Sign in'}
@@ -107,7 +107,7 @@ export function SadakaSiteHeader({ signedIn, pathname = '' }: SadakaSiteHeaderPr
             })}
             <li className="border-t border-border/70 pt-2">
               <Link
-                href={(signedIn ? '/dashboard' : '/phone?next=/sadaka') as Route}
+                href={(signedIn ? '/dashboard' : '/login?next=/sadaka') as Route}
                 className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-primary"
                 onClick={() => setMenuOpen(false)}
               >

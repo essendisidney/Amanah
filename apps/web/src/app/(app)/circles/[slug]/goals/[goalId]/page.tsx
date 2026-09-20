@@ -26,7 +26,7 @@ export default async function CircleGoalDetailPage({ params, searchParams }: Pro
   const { slug, goalId } = await params;
   const notices = (await searchParams) ?? {};
   const { user } = await getAuthUser();
-  if (!user) redirect(`/phone?next=/circles/${slug}/goals/${goalId}`);
+  if (!user) redirect(`/login?next=/circles/${slug}/goals/${goalId}`);
 
   const { data, error } = await callRpc('goal_member_totals', { p_goal_id: goalId });
   if (error) {

@@ -26,7 +26,7 @@ export default async function MySadakaCampaignsPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/phone?next=/sadaka/my');
+  if (!user) redirect('/login?next=/sadaka/my');
 
   const [{ data }, { data: sponsorships }] = await Promise.all([
     supabase

@@ -34,20 +34,24 @@ const INTENTS = [
   },
 ] as const;
 
+function loginWithNext(path: string): Route {
+  return `/login?next=${encodeURIComponent(path)}` as Route;
+}
+
 export function WelcomeIntentForm() {
   const [intent, setIntent] = useState<(typeof INTENTS)[number]['id']>('family');
   const next =
     intent === 'join'
-      ? (`/phone?next=${encodeURIComponent('/circles#redeem-invite')}` as Route)
+      ? loginWithNext('/circles#redeem-invite')
       : intent === 'build'
-        ? ('/phone?next=/finance/goals' as Route)
+        ? loginWithNext('/finance/goals')
         : intent === 'manage'
-          ? ('/phone?next=/wallet' as Route)
+          ? loginWithNext('/wallet')
           : intent === 'business'
-            ? (`/phone?next=${encodeURIComponent('/circles/new?intent=business')}` as Route)
+            ? loginWithNext('/circles/new?intent=business')
             : intent === 'family'
-              ? (`/phone?next=${encodeURIComponent('/circles/new?intent=family')}` as Route)
-              : ('/phone?next=/dashboard' as Route);
+              ? loginWithNext('/circles/new?intent=family')
+              : loginWithNext('/dashboard');
 
   return (
     <div className="space-y-6">
@@ -74,6 +78,9 @@ export function WelcomeIntentForm() {
       <Button asChild className="min-h-12 w-full">
         <Link href={next}>Continue</Link>
       </Button>
+      <p className="text-center text-xs text-muted-foreground">
+        Join with phone SMS, email, or Google on the next step.
+      </p>
     </div>
   );
 }

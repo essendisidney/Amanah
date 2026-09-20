@@ -329,7 +329,7 @@ export async function addOneCircleMember(args: {
 
   const phoneHint =
     !email && phone
-      ? ' They can sign in with phone OTP on Jameiyah, then paste the code.'
+      ? ' They can sign in with phone SMS, email, or Google on Jameiyah, then paste the code.'
       : '';
 
   return {

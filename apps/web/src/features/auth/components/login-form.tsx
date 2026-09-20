@@ -18,17 +18,17 @@ export function LoginForm({
 }) {
   const [state, formAction, pending] = useActionState(loginAction, initialAuthActionState);
   const showError = error || (state.message && !state.success);
+  const phoneHref = `/phone?next=${encodeURIComponent(next)}` as Route;
+  const registerHref = `/register?next=${encodeURIComponent(next)}` as Route;
 
   return (
     <div className="space-y-6">
       <Button asChild className="w-full min-h-11" size="lg">
-        <Link href={`/phone?next=${encodeURIComponent(next)}` as Route}>
-          Continue with phone
-        </Link>
+        <Link href={phoneHref}>Continue with phone</Link>
       </Button>
 
       <p className="text-center text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-        Or use email
+        Or use email / Google
       </p>
 
       {showError ? (
@@ -39,11 +39,8 @@ export function LoginForm({
               Reset password
             </Link>
             {' · '}
-            <Link
-              href={`/phone?next=${encodeURIComponent(next)}` as Route}
-              className="font-medium underline"
-            >
-              Phone OTP
+            <Link href={phoneHref} className="font-medium underline">
+              Phone SMS
             </Link>
           </AlertDescription>
         </Alert>
@@ -95,19 +92,15 @@ export function LoginForm({
 
       <AuthFormMessage>
         New to Jameiyah?{' '}
-        <Link
-          href={`/phone?next=${encodeURIComponent(next)}` as Route}
-          className="font-medium text-primary hover:underline"
-        >
-          Start with phone
+        <Link href={phoneHref} className="font-medium text-primary hover:underline">
+          Phone SMS
         </Link>
         {' · '}
-        <Link
-          href={`/register?next=${encodeURIComponent(next)}` as Route}
-          className="font-medium text-primary hover:underline"
-        >
+        <Link href={registerHref} className="font-medium text-primary hover:underline">
           Email account
         </Link>
+        {' · '}
+        <span className="text-muted-foreground">or Google above</span>
       </AuthFormMessage>
     </div>
   );

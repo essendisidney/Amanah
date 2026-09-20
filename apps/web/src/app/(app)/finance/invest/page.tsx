@@ -19,7 +19,7 @@ export default async function InvestPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/phone?next=/finance/invest');
+  if (!user) redirect('/login?next=/finance/invest');
 
   const { dict } = await getDictionary();
   const labels = dict.finance;

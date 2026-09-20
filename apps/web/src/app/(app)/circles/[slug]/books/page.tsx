@@ -61,7 +61,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/phone?next=/circles/${slug}/books`);
+  if (!user) redirect(`/login?next=/circles/${slug}/books`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

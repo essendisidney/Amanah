@@ -71,7 +71,7 @@ export default async function CircleCommunityPage({ params }: Props) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirect(`/phone?next=/circles/${slug}/community`);
+    redirect(`/login?next=/circles/${slug}/community`);
   }
 
   const { data: jamiya } = await supabase

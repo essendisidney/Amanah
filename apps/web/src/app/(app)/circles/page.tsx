@@ -45,7 +45,7 @@ export default async function MyCirclesPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/phone?next=/circles');
+    redirect('/login?next=/circles');
   }
 
   const [{ dict }, { data }] = await Promise.all([

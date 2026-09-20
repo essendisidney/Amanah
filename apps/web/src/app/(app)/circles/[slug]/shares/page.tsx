@@ -33,7 +33,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/phone?next=/circles/${slug}/shares`);
+  if (!user) redirect(`/login?next=/circles/${slug}/shares`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

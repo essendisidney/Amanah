@@ -129,8 +129,9 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedPath(pathname) && !user) {
     const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/phone';
-    // Keep full path (e.g. /invitations/CODE) so invite deep links survive phone OTP.
+    // Hub for phone OTP, email/password, and Google — not phone-only.
+    loginUrl.pathname = '/login';
+    // Keep full path (e.g. /invitations/CODE) so invite deep links survive auth.
     loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
     const redirect = NextResponse.redirect(loginUrl);
     response.cookies.getAll().forEach((cookie) => {

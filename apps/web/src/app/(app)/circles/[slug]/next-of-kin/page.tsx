@@ -40,7 +40,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect(`/phone?next=/circles/${slug}/next-of-kin`);
+  if (!user) redirect(`/login?next=/circles/${slug}/next-of-kin`);
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')

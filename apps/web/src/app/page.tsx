@@ -46,7 +46,7 @@ export default async function LandingPage() {
             { href: '/#shariah' as Route, label: dict.landing.shariaEyebrow },
             { href: '/pricing' as Route, label: 'Pricing' },
             { href: '/sadaka' as Route, label: dict.common.sadaka },
-            { href: '/phone' as Route, label: dict.common.signIn, variant: 'ghost' },
+            { href: '/login' as Route, label: dict.common.signIn, variant: 'ghost' },
           ]}
           cta={{ href: '/welcome' as Route, label: dict.landing.startWithPhone }}
         />
@@ -236,7 +236,7 @@ export default async function LandingPage() {
             <Link href="/support" className="hover:underline">
               {dict.common.support}
             </Link>
-            <Link href="/phone" className="hover:underline">
+            <Link href="/login" className="hover:underline">
               {dict.common.signIn}
             </Link>
           </nav>

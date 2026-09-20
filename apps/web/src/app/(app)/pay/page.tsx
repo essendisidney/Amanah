@@ -20,7 +20,7 @@ export default async function PayPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/phone?next=/pay');
+    redirect('/login?next=/pay');
   }
 
   const data = await getDashboardData(user.id);

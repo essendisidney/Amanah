@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function FinanceInsightsPage() {
   const [{ user }, { dict }] = await Promise.all([getAuthUser(), getDictionary()]);
-  if (!user) redirect('/phone?next=/finance/insights');
+  if (!user) redirect('/login?next=/finance/insights');
 
   const data = await getInsightsData(user.id);
   return (

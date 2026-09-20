@@ -332,11 +332,17 @@ export function PhoneOtpForm({
 
       <AuthFormMessage>
         {labels.preferEmail}{' '}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link
+          href={`/login?next=${encodeURIComponent(dest)}`}
+          className="font-medium text-primary hover:underline"
+        >
           {labels.signInPassword}
         </Link>
         {' · '}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link
+          href={`/register?next=${encodeURIComponent(dest)}`}
+          className="font-medium text-primary hover:underline"
+        >
           {labels.createEmailAccount}
         </Link>
       </AuthFormMessage>

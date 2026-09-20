@@ -28,8 +28,12 @@ export default function WelcomePage() {
       <WelcomeIntentForm />
       <p className="text-center text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link href="/phone" className="font-semibold text-primary hover:underline">
-          Sign in with phone
+        <Link href="/login" className="font-semibold text-primary hover:underline">
+          Sign in
+        </Link>
+        {' · '}
+        <Link href="/register" className="font-semibold text-primary hover:underline">
+          Create email account
         </Link>
       </p>
     </div>

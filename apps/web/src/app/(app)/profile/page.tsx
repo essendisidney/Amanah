@@ -71,7 +71,7 @@ export default async function ProfilePage({ searchParams }: Props) {
     const profilePath = nextBits.toString()
       ? `/profile?${nextBits.toString()}`
       : '/profile';
-    redirect(`/phone?next=${encodeURIComponent(profilePath)}`);
+    redirect(`/login?next=${encodeURIComponent(profilePath)}`);
   }
 
   const { dict } = await getDictionary();

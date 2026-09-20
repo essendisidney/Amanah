@@ -25,7 +25,7 @@ export async function requireAdminAccess(
       returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')
         ? returnTo
         : '/admin';
-    redirect(`/phone?next=${encodeURIComponent(dest)}`);
+    redirect(`/login?next=${encodeURIComponent(dest)}`);
   }
 
   const profile = await getUserProfile(user.id);

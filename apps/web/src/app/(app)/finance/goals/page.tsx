@@ -31,7 +31,7 @@ export default async function GoalsPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect('/phone?next=/finance/goals');
+  if (!user) redirect('/login?next=/finance/goals');
 
   const qs = (await searchParams) ?? {};
   const defaultJamiya = String(qs.jamiyaId ?? '');

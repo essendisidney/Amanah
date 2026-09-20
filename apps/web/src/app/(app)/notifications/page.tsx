@@ -44,7 +44,7 @@ export default async function NotificationsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/phone?next=/notifications');
+    redirect('/login?next=/notifications');
   }
 
   const { dict } = await getDictionary();

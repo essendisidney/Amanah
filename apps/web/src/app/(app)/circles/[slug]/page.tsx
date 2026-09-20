@@ -90,7 +90,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const [{ supabase, user }, { dict }] = await Promise.all([getAuthUser(), getDictionary()]);
 
   if (!user) {
-    redirect(`/phone?next=/circles/${slug}`);
+    redirect(`/login?next=/circles/${slug}`);
   }
 
   const { data } = await supabase
