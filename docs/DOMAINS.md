@@ -33,17 +33,21 @@ Assign each domain to **Production**.
 ### If using Vercel nameservers
 Point the domain’s NS records to the nameservers Vercel shows after you add the domain.
 
-### If keeping third-party DNS (common for `.co.ke`)
+### Current registrar DNS (host-ww.net)
 
-**Apex (`jameiyah.com` / `jameiyah.co.ke`):**
-- Type `A` → `76.76.21.21`  
-  (or use the exact A / ALIAS record Vercel displays)
+Both domains currently use nameservers:
+- `ns1.host-ww.net` … `ns4.host-ww.net`
 
-**www:**
-- Type `CNAME` → `cname.vercel-dns.com.`  
-  (or the CNAME Vercel displays)
+Keep those NS records. At the DNS panel for each domain, add:
 
-Wait for DNS propagation (often minutes; sometimes up to 48h for `.co.ke`).
+| Host | Type | Value |
+|------|------|-------|
+| `@` (apex) | A | `76.76.21.21` |
+| `www` | A | `76.76.21.21` |
+
+(Or CNAME `www` → `cname.vercel-dns.com` if your panel prefers CNAME for www.)
+
+SSL certificates issue automatically after DNS points at Vercel.
 
 ## 3. App env after domains go live
 
