@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { APP_NAME, APP_DESCRIPTION, APP_TAGLINE } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { PublicSiteHeader } from '@/components/public-site-header';
+import { PesaraCredit } from '@/components/pesara-credit';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -222,9 +223,8 @@ export default async function LandingPage() {
           <div>
             <p className="text-lg font-bold tracking-tight text-[#0b4a3c]">{APP_NAME}</p>
             <p className="mt-1 text-sm text-[#5a6f66]">{dict.brand.tagline}</p>
-            <p className="mt-3 text-xs text-[#7a8f86]">
-              jameiyah.com · Jameiyah Limited
-            </p>
+            <p className="mt-3 text-xs text-[#7a8f86]">jameiyah.com · Jameiyah Limited</p>
+            <PesaraCredit className="mt-3" />
           </div>
           <nav className="flex flex-wrap gap-4 text-sm font-medium text-[#0d5c45]">
             <Link href="/pricing" className="hover:underline">
