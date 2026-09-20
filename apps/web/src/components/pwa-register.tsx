@@ -8,7 +8,7 @@ export function PwaRegister() {
     if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
 
     const onMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'AMANAH_SW_UPDATED') {
+      if (event.data?.type === 'JAMEIYAH_SW_UPDATED' || event.data?.type === 'AMANAH_SW_UPDATED') {
         // New shell is active — reload once so theme/boot scripts aren't stale.
         const key = 'amanah-sw-reload-v6';
         try {

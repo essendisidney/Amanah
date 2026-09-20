@@ -1,5 +1,5 @@
 /* Jameiyah PWA — installability + light offline shell. */
-const SHELL = 'amanah-shell-v8';
+const SHELL = 'jameiyah-shell-v1';
 const PRECACHE = [
   '/manifest.webmanifest',
   '/icons/icon-192.png',
