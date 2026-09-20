@@ -29,7 +29,7 @@ export function InsightsView({
 
   const nextStops = [
     {
-      href: '/pay' as Route,
+      href: '/wallet' as Route,
       label: payLabels.title,
       hint: payLabels.subtitle,
       icon: Wallet,
@@ -76,8 +76,8 @@ export function InsightsView({
     <div className="space-y-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          <Link href={'/pay' as Route} className="hover:text-primary">
-            {payLabels.title}
+          <Link href={'/wallet' as Route} className="hover:text-primary">
+            {payLabels.openMoney}
           </Link>
           <span className="text-muted-foreground"> · </span>
           {payLabels.insights}
@@ -90,7 +90,7 @@ export function InsightsView({
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild className="min-h-11">
-            <Link href={'/pay' as Route}>{payLabels.title}</Link>
+            <Link href={'/wallet' as Route}>{payLabels.openMoney}</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/wallet#top-up' as Route}>{payLabels.addMoney}</Link>

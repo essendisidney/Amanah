@@ -263,8 +263,10 @@ export type Dictionary = {
     historyTitle: string;
     historyEmpty: string;
     availableLabel: string;
+    quickPay: string;
     quickSave: string;
     quickInsights: string;
+    quickMore: string;
     moreTitle: string;
     moreDesc: string;
     moreGoals: string;
@@ -785,7 +787,7 @@ export const en: Dictionary = {
   wallet: {
     eyebrow: 'Money',
     title: 'Money',
-    subtitle: 'Balance, top-ups, and withdrawals.',
+    subtitle: 'Balance, pay dues, top-ups, and withdrawals — one place.',
     emptyTitle: 'No balance yet',
     emptyDesc: 'Your wallet opens automatically with your profile.',
     totalBalance: 'Total balance {amount}',
@@ -799,10 +801,12 @@ export const en: Dictionary = {
     historyEmpty:
       'Top-ups, contributions, and payouts will appear here.',
     availableLabel: 'Available',
+    quickPay: 'Pay',
     quickSave: 'Save',
     quickInsights: 'Insights',
-    moreTitle: 'More',
-    moreDesc: 'Lending, goals, and giving.',
+    quickMore: 'More',
+    moreTitle: 'More money tools',
+    moreDesc: 'Loans, goals, giving, and insights.',
     moreGoals: 'Goals',
     moreGoalsDesc: 'Hajj, Umra, and personal saves',
     moreQard: 'Qard Hassan',
@@ -1335,7 +1339,7 @@ export const sw: Dictionary = {
   wallet: {
     eyebrow: 'Pesa',
     title: 'Pesa',
-    subtitle: 'Salio, ongezeko, na utoaji.',
+    subtitle: 'Salio, lipa michango, ongezeko, na utoaji — mahali pamoja.',
     emptyTitle: 'Bado hakuna akaunti ya Pesa',
     emptyDesc: 'Pochi yako inafunguka pamoja na wasifu wako.',
     totalBalance: 'Salio jumla {amount}',
@@ -1349,10 +1353,12 @@ export const sw: Dictionary = {
     historyEmpty:
       'Ongezeko, michango, na malipo yataonekana hapa.',
     availableLabel: 'Inayopatikana',
+    quickPay: 'Lipa',
     quickSave: 'Okoa',
     quickInsights: 'Ufahamu',
-    moreTitle: 'Zaidi',
-    moreDesc: 'Mikopo, malengo, na kuchangia.',
+    quickMore: 'Zaidi',
+    moreTitle: 'Zana zaidi za pesa',
+    moreDesc: 'Mikopo, malengo, kuchangia, na ufahamu.',
     moreGoals: 'Malengo',
     moreGoalsDesc: 'Hajj, Umra, na akiba binafsi',
     moreQard: 'Qard Hassan',

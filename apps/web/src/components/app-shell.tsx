@@ -39,9 +39,9 @@ function pathActive(pathname: string, href: string) {
   if (href === '/dashboard') return pathname === '/dashboard';
   if (href === '/wallet' || href === '/pay') {
     return (
-      pathname === '/pay' ||
       pathname === '/wallet' ||
       pathname.startsWith('/wallet/') ||
+      pathname === '/pay' ||
       pathname === '/finance' ||
       pathname.startsWith('/finance/') ||
       pathname === '/sadaka' ||
@@ -112,9 +112,9 @@ export function AppShell({
       icon: LayoutGrid,
     },
     {
-      href: '/pay' as Route,
-      label: dict.nav.pay,
-      short: dict.nav.payShort,
+      href: '/wallet' as Route,
+      label: dict.nav.wallet,
+      short: dict.nav.walletShort,
       icon: Wallet,
       center: true,
     },
@@ -135,7 +135,7 @@ export function AppShell({
   const desktopLinks: Array<{ href: Route; label: string }> = [
     { href: '/dashboard' as Route, label: dict.nav.dashboard },
     { href: '/circles' as Route, label: dict.nav.circles },
-    { href: '/pay' as Route, label: dict.nav.pay },
+    { href: '/wallet' as Route, label: dict.nav.wallet },
     { href: '/notifications' as Route, label: dict.nav.activity },
     { href: '/profile' as Route, label: dict.nav.profile },
   ];

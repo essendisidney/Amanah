@@ -30,7 +30,6 @@ import {
   Plus,
   TrendingUp,
 } from 'lucide-react';
-import { CamelIcon } from '@/components/camel-icon';
 import { AppPage, PageHeader } from '@/components/app-page';
 
 export const metadata: Metadata = {
@@ -231,10 +230,10 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="grid grid-cols-4 gap-2 sm:gap-3">
         {[
-          { href: '#top-up', label: 'Add', icon: Plus },
-          { href: '/finance/goals', label: labels.quickSave, icon: CamelIcon },
-          { href: '/finance/insights', label: labels.quickInsights, icon: ChartNoAxesCombined },
+          { href: '#top-up', label: labels.topUp, icon: Plus },
+          { href: '/pay', label: labels.quickPay, icon: ArrowDownLeft },
           { href: '#withdraw', label: labels.withdraw, icon: ArrowUpRight },
+          { href: '#more', label: labels.quickMore, icon: ChartNoAxesCombined },
         ].map((action) => {
           const Icon = action.icon;
           return (
@@ -252,7 +251,7 @@ export default async function WalletPage({ searchParams }: Props) {
         })}
       </section>
 
-      <section className="space-y-3">
+      <section id="more" className="scroll-mt-24 space-y-3">
         <div>
           <h2 className="text-lg font-bold tracking-tight">{labels.moreTitle}</h2>
           <p className="text-sm text-muted-foreground">{labels.moreDesc}</p>
@@ -270,6 +269,18 @@ export default async function WalletPage({ searchParams }: Props) {
               title: labels.moreQard,
               desc: labels.moreQardDesc,
               icon: Landmark,
+            },
+            {
+              href: '/finance/insights',
+              title: labels.quickInsights,
+              desc: labels.moreDesc,
+              icon: ChartNoAxesCombined,
+            },
+            {
+              href: '/finance/welfare',
+              title: dict.finance.welfareTitle,
+              desc: dict.finance.welfareDesc,
+              icon: HandHeart,
             },
             {
               href: '/sadaka',
