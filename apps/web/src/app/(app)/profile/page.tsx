@@ -110,18 +110,21 @@ export default async function ProfilePage({ searchParams }: Props) {
     created_at: string;
   }>;
 
-  const amanahScore = Math.min(
-    850,
-    620 +
-      (profile?.kyc_status === 'approved' ? 80 : 0) +
-      (profile?.profile_completed ? 40 : 0) +
-      (hasPhone ? 30 : 0) +
-      Math.min(docs.length, 3) * 15,
-  );
+  const scoreSteps = [
+    { done: hasPhone, label: labels.scoreStepPhone },
+    {
+      done: Boolean(profile?.profile_completed && profile?.full_name?.trim()),
+      label: labels.scoreStepProfile,
+    },
+    { done: docs.length > 0, label: labels.scoreStepDocs },
+    { done: profile?.kyc_status === 'approved', label: labels.scoreStepKyc },
+  ];
+  const stepsDone = scoreSteps.filter((s) => s.done).length;
+  const amanahScore = Math.round(100 + (stepsDone / scoreSteps.length) * 100);
   const scoreLabel =
-    amanahScore >= 750
+    stepsDone >= 4
       ? labels.scoreExcellent
-      : amanahScore >= 680
+      : stepsDone >= 2
         ? labels.scoreStrong
         : labels.scoreBuilding;
 
@@ -155,18 +158,55 @@ export default async function ProfilePage({ searchParams }: Props) {
         subtitle={profile?.phone || profile?.email || user.email || '—'}
       />
 
-      <Link
-        href={'/finance/insights' as Route}
-        className="amanah-forest block rounded-[1.5rem] px-5 py-5 text-white transition-transform active:scale-[0.99]"
-      >
-        <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
-          {labels.amanahScore}
-        </p>
-        <div className="mt-2 flex items-end justify-between gap-3">
-          <p className="amanah-money text-4xl font-bold tracking-tight text-white">{amanahScore}</p>
-          <span className="text-sm font-medium text-white/80">{scoreLabel}</span>
+      <section className="amanah-forest space-y-4 rounded-[1.5rem] px-5 py-5 text-white">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
+              {labels.amanahScore}
+            </p>
+            <p className="mt-1 text-sm text-white/75">{labels.scoreHint}</p>
+          </div>
+          <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/80">
+            {scoreLabel}
+          </span>
         </div>
-      </Link>
+        <div className="flex items-end justify-between gap-3">
+          <p className="amanah-money text-4xl font-bold tracking-tight text-white">
+            {amanahScore}
+            <span className="ml-1 text-lg font-semibold text-white/50">/200</span>
+          </p>
+          <p className="text-sm text-white/70">
+            {stepsDone}/{scoreSteps.length}
+          </p>
+        </div>
+        <ul className="grid gap-1.5 sm:grid-cols-2">
+          {scoreSteps.map((step) => (
+            <li
+              key={step.label}
+              className="flex items-center gap-2 text-sm text-white/85"
+            >
+              <span
+                className={
+                  step.done
+                    ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-xs'
+                    : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/25 text-xs text-white/40'
+                }
+                aria-hidden
+              >
+                {step.done ? '✓' : '·'}
+              </span>
+              {step.label}
+            </li>
+          ))}
+        </ul>
+        <p className="text-xs text-white/50">{labels.scoreNotCredit}</p>
+        <Link
+          href={'/finance/insights' as Route}
+          className="inline-flex text-sm font-semibold text-white underline-offset-4 hover:underline"
+        >
+          {labels.scoreNext} →
+        </Link>
+      </section>
 
       <PageCard className="divide-y divide-border/50 !py-0">
         <ul>

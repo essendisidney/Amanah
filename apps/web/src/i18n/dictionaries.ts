@@ -364,6 +364,13 @@ export type Dictionary = {
     scoreExcellent: string;
     scoreStrong: string;
     scoreBuilding: string;
+    scoreHint: string;
+    scoreNotCredit: string;
+    scoreStepPhone: string;
+    scoreStepProfile: string;
+    scoreStepDocs: string;
+    scoreStepKyc: string;
+    scoreNext: string;
     appearance: string;
     linkMoney: string;
     linkGoals: string;
@@ -907,9 +914,16 @@ export const en: Dictionary = {
     subtitle: 'Name, phone, and verification.',
     youFallback: 'You',
     amanahScore: 'Jameiyah Score',
-    scoreExcellent: 'Excellent',
-    scoreStrong: 'Strong',
-    scoreBuilding: 'Building',
+    scoreExcellent: 'Strong setup',
+    scoreStrong: 'Getting there',
+    scoreBuilding: 'Just starting',
+    scoreHint: 'How complete your Jameiyah profile is',
+    scoreNotCredit: 'Not a bank or CRB credit score',
+    scoreStepPhone: 'Kenya mobile',
+    scoreStepProfile: 'Name on profile',
+    scoreStepDocs: 'ID document uploaded',
+    scoreStepKyc: 'KYC approved',
+    scoreNext: 'See savings insights',
     appearance: 'Appearance',
     linkMoney: 'Money',
     linkGoals: 'Goals',
@@ -1460,9 +1474,16 @@ export const sw: Dictionary = {
     subtitle: 'Jina, simu, na uthibitisho.',
     youFallback: 'Wewe',
     amanahScore: 'Alama ya Jameiyah',
-    scoreExcellent: 'Bora',
-    scoreStrong: 'Imara',
-    scoreBuilding: 'Inajengwa',
+    scoreExcellent: 'Imara',
+    scoreStrong: 'Inaendelea',
+    scoreBuilding: 'Inaanza',
+    scoreHint: 'Ukamilifu wa wasifu wako wa Jameiyah',
+    scoreNotCredit: 'Si alama ya benki au CRB',
+    scoreStepPhone: 'Simu ya Kenya',
+    scoreStepProfile: 'Jina kwenye wasifu',
+    scoreStepDocs: 'Hati ya kitambulisho',
+    scoreStepKyc: 'KYC imeidhinishwa',
+    scoreNext: 'Angalia ufahamu wa akiba',
     appearance: 'Muonekano',
     linkMoney: 'Pesa',
     linkGoals: 'Malengo',
