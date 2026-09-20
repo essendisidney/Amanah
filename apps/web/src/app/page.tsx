@@ -223,7 +223,7 @@ export default async function LandingPage() {
             <p className="text-lg font-bold tracking-tight text-[#0b4a3c]">{APP_NAME}</p>
             <p className="mt-1 text-sm text-[#5a6f66]">{dict.brand.tagline}</p>
             <p className="mt-3 text-xs text-[#7a8f86]">
-              jameiyah.com · jameiyah.co.ke · Jameiyah Limited
+              jameiyah.com · Jameiyah Limited
             </p>
           </div>
           <nav className="flex flex-wrap gap-4 text-sm font-medium text-[#0d5c45]">

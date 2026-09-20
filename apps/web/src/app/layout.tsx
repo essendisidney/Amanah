@@ -67,6 +67,11 @@ export default async function RootLayout({
       </head>
       <body className="min-h-dvh font-sans">
         <BootSplashMarkup />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function h(){var s=document.getElementById('boot-splash');if(!s||s.getAttribute('data-out'))return;s.setAttribute('data-out','1');s.classList.add('amanah-boot-splash--out');setTimeout(function(){try{s.remove()}catch(e){}},400)}if(document.readyState==='complete'){setTimeout(h,420)}else{window.addEventListener('load',function(){setTimeout(h,420)},{once:true})}setTimeout(h,1600)})();`,
+          }}
+        />
         <Providers>
           {children}
           <BootSplash />

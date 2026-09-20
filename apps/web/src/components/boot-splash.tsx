@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 
 const MIN_SPLASH_MS = 420;
 const FADE_MS = 380;
-const FAILSAFE_MS = 2800;
+const FAILSAFE_MS = 1600;
 
 function hideSplash() {
   const splash = document.getElementById('boot-splash');

@@ -42,7 +42,7 @@ export default function AppError({
           {labels.tryAgain}
         </Button>
         <Button type="button" variant="outline" onClick={() => {
-          window.location.href = '/admin/circles';
+          window.location.href = '/circles';
         }}>
           Back to circles
         </Button>
