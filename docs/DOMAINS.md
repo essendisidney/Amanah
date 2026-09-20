@@ -51,23 +51,39 @@ SSL certificates issue automatically after DNS points at Vercel.
 
 ## 3. App env after domains go live
 
-In Vercel → Environment Variables (Production):
+`NEXT_PUBLIC_APP_URL=https://jameiyah.com` is set on Vercel (production + preview).
 
+Redeploy after DNS A records point to `76.76.21.21` so SSL can issue.
+
+### Supabase Auth (dashboard — MCP has no auth-URL API)
+
+Project **Amanah** (`vzpnixfqkvovbniaoudx`) → Authentication → URL Configuration:
+
+- **Site URL:** `https://jameiyah.com`
+- **Redirect URLs** (add all):
+  - `https://jameiyah.com/**`
+  - `https://www.jameiyah.com/**`
+  - `https://jameiyah.co.ke/**`
+  - `https://www.jameiyah.co.ke/**`
+  - `https://amanah-liart.vercel.app/**`
+  - `https://amanah-liart.vercel.app/auth/callback`
+  - `https://jameiyah.com/auth/callback`
+  - `https://jameiyah.co.ke/auth/callback`
+
+Or via Management API (needs `SUPABASE_ACCESS_TOKEN`):
+
+```bash
+curl -X PATCH "https://api.supabase.com/v1/projects/vzpnixfqkvovbniaoudx/config/auth" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"site_url":"https://jameiyah.com","uri_allow_list":"https://jameiyah.com/**,https://www.jameiyah.com/**,https://jameiyah.co.ke/**,https://www.jameiyah.co.ke/**,https://amanah-liart.vercel.app/**"}'
 ```
-NEXT_PUBLIC_APP_URL=https://jameiyah.com
-```
 
-Also update Supabase Auth → URL configuration:
+## 4. SSL
 
-- Site URL: `https://jameiyah.com`
-- Redirect URLs:  
-  `https://jameiyah.com/auth/callback`  
-  `https://jameiyah.co.ke/auth/callback`  
-  `https://www.jameiyah.com/auth/callback`  
-  `https://www.jameiyah.co.ke/auth/callback`
+Vercel issues certificates automatically once DNS A records resolve to `76.76.21.21`.
+Until then, `issue_cert` fails (domain not reachable). After you add the A records, wait a few minutes and open:
+- https://jameiyah.com
+- https://jameiyah.co.ke
 
-Redeploy after env changes.
-
-## 4. Optional: redirect `.co.ke` ↔ `.com`
-
-In Vercel domain settings you can set one apex as primary and redirect the other, or keep both as aliases of the same deployment.
+## 5. Optional: redirect `.co.ke` ↔ `.com`

@@ -1,10 +1,10 @@
 /* Jameiyah PWA — installability + light offline shell. */
-const SHELL = 'jameiyah-shell-v1';
+const SHELL = 'jameiyah-shell-v2';
 const PRECACHE = [
   '/manifest.webmanifest',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png',
-  '/icons/apple-touch-icon.png',
+  '/icons/jameiyah-192.png',
+  '/icons/jameiyah-512.png',
+  '/icons/jameiyah-apple.png',
 ];
 
 self.addEventListener('install', (event) => {
