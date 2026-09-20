@@ -21,6 +21,54 @@ function errorMessage(value: unknown, fallback: string): string {
   return fallback;
 }
 
+function supabasePublicConfig(): { url: string; anon: string } | null {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '')
+    .trim()
+    .replace(/\/$/, '');
+  const anon = (
+    process.env.SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    ''
+  ).trim();
+  if (!url || !anon) return null;
+  return { url, anon };
+}
+
+type EdgeVerifyResult = {
+  success?: boolean;
+  error?: string;
+  access_token?: string;
+  refresh_token?: string;
+  expires_in?: number;
+  userId?: string;
+  profile_completed?: boolean;
+};
+
+async function verifyViaEdge(phone: string, otp: string): Promise<EdgeVerifyResult | null> {
+  const cfg = supabasePublicConfig();
+  if (!cfg) return null;
+
+  const res = await fetch(`${cfg.url}/functions/v1/auth-otp-verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: cfg.anon,
+      Authorization: `Bearer ${cfg.anon}`,
+    },
+    body: JSON.stringify({ phone, otp }),
+  });
+
+  const json = (await res.json().catch(() => ({}))) as EdgeVerifyResult;
+  if (!res.ok) {
+    return {
+      success: false,
+      error: typeof json.error === 'string' ? json.error : 'Could not verify code. Try again.',
+    };
+  }
+  return { ...json, success: true };
+}
+
 async function adminFindUserByEmail(
   url: string,
   serviceKey: string,
@@ -130,15 +178,68 @@ async function createSessionForEmail(
   return { error: 'Could not create session' };
 }
 
+async function attachSessionCookies(access_token: string, refresh_token: string): Promise<boolean> {
+  try {
+    const cookieClient = await createCookieClient();
+    const { error: cookieErr } = await cookieClient.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    if (cookieErr) {
+      console.error('[auth/phone/verify] cookie session', cookieErr);
+      return false;
+    }
+    return true;
+  } catch (cookieSetErr) {
+    console.error('[auth/phone/verify] cookie session threw', cookieSetErr);
+    return false;
+  }
+}
+
 export async function POST(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
-  // Prefer legacy JWT anon for Auth /verify; publishable keys are fine as fallback.
   const anon =
     process.env.SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !anon || !serviceKey) {
+
+  // Prefer Edge when Vercel lacks service role (current production breakage).
+  if (!serviceKey?.trim()) {
+    try {
+      const body = (await req.json()) as { phone?: string; otp?: string; code?: string };
+      const phoneRaw = String(body.phone ?? '').trim();
+      const codeRaw = String(body.otp ?? body.code ?? '').trim();
+      if (!phoneRaw || !codeRaw) {
+        return NextResponse.json({ error: 'Phone and code required' }, { status: 400 });
+      }
+      const edge = await verifyViaEdge(phoneRaw, codeRaw);
+      if (!edge?.success || !edge.access_token || !edge.refresh_token) {
+        return NextResponse.json(
+          { error: edge?.error ?? 'Could not verify code. Try again.' },
+          { status: edge?.error?.includes('Invalid') || edge?.error?.includes('expired') ? 400 : 500 },
+        );
+      }
+      const cookiesSet = await attachSessionCookies(edge.access_token, edge.refresh_token);
+      return NextResponse.json({
+        success: true,
+        cookies_set: cookiesSet,
+        access_token: edge.access_token,
+        refresh_token: edge.refresh_token,
+        expires_in: edge.expires_in,
+        userId: edge.userId,
+        profile_completed: edge.profile_completed ?? false,
+      });
+    } catch (err) {
+      console.error('[auth/phone/verify] edge proxy', err);
+      return NextResponse.json(
+        { error: 'Something went wrong. Please try again.' },
+        { status: 500 },
+      );
+    }
+  }
+
+  if (!url || !anon) {
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
@@ -170,7 +271,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Enter the 6-digit code' }, { status: 400 });
     }
 
-    // Auth stores Kenya MSISDN without '+'; profiles use E.164 with '+'.
     const normalized = normalizePhone254(phoneRaw);
     const e164 = `+${normalized}`;
     const email = internalEmail(normalized);
@@ -244,9 +344,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (!authUserId) {
-      // Do not set auth.users.phone here: GoTrue may store MSISDN without '+',
-      // and the profile trigger historically copied that into profiles.phone
-      // (E.164 required). Metadata carries +254… for the trigger / profile.
       const { data: created, error: createErr } = await admin.auth.admin.createUser({
         email,
         email_confirm: true,
@@ -298,7 +395,6 @@ export async function POST(req: NextRequest) {
       {
         email: loginEmail.includes('@') ? loginEmail : email,
         email_confirm: true,
-        // Auth stores without '+'; profiles keep E.164 via upsert below.
         phone: normalized,
         phone_confirm: true,
         user_metadata: { phone: e164, created_via: 'taifa_otp' },
@@ -333,23 +429,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: session.error }, { status: 500 });
     }
 
-    // Persist auth cookies on the response so the browser does not rely on
-    // client-only setSession (which can throw in some WebViews / PWA shells).
-    let cookiesSet = false;
-    try {
-      const cookieClient = await createCookieClient();
-      const { error: cookieErr } = await cookieClient.auth.setSession({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-      });
-      if (cookieErr) {
-        console.error('[auth/phone/verify] cookie session', cookieErr);
-      } else {
-        cookiesSet = true;
-      }
-    } catch (cookieSetErr) {
-      console.error('[auth/phone/verify] cookie session threw', cookieSetErr);
-    }
+    const cookiesSet = await attachSessionCookies(session.access_token, session.refresh_token);
 
     const { data: profileAfter } = await admin
       .from('profiles')
