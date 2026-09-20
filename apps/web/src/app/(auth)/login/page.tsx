@@ -9,13 +9,23 @@ type SearchParams = Promise<{ next?: string; error?: string }>;
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
+  const next = params.next ?? '/dashboard';
+  const joining =
+    next.includes('/invitations/') ||
+    next.includes('/circles/new') ||
+    next.includes('redeem-invite') ||
+    next.includes('/welcome');
 
   return (
     <AuthCard
-      title="Welcome back"
-      description="Join with phone SMS, email and password, or Google — then manage circles, contributions, and payouts."
+      title={joining ? 'Join Jameiyah' : 'Welcome back'}
+      description={
+        joining
+          ? 'Choose phone SMS, email, or Google — then continue where you left off.'
+          : 'Sign in with phone SMS, email, or Google.'
+      }
     >
-      <LoginForm next={params.next ?? '/dashboard'} error={params.error} />
+      <LoginForm next={next} error={params.error} isReturning={!joining} />
     </AuthCard>
   );
 }

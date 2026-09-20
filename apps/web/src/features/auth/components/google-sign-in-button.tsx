@@ -1,26 +1,31 @@
 'use client';
 
-import { Button, Separator } from '@jamiya/ui';
+import { Button } from '@jamiya/ui';
 import { signInWithGoogleAction } from '../actions/oauth-actions';
 
 export function GoogleSignInButton({
   next = '/dashboard',
   label = 'Continue with Google',
+  showDivider = true,
 }: {
   next?: string;
   label?: string;
+  /** Hide the “Or” rule when the parent already chose Google. */
+  showDivider?: boolean;
 }) {
   return (
     <div className="space-y-4">
-      <div className="relative flex items-center justify-center">
-        <Separator className="absolute inset-x-0" />
-        <span className="relative bg-card px-3 text-xs uppercase tracking-wide text-muted-foreground">
-          Or
-        </span>
-      </div>
+      {showDivider ? (
+        <div className="relative flex items-center justify-center">
+          <div className="absolute inset-x-0 h-px bg-border" />
+          <span className="relative bg-card px-3 text-xs uppercase tracking-wide text-muted-foreground">
+            Or
+          </span>
+        </div>
+      ) : null}
       <form action={signInWithGoogleAction}>
         <input type="hidden" name="next" value={next} />
-        <Button type="submit" variant="outline" className="w-full">
+        <Button type="submit" variant="outline" className="min-h-11 w-full">
           <GoogleIcon />
           {label}
         </Button>

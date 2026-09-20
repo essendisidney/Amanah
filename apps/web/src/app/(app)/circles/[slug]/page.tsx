@@ -39,6 +39,8 @@ import {
 import { MerryGoRoundPaymentsGrid } from '@/features/circles/components/merry-go-round-payments-grid';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
 import { CircleActionHub, type CircleHubGroup } from '@/features/circles/components/circle-action-hub';
+import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
+import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
 import { AppPage } from '@/components/app-page';
@@ -905,12 +907,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       ) : null}
 
-      {canManageOps && paymentProvider() === 'simulated' ? (
-        <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />
-      ) : null}
-
-      {canManageOps && !isRotating ? (
-        <OfficerPaymentsGuide slug={slug} challengeKind={jamiya.challenge_kind} />
+      {canManageOps ? (
+        <OfficerDeskEntry
+          slug={slug}
+          lateCount={lateCount}
+          unpaidCount={unpaidMemberLabels.length}
+          pendingInvites={invitations.length}
+        />
       ) : null}
 
       <CircleDetailHero
@@ -957,32 +960,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         }
       />
 
-      {canManageOps && jamiya.member_count < 2 ? (
-        <p className="text-sm text-muted-foreground">
-          Invite people to activate.{' '}
-          <a href="#invite-people" className="font-medium text-primary hover:underline">
-            Invite
-          </a>
-        </p>
-      ) : null}
-
-      {isRotating ? (
-        <MerryGoRoundSimpleFlow
-          jamiyaId={jamiya.id}
-          canManage={Boolean(canManageOps)}
-          memberCount={jamiya.member_count}
-          circleActive={jamiya.status === 'active'}
-          hasOpenDue={Boolean(myOpenDue)}
-        />
-      ) : (
-        <CircleActionHub groups={hubGroups} challengeKind={jamiya.challenge_kind} />
-      )}
-
-      {canActivate ? (
-        <ActivateCircleButton
-          jamiyaId={jamiya.id}
-          slug={jamiya.slug}
-          canActivate={canActivate}
+      {membership?.status === 'active' ? (
+        <MemberCircleLinks
+          slug={slug}
+          hasDue={Boolean(myOpenDue)}
+          showGoals={isShareDividend}
         />
       ) : null}
 
@@ -1014,22 +996,22 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
       {myOpenDue ? (
         <div id="pay-due">
-        <NextContributionCard
-          contributionId={myOpenDue.id}
-          slug={slug}
-          amount={myOpenDue.amount}
-          amountPaid={myOpenDue.amountPaid}
-          currency={myOpenDue.currency}
-          dueDate={myOpenDue.dueDate}
-          status={myOpenDue.status}
-          walletAvailable={
-            walletAvailable != null && Number.isFinite(walletAvailable)
-              ? walletAvailable
-              : null
-          }
-          walletCurrency={walletCurrency}
-          labels={dict.contributionCard}
-        />
+          <NextContributionCard
+            contributionId={myOpenDue.id}
+            slug={slug}
+            amount={myOpenDue.amount}
+            amountPaid={myOpenDue.amountPaid}
+            currency={myOpenDue.currency}
+            dueDate={myOpenDue.dueDate}
+            status={myOpenDue.status}
+            walletAvailable={
+              walletAvailable != null && Number.isFinite(walletAvailable)
+                ? walletAvailable
+                : null
+            }
+            walletCurrency={walletCurrency}
+            labels={dict.contributionCard}
+          />
         </div>
       ) : null}
 
@@ -1037,7 +1019,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <CircleSection
           id="merry-go-round"
           title="Who gets the pot"
-          description="Each person’s payout month. Tick who has been paid."
+          description="Each person’s payout month."
           padded={false}
         >
           <MerryGoRoundBoard
@@ -1052,99 +1034,39 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         </CircleSection>
       ) : null}
 
-      {canManageOps && (isRotating || isSavings) ? (
-        <CircleSection
-          id="monthly-payments"
-          title={isRotating ? 'Monthly contributions' : 'Monthly savings grid'}
-          description="Record what each member paid for any month — past or present. Empty cells mean they did not contribute."
-          padded={false}
-        >
-          <div className="amanah-surface px-4 py-4 sm:px-5">
-            <MerryGoRoundPaymentsGrid
-              jamiyaId={jamiya.id}
-              slug={slug}
-              members={mgrGridMembers}
-              months={mgrMonths}
-              amounts={mgrAmounts}
-              contributionIds={mgrContributionIds}
-              canManage
-              defaultAmount={amount}
-            />
-          </div>
-        </CircleSection>
-      ) : null}
-
-      {!isRotating ? (
-      <div className="grid gap-4 lg:grid-cols-2">
-        {canManageMembers ? (
-          <OfficerOverviewStrip
-            slug={jamiya.slug}
-            jamiyaId={jamiya.id}
-            lateCount={lateCount}
-            pendingGrace={pendingGraceCount ?? 0}
-            openPenaltyCount={openPenaltyCount}
-            unpaidMemberLabels={unpaidMemberLabels}
-            recordPaymentHref={recordPaymentHref}
-            recordPaymentLabel={recordPaymentLabel}
-            finesHref={`/circles/${slug}/treasury` as Route}
-            cycleLabel={officerCycleLabel}
-            nextPayoutLabel={nextPayout?.memberLabel ?? null}
-            nextPayoutDate={nextPayout?.scheduledDate ?? null}
-            nextPayoutAmount={nextPayout?.amount ?? null}
-            currency={jamiya.currency}
-          />
-        ) : null}
-      </div>
-      ) : null}
-
       {isShareDividend ? (
-      <CircleSection
-        id="calendar"
-        title="Contribution calendar"
-        description="Due dates and wallet payments for each cycle."
-        padded={false}
-      >
-        <ContributionCalendar
-          contributions={contributions}
-          slug={jamiya.slug}
-          walletAvailable={
-            walletAvailable != null && Number.isFinite(walletAvailable)
-              ? walletAvailable
-              : null
-          }
-          walletCurrency={walletCurrency}
-          canActivate={canActivate}
-          canManageOps={Boolean(canManageOps)}
-          memberCount={jamiya.member_count}
-          officerCashCapture={isRotating || isSavings}
-        />
-      </CircleSection>
-      ) : null}
-
-      {canManageOps && isShareDividend ? (
         <CircleSection
-          id="contribution-ledger"
-          title="Contribution ledger"
-          description="Who has paid, who owes, and payment history from wallet."
+          id="calendar"
+          title="Contribution calendar"
+          description="Due dates and wallet payments for each cycle."
           padded={false}
         >
-          <ContributionLedger rows={ledgerRows} payments={paymentHistory} />
+          <ContributionCalendar
+            contributions={contributions}
+            slug={jamiya.slug}
+            walletAvailable={
+              walletAvailable != null && Number.isFinite(walletAvailable)
+                ? walletAvailable
+                : null
+            }
+            walletCurrency={walletCurrency}
+            canActivate={canActivate}
+            canManageOps={Boolean(canManageOps)}
+            memberCount={jamiya.member_count}
+            officerCashCapture={isRotating || isSavings}
+          />
         </CircleSection>
       ) : null}
 
       <CircleSection
         id="members"
         title={`Members (${visibleMemberCount})`}
-        description="Everyone who has joined this chama. After you add or invite someone, refresh or tap Add people."
+        description="Everyone who has joined this chama."
         action={
-          membership?.status === 'active' &&
-          ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(membership?.role ?? '') ? (
-            <div className="flex flex-wrap gap-2">
-              <Button asChild size="sm" variant="outline" className="rounded-full">
-                <a href="#invite-people">Add people</a>
-              </Button>
-              {!isRotating ? <ExportCircleReportButtons slug={jamiya.slug} /> : null}
-            </div>
+          canManageOps ? (
+            <Button asChild size="sm" variant="outline" className="rounded-full">
+              <a href="#invite-people">Add people</a>
+            </Button>
           ) : undefined
         }
         padded={false}
@@ -1160,12 +1082,152 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         />
       </CircleSection>
 
+      {membership?.status === 'active' && isShareDividend ? (
+        <CircleSection title="Open a dispute">
+          <OpenDisputeForm jamiyaId={jamiya.id} slug={jamiya.slug} />
+        </CircleSection>
+      ) : null}
+
+      {membership?.status === 'active' ? (
+        <details className="amanah-surface px-5 py-4">
+          <summary className="cursor-pointer text-sm font-semibold">More</summary>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>
+            </Button>
+            {isShareDividend ? (
+              <>
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
+                </Button>
+              </>
+            ) : null}
+            <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
+            </Button>
+          </div>
+        </details>
+      ) : null}
+
       {canManageOps ? (
-        <>
+        <section id="officer-desk" className="scroll-mt-24 space-y-6 border-t border-border/60 pt-8">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              Officer desk
+            </p>
+            <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">
+              Run this circle
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Payments, people, and ops — kept off the member view above.
+            </p>
+          </div>
+
+          {paymentProvider() === 'simulated' ? (
+            <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />
+          ) : null}
+
+          {!isRotating ? (
+            <OfficerPaymentsGuide slug={slug} challengeKind={jamiya.challenge_kind} />
+          ) : null}
+
+          {jamiya.member_count < 2 ? (
+            <p className="text-sm text-muted-foreground">
+              Invite people to activate.{' '}
+              <a href="#invite-people" className="font-medium text-primary hover:underline">
+                Invite
+              </a>
+            </p>
+          ) : null}
+
+          {isRotating ? (
+            <MerryGoRoundSimpleFlow
+              jamiyaId={jamiya.id}
+              canManage
+              memberCount={jamiya.member_count}
+              circleActive={jamiya.status === 'active'}
+              hasOpenDue={Boolean(myOpenDue)}
+            />
+          ) : (
+            <CircleActionHub groups={hubGroups} challengeKind={jamiya.challenge_kind} />
+          )}
+
+          {canActivate ? (
+            <ActivateCircleButton
+              jamiyaId={jamiya.id}
+              slug={jamiya.slug}
+              canActivate={canActivate}
+            />
+          ) : null}
+
+          {isRotating || isSavings ? (
+            <CircleSection
+              id="monthly-payments"
+              title={isRotating ? 'Monthly contributions' : 'Monthly savings grid'}
+              description="Record what each member paid for any month — past or present."
+              padded={false}
+            >
+              <div className="amanah-surface px-4 py-4 sm:px-5">
+                <MerryGoRoundPaymentsGrid
+                  jamiyaId={jamiya.id}
+                  slug={slug}
+                  members={mgrGridMembers}
+                  months={mgrMonths}
+                  amounts={mgrAmounts}
+                  contributionIds={mgrContributionIds}
+                  canManage
+                  defaultAmount={amount}
+                />
+              </div>
+            </CircleSection>
+          ) : null}
+
+          {!isRotating ? (
+            <OfficerOverviewStrip
+              slug={jamiya.slug}
+              jamiyaId={jamiya.id}
+              lateCount={lateCount}
+              pendingGrace={pendingGraceCount ?? 0}
+              openPenaltyCount={openPenaltyCount}
+              unpaidMemberLabels={unpaidMemberLabels}
+              recordPaymentHref={recordPaymentHref}
+              recordPaymentLabel={recordPaymentLabel}
+              finesHref={`/circles/${slug}/treasury` as Route}
+              cycleLabel={officerCycleLabel}
+              nextPayoutLabel={nextPayout?.memberLabel ?? null}
+              nextPayoutDate={nextPayout?.scheduledDate ?? null}
+              nextPayoutAmount={nextPayout?.amount ?? null}
+              currency={jamiya.currency}
+            />
+          ) : null}
+
+          {isShareDividend ? (
+            <CircleSection
+              id="contribution-ledger"
+              title="Contribution ledger"
+              description="Who has paid, who owes, and payment history from wallet."
+              padded={false}
+            >
+              <ContributionLedger rows={ledgerRows} payments={paymentHistory} />
+            </CircleSection>
+          ) : null}
+
           <CircleSection
             id="invite-people"
             title="Add people"
-            description="Add one person, paste many phones, or share a join link — all in one place."
+            description="Add one person, paste many phones, or share a join link."
+            action={
+              !isRotating ? <ExportCircleReportButtons slug={jamiya.slug} /> : undefined
+            }
           >
             <AddPeoplePanel jamiyaId={jamiya.id} circleName={jamiya.name} />
           </CircleSection>
@@ -1202,84 +1264,59 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               circleName={jamiya.name}
             />
           </CircleSection>
-        </>
-      ) : null}
 
-      {membership?.status === 'active' && isShareDividend ? (
-        <CircleSection title="Open a dispute">
-          <OpenDisputeForm jamiyaId={jamiya.id} slug={jamiya.slug} />
-        </CircleSection>
-      ) : null}
-
-      {membership?.status === 'active' && isShareDividend ? (
-        <section id="finance" className="grid gap-4 sm:grid-cols-2">
-          <div className="amanah-surface p-5">
-            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Loans & welfare
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Qard Hassan, welfare support, and partner Tawarruq — this circle is preselected where
-              possible.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm" className="rounded-full">
-                <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}#goals` as Route}>Goals</Link>
+          {isShareDividend ? (
+            <section className="grid gap-4 sm:grid-cols-2">
+              <div className="amanah-surface p-5">
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+                  Loans & welfare
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Qard Hassan, welfare, and partner Tawarruq for this circle.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button asChild size="sm" className="rounded-full">
+                    <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
+                  </Button>
+                </div>
+              </div>
+              <div className="amanah-surface p-5">
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+                  Treasury & books
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Cashbook, journals, and member payment grids.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button asChild size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                    <Link href={`/circles/${slug}/officer` as Route}>Full console</Link>
+                  </Button>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="rounded-full">
+                <Link href={`/circles/${slug}/officer` as Route}>Full officer console</Link>
               </Button>
             </div>
-          </div>
-          <div className="amanah-surface p-5">
-            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Treasury & books
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Record shares, savings, and loans — or open the full cashbook.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Button asChild size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}/statement` as Route}>Statement</Link>
-              </Button>
-              {canManageOps ? (
-                <Button asChild size="sm" variant="outline" className="rounded-full">
-                  <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
-                </Button>
-              ) : null}
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
-              </Button>
-              <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
-              </Button>
-            </div>
-          </div>
+          )}
         </section>
-      ) : null}
-
-      {isRotating && membership?.status === 'active' ? (
-        <details className="amanah-surface px-5 py-4">
-          <summary className="cursor-pointer text-sm font-semibold">More (statement, next of kin)</summary>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline" className="rounded-full">
-              <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
-            </Button>
-            <Button asChild size="sm" variant="outline" className="rounded-full">
-              <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>
-            </Button>
-            {canManageMembers ? (
-              <Button asChild size="sm" variant="outline" className="rounded-full">
-                <Link href={`/circles/${slug}/officer` as Route}>Officer settings</Link>
-              </Button>
-            ) : null}
-          </div>
-        </details>
       ) : null}
 
       <Button asChild variant="outline" className="rounded-full">
