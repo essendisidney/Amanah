@@ -123,7 +123,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             .eq('jamiya_id', jamiya.id)
             .in('member_id', memberIds)
             .order('effective_date', { ascending: false })
-            .limit(2000)
+            .limit(800)
         : Promise.resolve({ data: [] }),
       memberIds.length
         ? supabase
@@ -357,22 +357,26 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
   } = { facility: null, totals: { profit_paid: 0, disbursed: 0, repaid_principal: 0 }, events: [] };
 
   if (view === 'member' && selectedId) {
-    const { data: ledgerData } = await callRpc('member_loan_ledger_summary', {
-      p_jamiya_id: jamiya.id,
-      p_member_id: selectedId,
-    });
-    const ledger = ledgerData as {
-      ok?: boolean;
-      facility?: typeof loanLedger.facility;
-      totals?: typeof loanLedger.totals;
-      events?: typeof loanLedger.events;
-    } | null;
-    if (ledger?.ok) {
-      loanLedger = {
-        facility: ledger.facility ?? null,
-        totals: ledger.totals ?? loanLedger.totals,
-        events: ledger.events ?? [],
-      };
+    try {
+      const { data: ledgerData } = await callRpc('member_loan_ledger_summary', {
+        p_jamiya_id: jamiya.id,
+        p_member_id: selectedId,
+      });
+      const ledger = ledgerData as {
+        ok?: boolean;
+        facility?: typeof loanLedger.facility;
+        totals?: typeof loanLedger.totals;
+        events?: typeof loanLedger.events;
+      } | null;
+      if (ledger?.ok) {
+        loanLedger = {
+          facility: ledger.facility ?? null,
+          totals: ledger.totals ?? loanLedger.totals,
+          events: ledger.events ?? [],
+        };
+      }
+    } catch {
+      // Keep the payments page usable if the loan ledger RPC fails after a save.
     }
   }
 

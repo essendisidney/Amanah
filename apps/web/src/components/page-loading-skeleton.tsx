@@ -7,7 +7,12 @@ import { Skeleton } from '@jamiya/ui';
  */
 export function PageLoadingSkeleton({ message = 'Loading…' }: { message?: string }) {
   return (
-    <div className="space-y-6 py-2" role="status" aria-live="polite" aria-busy="true">
+    <div
+      className="jameiyah-page-enter space-y-6 py-2"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <p className="sr-only">{message}</p>
       <div className="space-y-3">
         <Skeleton className="h-3 w-24" />

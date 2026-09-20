@@ -4,21 +4,21 @@ import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
 import { BOOKS_MEMBER_STATUSES } from '../lib/books-members';
+import { booksHref } from '../lib/member-books-view';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
 import type { GridSaveResult } from '../lib/action-state';
 
-function booksPath(memberId: string, view: 'member' | 'grid' | 'import' = 'member') {
-  const params = new URLSearchParams({ view, memberId });
-  return `/books?${params.toString()}`;
+function booksPath(memberId: string, view: 'member' | 'grid' | 'import' | 'home' = 'member') {
+  // Absolute path under the circle — redirectWithCircleNotice only appends suffixes.
+  const full = booksHref('__slug__', view === 'home' ? 'home' : view, memberId);
+  return full.replace('/circles/__slug__', '') || '/books';
 }
 
 function revalidateBooks(slug: string) {
-  revalidatePath(`/circles/${slug}`);
+  // Keep this light — heavy multi-path revalidation after save was stalling
+  // the follow-up render and surfacing the app error boundary for officers.
   revalidatePath(`/circles/${slug}/books`);
-  revalidatePath(`/circles/${slug}/statement`);
-  revalidatePath(`/circles/${slug}/treasury`);
-  revalidatePath(`/circles/${slug}/shares`);
-  revalidatePath(`/circles/${slug}/report`);
+  revalidatePath(`/circles/${slug}`);
 }
 
 async function importRows(

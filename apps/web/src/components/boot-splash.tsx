@@ -2,24 +2,40 @@
 
 import { useEffect } from 'react';
 
-const MIN_SPLASH_MS = 420;
-const FADE_MS = 380;
-const FAILSAFE_MS = 1600;
+const MIN_SPLASH_MS = 520;
+const FADE_MS = 700;
+const FAILSAFE_MS = 1800;
+const BOOT_KEY = 'jameiyah-booted';
 
 function hideSplash() {
   const splash = document.getElementById('boot-splash');
   if (!splash || splash.classList.contains('amanah-boot-splash--out')) return;
   splash.classList.add('amanah-boot-splash--out');
+  splash.setAttribute('data-out', '1');
   window.setTimeout(() => {
-    splash.remove();
+    try {
+      splash.remove();
+    } catch {
+      /* already gone */
+    }
   }, FADE_MS);
 }
 
-/** Brief first-paint splash — keep short so route skeletons don’t feel like a second load. */
+/** Brief first-paint splash — cold start only, eased fade. */
 export function BootSplash() {
   useEffect(() => {
     const splash = document.getElementById('boot-splash');
     if (!splash) return;
+
+    try {
+      if (sessionStorage.getItem(BOOT_KEY) === '1') {
+        hideSplash();
+        return;
+      }
+      sessionStorage.setItem(BOOT_KEY, '1');
+    } catch {
+      /* private mode */
+    }
 
     const shownAt = Date.now();
     let timeoutId = 0;

@@ -69,7 +69,7 @@ export default async function RootLayout({
         <BootSplashMarkup />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){function h(){var s=document.getElementById('boot-splash');if(!s||s.getAttribute('data-out'))return;s.setAttribute('data-out','1');s.classList.add('amanah-boot-splash--out');setTimeout(function(){try{s.remove()}catch(e){}},400)}if(document.readyState==='complete'){setTimeout(h,420)}else{window.addEventListener('load',function(){setTimeout(h,420)},{once:true})}setTimeout(h,1600)})();`,
+            __html: `(function(){try{if(sessionStorage.getItem('jameiyah-booted')==='1'){var s0=document.getElementById('boot-splash');if(s0){s0.setAttribute('data-out','1');s0.classList.add('amanah-boot-splash--out');s0.remove();return}}}catch(e){}function h(){var s=document.getElementById('boot-splash');if(!s||s.getAttribute('data-out'))return;s.setAttribute('data-out','1');s.classList.add('amanah-boot-splash--out');try{sessionStorage.setItem('jameiyah-booted','1')}catch(e){}setTimeout(function(){try{s.remove()}catch(e){}},700)}if(document.readyState==='complete'){setTimeout(h,520)}else{window.addEventListener('load',function(){setTimeout(h,520)},{once:true})}setTimeout(h,1800)})();`,
           }}
         />
         <Providers>

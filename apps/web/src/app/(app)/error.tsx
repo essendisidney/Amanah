@@ -21,6 +21,7 @@ export default function AppError({
   reset: () => void;
 }) {
   const [labels, setLabels] = useState(dictionaries[DEFAULT_LOCALE].errors);
+  const [retrying, setRetrying] = useState(true);
 
   useEffect(() => {
     setLabels(dictionaries[readLocale()].errors);
@@ -30,23 +31,40 @@ export default function AppError({
     console.error(error);
   }, [error]);
 
+  // Auto-retry once — saves often succeed before the follow-up page hiccups.
+  useEffect(() => {
+    const t = window.setTimeout(() => {
+      setRetrying(false);
+      reset();
+    }, 1200);
+    return () => window.clearTimeout(t);
+  }, [reset, error]);
+
   return (
     <AppPage width="narrow">
       <PageCard>
-      <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-        {labels.title}
-      </h1>
-      <p className="mt-2 text-sm text-muted-foreground">{labels.body}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Button type="button" onClick={reset}>
-          {labels.tryAgain}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => {
-          window.location.href = '/circles';
-        }}>
-          Back to circles
-        </Button>
-      </div>
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          {labels.title}
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {retrying
+            ? labels.body
+            : 'If you just saved a payment, it may already be recorded. Open the circle and check Record so far.'}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button type="button" onClick={reset} disabled={retrying}>
+            {retrying ? 'Retrying…' : labels.tryAgain}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              window.location.href = '/circles';
+            }}
+          >
+            Back to circles
+          </Button>
+        </div>
       </PageCard>
     </AppPage>
   );
