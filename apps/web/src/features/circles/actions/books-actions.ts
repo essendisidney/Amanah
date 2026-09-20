@@ -15,10 +15,9 @@ function booksPath(memberId: string, view: 'member' | 'grid' | 'import' | 'home'
 }
 
 function revalidateBooks(slug: string) {
-  // Keep this light — heavy multi-path revalidation after save was stalling
-  // the follow-up render and surfacing the app error boundary for officers.
+  // Books only — revalidating the full circle home after every save was stalling
+  // the follow-up render and showing officers the app error boundary.
   revalidatePath(`/circles/${slug}/books`);
-  revalidatePath(`/circles/${slug}`);
 }
 
 async function importRows(
