@@ -26,7 +26,7 @@ self.addEventListener('activate', (event) => {
       .then(() =>
         self.clients.matchAll({ type: 'window' }).then((clients) => {
           for (const client of clients) {
-            client.postMessage({ type: 'AMANAH_SW_UPDATED', shell: SHELL });
+            client.postMessage({ type: 'JAMEIYAH_SW_UPDATED', shell: SHELL });
           }
         }),
       ),
