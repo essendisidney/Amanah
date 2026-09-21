@@ -2,17 +2,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
-import { APP_NAME, APP_DESCRIPTION, APP_TAGLINE } from '@jamiya/shared';
+import { APP_NAME, APP_DESCRIPTION } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { PublicSiteHeader } from '@/components/public-site-header';
 import { PesaraCredit } from '@/components/pesara-credit';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} - ${APP_TAGLINE}`,
-  description: APP_DESCRIPTION,
+  title: `${APP_NAME} — Save together, without interest`,
+  description:
+    'Jameiyah is community finance for Kenyan circles: merry-go-round, table banking, and savings, with statements officers and members can both see. No riba.',
   openGraph: {
-    title: APP_NAME,
+    title: `${APP_NAME} — Save together, without interest`,
     description: APP_DESCRIPTION,
     siteName: APP_NAME,
     type: 'website',
@@ -43,6 +44,7 @@ export default async function LandingPage() {
           homeHref={'/' as Route}
           links={[
             { href: '/#how' as Route, label: dict.landing.joinCircle },
+            { href: '/#circles' as Route, label: 'Circles' },
             { href: '/#shariah' as Route, label: dict.landing.shariaEyebrow },
             { href: '/pricing' as Route, label: 'Pricing' },
             { href: '/sadaka' as Route, label: dict.common.sadaka },
@@ -58,11 +60,12 @@ export default async function LandingPage() {
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
               {dict.brand.tagline}
             </p>
-            <h1 className="max-w-xl text-5xl font-bold leading-none tracking-tight text-[#0b4a3c] sm:text-6xl md:text-7xl">
-              {APP_NAME}
+            <h1 className="max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-[#0b4a3c] sm:text-5xl md:text-6xl">
+              Save together. See every shilling. Stay riba-free.
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-[#3d524a] sm:text-lg">
-              {dict.brand.description}
+              Jameiyah is the digital home for Kenyan circles — merry-go-round, table banking, and
+              savings. Officers replace the spreadsheet. Members see what they paid.
             </p>
             <div className="mt-9 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
               <Button
@@ -78,9 +81,18 @@ export default async function LandingPage() {
                 className="min-h-12 w-full border-[#0d5c45]/40 text-[#0d5c45] sm:w-auto"
                 asChild
               >
-                <Link href="/#how">{dict.landing.joinCircle}</Link>
+                <Link href="/welcome">Start a circle</Link>
               </Button>
             </div>
+            <ul className="mt-6 flex max-w-lg flex-wrap gap-2 text-xs font-medium text-[#0b4a3c]">
+              {['No interest (riba)', 'Private to your circle', 'Phone, email, or Google', 'Member statements'].map(
+                (item) => (
+                  <li key={item} className="rounded-full border border-[#0d5c45]/20 bg-white/80 px-3 py-1.5">
+                    {item}
+                  </li>
+                ),
+              )}
+            </ul>
             <p className="mt-5 text-sm text-[#5a6f66]">
               {dict.landing.preferEmail}{' '}
               <Link href="/login" className="font-semibold text-[#0d5c45] hover:underline">
@@ -113,6 +125,84 @@ export default async function LandingPage() {
                 style={{ filter: 'drop-shadow(0 24px 48px rgba(11, 74, 60, 0.18))' }}
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      </section>
+
+      <section id="circles" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/70">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
+            Built for how circles already work
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
+            One practice. Many names. Your chama, recorded.
+          </h2>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#5a6f66]">
+            Merry-go-round, chama, jam&apos;iyah, susu, esusu, tontine — communities have pooled money
+            this way for generations. Jameiyah keeps that trust, and replaces the notebook.
+          </p>
+          <ul className="mt-12 grid gap-6 md:grid-cols-2">
+            {[
+              {
+                title: 'Merry-go-round',
+                body: 'Monthly contributions, payout turns, and a board that shows who has received the pot.',
+              },
+              {
+                title: 'Table banking',
+                body: 'Share buy-in, monthly savings, and loans. Paste past Excel records once names match, or enter one member at a time.',
+              },
+              {
+                title: 'Savings',
+                body: 'A contribution calendar and shared goals — school fees, a trip, a wedding — without a rotating pot.',
+              },
+              {
+                title: 'Sadaka & zakat',
+                body: 'Give in the open. Campaigns with receipts, and a zakat calculator that explains the nisab.',
+                href: '/sadaka' as Route,
+              },
+            ].map((item) => (
+              <li key={item.title} className="rounded-2xl border border-[#0d5c45]/10 bg-white p-6">
+                <h3 className="text-xl font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.body}</p>
+                {'href' in item && item.href ? (
+                  <Link href={item.href} className="mt-4 inline-block text-sm font-semibold text-[#0d5c45] hover:underline">
+                    Open giving →
+                  </Link>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="relative z-10 border-t border-[#0d5c45]/10">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">Who it is for</p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
+            Officers run the books. Members see their own.
+          </h2>
+          <div className="mt-12 grid gap-10 md:grid-cols-3">
+            {[
+              {
+                title: 'Circle officers',
+                body: 'Invite by phone, record shares and monthly savings, import a past sheet, and export statements. The Excel file stays a backup, not the only book.',
+              },
+              {
+                title: 'Members',
+                body: 'Join with a code from WhatsApp, pay from Money, and open your statement. You see your circle — not everyone else’s private groups.',
+              },
+              {
+                title: 'Mosques & campaigns',
+                body: 'Publish a sadaka page, share a link, and give donors a receipt. Zakat stays a calculator, not a hidden fee.',
+              },
+            ].map((item) => (
+              <div key={item.title}>
+                <h3 className="text-lg font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -193,8 +283,56 @@ export default async function LandingPage() {
             ))}
           </div>
           <p className="mt-10 max-w-2xl text-xs leading-relaxed text-white/50">
-            {dict.landing.shariaDisclaimer}
+            {dict.landing.shariaDisclaimer} Jameiyah is community software, not a bank and not an
+            investment fund. We do not claim a regulator licence or a named Shariah board until one
+            is appointed and published here.
           </p>
+        </div>
+      </section>
+
+      <section id="trust" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/60">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
+            What serious platforms show — stated plainly
+          </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
+            Trust you can check, not a slogan.
+          </h2>
+          <dl className="mt-12 grid gap-8 md:grid-cols-2">
+            {[
+              {
+                q: 'Where does the money sit?',
+                a: 'Circle records live in Jameiyah. Wallet top-ups use the payment providers configured for your account (such as M-Pesa or card). Officers still reconcile the circle bank account.',
+              },
+              {
+                q: 'Who can see a payment?',
+                a: 'Officers of that circle, and the member it belongs to. Other circles on the platform cannot open your books.',
+              },
+              {
+                q: 'Can we bring last year’s Excel?',
+                a: 'Yes for table banking. Paste the sheet, preview every name, and import only when each row matches a member. Nothing is skipped quietly.',
+              },
+              {
+                q: 'What does it cost?',
+                a: 'Group plans are listed in Kenyan shillings. A small circle can start free. Officers change the plan from the circle console.',
+              },
+            ].map((item) => (
+              <div key={item.q}>
+                <dt className="text-lg font-bold tracking-tight text-[#0b4a3c]">{item.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.a}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-10">
+            <Button
+              size="lg"
+              variant="outline"
+              className="min-h-12 border-[#0d5c45]/40 text-[#0d5c45]"
+              asChild
+            >
+              <Link href="/pricing">See pricing</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
