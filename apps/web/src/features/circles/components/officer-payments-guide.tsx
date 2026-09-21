@@ -92,12 +92,13 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
             missing from the list.
           </li>
           <li>
-            Open <strong className="font-medium text-foreground">Member payments</strong> to enter
-            each person&apos;s share buy-in and monthly savings.
+            For past Excel records, open{' '}
+            <strong className="font-medium text-foreground">Paste past records</strong>, preview
+            names, then import. Unmatched names are blocked — nothing is skipped quietly.
           </li>
           <li>
-            Use <strong className="font-medium text-foreground">Enter everyone&apos;s payments</strong>{' '}
-            for the full table, or pick one member at a time.
+            Or use <strong className="font-medium text-foreground">Enter everyone&apos;s payments</strong>{' '}
+            / <strong className="font-medium text-foreground">Enter payments</strong> on one member.
           </li>
           <li>Check <strong className="font-medium text-foreground">Statements</strong> when done.</li>
         </ol>
@@ -105,17 +106,17 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
           items={[
             'All members invited',
             'Share buy-in + monthly grid filled',
-            'Excel paste previewed before import (if used)',
+            'Past Excel previewed — every name matched — then imported',
             'Next of kin complete',
             'Treasury: bank SMS matched when cash hits the account',
           ]}
         />
         <div className="mt-5 flex flex-wrap gap-2">
           <Button asChild size="lg" className="min-h-11 rounded-full px-6">
-            <Link href={`/circles/${slug}/books` as Route}>Open member payments</Link>
+            <Link href={`/circles/${slug}/books?view=import` as Route}>Paste past records</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
-            <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
+            <Link href={`/circles/${slug}/books` as Route}>Enter payments</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="min-h-11 rounded-full px-6">
             <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>

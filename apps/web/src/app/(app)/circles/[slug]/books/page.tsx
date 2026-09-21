@@ -493,8 +493,8 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             <p className="text-sm text-muted-foreground">
               From <strong className="font-medium text-foreground">HALAL CHAMA INVESTMENT.xlsx</strong>{' '}
               → tab <strong className="font-medium text-foreground">AMANAH TEST</strong>: select rows
-              1–10 (header + members), copy, paste below. Include both header rows. Names must match
-              members on the circle page exactly.
+              1–10 (header + members), copy, paste below. Include both header rows. Preview first —
+              import stays off until every name matches a member.
             </p>
             {members.length > 0 ? (
               <div className="mt-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
@@ -510,8 +510,8 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
                     .join(' · ')}
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Paste rows must use these names (or close spelling). Unmatched names are skipped and
-                  listed after import.
+                  Names must match these (or a close spelling). If any name does not match, import is
+                  blocked until you fix it.
                 </p>
               </div>
             ) : (

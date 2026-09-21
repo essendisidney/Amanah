@@ -36,6 +36,8 @@ export function TbSheetImportForm({
     });
   }
 
+  const canImport = Boolean(preview?.ok && preview.unmatched.length === 0 && preview.matched.length > 0);
+
   function runImport(form: HTMLFormElement) {
     const fd = new FormData(form);
     startTransition(async () => {
@@ -70,6 +72,7 @@ export function TbSheetImportForm({
           placeholder={`NEXT OF KIN	NAME	SHARES	CONTRIBUTION
 		ONE OFF	5TH FEB	5TH MARCH
 HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
+          onChange={() => setPreview(null)}
         />
       </div>
       <div className="space-y-1">
@@ -81,6 +84,7 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
           className="font-mono text-xs"
           placeholder={`FEB	LOANS
 5TH FEB	JULIET	16000	paid 3k contribution plus profit`}
+          onChange={() => setPreview(null)}
         />
       </div>
 
@@ -97,19 +101,25 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
             {preview.unmatched.length ? ` · ${preview.unmatched.length} unmatched` : ''}
           </p>
           {preview.matched.length ? (
-            <ul className="text-muted-foreground">
+            <ul className="space-y-1 text-muted-foreground">
               {preview.matched.map((row) => (
                 <li key={row.sheetName}>
                   {row.sheetName} → {row.memberLabel}
+                  {row.shareAmount ? ` · shares ${row.shareAmount.toLocaleString()}` : ''}
+                  {row.months ? ` · ${row.months} months` : ''}
+                  {row.loans ? ` · ${row.loans} loan${row.loans === 1 ? '' : 's'}` : ''}
                 </li>
               ))}
             </ul>
           ) : null}
           {preview.unmatched.length ? (
             <p className="text-destructive">
-              Unmatched: {preview.unmatched.join(', ')} — add these members first or fix spelling.
+              Blocked — unmatched: {preview.unmatched.join(', ')}. Add them on Members or fix the
+              spelling, then preview again. Nothing is imported until every name matches.
             </p>
-          ) : null}
+          ) : (
+            <p className="text-muted-foreground">Every name matches. You can import.</p>
+          )}
         </div>
       ) : null}
 
@@ -129,7 +139,7 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
         >
           {previewPending ? 'Checking names…' : 'Preview names'}
         </Button>
-        <Button type="submit" className="min-h-11" disabled={pending || previewPending}>
+        <Button type="submit" className="min-h-11" disabled={pending || previewPending || !canImport}>
           {pending ? 'Importing…' : 'Import sheet'}
         </Button>
       </div>

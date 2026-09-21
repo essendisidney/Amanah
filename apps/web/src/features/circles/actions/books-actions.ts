@@ -374,7 +374,7 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
 
   const members = await loadBooksMemberMatchers(jamiyaId);
 
-  let sharesDone = 0;
+  const pendingShares: Array<{ memberId: string; shares: number }> = [];
   const contribRows: Array<Record<string, string>> = [];
   const unmatched: string[] = [];
 
@@ -410,18 +410,7 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
       if (sharesIdx >= 0) {
         const shareAmt = parseMoney(cells[sharesIdx] ?? '');
         if (shareAmt && Number.isFinite(parValue) && parValue > 0) {
-          const shares = shareAmt / parValue;
-          const { data } = await callRpc('record_share_purchase', {
-            p_jamiya_id: jamiyaId,
-            p_member_id: memberId,
-            p_shares: shares,
-            p_unit_price: parValue,
-            p_purchased_on: `${year}-02-05`,
-            p_bank_account_id: null,
-            p_notes: 'Shares one off (sheet import)',
-          });
-          const ok = (data as { ok?: boolean } | null)?.ok;
-          if (ok) sharesDone += 1;
+          pendingShares.push({ memberId, shares: shareAmt / parValue });
         }
       }
 
@@ -496,6 +485,28 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
     }
   }
 
+  const uniqueUnmatched = [...new Set(unmatched)];
+  if (uniqueUnmatched.length > 0) {
+    return {
+      success: false,
+      message: `Nothing imported. Fix these names first (they must match Members): ${uniqueUnmatched.join(', ')}.`,
+    };
+  }
+
+  let sharesDone = 0;
+  for (const row of pendingShares) {
+    const { data } = await callRpc('record_share_purchase', {
+      p_jamiya_id: jamiyaId,
+      p_member_id: row.memberId,
+      p_shares: row.shares,
+      p_unit_price: parValue,
+      p_purchased_on: `${year}-02-05`,
+      p_bank_account_id: null,
+      p_notes: 'Shares one off (sheet import)',
+    });
+    if ((data as { ok?: boolean } | null)?.ok) sharesDone += 1;
+  }
+
   const bookRows = [...contribRows, ...loanRows, ...repayRows];
   let imported = 0;
   if (bookRows.length) {
@@ -510,22 +521,24 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
   }
 
   revalidateBooks(slug);
-  const miss =
-    unmatched.length > 0
-      ? ` Unmatched (add on Members first): ${[...new Set(unmatched)].join(', ')}.`
-      : '';
   const worked = sharesDone > 0 || imported > 0;
   return {
     success: worked,
     message: worked
-      ? `Imported: ${sharesDone} share lots, ${imported} book rows.${miss}`
-      : `Nothing imported.${miss || ' Check names match Members and paste includes a NAME header.'}`,
+      ? `Imported: ${sharesDone} share lots, ${imported} book rows.`
+      : 'Nothing imported. Check the paste includes a NAME header and amounts.',
   };
 }
 
 export type TbImportPreview = {
   ok: boolean;
-  matched: Array<{ sheetName: string; memberLabel: string }>;
+  matched: Array<{
+    sheetName: string;
+    memberLabel: string;
+    shareAmount: number | null;
+    months: number;
+    loans: number;
+  }>;
   unmatched: string[];
   error?: string;
 };
@@ -581,7 +594,18 @@ export async function previewTbSheetImportAction(
   }
 
   const members = await loadBooksMemberMatchers(jamiyaId);
-  const sheetNames = new Set<string>();
+  const byName = new Map<
+    string,
+    { shareAmount: number | null; months: number; loans: number }
+  >();
+
+  function bump(name: string) {
+    const key = name.trim();
+    if (!key) return null;
+    const row = byName.get(key) ?? { shareAmount: null, months: 0, loans: 0 };
+    byName.set(key, row);
+    return row;
+  }
 
   const contribLines = contribPaste
     .split(/\r?\n/)
@@ -598,13 +622,23 @@ export async function previewTbSheetImportAction(
         error: 'Contribution paste needs a header row with NAME and SHARES.',
       };
     }
-    const { nameIdx, dataStart } = parsed;
+    const { nameIdx, sharesIdx, monthCols, dataStart } = parsed;
     for (const line of contribLines.slice(dataStart)) {
       if (/^FEB\s+LOANS|^MARCH\s+LOANS|^APRIL\s+LOANS|^MAY\s+LOANS|^LOANS/i.test(line)) break;
       const cells = splitRow(line);
       const name = cells[nameIdx] ?? '';
       if (!name || /NEXT OF KIN/i.test(name)) continue;
-      sheetNames.add(name.trim());
+      const row = bump(name);
+      if (!row) continue;
+      if (sharesIdx >= 0) {
+        const shareAmt = parseMoney(cells[sharesIdx] ?? '');
+        if (shareAmt) row.shareAmount = shareAmt;
+      }
+      for (const col of monthCols) {
+        const raw = cells[col.i] ?? '';
+        if (isClosedCell(raw)) continue;
+        if (parseMoney(raw)) row.months += 1;
+      }
     }
   }
 
@@ -618,17 +652,24 @@ export async function previewTbSheetImportAction(
     if (monthHeaderToDate(name, year) && !monthHeaderToDate(cells[0] ?? '', year)) {
       name = cells[0] ?? '';
     }
-    if (name.trim()) sheetNames.add(name.trim());
+    const row = bump(name);
+    if (row && parseMoney(cells[2] ?? '')) row.loans += 1;
   }
 
   const matched: TbImportPreview['matched'] = [];
   const unmatched: string[] = [];
 
-  for (const sheetName of sheetNames) {
+  for (const [sheetName, stats] of byName) {
     const memberId = matchMemberId(sheetName, members);
     if (memberId) {
       const member = members.find((m) => m.id === memberId);
-      matched.push({ sheetName, memberLabel: member?.label ?? sheetName });
+      matched.push({
+        sheetName,
+        memberLabel: member?.label ?? sheetName,
+        shareAmount: stats.shareAmount,
+        months: stats.months,
+        loans: stats.loans,
+      });
     } else {
       unmatched.push(sheetName);
     }
