@@ -10,7 +10,7 @@ Jameiyah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections
 | Bank account management | `circle_bank_accounts` (bank / M-Pesa / petty cash) |
 | Income & expense management | `circle_ledger_categories` + income/expense entries |
 | Member fining | `fine_categories` + `levy_member_fine` → `penalties` |
-| Group investments / projects | `circle_investments` |
+| Group investments / projects | `circle_investments` + Treasury **Circle projects** + statement/PDF visibility |
 | Membership + personal records | Existing members + `/circles/[slug]/statement` |
 | Loans | Existing Qard Hassan (+ kafala) |
 | Reports (income / cash flow / balance sheet) | `/circles/[slug]/report` + `circle_gl_pack` (print → PDF) |
@@ -26,7 +26,7 @@ Jameiyah already covered ROSCA cycles, Qard Hassan, welfare, meetings, elections
 | Android app install | Chrome PWA primary; Expo `eas.json` scaffold for APK/AAB |
 | Dual approval | Circle dual-approval settings + `dual_approval_requests` for payouts/Qard; platform withdrawals |
 | Group SaaS pricing | `/pricing` + `platform_plans` / `circle_subscriptions` (Free / Starter / Pro) |
-| Member statements | Branded print statements + loan/savings book summaries on statement/report |
+| Member statements | Branded print/PDF statements include share lots, dues, fines, Qard, savings pockets, and **circle projects** |
 
 ## Still later
 

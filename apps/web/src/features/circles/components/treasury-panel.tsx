@@ -12,10 +12,13 @@ import {
   createFineCategoryAction,
   createInvestmentAction,
   createLedgerCategoryAction,
+  createCirclePayoutDestinationAction,
   ensureTreasuryAction,
   importBookEntriesAction,
   levyFineAction,
   recordTreasuryEntryAction,
+  requestTreasuryPayoutAction,
+  updateInvestmentAction,
 } from '../actions/treasury-actions';
 import {
   OpenPenaltiesPanel,
@@ -56,6 +59,8 @@ export type TreasuryInvestment = {
   currentValue: number;
   currency: string;
   startedOn: string | null;
+  recordedBy: string | null;
+  notes: string | null;
 };
 
 export type TreasuryMember = {
@@ -75,6 +80,24 @@ export type TreasurySnapshot = {
   investmentsValue: number;
   contributionsPaid: number;
   contributionsOutstanding: number;
+};
+
+export type PayoutDestination = {
+  id: string;
+  kind: string;
+  label: string;
+  shortcode: string | null;
+  accountReference: string | null;
+};
+
+export type TreasuryPayoutRow = {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  narrative: string | null;
+  createdAt: string;
+  destinationLabel: string | null;
 };
 
 export type CashbookRow = {
@@ -112,6 +135,8 @@ export function TreasuryPanel({
   bankAlerts = [],
   openPenalties = [],
   penaltySettings,
+  payoutDestinations = [],
+  recentPayouts = [],
 }: {
   jamiyaId: string;
   slug: string;
@@ -127,6 +152,8 @@ export function TreasuryPanel({
   bankAlerts?: BankAlertRow[];
   openPenalties?: OpenPenaltyRow[];
   penaltySettings?: PenaltySettings | null;
+  payoutDestinations?: PayoutDestination[];
+  recentPayouts?: TreasuryPayoutRow[];
 }) {
   const today = new Date().toISOString().slice(0, 10);
   const incomeCats = categories.filter((c) => c.kind === 'income');
@@ -148,7 +175,7 @@ export function TreasuryPanel({
               ['Income', snapshot.incomeTotal],
               ['Expenses', snapshot.expenseTotal],
               ['Loans disbursed', snapshot.loansDisbursed],
-              ['Investments value', snapshot.investmentsValue],
+              ['Projects value', snapshot.investmentsValue],
             ].map(([label, value]) => (
               <div key={String(label)} className="rounded-xl border border-border bg-card p-4">
                 <dt className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -258,6 +285,161 @@ export function TreasuryPanel({
           </form>
         ) : null}
       </section>
+
+      {canManage ? (
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Pay supplier / utility
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Live B2B to M-Pesa Paybill or Till (IntaSend). Dual approval applies when enabled.
+            Bank destinations settle in the cashbook (manual rail for now).
+          </p>
+
+          <form
+            action={createCirclePayoutDestinationAction}
+            className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
+          >
+            <input type="hidden" name="jamiyaId" value={jamiyaId} />
+            <input type="hidden" name="slug" value={slug} />
+            <div className="space-y-1 sm:col-span-2">
+              <Label htmlFor="destLabel">Save destination</Label>
+              <Input id="destLabel" name="label" required minLength={2} placeholder="KPLC / landlord" className="min-h-11" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="destKind">Type</Label>
+              <select
+                id="destKind"
+                name="kind"
+                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                defaultValue="paybill"
+              >
+                <option value="paybill">Paybill</option>
+                <option value="till">Till</option>
+                <option value="bank">Bank</option>
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="destShortcode">Paybill / Till number</Label>
+              <Input id="destShortcode" name="shortcode" placeholder="888880" className="min-h-11" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="destRef">Account reference (optional)</Label>
+              <Input id="destRef" name="accountReference" placeholder="Meter / account no." className="min-h-11" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="bankName">Bank name (if bank)</Label>
+              <Input id="bankName" name="bankName" className="min-h-11" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="bankAcct">Bank account number</Label>
+              <Input id="bankAcct" name="bankAccountNumber" className="min-h-11" />
+            </div>
+            <div className="space-y-1 sm:col-span-2">
+              <Label htmlFor="bankAcctName">Account name</Label>
+              <Input id="bankAcctName" name="bankAccountName" className="min-h-11" />
+            </div>
+            <div className="sm:col-span-2">
+              <Button type="submit" className="min-h-11">
+                Save destination
+              </Button>
+            </div>
+          </form>
+
+          {payoutDestinations.length > 0 ? (
+            <form
+              action={requestTreasuryPayoutAction}
+              className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
+            >
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="currency" value={currency} />
+              <div className="space-y-1 sm:col-span-2">
+                <Label htmlFor="payDest">Pay to</Label>
+                <select
+                  id="payDest"
+                  name="destinationId"
+                  required
+                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {payoutDestinations.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.label} · {d.kind}
+                      {d.shortcode ? ` · ${d.shortcode}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="paySource">From account</Label>
+                <select
+                  id="paySource"
+                  name="sourceAccountId"
+                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  defaultValue={accounts[0]?.id ?? ''}
+                >
+                  <option value="">—</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.name} ({formatCurrency(a.balance, a.currency)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="payCat">Expense category</Label>
+                <select
+                  id="payCat"
+                  name="categoryId"
+                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  <option value="">—</option>
+                  {expenseCats.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="payAmt">Amount ({currency})</Label>
+                <Input id="payAmt" name="amount" type="number" min="1" step="0.01" required className="min-h-11" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="payNotes">Narrative</Label>
+                <Input id="payNotes" name="narrative" placeholder="March electricity" className="min-h-11" />
+              </div>
+              <div className="sm:col-span-2">
+                <Button type="submit" className="min-h-11">
+                  Send payout
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Save a Paybill, Till, or bank destination first.
+            </p>
+          )}
+
+          {recentPayouts.length > 0 ? (
+            <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+              {recentPayouts.map((p) => (
+                <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {p.destinationLabel ?? 'Supplier'} · {formatCurrency(p.amount, p.currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.status} · {formatDate(p.createdAt)}
+                      {p.narrative ? ` · ${p.narrative}` : ''}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
 
       {canManage ? (
         <section className="space-y-3">
@@ -488,30 +670,70 @@ export function TreasuryPanel({
 
       <section className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Investments & projects
+          Circle projects
         </h2>
+        <p className="text-sm text-muted-foreground">
+          Land, stock, equipment, and other group ventures. Funding debits a treasury account and
+          shows on member statements.
+        </p>
         {investments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No investments tracked yet.</p>
+          <p className="text-sm text-muted-foreground">No projects tracked yet.</p>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {investments.map((inv) => (
-              <li
-                key={inv.id}
-                className="flex flex-wrap items-center justify-between gap-2 px-5 py-4"
-              >
-                <div>
-                  <p className="font-medium">{inv.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {inv.status}
-                    {inv.startedOn ? ` · started ${formatDate(inv.startedOn)}` : ''}
+              <li key={inv.id} className="space-y-3 px-5 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="font-medium">{inv.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {inv.status}
+                      {inv.startedOn ? ` · started ${formatDate(inv.startedOn)}` : ''}
+                      {inv.recordedBy ? ` · recorded by ${inv.recordedBy}` : ''}
+                    </p>
+                  </div>
+                  <p className="text-sm font-semibold">
+                    {formatCurrency(inv.currentValue, inv.currency)}
+                    <span className="block text-xs font-normal text-muted-foreground">
+                      principal {formatCurrency(inv.principal, inv.currency)}
+                    </span>
                   </p>
                 </div>
-                <p className="text-sm font-semibold">
-                  {formatCurrency(inv.currentValue, inv.currency)}
-                  <span className="block text-xs font-normal text-muted-foreground">
-                    principal {formatCurrency(inv.principal, inv.currency)}
-                  </span>
-                </p>
+                {canManage ? (
+                  <form
+                    action={updateInvestmentAction}
+                    className="grid gap-2 sm:grid-cols-[1fr_8rem_8rem_auto]"
+                  >
+                    <input type="hidden" name="slug" value={slug} />
+                    <input type="hidden" name="investmentId" value={inv.id} />
+                    <Input
+                      name="notes"
+                      placeholder="Notes"
+                      defaultValue={inv.notes ?? ''}
+                      className="min-h-11"
+                    />
+                    <Input
+                      name="currentValue"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      defaultValue={inv.currentValue}
+                      className="min-h-11"
+                      aria-label="Current value"
+                    />
+                    <select
+                      name="status"
+                      defaultValue={inv.status}
+                      className="min-h-11 rounded-md border border-input bg-background px-2 text-sm"
+                    >
+                      <option value="planned">Planned</option>
+                      <option value="active">Active</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                    <Button type="submit" variant="outline" className="min-h-11">
+                      Update
+                    </Button>
+                  </form>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -526,23 +748,60 @@ export function TreasuryPanel({
             <input type="hidden" name="currency" value={currency} />
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="invName">Project / investment name</Label>
-              <Input id="invName" name="name" required minLength={2} placeholder="Plot in Kitengela" />
+              <Input
+                id="invName"
+                name="name"
+                required
+                minLength={2}
+                placeholder="Plot in Kitengela"
+                className="min-h-11"
+              />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="principal">Initial value</Label>
-              <Input id="principal" name="principal" type="number" min="0" step="0.01" defaultValue={0} />
+              <Label htmlFor="principal">Fund amount (optional)</Label>
+              <Input
+                id="principal"
+                name="principal"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={0}
+                className="min-h-11"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="invAccount">From account</Label>
+              <select
+                id="invAccount"
+                name="bankAccountId"
+                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                defaultValue={accounts[0]?.id ?? ''}
+              >
+                <option value="">—</option>
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name} ({formatCurrency(a.balance, a.currency)})
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1">
               <Label htmlFor="startedOn">Started</Label>
-              <Input id="startedOn" name="startedOn" type="date" defaultValue={today} />
+              <Input
+                id="startedOn"
+                name="startedOn"
+                type="date"
+                defaultValue={today}
+                className="min-h-11"
+              />
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="description">Description</Label>
               <Textarea id="description" name="description" rows={2} />
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit" size="sm">
-                Add investment
+              <Button type="submit" className="min-h-11">
+                Add project
               </Button>
             </div>
           </form>

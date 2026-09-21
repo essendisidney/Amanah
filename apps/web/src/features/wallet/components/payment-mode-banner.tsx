@@ -16,6 +16,11 @@ const COPY: Record<
   },
   // Checkout is obvious from the button — no provider brand banner.
   paystack: null,
+  intasend: {
+    title: 'M-Pesa',
+    body: 'Approve the prompt on your phone to add money.',
+    tone: 'live',
+  },
   bank: {
     title: 'Bank transfer',
     body: 'Top-ups queue a bank transfer for settlement.',

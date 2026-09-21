@@ -8,6 +8,7 @@ import {
   officerRecordContributionPaymentAction,
   payContributionAction,
   payContributionAheadAction,
+  payContributionStkAction,
   settlePayoutAction,
   settlePayoutToMpesaAction,
 } from '../actions/ledger-actions';
@@ -246,15 +247,39 @@ export function ContributionCalendar({
                       </Button>
                     </form>
                   ) : (
-                    <Button asChild className="min-h-11 w-full sm:w-auto">
-                      <Link
-                        href={
-                          `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
-                        }
+                    <>
+                      <form
+                        action={payContributionStkAction}
+                        className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
                       >
-                        {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
-                      </Link>
-                    </Button>
+                        <input type="hidden" name="contributionId" value={item.id} />
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="amount" value={String(remaining)} />
+                        <label className="block text-xs text-muted-foreground">
+                          M-Pesa phone
+                          <input
+                            name="phone"
+                            type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            placeholder={KE_PHONE_PLACEHOLDER}
+                            className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-44 sm:text-sm"
+                          />
+                        </label>
+                        <Button type="submit" className="min-h-11 w-full sm:w-auto">
+                          Pay with M-Pesa
+                        </Button>
+                      </form>
+                      <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+                        <Link
+                          href={
+                            `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
+                          }
+                        >
+                          {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}
+                        </Link>
+                      </Button>
+                    </>
                   )}
                   {!canCover && walletAvailable != null && walletAvailable > 0 ? (
                     <form

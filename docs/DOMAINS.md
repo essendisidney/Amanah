@@ -1,6 +1,8 @@
 # Domains — jameiyah.com & jameiyah.co.ke
 
-Production app currently: `https://amanah-liart.vercel.app` (Vercel project **amanah**).
+Production app: **https://jameiyah.com** (also `jameiyah.co.ke`, `amanah-liart.vercel.app`). Vercel project **amanah**.
+
+Domains verified on Vercel (2026-09-21). See [PHASE_0.md](./PHASE_0.md) for ops checklist.
 
 ## Goal
 

@@ -1,13 +1,17 @@
 import type { Metadata } from 'next';
+import { formatDate } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { mpesaHealth } from '@/lib/payments/mpesa';
 import { bankHealth } from '@/lib/payments/bank';
 import { paymentProvider } from '@/lib/payments/provider';
+import { orchestratorHealth } from '@/lib/payments/orchestrator';
 import {
   requireRealProviders,
   shouldBlockSimulatedPayments,
 } from '@/lib/production-cutover';
+import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
+import { Button } from '@jamiya/ui';
 
 export const metadata: Metadata = { title: 'Admin · Observability' };
 export const dynamic = 'force-dynamic';
@@ -31,6 +35,7 @@ export default async function AdminObservabilityPage() {
     failedIntents,
     mpesa,
     bank,
+    lastReconcile,
   ] = await Promise.all([
     supabase.from('profiles').select('id', { count: 'exact', head: true }),
     supabase.from('jamiyas').select('id', { count: 'exact', head: true }),
@@ -73,6 +78,12 @@ export default async function AdminObservabilityPage() {
       .in('status', ['failed', 'expired', 'cancelled']),
     mpesaHealth(),
     bankHealth(),
+    supabase
+      .from('reconcile_runs')
+      .select('id, status, started_at, finished_at, summary, error_message')
+      .order('started_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const cards = [
@@ -90,8 +101,14 @@ export default async function AdminObservabilityPage() {
   ];
 
   const provider = paymentProvider();
+  const orch = orchestratorHealth();
   const cutoverRows = [
     { label: 'PAYMENT_PROVIDER', value: provider },
+    { label: 'Collect / Disburse', value: `${orch.collect} / ${orch.disburse}` },
+    {
+      label: 'Failover collect / disburse',
+      value: `${orch.failoverCollect ?? '—'} / ${orch.failoverDisburse ?? '—'}`,
+    },
     { label: 'REQUIRE_REAL_PROVIDERS', value: requireRealProviders() ? 'true' : 'false' },
     {
       label: 'Simulated blocked',
@@ -110,6 +127,10 @@ export default async function AdminObservabilityPage() {
       value: mpesa.b2c_configured ? 'yes' : 'no',
     },
     {
+      label: 'IntaSend / TendePay',
+      value: `${orch.adapters.intasend.configured ? 'intasend✓' : 'intasend–'} / ${orch.adapters.tendepay.configured ? 'tendepay✓' : 'tendepay–'}`,
+    },
+    {
       label: 'payments-bank health',
       value: bank.ok ? 'ok' : `${bank.error ?? 'down'}${provider === 'bank' ? '' : ' (info)'}`,
     },
@@ -123,6 +144,25 @@ export default async function AdminObservabilityPage() {
     },
   ];
 
+  const reconcile = lastReconcile.data as {
+    id: string;
+    status: string;
+    started_at: string;
+    finished_at: string | null;
+    summary: Record<string, unknown> | null;
+    error_message: string | null;
+  } | null;
+
+  const summary = (reconcile?.summary ?? {}) as {
+    intents_settled?: number;
+    intents_failed?: number;
+    intents_flagged?: number;
+    withdrawals_settled?: number;
+    withdrawals_failed?: number;
+    withdrawals_flagged?: number;
+    needs_admin?: Array<{ entity_type: string; entity_id: string; reason: string }>;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -130,12 +170,76 @@ export default async function AdminObservabilityPage() {
           Observability
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Operational snapshot including aged withdrawals, failed outbox, and payment cutover.
-          Health:{' '}
-          <code className="text-xs">/api/v1/payments/mpesa-health</code> ·{' '}
-          <code className="text-xs">/api/v1/payments/bank-health</code>.
+          Operational snapshot including aged withdrawals, failed outbox, payment cutover, and
+          daily reconcile. Health:{' '}
+          <code className="text-xs">/api/v1/payments/orchestrator-health</code>.
         </p>
       </div>
+
+      <section className="amanah-surface space-y-3 px-4 py-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h3 className="text-lg font-semibold tracking-tight">Payment reconcile</h3>
+          <form action={runReconcileNowAction}>
+            <Button type="submit" variant="outline" className="min-h-11">
+              Run now
+            </Button>
+          </form>
+        </div>
+        {reconcile ? (
+          <div className="space-y-2 text-sm">
+            <p className="text-muted-foreground">
+              Last run {formatDate(reconcile.started_at)} · status{' '}
+              <span className="font-medium text-foreground">{reconcile.status}</span>
+              {reconcile.finished_at ? ` · finished ${formatDate(reconcile.finished_at)}` : ''}
+            </p>
+            <dl className="grid gap-2 sm:grid-cols-3">
+              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+                <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Intents settled / failed / flagged
+                </dt>
+                <dd className="mt-1 font-mono text-sm font-semibold">
+                  {summary.intents_settled ?? 0} / {summary.intents_failed ?? 0} /{' '}
+                  {summary.intents_flagged ?? 0}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+                <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Withdrawals settled / failed / flagged
+                </dt>
+                <dd className="mt-1 font-mono text-sm font-semibold">
+                  {summary.withdrawals_settled ?? 0} / {summary.withdrawals_failed ?? 0} /{' '}
+                  {summary.withdrawals_flagged ?? 0}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+                <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Needs admin
+                </dt>
+                <dd className="mt-1 font-mono text-sm font-semibold">
+                  {summary.needs_admin?.length ?? 0}
+                </dd>
+              </div>
+            </dl>
+            {reconcile.error_message ? (
+              <p className="text-sm text-destructive">{reconcile.error_message}</p>
+            ) : null}
+            {(summary.needs_admin?.length ?? 0) > 0 ? (
+              <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-muted-foreground">
+                {summary.needs_admin!.slice(0, 12).map((item) => (
+                  <li key={`${item.entity_type}:${item.entity_id}`}>
+                    {item.entity_type} {item.entity_id.slice(0, 8)}… · {item.reason}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No reconcile runs yet. Daily cron:{' '}
+            <code className="text-xs">job=reconcile-payments</code> at 05:00 UTC.
+          </p>
+        )}
+      </section>
 
       <section className="amanah-surface space-y-3 px-4 py-4">
         <h3 className="text-lg font-semibold tracking-tight">Payment cutover</h3>
@@ -164,8 +268,8 @@ export default async function AdminObservabilityPage() {
         ) : mpesa.hint && provider !== 'mpesa' ? (
           <p className="rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
             Edge probe: {mpesa.error ?? 'not ready'}. App is on {provider}, so wallet top-ups do not
-            depend on Daraja until you switch <code className="text-xs">PAYMENT_PROVIDER=mpesa</code>.
-            {mpesa.hint ? ` ${mpesa.hint}` : ''}
+            depend on Daraja until you switch <code className="text-xs">PAYMENT_PROVIDER=mpesa</code>
+            .{mpesa.hint ? ` ${mpesa.hint}` : ''}
           </p>
         ) : provider === 'paystack' && !mpesa.daraja_configured ? (
           <p className="text-sm text-muted-foreground">

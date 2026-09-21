@@ -5,6 +5,7 @@ import { Button } from '@jamiya/ui';
 import {
   payContributionAction,
   payContributionAheadAction,
+  payContributionStkAction,
 } from '@/features/circles/actions/ledger-actions';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
@@ -96,7 +97,8 @@ export function NextContributionCard({
         <p className="text-sm text-muted-foreground">
           {walletAvailable == null
             ? labels.needWallet
-            : t(labels.needMore, { amount: formatCurrency(shortfall, currency) })}
+            : t(labels.needMore, { amount: formatCurrency(shortfall, currency) })}{' '}
+          {labels.orPayPhone}
         </p>
       ) : (
         <p className="text-sm text-muted-foreground">{labels.paysFromBalance}</p>
@@ -128,7 +130,32 @@ export function NextContributionCard({
             </Button>
           </form>
         ) : (
-          <Button asChild className="min-h-11 w-full sm:w-auto">
+          <form
+            action={payContributionStkAction}
+            className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end"
+          >
+            <input type="hidden" name="contributionId" value={contributionId} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="amount" value={String(remaining)} />
+            <label className="block text-xs text-muted-foreground">
+              {labels.mpesaPhone}
+              <input
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="07…"
+                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-44 sm:text-sm"
+              />
+            </label>
+            <Button type="submit" className="min-h-11 w-full sm:w-auto">
+              {labels.payPhone}
+            </Button>
+          </form>
+        )}
+
+        {!canCover ? (
+          <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
             <Link
               href={
                 `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
@@ -137,7 +164,7 @@ export function NextContributionCard({
               {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}
             </Link>
           </Button>
-        )}
+        ) : null}
 
         {!canCover && walletAvailable != null && walletAvailable > 0 ? (
           <form
@@ -161,6 +188,31 @@ export function NextContributionCard({
             </label>
             <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
               {labels.payPartial}
+            </Button>
+          </form>
+        ) : null}
+
+        {canCover ? (
+          <form
+            action={payContributionStkAction}
+            className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
+          >
+            <input type="hidden" name="contributionId" value={contributionId} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="amount" value={String(remaining)} />
+            <label className="block text-xs text-muted-foreground">
+              {labels.mpesaPhone}
+              <input
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="07…"
+                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-44 sm:text-sm"
+              />
+            </label>
+            <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
+              {labels.payPhoneInstead}
             </Button>
           </form>
         ) : null}

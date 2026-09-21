@@ -31,9 +31,31 @@ async function decideGraceFormAction(formData: FormData) {
   const slug = String(formData.get('slug') ?? '');
   const requestId = String(formData.get('requestId') ?? '');
   const approve = String(formData.get('approve') ?? '') === '1';
-  await callRpc('decide_grace_request', { p_request_id: requestId, p_approve: approve });
+  const { redirectWithCircleNotice } = await import('@/features/circles/lib/circle-notice');
+  const { data, error } = await callRpc('decide_grace_request', {
+    p_request_id: requestId,
+    p_approve: approve,
+  });
+  if (error) {
+    redirectWithCircleNotice(slug, error.message || 'Could not decide grace request.', 'error', '/officer');
+  }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (result && result.ok === false) {
+    redirectWithCircleNotice(
+      slug,
+      result.error ?? 'Could not decide grace request.',
+      'error',
+      '/officer',
+    );
+  }
   revalidatePath(`/circles/${slug}/officer`);
   revalidatePath(`/circles/${slug}/community`);
+  redirectWithCircleNotice(
+    slug,
+    approve ? 'Grace request approved.' : 'Grace request rejected.',
+    'success',
+    '/officer',
+  );
 }
 
 async function vouchFormAction(formData: FormData) {
@@ -74,10 +96,23 @@ async function vouchFormAction(formData: FormData) {
 async function decideQardFormAction(formData: FormData) {
   'use server';
   const slug = String(formData.get('slug') ?? '');
-  await decideQardAction(formData);
+  const approve = String(formData.get('approve') ?? 'true') === 'true';
+  const { redirectWithCircleNotice } = await import('@/features/circles/lib/circle-notice');
+  const state = await decideQardAction(formData);
   revalidatePath(`/circles/${slug}/officer`);
   revalidatePath(`/circles/${slug}`);
   revalidatePath('/finance/qard');
+  redirectWithCircleNotice(
+    slug,
+    state.message ||
+      (state.success
+        ? approve
+          ? 'Loan decision saved.'
+          : 'Loan rejected.'
+        : 'Could not decide loan.'),
+    state.success ? 'success' : 'error',
+    '/officer',
+  );
 }
 
 type Props = {
@@ -476,8 +511,8 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                 <input type="hidden" name="planId" value={plan.id} />
                 <Button
                   type="submit"
-                  size="sm"
                   variant={planInfo?.plan_id === plan.id ? 'default' : 'outline'}
+                  className="min-h-11"
                 >
                   {plan.name}
                   {Number(plan.price_kes) > 0
@@ -517,10 +552,11 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                 type="number"
                 min={0}
                 step={100}
+                className="min-h-11"
                 defaultValue={Number(jamiyaRow.dual_approval_threshold ?? 10000)}
               />
             </div>
-            <Button type="submit" size="sm">
+            <Button type="submit" className="min-h-11 w-full sm:w-auto">
               Save dual-approval settings
             </Button>
           </form>
@@ -681,20 +717,20 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                   {row.requested_days} days · {row.reason ?? 'No reason'} ·{' '}
                   {formatDate(row.created_at)}
                 </p>
-                <div className="flex gap-2">
-                  <form action={decideGraceFormAction}>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <form action={decideGraceFormAction} className="w-full sm:w-auto">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="approve" value="1" />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Approve
                     </Button>
                   </form>
-                  <form action={decideGraceFormAction}>
+                  <form action={decideGraceFormAction} className="w-full sm:w-auto">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="requestId" value={row.id} />
                     <input type="hidden" name="approve" value="0" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       Reject
                     </Button>
                   </form>
@@ -757,17 +793,17 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                     {m.role} · {m.status}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <Button asChild size="sm" variant="outline">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
                     <Link href={`/circles/${slug}/statement?memberId=${m.id}` as Route}>
                       {dict.circle.idReport}
                     </Link>
                   </Button>
-                  <form action={vouchFormAction}>
+                  <form action={vouchFormAction} className="w-full sm:w-auto">
                     <input type="hidden" name="slug" value={slug} />
                     <input type="hidden" name="memberId" value={m.id} />
                     <input type="hidden" name="approve" value="1" />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                       Vouch
                     </Button>
                   </form>

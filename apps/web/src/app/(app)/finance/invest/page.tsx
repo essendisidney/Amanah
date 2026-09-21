@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
+import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
@@ -11,7 +12,17 @@ export const metadata: Metadata = { title: 'Investments' };
 export const dynamic = 'force-dynamic';
 
 type CircleRow = {
-  jamiya: { id: string; name: string; slug: string } | null;
+  jamiya: { id: string; name: string; slug: string; currency: string } | null;
+};
+
+type ProjectRow = {
+  id: string;
+  name: string;
+  status: string;
+  principal: number;
+  current_value: number;
+  currency: string;
+  jamiya_id: string;
 };
 
 export default async function InvestPage() {
@@ -25,13 +36,26 @@ export default async function InvestPage() {
   const labels = dict.finance;
   const { data } = await supabase
     .from('members')
-    .select('jamiya:jamiyas(id, name, slug)')
+    .select('jamiya:jamiyas(id, name, slug, currency)')
     .eq('user_id', user.id)
     .eq('status', 'active');
 
   const circles = ((data ?? []) as unknown as CircleRow[])
     .map((row) => row.jamiya)
     .filter((j): j is NonNullable<typeof j> => Boolean(j?.slug));
+
+  const jamiyaIds = circles.map((c) => c.id);
+  const { data: projectData } = jamiyaIds.length
+    ? await supabase
+        .from('circle_investments')
+        .select('id, name, status, principal, current_value, currency, jamiya_id')
+        .in('jamiya_id', jamiyaIds)
+        .in('status', ['planned', 'active'])
+        .order('started_on', { ascending: false })
+    : { data: [] };
+
+  const projects = (projectData ?? []) as ProjectRow[];
+  const circleById = new Map(circles.map((c) => [c.id, c]));
 
   const options = [
     {
@@ -68,6 +92,9 @@ export default async function InvestPage() {
           {labels.investTitle}
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">{labels.investDesc}</p>
+        {circles.length > 1 ? (
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{labels.investMultiHint}</p>
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/finance' as Route}>{labels.backToFinance}</Link>
@@ -94,6 +121,48 @@ export default async function InvestPage() {
         ))}
       </section>
 
+      {projects.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold tracking-tight">{labels.investActiveProjects}</h2>
+          <p className="text-sm text-muted-foreground">{labels.investActiveProjectsDesc}</p>
+          <ul className="divide-y divide-border border-y border-border">
+            {projects.map((project) => {
+              const circle = circleById.get(project.jamiya_id);
+              if (!circle) return null;
+              const currency = project.currency || circle.currency || 'KES';
+              return (
+                <li
+                  key={project.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-4"
+                >
+                  <div>
+                    <p className="font-medium">{project.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {circle.name} · {project.status}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-sm font-semibold tabular-nums">
+                      {formatCurrency(Number(project.current_value ?? 0), currency)}
+                    </p>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/circles/${circle.slug}/treasury` as Route}>
+                        {labels.investTreasuryCta}
+                      </Link>
+                    </Button>
+                    <Button asChild size="sm" variant="ghost">
+                      <Link href={`/circles/${circle.slug}/statement` as Route}>
+                        {labels.investStatementCta}
+                      </Link>
+                    </Button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="space-y-3">
         <h2 className="text-lg font-bold tracking-tight">{labels.investYourCircles}</h2>
         {circles.length ? (
@@ -113,6 +182,11 @@ export default async function InvestPage() {
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/circles/${circle.slug}/treasury` as Route}>
                       {labels.investTreasuryCta}
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/circles/${circle.slug}/statement` as Route}>
+                      {labels.investStatementCta}
                     </Link>
                   </Button>
                 </div>

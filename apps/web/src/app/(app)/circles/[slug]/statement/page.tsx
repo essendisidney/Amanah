@@ -36,6 +36,7 @@ type StatementSummary = {
   loan_repaid?: number;
   loan_outstanding?: number;
   savings_total?: number;
+  circle_investments_value?: number;
 };
 
 function money(n: unknown, currency: string) {
@@ -117,6 +118,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     loans?: Array<Record<string, unknown>>;
     book_entries?: Array<Record<string, unknown>>;
     savings_pockets?: Array<Record<string, unknown>>;
+    circle_investments?: Array<Record<string, unknown>>;
   } | null;
 
   if (!stmt?.ok) {
@@ -158,6 +160,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   const penalties = stmt.penalties ?? [];
   const loans = stmt.loans ?? [];
   const pockets = stmt.savings_pockets ?? [];
+  const circleInvestments = stmt.circle_investments ?? [];
   const books = stmt.book_entries ?? [];
   const bookContributions = books.filter((b) => b.entry_type === 'contribution');
   const otherBooks = books.filter(
@@ -603,6 +606,35 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         footer={
           loans.length > 0
             ? `Outstanding ${money(summary.loan_outstanding, jamiya.currency)}`
+            : undefined
+        }
+      />
+
+      <StatementSection
+        title="Circle projects"
+        description="Group projects funded from this circle's treasury (land, stock, equipment). Shared pool — not a personal portfolio."
+        empty="No active circle projects."
+        emptyHref={
+          isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
+        }
+        emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
+        rows={circleInvestments.map((inv) => ({
+          key: String(inv.id),
+          title: String(inv.name || 'Project'),
+          meta: [
+            inv.status ? String(inv.status) : null,
+            inv.started_on ? `Started ${formatDate(String(inv.started_on))}` : null,
+            inv.recorded_by ? `Recorded by ${String(inv.recorded_by)}` : null,
+            inv.notes ? String(inv.notes) : null,
+          ]
+            .filter(Boolean)
+            .join(' · '),
+          amount: money(inv.current_value ?? inv.principal, jamiya.currency),
+          badge: String(inv.status ?? 'active'),
+        }))}
+        footer={
+          circleInvestments.length > 0
+            ? `Pool value ${money(summary.circle_investments_value, jamiya.currency)}`
             : undefined
         }
       />

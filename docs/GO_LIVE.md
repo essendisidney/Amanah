@@ -1,7 +1,10 @@
 # Jameiyah go-live checklist
 
-Production URL: https://amanah-liart.vercel.app  
+Primary production URL: **https://jameiyah.com**  
+Aliases: `https://jameiyah.co.ke`, `https://amanah-liart.vercel.app`  
 Supabase project: `vzpnixfqkvovbniaoudx`
+
+Phase 0 ops status: [PHASE_0.md](./PHASE_0.md) · Domains: [DOMAINS.md](./DOMAINS.md)
 
 ## 1. Auth URL configuration (required)
 
@@ -9,11 +12,13 @@ In [Supabase Dashboard](https://supabase.com/dashboard/project/vzpnixfqkvovbniao
 
 | Setting | Value |
 |---------|--------|
-| Site URL | `https://amanah-liart.vercel.app` |
-| Redirect URLs | `https://amanah-liart.vercel.app/auth/callback` |
+| Site URL | `https://jameiyah.com` |
+| Redirect URLs | `https://jameiyah.com/auth/callback` |
+| | `https://jameiyah.co.ke/auth/callback` |
+| | `https://amanah-liart.vercel.app/auth/callback` |
 | | `http://localhost:3002/auth/callback` (local) |
 
-Without this, login / OAuth / magic links will fail on production.
+Also allow the wildcard list in `DOMAINS.md`. Without this, login / OAuth / magic links fail on the custom domain.
 
 ## 2. Rotate secrets (do this soon)
 
@@ -24,13 +29,13 @@ These were shared in chat during setup — rotate in Supabase, then update Verce
 3. Update Vercel project env: `SUPABASE_SERVICE_ROLE_KEY` (and DB URL if used for CLI)  
 4. Redeploy after env changes
 
-## 3. Live M-Pesa (Phase 9)
+## 3. Live M-Pesa (Daraja)
 
-Full runbook: [PHASE_9.md](./PHASE_9.md).
+Full runbook: [PHASE_9.md](./PHASE_9.md). Payment orchestrator map: [PAYMENTS_ORCHESTRATOR.md](./PAYMENTS_ORCHESTRATOR.md).
 
 | Env | Where | Purpose |
 |-----|--------|---------|
-| `PAYMENT_PROVIDER=mpesa` | Vercel | STK for wallet + sadaka + tips |
+| `PAYMENT_PROVIDER=mpesa` | Vercel | STK for wallet + sadaka + tips (or keep `paystack` until cutover) |
 | `ALLOW_SIMULATED_IN_PROD=true` | Vercel | Until Daraja secrets are set |
 | `MPESA_*` | Supabase Edge secrets | Daraja consumer/passkey/callback |
 | `REQUIRE_REAL_PROVIDERS=true` | Edge + Vercel | Block simulated fallbacks |
@@ -42,6 +47,7 @@ npx supabase functions deploy notify-dispatch --project-ref vzpnixfqkvovbniaoudx
 ```
 
 Health: `GET /api/v1/payments/mpesa-health`  
+Orchestrator: `GET /api/v1/payments/orchestrator-health` (after Kenya payment code is deployed)  
 Edge deploy steps: [DEPLOY_PAYMENTS_MPESA.md](./DEPLOY_PAYMENTS_MPESA.md)
 
 ## 3b. Tawarruq partner + USSD (Phase 13)
@@ -59,7 +65,7 @@ Edge deploy steps: [DEPLOY_PAYMENTS_MPESA.md](./DEPLOY_PAYMENTS_MPESA.md)
 npx supabase functions deploy tawarruq-partner --project-ref vzpnixfqkvovbniaoudx
 ```
 
-USSD callback: `https://amanah-liart.vercel.app/api/ussd`  
+USSD callback: `https://jameiyah.com/api/ussd`  
 Sadaka fee endorsement after board sign-off: `/admin/sadaka`
 
 ## 4. GitHub auto-deploy
@@ -75,7 +81,7 @@ Repo currently deploys via Vercel CLI. For git-based deploys:
 
 Prefer the **PWA** on Chrome — not Expo Go — for real Android phones:
 
-1. Open https://amanah-liart.vercel.app in **Chrome** (not WhatsApp/Facebook in-app browsers).
+1. Open https://jameiyah.com in **Chrome** (not WhatsApp/Facebook in-app browsers).
 2. Menu (⋮) → **Install app** or **Add to Home screen**.
 3. If Install is missing, browse a few pages over HTTPS and retry; Chrome withholds the prompt until engagement heuristics pass.
 
@@ -92,12 +98,13 @@ Keep **simulated** for UAT demos. Flip live only when Daraja/Paystack secrets ar
 | Step | Action |
 |------|--------|
 | 1 | Confirm `GET /api/v1/payments/mpesa-health` shows expected provider flags |
-| 2 | Wallet page shows **Payment mode** banner (simulated vs mpesa/paystack) |
-| 3 | Admin → Observability → **Payment cutover** panel matches Vercel + Edge |
-| 4 | Officer → Circle plan: buy Starter/Pro from wallet; renews_at shows |
-| 5 | Cron `plan-renewals` (06:45 UTC) auto-debits or marks `past_due` |
-| 6 | Arrears → **Remind** / **Remind all (SMS)** for open invoices |
-| 7 | When ready: `PAYMENT_PROVIDER=mpesa|paystack`, Edge Daraja secrets, then `REQUIRE_REAL_PROVIDERS=true` and remove `ALLOW_SIMULATED_IN_PROD` |
+| 2 | After ship: `GET /api/v1/payments/orchestrator-health` shows adapters + failover |
+| 3 | Wallet page shows **Payment mode** banner (simulated vs mpesa/paystack) |
+| 4 | Admin → Observability → **Payment cutover** panel matches Vercel + Edge |
+| 5 | Officer → Circle plan: buy Starter/Pro from wallet; renews_at shows |
+| 6 | Cron `plan-renewals` (06:45 UTC) auto-debits or marks `past_due` |
+| 7 | Arrears → **Remind** / **Remind all (SMS)** for open invoices |
+| 8 | When ready: `PAYMENT_PROVIDER=mpesa|paystack`, Edge Daraja secrets, then `REQUIRE_REAL_PROVIDERS=true` and remove `ALLOW_SIMULATED_IN_PROD` |
 
 If health returns `UNAUTHORIZED`, Vercel `SUPABASE_SERVICE_ROLE_KEY` is out of sync with the Supabase project service role. Copy the current service role key into Vercel and redeploy before flipping M-Pesa.
 
@@ -105,7 +112,7 @@ Light concurrency smoke (public routes only):
 
 ```bash
 node scripts/load-smoke.mjs
-BASE_URL=https://amanah-liart.vercel.app CONCURRENCY=20 REQUESTS=100 node scripts/load-smoke.mjs
+BASE_URL=https://jameiyah.com CONCURRENCY=20 REQUESTS=100 node scripts/load-smoke.mjs
 ```
 
 Member statement PDF stays free for self-download. Officers exporting **another** member’s PDF need Starter/Pro (`exports_included`).

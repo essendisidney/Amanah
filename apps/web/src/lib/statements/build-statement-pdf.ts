@@ -15,6 +15,7 @@ type Stmt = {
   loans?: Array<Record<string, unknown>>;
   savings_pockets?: Array<Record<string, unknown>>;
   book_entries?: Array<Record<string, unknown>>;
+  circle_investments?: Array<Record<string, unknown>>;
 };
 
 type PdfSection = {
@@ -78,6 +79,11 @@ function buildGlanceLines(
   const isTb = kind === 'share_dividend';
   const isSavings = kind === 'savings';
 
+  const projectsLine =
+    Number(summary.circle_investments_value ?? 0) > 0
+      ? `Circle projects value: ${money(summary.circle_investments_value, currency)}`
+      : null;
+
   if (isTb) {
     return [
       `Share capital: ${money(summary.share_capital, currency)}${
@@ -89,6 +95,7 @@ function buildGlanceLines(
       `Contributions so far: ${money(summary.contributions_so_far, currency)}`,
       `Penalties: ${money(summary.penalties_total, currency)} · open ${money(summary.penalties_open, currency)}`,
       `Loan outstanding: ${money(summary.loan_outstanding, currency)}`,
+      ...(projectsLine ? [projectsLine] : []),
     ];
   }
 
@@ -99,6 +106,7 @@ function buildGlanceLines(
       `Savings pockets: ${money(summary.savings_total, currency)}`,
       `Penalties: ${money(summary.penalties_total, currency)} · open ${money(summary.penalties_open, currency)}`,
       `Loan outstanding: ${money(summary.loan_outstanding, currency)}`,
+      ...(projectsLine ? [projectsLine] : []),
     ];
   }
 
@@ -112,6 +120,7 @@ function buildGlanceLines(
     slot,
     `Penalties: ${money(summary.penalties_total, currency)} · open ${money(summary.penalties_open, currency)}`,
     `Loan outstanding: ${money(summary.loan_outstanding, currency)}`,
+    ...(projectsLine ? [projectsLine] : []),
   ];
 }
 
@@ -172,14 +181,22 @@ function buildSections(
       `${row.label ?? row.category ?? 'Pocket'} · ${money(row.balance, currency)}`,
   };
 
+  const projects: PdfSection = {
+    title: 'Circle projects',
+    rows: stmt.circle_investments ?? [],
+    omitIfEmpty: true,
+    format: (row) =>
+      `${row.name ?? 'Project'} · ${String(row.status ?? 'active')} · principal ${money(row.principal, currency)} · value ${money(row.current_value, currency)}${row.started_on ? ` · started ${row.started_on}` : ''}`,
+  };
+
   if (isTb) {
-    return [share, monthlyBooks, schedule, penalties, loans, pockets];
+    return [share, monthlyBooks, schedule, penalties, loans, pockets, projects];
   }
   if (isSavings) {
-    return [schedule, monthlyBooks, pockets, share, penalties, loans];
+    return [schedule, monthlyBooks, pockets, share, penalties, loans, projects];
   }
   // MGR: cycles first, then fines/loans; hide empty share/books noise
-  return [schedule, share, monthlyBooks, penalties, loans, pockets];
+  return [schedule, share, monthlyBooks, penalties, loans, pockets, projects];
 }
 
 /** Server-rendered branded member statement PDF (layout varies by circle mode). */

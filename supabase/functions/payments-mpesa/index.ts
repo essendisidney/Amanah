@@ -24,10 +24,14 @@ type StkBody = {
   action?: string;
   intent_id?: string;
   disbursement_id?: string;
+  /** charity (default) | withdrawal — wallet / circle cashouts */
+  kind?: string;
   amount?: number;
   phone?: string;
   description?: string;
+  checkout_request_id?: string;
 };
+
 
 function env(name: string): string {
   return Deno.env.get(name) ?? "";
@@ -183,7 +187,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // ---- B2C initiate (service) — Sadaka Option B beneficiary payout ----
+    // ---- B2C initiate (service) — charity OR wallet withdrawal ----
     if ((json as StkBody).action === "b2c_payment") {
       if (!isServiceRoleRequest(auth, serviceKey)) {
         return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
@@ -194,24 +198,50 @@ Deno.serve(async (req) => {
         return Response.json({ ok: false, error: "INVALID_BODY" }, { status: 400 });
       }
 
-      const { data: row, error: rowErr } = await supabase
-        .from("charity_disbursements")
-        .select("id, net_amount, beneficiary_phone, status, currency")
-        .eq("id", body.disbursement_id)
-        .maybeSingle();
+      const kind = (body.kind ?? "charity").toLowerCase();
+      let amount = Number(body.amount ?? 0);
+      let phone = String(body.phone ?? "");
+      let remarks = body.description?.slice(0, 70) || "Jameiyah payout";
 
-      if (rowErr || !row) {
-        return Response.json({ ok: false, error: "DISBURSEMENT_NOT_FOUND" }, { status: 404 });
-      }
-      if (!["pending", "processing"].includes(row.status as string)) {
-        return Response.json(
-          { ok: false, error: "NOT_PAYABLE", status: row.status },
-          { status: 409 },
-        );
+      if (kind === "withdrawal" || kind === "wallet") {
+        const { data: wrow, error: wErr } = await supabase
+          .from("withdrawal_requests")
+          .select("id, amount, destination_phone, status, currency")
+          .eq("id", body.disbursement_id)
+          .maybeSingle();
+        if (wErr || !wrow) {
+          return Response.json({ ok: false, error: "WITHDRAWAL_NOT_FOUND" }, { status: 404 });
+        }
+        if (!["pending", "processing"].includes(wrow.status as string)) {
+          return Response.json(
+            { ok: false, error: "NOT_PAYABLE", status: wrow.status },
+            { status: 409 },
+          );
+        }
+        amount = Number(body.amount ?? wrow.amount);
+        phone = String(body.phone ?? wrow.destination_phone ?? "");
+        remarks = (body.description ?? "Jameiyah withdrawal").slice(0, 70);
+      } else {
+        const { data: row, error: rowErr } = await supabase
+          .from("charity_disbursements")
+          .select("id, net_amount, beneficiary_phone, status, currency")
+          .eq("id", body.disbursement_id)
+          .maybeSingle();
+
+        if (rowErr || !row) {
+          return Response.json({ ok: false, error: "DISBURSEMENT_NOT_FOUND" }, { status: 404 });
+        }
+        if (!["pending", "processing"].includes(row.status as string)) {
+          return Response.json(
+            { ok: false, error: "NOT_PAYABLE", status: row.status },
+            { status: 409 },
+          );
+        }
+        amount = Number(body.amount ?? row.net_amount);
+        phone = String(body.phone ?? row.beneficiary_phone ?? "");
+        remarks = "Jameiyah sadaka";
       }
 
-      const amount = Number(body.amount ?? row.net_amount);
-      const phone = String(body.phone ?? row.beneficiary_phone ?? "");
       if (!Number.isFinite(amount) || amount < 1) {
         return Response.json({ ok: false, error: "INVALID_AMOUNT" }, { status: 400 });
       }
@@ -222,12 +252,22 @@ Deno.serve(async (req) => {
       const token = await getDarajaToken();
       if (!token || !b2cConfigured()) {
         if (requireReal()) {
-          await supabase.rpc("complete_sadaka_disbursement", {
-            p_disbursement_id: body.disbursement_id,
-            p_success: false,
-            p_error: "B2C secrets not configured",
-          });
+          if (kind !== "withdrawal" && kind !== "wallet") {
+            await supabase.rpc("complete_sadaka_disbursement", {
+              p_disbursement_id: body.disbursement_id,
+              p_success: false,
+              p_error: "B2C secrets not configured",
+            });
+          }
           return Response.json({ ok: false, error: "B2C_UNAVAILABLE" }, { status: 502 });
+        }
+
+        if (kind === "withdrawal" || kind === "wallet") {
+          return Response.json({
+            ok: true,
+            fallback: "simulated",
+            conversation_id: `sim-b2c:${body.disbursement_id}`,
+          });
         }
 
         const { data } = await supabase.rpc("complete_sadaka_disbursement", {
@@ -263,7 +303,7 @@ Deno.serve(async (req) => {
           Amount: Math.max(1, Math.round(amount)),
           PartyA: shortcode,
           PartyB: msisdn,
-          Remarks: "Jameiyah sadaka",
+          Remarks: remarks,
           QueueTimeOutURL: timeoutUrl,
           ResultURL: resultUrl,
           Occasion: String(body.disbursement_id).replace(/-/g, "").slice(0, 20),
@@ -272,32 +312,129 @@ Deno.serve(async (req) => {
 
       const b2cJson = await b2cRes.json();
       if (!b2cRes.ok || String(b2cJson.ResponseCode) !== "0") {
-        await supabase.rpc("complete_sadaka_disbursement", {
-          p_disbursement_id: body.disbursement_id,
-          p_success: false,
-          p_error:
-            b2cJson.errorMessage ??
-            b2cJson.ResponseDescription ??
-            "B2C initiate failed",
-        });
+        if (kind !== "withdrawal" && kind !== "wallet") {
+          await supabase.rpc("complete_sadaka_disbursement", {
+            p_disbursement_id: body.disbursement_id,
+            p_success: false,
+            p_error:
+              b2cJson.errorMessage ??
+              b2cJson.ResponseDescription ??
+              "B2C initiate failed",
+          });
+        }
         return Response.json({ ok: false, error: b2cJson }, { status: 502 });
       }
 
-      await supabase
-        .from("charity_disbursements")
-        .update({
-          status: "processing",
-          mpesa_b2c_id: String(
-            b2cJson.ConversationID ?? b2cJson.OriginatorConversationID ?? "",
-          ),
-        })
-        .eq("id", body.disbursement_id);
+      const conversationId = String(
+        b2cJson.ConversationID ?? b2cJson.OriginatorConversationID ?? "",
+      );
+
+      if (kind === "withdrawal" || kind === "wallet") {
+        const { data: prev } = await supabase
+          .from("withdrawal_requests")
+          .select("metadata")
+          .eq("id", body.disbursement_id)
+          .maybeSingle();
+        const prevMeta =
+          prev && typeof prev.metadata === "object" && prev.metadata
+            ? (prev.metadata as Record<string, unknown>)
+            : {};
+        await supabase
+          .from("withdrawal_requests")
+          .update({
+            status: "processing",
+            provider_reference: conversationId || null,
+            metadata: {
+              ...prevMeta,
+              daraja_kind: "withdrawal",
+              originator_conversation_id:
+                b2cJson.OriginatorConversationID ?? null,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", body.disbursement_id);
+      } else {
+        await supabase
+          .from("charity_disbursements")
+          .update({
+            status: "processing",
+            mpesa_b2c_id: conversationId,
+          })
+          .eq("id", body.disbursement_id);
+      }
 
       return Response.json({
         ok: true,
         conversation_id: b2cJson.ConversationID ?? null,
         originator_conversation_id: b2cJson.OriginatorConversationID ?? null,
         response_description: b2cJson.ResponseDescription ?? null,
+        kind,
+      });
+    }
+
+    // ---- STK query (service) — for reconcile / getPaymentStatus ----
+    if ((json as StkBody).action === "stk_query") {
+      if (!isServiceRoleRequest(auth, serviceKey)) {
+        return Response.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+      }
+      const checkoutId = String(
+        (json as StkBody).checkout_request_id ?? "",
+      ).trim();
+      if (!checkoutId) {
+        return Response.json({ ok: false, error: "CHECKOUT_REQUIRED" }, { status: 400 });
+      }
+      const token = await getDarajaToken();
+      if (!token || !darajaConfigured()) {
+        return Response.json({
+          ok: true,
+          status: "unknown",
+          error: "DARAJA_UNAVAILABLE",
+        });
+      }
+      const shortcode = env("MPESA_SHORTCODE");
+      const passkey = env("MPESA_PASSKEY");
+      const ts = timestampNairobi();
+      const base = env("MPESA_BASE_URL") || "https://sandbox.safaricom.co.ke";
+      const qRes = await fetch(`${base}/mpesa/stkpushquery/v1/query`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          BusinessShortCode: shortcode,
+          Password: password(shortcode, passkey, ts),
+          Timestamp: ts,
+          CheckoutRequestID: checkoutId,
+        }),
+      });
+      const qJson = await qRes.json().catch(() => ({})) as {
+        ResultCode?: string | number;
+        ResultDesc?: string;
+        errorMessage?: string;
+        ResponseCode?: string;
+      };
+      if (!qRes.ok) {
+        return Response.json({
+          ok: false,
+          error: qJson.errorMessage ?? `Query HTTP ${qRes.status}`,
+          status: "unknown",
+        });
+      }
+      const code = String(qJson.ResultCode ?? "");
+      // 0 = success; common cancel/fail codes; else still pending
+      const status =
+        code === "0"
+          ? "success"
+          : ["1032", "17", "1025", "1019", "1001"].includes(code)
+            ? "failed"
+            : "processing";
+      return Response.json({
+        ok: true,
+        status,
+        result_code: code,
+        result_desc: qJson.ResultDesc ?? null,
+        checkout_request_id: checkoutId,
       });
     }
 
@@ -493,6 +630,52 @@ Deno.serve(async (req) => {
     if (b2cResult?.ConversationID || b2cResult?.OriginatorConversationID) {
       const conv =
         b2cResult.ConversationID ?? b2cResult.OriginatorConversationID ?? "";
+      const receipt =
+        b2cResult.TransactionID ??
+        b2cResult.ResultParameters?.ResultParameter?.find(
+          (p) => p.Key === "TransactionReceipt",
+        )?.Value;
+      const success = Number(b2cResult.ResultCode) === 0;
+
+      // Wallet / circle withdrawals first
+      const { data: wRows } = await supabase
+        .from("withdrawal_requests")
+        .select("id, status")
+        .eq("provider_reference", conv)
+        .in("status", ["pending", "processing"])
+        .limit(1);
+      let withdrawalId = wRows?.[0]?.id as string | undefined;
+      if (!withdrawalId && b2cResult.OriginatorConversationID) {
+        const { data: wAlt } = await supabase
+          .from("withdrawal_requests")
+          .select("id, status")
+          .eq("provider_reference", b2cResult.OriginatorConversationID)
+          .in("status", ["pending", "processing"])
+          .limit(1);
+        withdrawalId = wAlt?.[0]?.id as string | undefined;
+      }
+
+      if (withdrawalId) {
+        if (success) {
+          await supabase.rpc("process_withdrawal", {
+            p_withdrawal_id: withdrawalId,
+            p_approve: true,
+            p_provider_reference: String(receipt ?? conv),
+            p_error_message: null,
+          });
+        } else {
+          await supabase
+            .from("withdrawal_requests")
+            .update({
+              status: "failed",
+              error_message: (b2cResult.ResultDesc ?? "B2C declined").slice(0, 500),
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", withdrawalId);
+        }
+        return Response.json({ ResultCode: 0, ResultDesc: "Accepted" });
+      }
+
       const { data: rows } = await supabase
         .from("charity_disbursements")
         .select("id, status")
@@ -518,13 +701,7 @@ Deno.serve(async (req) => {
         return Response.json({ ResultCode: 0, ResultDesc: "Already paid" });
       }
 
-      const receipt =
-        b2cResult.TransactionID ??
-        b2cResult.ResultParameters?.ResultParameter?.find(
-          (p) => p.Key === "TransactionReceipt",
-        )?.Value;
-
-      if (Number(b2cResult.ResultCode) === 0) {
+      if (success) {
         await supabase.rpc("complete_sadaka_disbursement", {
           p_disbursement_id: disbursementId,
           p_success: true,

@@ -99,7 +99,8 @@ export async function createInvestmentAction(formData: FormData): Promise<void> 
   const slug = String(formData.get('slug') ?? '');
   const name = String(formData.get('name') ?? '').trim();
   const description = String(formData.get('description') ?? '').trim();
-  const principal = Number(formData.get('principal') ?? 0);
+  const fundAmount = Number(formData.get('principal') ?? formData.get('fundAmount') ?? 0);
+  const bankAccountId = String(formData.get('bankAccountId') ?? '').trim();
   const currency = String(formData.get('currency') ?? 'KES');
   const startedOn = String(formData.get('startedOn') ?? '') || null;
   if (!jamiyaId || !slug || name.length < 2) return;
@@ -110,25 +111,115 @@ export async function createInvestmentAction(formData: FormData): Promise<void> 
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const value = Number.isFinite(principal) && principal >= 0 ? principal : 0;
-  const { error } = await supabase.from('circle_investments').insert({
-    jamiya_id: jamiyaId,
-    name,
-    description: description || null,
-    status: 'active',
-    principal: value,
-    current_value: value,
-    currency,
-    started_on: startedOn,
-    created_by: user.id,
-  } as never);
+  const shouldFund = Number.isFinite(fundAmount) && fundAmount > 0;
+  if (shouldFund && !bankAccountId) {
+    redirectWithCircleNotice(
+      slug,
+      'Choose a treasury account to fund this project from.',
+      'error',
+      '/treasury',
+    );
+  }
 
+  // Create at zero; funding (if any) goes through record_treasury_entry so cashbook stays true.
+  const { data: created, error } = await supabase
+    .from('circle_investments')
+    .insert({
+      jamiya_id: jamiyaId,
+      name,
+      description: description || null,
+      status: shouldFund ? 'active' : 'planned',
+      principal: 0,
+      current_value: 0,
+      currency,
+      started_on: startedOn,
+      created_by: user.id,
+    } as never)
+    .select('id')
+    .single();
+
+  if (error || !created) {
+    redirectWithCircleNotice(slug, error?.message ?? 'Could not create project.', 'error', '/treasury');
+  }
+
+  const investmentId = (created as { id: string }).id;
+
+  if (shouldFund) {
+    const { data: fund, error: fundErr } = await callRpc('record_treasury_entry', {
+      p_jamiya_id: jamiyaId,
+      p_entry_type: 'investment',
+      p_amount: fundAmount,
+      p_effective_date: startedOn || new Date().toISOString().slice(0, 10),
+      p_bank_account_id: bankAccountId,
+      p_counterparty_account_id: null,
+      p_category_id: null,
+      p_investment_id: investmentId,
+      p_member_id: null,
+      p_notes: `Fund ${name}`,
+    });
+    if (fundErr) {
+      redirectWithCircleNotice(slug, fundErr.message, 'error', '/treasury');
+    }
+    const fundResult = fund as { ok?: boolean; error?: string } | null;
+    if (fundResult && fundResult.ok === false) {
+      redirectWithCircleNotice(
+        slug,
+        fundResult.error === 'INSUFFICIENT_BALANCE'
+          ? 'Not enough balance in that account to fund the project.'
+          : fundResult.error ?? 'Could not fund project.',
+        'error',
+        '/treasury',
+      );
+    }
+  }
+
+  revalidateTreasury(slug);
+  redirectWithCircleNotice(
+    slug,
+    shouldFund
+      ? 'Project created and funded from treasury.'
+      : 'Project recorded (planned). Fund it from the cashbook when ready.',
+    'success',
+    '/treasury',
+  );
+}
+
+export async function updateInvestmentAction(formData: FormData): Promise<void> {
+  const slug = String(formData.get('slug') ?? '');
+  const investmentId = String(formData.get('investmentId') ?? '');
+  const currentValueRaw = String(formData.get('currentValue') ?? '').trim();
+  const status = String(formData.get('status') ?? '').trim();
+  const notes = String(formData.get('notes') ?? '').trim();
+  if (!slug || !investmentId) return;
+
+  const currentValue =
+    currentValueRaw === '' ? null : Number(currentValueRaw);
+  if (currentValue !== null && (!Number.isFinite(currentValue) || currentValue < 0)) {
+    redirectWithCircleNotice(slug, 'Enter a valid current value.', 'error', '/treasury');
+  }
+
+  const { data, error } = await callRpc('update_circle_investment', {
+    p_investment_id: investmentId,
+    p_current_value: currentValue,
+    p_status: status || null,
+    p_notes: notes || null,
+    p_name: null,
+  });
+
+  revalidateTreasury(slug);
   if (error) {
     redirectWithCircleNotice(slug, error.message, 'error', '/treasury');
-    return;
   }
-  revalidateTreasury(slug);
-  redirectWithCircleNotice(slug, 'Investment / project recorded.', 'success', '/treasury');
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      result?.error ?? 'Could not update project.',
+      'error',
+      '/treasury',
+    );
+  }
+  redirectWithCircleNotice(slug, 'Project updated.', 'success', '/treasury');
 }
 
 export async function recordTreasuryEntryAction(formData: FormData): Promise<void> {
@@ -296,4 +387,128 @@ export async function importBookEntriesAction(formData: FormData): Promise<void>
     'success',
     '/treasury',
   );
+}
+
+export async function createCirclePayoutDestinationAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const kind = String(formData.get('kind') ?? 'paybill');
+  const label = String(formData.get('label') ?? '').trim();
+  const shortcode = String(formData.get('shortcode') ?? '').trim();
+  const accountReference = String(formData.get('accountReference') ?? '').trim();
+  const bankName = String(formData.get('bankName') ?? '').trim();
+  const bankAccountNumber = String(formData.get('bankAccountNumber') ?? '').trim();
+  const bankAccountName = String(formData.get('bankAccountName') ?? '').trim();
+  if (!jamiyaId || !slug || label.length < 2) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { error } = await supabase.from('circle_payout_destinations').insert({
+    jamiya_id: jamiyaId,
+    kind: ['paybill', 'till', 'bank'].includes(kind) ? kind : 'paybill',
+    label,
+    shortcode: shortcode || null,
+    account_reference: accountReference || null,
+    bank_name: bankName || null,
+    bank_account_number: bankAccountNumber || null,
+    bank_account_name: bankAccountName || null,
+    created_by: user?.id ?? null,
+  } as never);
+
+  if (error) {
+    redirectWithCircleNotice(slug, error.message, 'error', '/treasury');
+  }
+  revalidateTreasury(slug);
+  redirectWithCircleNotice(slug, 'Supplier destination saved.', 'success', '/treasury');
+}
+
+export async function requestTreasuryPayoutAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const destinationId = String(formData.get('destinationId') ?? '');
+  const sourceAccountId = String(formData.get('sourceAccountId') ?? '').trim();
+  const categoryId = String(formData.get('categoryId') ?? '').trim();
+  const amount = Number(formData.get('amount'));
+  const narrative = String(formData.get('narrative') ?? '').trim();
+  const currency = String(formData.get('currency') ?? 'KES');
+  if (!jamiyaId || !slug || !destinationId || !Number.isFinite(amount) || amount <= 0) {
+    if (slug) redirectWithCircleNotice(slug, 'Enter amount and destination.', 'error', '/treasury');
+    return;
+  }
+
+  const { data, error } = await callRpc('request_treasury_payout', {
+    p_jamiya_id: jamiyaId,
+    p_destination_id: destinationId,
+    p_amount: amount,
+    p_source_account_id: sourceAccountId || null,
+    p_category_id: categoryId || null,
+    p_narrative: narrative || null,
+    p_currency: currency,
+  });
+
+  revalidateTreasury(slug);
+
+  if (error) {
+    redirectWithCircleNotice(slug, error.message, 'error', '/treasury');
+  }
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    payout_id?: string;
+    pending_dual_approval?: boolean;
+    ready_to_disburse?: boolean;
+  } | null;
+
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      result?.error ?? 'Could not request supplier payout.',
+      'error',
+      '/treasury',
+    );
+  }
+
+  if (result.pending_dual_approval) {
+    redirectWithCircleNotice(
+      slug,
+      'Payout queued for a second officer. Approve it on the Officer console.',
+      'success',
+      '/officer',
+    );
+  }
+
+  if (result.ready_to_disburse && result.payout_id) {
+    const supabase = await createClient();
+    const { data: payout } = await supabase
+      .from('treasury_payout_requests')
+      .select(
+        'id, jamiya_id, amount, currency, status, narrative, provider_reference, metadata, destination_id',
+      )
+      .eq('id', result.payout_id)
+      .maybeSingle();
+    const { data: dest } = payout
+      ? await supabase
+          .from('circle_payout_destinations')
+          .select(
+            'id, kind, label, shortcode, account_reference, bank_name, bank_account_number, bank_account_name',
+          )
+          .eq('id', (payout as { destination_id: string }).destination_id)
+          .maybeSingle()
+      : { data: null };
+
+    if (payout && dest) {
+      const { runTreasuryB2bDisbursement } = await import('@/lib/payments/disburse-treasury');
+      const sent = await runTreasuryB2bDisbursement(payout as never, dest as never);
+      revalidateTreasury(slug);
+      if (!sent.ok) {
+        redirectWithCircleNotice(slug, sent.error, 'error', '/treasury');
+      }
+      redirectWithCircleNotice(slug, sent.message, 'success', '/treasury');
+    }
+  }
+
+  redirectWithCircleNotice(slug, 'Supplier payout recorded.', 'success', '/treasury');
 }

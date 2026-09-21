@@ -91,6 +91,10 @@ export async function requestWithdrawalAction(
       KYC_REQUIRED: 'KYC approval required for withdrawals of 20,000+.',
       RISK_BLOCKED: 'Withdrawal blocked by risk controls. Contact support.',
       PHONE_REQUIRED: 'Provide an E.164 M-Pesa phone number.',
+      DESTINATION_REQUIRED:
+        'Link your M-Pesa number on Profile before withdrawing.',
+      DESTINATION_MISMATCH:
+        'Withdrawals must go to your linked M-Pesa number. Update it on Profile if needed.',
       BANK_DETAILS_REQUIRED: 'Provide bank name, account name, and account number.',
       INVALID_AMOUNT: 'Amount must be between 100 and 5,000,000.',
     };
@@ -127,13 +131,15 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
     ok?: boolean;
     error?: string;
     pending_dual_approval?: boolean;
+    ready_to_disburse?: boolean;
+    withdrawal_id?: string;
   } | null;
 
   if (result?.pending_dual_approval) {
     redirect(
       withNoticeQuery(
         '/admin/withdrawals',
-        'First approval recorded. A different admin must second-approve.',
+        'First approval recorded. A different admin must second-approve before send.',
         'info',
       ),
     );
@@ -148,12 +154,59 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
     redirect(withNoticeQuery('/admin/withdrawals', message, 'error'));
   }
 
+  if (!approve) {
+    redirect(withNoticeQuery('/admin/withdrawals', 'Withdrawal rejected.', 'success'));
+  }
+
+  if (result.ready_to_disburse) {
+    const { createClient } = await import('@/lib/supabase/server');
+    const { runWithdrawalDisbursement } = await import(
+      '@/lib/payments/disburse-withdrawal'
+    );
+    const supabase = await createClient();
+    const { data: row } = await supabase
+      .from('withdrawal_requests')
+      .select(
+        'id, user_id, amount, currency, status, destination_type, destination_phone, provider_reference, metadata',
+      )
+      .eq('id', result.withdrawal_id ?? withdrawalId)
+      .maybeSingle();
+
+    if (!row) {
+      redirect(withNoticeQuery('/admin/withdrawals', 'Withdrawal not found.', 'error'));
+    }
+
+    const sent = await runWithdrawalDisbursement(
+      row as {
+        id: string;
+        user_id: string;
+        amount: number;
+        currency: string;
+        status: string;
+        destination_type: string;
+        destination_phone: string | null;
+        provider_reference: string | null;
+        metadata: Record<string, unknown> | null;
+      },
+    );
+
+    revalidatePath('/admin/withdrawals');
+    revalidatePath('/wallet');
+
+    if (!sent.ok) {
+      redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+    }
+    redirect(
+      withNoticeQuery(
+        '/admin/withdrawals',
+        sent.message,
+        sent.status === 'completed' ? 'success' : 'info',
+      ),
+    );
+  }
+
   redirect(
-    withNoticeQuery(
-      '/admin/withdrawals',
-      approve ? 'Withdrawal processed.' : 'Withdrawal rejected.',
-      'success',
-    ),
+    withNoticeQuery('/admin/withdrawals', 'Withdrawal processed.', 'success'),
   );
 }
 
@@ -175,7 +228,13 @@ export async function confirmDualApprovalAction(formData: FormData): Promise<voi
   if (error) {
     redirect(withNoticeQuery('/admin/withdrawals', error.message, 'error'));
   }
-  const result = data as { ok?: boolean; error?: string; status?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    status?: string;
+    ready_to_disburse?: boolean;
+    withdrawal_id?: string;
+  } | null;
   if (!result?.ok) {
     const code = result?.error ?? 'Could not complete second approval.';
     const message =
@@ -186,6 +245,50 @@ export async function confirmDualApprovalAction(formData: FormData): Promise<voi
           : code;
     redirect(withNoticeQuery('/admin/withdrawals', message, 'error'));
   }
+
+  if (approve && result.ready_to_disburse && result.withdrawal_id) {
+    const { createClient } = await import('@/lib/supabase/server');
+    const { runWithdrawalDisbursement } = await import(
+      '@/lib/payments/disburse-withdrawal'
+    );
+    const supabase = await createClient();
+    const { data: row } = await supabase
+      .from('withdrawal_requests')
+      .select(
+        'id, user_id, amount, currency, status, destination_type, destination_phone, provider_reference, metadata',
+      )
+      .eq('id', result.withdrawal_id)
+      .maybeSingle();
+
+    if (row) {
+      const sent = await runWithdrawalDisbursement(
+        row as {
+          id: string;
+          user_id: string;
+          amount: number;
+          currency: string;
+          status: string;
+          destination_type: string;
+          destination_phone: string | null;
+          provider_reference: string | null;
+          metadata: Record<string, unknown> | null;
+        },
+      );
+      revalidatePath('/admin/withdrawals');
+      revalidatePath('/wallet');
+      if (!sent.ok) {
+        redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+      }
+      redirect(
+        withNoticeQuery(
+          '/admin/withdrawals',
+          sent.message,
+          sent.status === 'completed' ? 'success' : 'info',
+        ),
+      );
+    }
+  }
+
   redirect(
     withNoticeQuery(
       '/admin/withdrawals',
@@ -195,10 +298,52 @@ export async function confirmDualApprovalAction(formData: FormData): Promise<voi
   );
 }
 
-/** Simulated B2C for circle payout cashouts until live Daraja. */
+/** Circle payout cashout → orchestrator B2C (or simulated complete). */
 export async function processPayoutCashoutAction(formData: FormData): Promise<void> {
   const withdrawalId = String(formData.get('withdrawalId') ?? '');
   if (!withdrawalId) return;
+
+  const { createClient } = await import('@/lib/supabase/server');
+  const { runWithdrawalDisbursement, shouldUseLiveDisburse } = await import(
+    '@/lib/payments/disburse-withdrawal'
+  );
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from('withdrawal_requests')
+    .select(
+      'id, user_id, amount, currency, status, destination_type, destination_phone, provider_reference, metadata',
+    )
+    .eq('id', withdrawalId)
+    .maybeSingle();
+
+  if (row && shouldUseLiveDisburse()) {
+    const sent = await runWithdrawalDisbursement(
+      row as {
+        id: string;
+        user_id: string;
+        amount: number;
+        currency: string;
+        status: string;
+        destination_type: string;
+        destination_phone: string | null;
+        provider_reference: string | null;
+        metadata: Record<string, unknown> | null;
+      },
+      { narrative: 'Jameiyah circle payout cashout' },
+    );
+    revalidatePath('/admin/withdrawals');
+    revalidatePath('/wallet');
+    if (!sent.ok) {
+      redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+    }
+    redirect(
+      withNoticeQuery(
+        '/admin/withdrawals',
+        sent.message,
+        sent.status === 'completed' ? 'success' : 'info',
+      ),
+    );
+  }
 
   await callRpc('process_payout_cashout', {
     p_withdrawal_id: withdrawalId,
@@ -207,4 +352,7 @@ export async function processPayoutCashoutAction(formData: FormData): Promise<vo
 
   revalidatePath('/admin/withdrawals');
   revalidatePath('/wallet');
+  redirect(
+    withNoticeQuery('/admin/withdrawals', 'Payout cashout simulated.', 'success'),
+  );
 }

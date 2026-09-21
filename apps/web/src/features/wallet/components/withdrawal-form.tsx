@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import type { Route } from 'next';
 import { useActionState, useState } from 'react';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
@@ -24,6 +26,8 @@ export function WithdrawalForm({
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
   const needsOtp = Boolean(state.needsOtp);
+  const linkedPhone = defaultPhone.trim();
+  const hasLinkedMpesa = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
 
   return (
     <form action={action} className="space-y-4">
@@ -67,16 +71,37 @@ export function WithdrawalForm({
       {destinationType === 'mpesa' ? (
         <div className="space-y-2">
           <Label htmlFor="phone">{labels.mpesaPhone}</Label>
-          <Input
-            id="phone"
-            name="phone"
-            type="tel"
-            inputMode="tel"
-            placeholder={KE_PHONE_PLACEHOLDER}
-            defaultValue={defaultPhone}
-            required
-            className="h-11 text-base sm:h-10 sm:text-sm"
-          />
+          {hasLinkedMpesa ? (
+            <>
+              <input type="hidden" name="phone" value={linkedPhone} />
+              <p className="rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm">
+                Pays to linked number <span className="font-medium">{linkedPhone}</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Change it on{' '}
+                <Link href={'/profile' as Route} className="underline underline-offset-2">
+                  Profile
+                </Link>
+                . Checker sees this locked destination.
+              </p>
+            </>
+          ) : (
+            <>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                placeholder={KE_PHONE_PLACEHOLDER}
+                required
+                className="h-11 text-base sm:h-10 sm:text-sm"
+              />
+              <p className="text-xs text-muted-foreground">
+                Link this number on Profile after your first withdraw so future cash-outs stay
+                locked to you.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <>

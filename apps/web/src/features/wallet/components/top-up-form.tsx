@@ -20,7 +20,7 @@ export function TopUpForm({
   returnPath,
 }: {
   currency?: string;
-  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack';
+  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack' | 'intasend';
   labels: Dictionary['walletForms'];
   defaultAmount?: number;
   returnPath?: string | null;
@@ -33,6 +33,8 @@ export function TopUpForm({
       : provider === 'simulated'
         ? 50000
         : 1000;
+  const needsPhone =
+    provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
 
   return (
     <form action={action} className="space-y-4">
@@ -53,7 +55,7 @@ export function TopUpForm({
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
       </div>
-      {provider === 'mpesa' ? (
+      {needsPhone ? (
         <div className="space-y-2">
           <Label htmlFor="phone">{labels.mpesaPhone}</Label>
           <Input
@@ -125,7 +127,9 @@ export function TopUpForm({
                 ? labels.topUpWallet
                 : provider === 'paystack'
                   ? labels.payPaystack
-                  : provider === 'mpesa'
+                  : provider === 'mpesa' ||
+                      provider === 'intasend' ||
+                      provider === 'tendepay'
                     ? labels.payMpesa
                     : provider === 'bank'
                       ? labels.startBank

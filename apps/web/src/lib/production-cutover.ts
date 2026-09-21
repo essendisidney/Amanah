@@ -22,11 +22,11 @@ export function shouldBlockSimulatedPayments(): boolean {
 }
 
 export function assertProviderConfigured(
-  provider: 'mpesa' | 'bank' | 'paystack' | 'simulated',
+  provider: 'mpesa' | 'bank' | 'paystack' | 'intasend' | 'tendepay' | 'simulated',
 ): void {
   if (provider === 'simulated' && shouldBlockSimulatedPayments()) {
     throw new Error(
-      'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank|paystack.',
+      'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank|paystack|intasend|tendepay.',
     );
   }
   // Daraja credentials live on Edge Function `payments-mpesa`, not Next.js.
@@ -51,6 +51,21 @@ export function assertProviderConfigured(
     }
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error('Paystack requires SUPABASE_SERVICE_ROLE_KEY to settle payment intents.');
+    }
+  }
+  if (provider === 'intasend') {
+    if (
+      !(process.env.INTASEND_SECRET_KEY ?? '').trim() ||
+      !(process.env.INTASEND_PUBLISHABLE_KEY ?? '').trim()
+    ) {
+      throw new Error(
+        'IntaSend requires INTASEND_SECRET_KEY and INTASEND_PUBLISHABLE_KEY on the web app.',
+      );
+    }
+  }
+  if (provider === 'tendepay') {
+    if (!(process.env.TENDEPAY_API_KEY ?? '').trim()) {
+      throw new Error('TendePay requires TENDEPAY_API_KEY on the web app.');
     }
   }
 }

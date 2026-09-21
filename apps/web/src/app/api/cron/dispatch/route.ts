@@ -78,6 +78,10 @@ export async function GET(request: Request) {
     if (job === 'all' || job === 'sadaka') {
       results.sadaka = await invokeEdge('sadaka-ops', secret);
     }
+    if (job === 'all' || job === 'reconcile-payments') {
+      const { runPaymentReconcile } = await import('@/lib/payments/reconcile');
+      results.reconcile_payments = await runPaymentReconcile();
+    }
     return NextResponse.json({ ok: true, results });
   } catch (error) {
     return NextResponse.json(

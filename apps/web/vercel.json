@@ -31,6 +31,10 @@
     {
       "path": "/api/cron/dispatch?job=plan-renewals",
       "schedule": "45 6 * * *"
+    },
+    {
+      "path": "/api/cron/dispatch?job=reconcile-payments",
+      "schedule": "0 5 * * *"
     }
   ]
 }

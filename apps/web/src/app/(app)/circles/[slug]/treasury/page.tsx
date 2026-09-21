@@ -73,6 +73,8 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
     { data: entriesData },
     { data: alertsData },
     { data: openPenaltiesData },
+    { data: destData },
+    { data: payoutData },
   ] = await Promise.all([
     callRpc('treasury_snapshot', { p_jamiya_id: jamiya.id }),
     supabase
@@ -95,7 +97,7 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
       .order('name'),
     supabase
       .from('circle_investments')
-      .select('id, name, status, principal, current_value, currency, started_on')
+      .select('id, name, status, principal, current_value, currency, started_on, notes, created_by')
       .eq('jamiya_id', jamiya.id)
       .order('created_at', { ascending: false })
       .limit(40),
@@ -128,6 +130,24 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           .order('assessed_at', { ascending: false })
           .limit(50)
       : Promise.resolve({ data: [] as never[] }),
+    canManage
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from('circle_payout_destinations')
+          .select('id, kind, label, shortcode, account_reference')
+          .eq('jamiya_id', jamiya.id)
+          .eq('is_active', true)
+          .order('label')
+      : Promise.resolve({ data: [] as never[] }),
+    canManage
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from('treasury_payout_requests')
+          .select('id, amount, currency, status, narrative, created_at, destination_id')
+          .eq('jamiya_id', jamiya.id)
+          .order('created_at', { ascending: false })
+          .limit(12)
+      : Promise.resolve({ data: [] as never[] }),
   ]);
 
   const snap = snapData as Record<string, unknown> | null;
@@ -152,7 +172,11 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
     member_code: string | null;
     user_id: string;
   }>;
-  const userIds = memberRows.map((m) => m.user_id);
+  const invRows = (invData ?? []) as Array<Record<string, unknown>>;
+  const creatorIds = invRows
+    .map((inv) => (inv.created_by as string | null) ?? null)
+    .filter((id): id is string => Boolean(id));
+  const userIds = [...new Set([...memberRows.map((m) => m.user_id), ...creatorIds])];
   const { data: profiles } = userIds.length
     ? await supabase.from('profiles').select('id, full_name, email').in('id', userIds)
     : { data: [] };
@@ -250,15 +274,22 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           defaultAmount: Number(f.default_amount),
           currency: String(f.currency),
         }))}
-        investments={((invData ?? []) as Array<Record<string, unknown>>).map((inv) => ({
-          id: String(inv.id),
-          name: String(inv.name),
-          status: String(inv.status),
-          principal: Number(inv.principal),
-          currentValue: Number(inv.current_value),
-          currency: String(inv.currency),
-          startedOn: (inv.started_on as string | null) ?? null,
-        }))}
+        investments={invRows.map((inv) => {
+          const creator = inv.created_by
+            ? profileMap.get(String(inv.created_by))
+            : undefined;
+          return {
+            id: String(inv.id),
+            name: String(inv.name),
+            status: String(inv.status),
+            principal: Number(inv.principal),
+            currentValue: Number(inv.current_value),
+            currency: String(inv.currency),
+            startedOn: (inv.started_on as string | null) ?? null,
+            notes: (inv.notes as string | null) ?? null,
+            recordedBy: creator?.full_name || creator?.email || null,
+          };
+        })}
         members={memberRows.map((m) => {
           const p = profileMap.get(m.user_id);
           return {
@@ -314,6 +345,30 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
               }
             : null
         }
+        payoutDestinations={((destData ?? []) as Array<Record<string, unknown>>).map((d) => ({
+          id: String(d.id),
+          kind: String(d.kind),
+          label: String(d.label),
+          shortcode: (d.shortcode as string | null) ?? null,
+          accountReference: (d.account_reference as string | null) ?? null,
+        }))}
+        recentPayouts={(() => {
+          const destMap = new Map(
+            ((destData ?? []) as Array<Record<string, unknown>>).map((d) => [
+              String(d.id),
+              String(d.label),
+            ]),
+          );
+          return ((payoutData ?? []) as Array<Record<string, unknown>>).map((p) => ({
+            id: String(p.id),
+            amount: Number(p.amount),
+            currency: String(p.currency),
+            status: String(p.status),
+            narrative: (p.narrative as string | null) ?? null,
+            createdAt: String(p.created_at),
+            destinationLabel: destMap.get(String(p.destination_id)) ?? null,
+          }));
+        })()}
       />
     
     </AppPage>

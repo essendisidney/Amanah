@@ -33,7 +33,11 @@ export async function topUpWalletAction(
     return { success: false, message: 'Enter an amount of at least 100.' };
   }
 
-  if (provider === 'mpesa' && phoneRaw && !toE164Kenya(phoneRaw)) {
+  if (
+    (provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay') &&
+    phoneRaw &&
+    !toE164Kenya(phoneRaw)
+  ) {
     return {
       success: false,
       message: 'Use a Kenya mobile, e.g. 07… or +254….',
@@ -67,7 +71,10 @@ export async function topUpWalletAction(
     }
   }
 
-  if (provider === 'mpesa' && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+  if (
+    (provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay') &&
+    !/^\+[1-9]\d{7,14}$/.test(phone)
+  ) {
     return {
       success: false,
       message: 'M-Pesa requires an E.164 phone, e.g. +254712345678.',
@@ -95,7 +102,8 @@ export async function topUpWalletAction(
   if (requireReal && provider === 'simulated') {
     return {
       success: false,
-      message: 'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|bank|paystack.',
+      message:
+        'Simulated payments disabled. Set PAYMENT_PROVIDER=mpesa|bank|paystack|intasend.',
     };
   }
 
@@ -136,46 +144,6 @@ export async function topUpWalletAction(
     };
   }
 
-  if (provider === 'simulated') {
-    const { data: completeData, error: completeError } = await callRpc(
-      'complete_payment_intent',
-      {
-        p_intent_id: created.intent_id,
-        p_provider_reference: `sim:${created.intent_id}`,
-        p_metadata: { source: 'simulated' },
-      },
-    );
-
-    if (completeError) {
-      return { success: false, message: completeError.message };
-    }
-
-    const completed = completeData as { ok?: boolean; error?: string } | null;
-    if (!completed?.ok) {
-      return {
-        success: false,
-        message: completed?.error ?? 'Failed to credit wallet.',
-      };
-    }
-
-    revalidatePath('/wallet');
-    revalidatePath('/dashboard');
-    if (returnPath) {
-      redirect(
-        withNoticeQuery(
-          returnPath,
-          'Wallet topped up. You can pay your contribution now.',
-          'success',
-        ),
-      );
-    }
-    return {
-      success: true,
-      message: 'Wallet topped up (simulated payment).',
-      intentId: created.intent_id,
-    };
-  }
-
   if (provider === 'bank') {
     const baseUrl =
       process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL ?? '';
@@ -209,63 +177,57 @@ export async function topUpWalletAction(
     };
   }
 
-  if (provider === 'paystack') {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
-    const init = await initializePaystackTransaction({
-      intentId: created.intent_id,
-      amount,
-      currency,
-      email: user?.email,
-      phone: phone || user?.phone || null,
-      userId: user?.id,
-      metadata: {
-        kind: 'wallet_top_up',
-        ...(returnPath ? { return_path: returnPath } : {}),
-      },
-    });
-    if (!init.ok) {
-      return {
-        success: false,
-        message: `Checkout failed: ${init.error}`,
-        intentId: created.intent_id,
-      };
-    }
-
-    redirect(init.authorization_url);
-  }
-
-  // M-Pesa STK via Edge Function
-  const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
-  const stk = await invokeMpesaStk({
+  const { collectPayment } = await import('@/lib/payments/orchestrator');
+  const collected = await collectPayment({
     intentId: created.intent_id,
     amount,
-    phone,
-    description: 'Jameiyah top-up',
+    currency,
+    phone: phone || user?.phone || null,
+    email: user?.email,
+    userId: user?.id,
+    description: 'Jameiyah wallet top-up',
+    metadata: {
+      kind: 'wallet_top_up',
+      ...(returnPath ? { return_path: returnPath } : {}),
+    },
   });
 
-  revalidatePath('/wallet');
-  revalidatePath('/dashboard');
-
-  if (!stk.ok) {
+  if (!collected.ok) {
     return {
       success: false,
-      message: stk.error
-        ? `M-Pesa failed: ${stk.error}`
-        : 'Could not start M-Pesa prompt. Try again.',
+      message: collected.error,
       intentId: created.intent_id,
     };
   }
 
-  if (stk.fallback === 'simulated') {
+  if (collected.redirectUrl) {
+    redirect(collected.redirectUrl);
+  }
+
+  revalidatePath('/wallet');
+  revalidatePath('/dashboard');
+
+  if (collected.status === 'completed') {
+    if (returnPath) {
+      redirect(
+        withNoticeQuery(
+          returnPath,
+          'Wallet topped up. You can pay your contribution now.',
+          'success',
+        ),
+      );
+    }
     return {
       success: true,
       message:
-        'Wallet topped up (M-Pesa sandbox not configured — simulated completion).',
+        collected.fallback === 'simulated'
+          ? 'Wallet topped up (simulated payment).'
+          : (collected.customerMessage ?? 'Wallet topped up.'),
       intentId: created.intent_id,
     };
   }
@@ -273,8 +235,8 @@ export async function topUpWalletAction(
   return {
     success: true,
     message:
-      stk.customer_message ??
-      'M-Pesa prompt sent. Approve on your phone to complete top-up.',
+      collected.customerMessage ??
+      'Payment started. Approve on your phone if prompted.',
     intentId: created.intent_id,
   };
 }
@@ -308,51 +270,46 @@ export async function retryPaymentIntentAction(
     return { success: false, message: created?.error ?? 'Retry failed.' };
   }
 
-  if (created.provider === 'mpesa' && created.phone) {
-    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
-    const stk = await invokeMpesaStk({
-      intentId: created.intent_id,
-      amount: Number(created.amount ?? 0),
-      phone: created.phone,
-    });
-    revalidatePath('/wallet');
-    revalidatePath('/dashboard');
-    if (!stk.ok) {
-      return {
-        success: false,
-        message: stk.error ?? 'Could not start M-Pesa retry.',
-        intentId: created.intent_id,
-      };
-    }
-    return {
-      success: true,
-      message: stk.customer_message ?? 'M-Pesa prompt re-sent.',
-      intentId: created.intent_id,
-    };
-  }
-
-  if (created.provider === 'paystack') {
+  if (
+    created.provider === 'mpesa' ||
+    created.provider === 'intasend' ||
+    created.provider === 'tendepay' ||
+    created.provider === 'paystack'
+  ) {
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
-    const init = await initializePaystackTransaction({
-      intentId: created.intent_id,
-      amount: Number(created.amount ?? 0),
-      email: user?.email,
-      phone: created.phone ?? user?.phone ?? null,
-      userId: user?.id,
-      metadata: { kind: 'wallet_top_up', retry: true },
-    });
-    if (!init.ok) {
+    const { collectPayment } = await import('@/lib/payments/orchestrator');
+    const collected = await collectPayment(
+      {
+        intentId: created.intent_id,
+        amount: Number(created.amount ?? 0),
+        phone: created.phone ?? user?.phone ?? null,
+        email: user?.email,
+        userId: user?.id,
+        description: 'Jameiyah wallet top-up',
+        metadata: { kind: 'wallet_top_up', retry: true },
+      },
+      created.provider as 'mpesa' | 'intasend' | 'tendepay' | 'paystack',
+    );
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
+    if (!collected.ok) {
       return {
         success: false,
-        message: init.error,
+        message: collected.error,
         intentId: created.intent_id,
       };
     }
-    redirect(init.authorization_url);
+    if (collected.redirectUrl) {
+      redirect(collected.redirectUrl);
+    }
+    return {
+      success: true,
+      message: collected.customerMessage ?? 'Payment re-started.',
+      intentId: created.intent_id,
+    };
   }
 
   if (created.provider === 'simulated') {

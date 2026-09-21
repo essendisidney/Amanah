@@ -31,7 +31,7 @@ export async function updatePenaltySettingsAction(formData: FormData): Promise<v
   const mode = String(formData.get('payoutComplianceMode') ?? 'block');
 
   const supabase = await createClient();
-  await supabase
+  const { error } = await supabase
     .from('jamiyas')
     .update({
       late_contribution_penalty: Number.isFinite(late) ? late : 0,
@@ -46,14 +46,43 @@ export async function updatePenaltySettingsAction(formData: FormData): Promise<v
     .eq('id', jamiyaId);
 
   revalidateCircle(slug || undefined);
+
+  if (!slug) return;
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message), 'error');
+  }
+  redirectWithCircleNotice(slug, 'Penalty settings saved.', 'success');
 }
 
 export async function assessPenaltiesAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const slug = String(formData.get('slug') ?? '');
   if (!jamiyaId) return;
-  await callRpc('assess_contribution_penalties', { p_jamiya_id: jamiyaId });
+  const { data, error } = await callRpc('assess_contribution_penalties', {
+    p_jamiya_id: jamiyaId,
+  });
   revalidateCircle(slug || undefined);
+
+  if (!slug) return;
+  if (error) {
+    redirectWithCircleNotice(slug, mapMoneyError(error.message), 'error');
+  }
+  const result = data as { ok?: boolean; error?: string; assessed?: number } | null;
+  if (result && result.ok === false) {
+    redirectWithCircleNotice(
+      slug,
+      mapMoneyError(result.error ?? 'Could not assess penalties.'),
+      'error',
+    );
+  }
+  const assessed = Number(result?.assessed ?? 0);
+  redirectWithCircleNotice(
+    slug,
+    assessed > 0
+      ? `Assessed ${assessed} late-contribution penalt${assessed === 1 ? 'y' : 'ies'}.`
+      : 'No new late-contribution penalties to assess.',
+    'success',
+  );
 }
 
 export async function createBookEntryAction(formData: FormData): Promise<void> {

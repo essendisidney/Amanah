@@ -41,7 +41,10 @@ export async function POST(request: Request) {
 
   const providerEnv = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
   const provider =
-    providerEnv === 'mpesa' || providerEnv === 'bank' || providerEnv === 'paystack'
+    providerEnv === 'mpesa' ||
+    providerEnv === 'bank' ||
+    providerEnv === 'paystack' ||
+    providerEnv === 'intasend'
       ? providerEnv
       : 'simulated';
 
@@ -66,79 +69,47 @@ export async function POST(request: Request) {
     );
   }
 
-  if (provider === 'simulated') {
-    const { data: completed } = await supabase.rpc('complete_payment_intent', {
-      p_intent_id: created.intent_id,
-      p_provider_reference: `api-sim:${created.intent_id}`,
-      p_metadata: { source: 'api_v1' },
-    });
-    return NextResponse.json({ ok: true, intent_id: created.intent_id, completed });
-  }
-
-  if (provider === 'mpesa') {
-    if (!body.phone || !/^\+[1-9]\d{7,14}$/.test(body.phone)) {
-      return NextResponse.json(
-        { ok: false, error: 'PHONE_REQUIRED', intent_id: created.intent_id },
-        { status: 400 },
-      );
-    }
-    const { invokeMpesaStk } = await import('@/lib/payments/mpesa');
-    const stk = await invokeMpesaStk({
-      intentId: created.intent_id,
-      amount: body.amount,
-      phone: body.phone,
-    });
-    if (!stk.ok) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: stk.error ?? 'STK_FAILED',
-          intent_id: created.intent_id,
-        },
-        { status: 502 },
-      );
-    }
+  if (provider === 'bank') {
     return NextResponse.json({
       ok: true,
       intent_id: created.intent_id,
-      status: stk.fallback === 'simulated' ? 'completed' : 'processing',
+      status: 'pending',
       provider,
-      fallback: stk.fallback ?? null,
-      checkout_request_id: stk.checkout_request_id ?? null,
     });
   }
 
-  if (provider === 'paystack') {
-    const { initializePaystackTransaction } = await import('@/lib/payments/paystack');
-    const init = await initializePaystackTransaction({
-      intentId: created.intent_id,
-      amount: body.amount,
-      currency: (body.currency ?? 'KES').toUpperCase(),
-      email: user.email,
-      phone: body.phone ?? user.phone ?? null,
-      userId: user.id,
-      metadata: { kind: 'wallet_top_up', source: 'api_v1' },
-    });
-    if (!init.ok) {
-      return NextResponse.json(
-        { ok: false, error: init.error, intent_id: created.intent_id },
-        { status: 502 },
-      );
-    }
-    return NextResponse.json({
-      ok: true,
-      intent_id: created.intent_id,
-      status: 'processing',
-      provider,
-      authorization_url: init.authorization_url,
-      reference: init.reference,
-    });
+  const { collectPayment } = await import('@/lib/payments/orchestrator');
+  const collected = await collectPayment({
+    intentId: created.intent_id,
+    amount: body.amount,
+    currency: (body.currency ?? 'KES').toUpperCase(),
+    phone: body.phone ?? user.phone ?? null,
+    email: user.email,
+    userId: user.id,
+    description: 'Jameiyah wallet top-up',
+    metadata: { kind: 'wallet_top_up', source: 'api_v1' },
+  });
+
+  if (!collected.ok) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: collected.error,
+        intent_id: created.intent_id,
+      },
+      { status: collected.error.includes('phone') ? 400 : 502 },
+    );
   }
 
   return NextResponse.json({
     ok: true,
     intent_id: created.intent_id,
-    status: 'pending',
-    provider,
+    status: collected.status,
+    provider: collected.provider,
+    fallback: collected.fallback ?? null,
+    checkout_request_id: collected.checkoutRequestId ?? null,
+    authorization_url: collected.redirectUrl ?? null,
+    reference: collected.providerReference ?? null,
+    message: collected.customerMessage ?? null,
   });
 }

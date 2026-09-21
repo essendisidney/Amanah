@@ -223,6 +223,7 @@ export type Dictionary = {
     alreadyPaid: string;
     needWallet: string;
     needMore: string;
+    orPayPhone: string;
     paysFromBalance: string;
     amountOptional: string;
     pay: string;
@@ -231,6 +232,9 @@ export type Dictionary = {
     addMoneyToPay: string;
     partialAmount: string;
     payPartial: string;
+    mpesaPhone: string;
+    payPhone: string;
+    payPhoneInstead: string;
     calendar: string;
   };
   circles: {
@@ -345,6 +349,10 @@ export type Dictionary = {
     investTawarruqBody: string;
     investTawarruqCta: string;
     investYourCircles: string;
+    investMultiHint: string;
+    investActiveProjects: string;
+    investActiveProjectsDesc: string;
+    investStatementCta: string;
     investEmptyTitle: string;
     investEmptyDesc: string;
     investEmptyCta: string;
@@ -764,6 +772,7 @@ export const en: Dictionary = {
     alreadyPaid: '{amount} already paid',
     needWallet: 'Add money to your wallet, then pay this contribution.',
     needMore: 'You need about {amount} more to pay in full.',
+    orPayPhone: 'Or pay from your phone now.',
     paysFromBalance:
       'Pays from your Jameiyah balance into this circle. Leave amount blank for the full remaining balance.',
     amountOptional: 'Amount (optional)',
@@ -773,6 +782,9 @@ export const en: Dictionary = {
     addMoneyToPay: 'Add money to pay',
     partialAmount: 'Partial amount',
     payPartial: 'Pay partial',
+    mpesaPhone: 'M-Pesa phone',
+    payPhone: 'Pay with M-Pesa',
+    payPhoneInstead: 'Pay with M-Pesa instead',
     calendar: 'Calendar',
   },
   circles: {
@@ -880,22 +892,29 @@ export const en: Dictionary = {
     goalsTitle: 'Savings goals',
     goalsDesc: 'Hajj, Umra, Udhiyah, or any target.',
     investTitle: 'Investments',
-    investDesc: 'Shares, treasury projects, and partner finance.',
+    investDesc:
+      'Circle shares and group projects — never a personal portfolio. Each circle keeps its own books.',
     investSharesTitle: 'Circle shares',
     investSharesBody:
       'Buy and hold membership shares in your circle. Officers keep par value and dividends on record.',
     investSharesCta: 'Shares',
     investSharesJoinCta: 'Join a circle first',
-    investTreasuryTitle: 'Treasury projects',
+    investTreasuryTitle: 'Circle projects',
     investTreasuryBody:
-      'Circles record Shariah-conscious investments so members see where pooled capital goes.',
-    investTreasuryCta: 'Treasury',
+      'Officers record land, stock, or equipment in treasury. Members see the same projects on statements.',
+    investTreasuryCta: 'Projects',
     investTreasuryBrowseCta: 'Circles',
     investTawarruqTitle: 'Partner Tawarruq',
     investTawarruqBody:
       'Larger finance outside the circle pool, kept separate from interest-free Qard.',
     investTawarruqCta: 'Tawarruq',
     investYourCircles: 'Your circles',
+    investMultiHint:
+      'In more than one circle? Open each circle for its own shares, projects, and statement — pools stay separate.',
+    investActiveProjects: 'Active circle projects',
+    investActiveProjectsDesc:
+      "Projects across every circle you belong to. Funding and value live on that circle's treasury.",
+    investStatementCta: 'Statement',
     investEmptyTitle: 'No circles yet',
     investEmptyDesc:
       'Join or create a circle for shares and treasury records.',
@@ -1323,6 +1342,7 @@ export const sw: Dictionary = {
     alreadyPaid: '{amount} tayari imelipwa',
     needWallet: 'Ongeza pesa kwenye pochi yako, kisha lipa mchango huu.',
     needMore: 'Unahitaji takriban {amount} zaidi ili kulipa kamili.',
+    orPayPhone: 'Au lipa kutoka simu sasa.',
     paysFromBalance:
       'Hulipwa kutoka salio lako la Jameiyah kwenda mduara. Acha kiasi tupu kwa salio lote lililobaki.',
     amountOptional: 'Kiasi (si lazima)',
@@ -1332,6 +1352,9 @@ export const sw: Dictionary = {
     addMoneyToPay: 'Ongeza pesa ili kulipa',
     partialAmount: 'Kiasi cha sehemu',
     payPartial: 'Lipa sehemu',
+    mpesaPhone: 'Nambari ya M-Pesa',
+    payPhone: 'Lipa kwa M-Pesa',
+    payPhoneInstead: 'Lipa kwa M-Pesa badala yake',
     calendar: 'Kalenda',
   },
   circles: {
@@ -1440,22 +1463,29 @@ export const sw: Dictionary = {
     goalsTitle: 'Malengo ya akiba',
     goalsDesc: 'Okoa kwa Hajj, Umra, Udhiyah, au lengo lolote la kibinafsi.',
     investTitle: 'Uwekezaji',
-    investDesc: 'Hisa za mduara, miradi ya hazina, na chaguo za fedha za washirika.',
+    investDesc:
+      'Hisa na miradi ya mduara — si portfolio ya kibinafsi. Kila mduara una vitabu vyake.',
     investSharesTitle: 'Hisa za mduara',
     investSharesBody:
       'Nunua na shikilia hisa za uanachama katika mduara wako. Thamani ya hisa na gawio husimamiwa na maafisa kwa rekodi wazi.',
     investSharesCta: 'Fungua hisa',
     investSharesJoinCta: 'Jiunge na mduara kwanza',
-    investTreasuryTitle: 'Miradi ya hazina',
+    investTreasuryTitle: 'Miradi ya mduara',
     investTreasuryBody:
-      'Miduara inaweza kurekodi uwekezaji na miradi inayofuata Shariah katika hazina — ili wanachama waone pesa za pamoja zinakokwenda.',
-    investTreasuryCta: 'Fungua hazina',
+      'Maafisa hurekodi ardhi, hisa, au vifaa katika hazina. Wanachama wanaona miradi ileile kwenye taarifa.',
+    investTreasuryCta: 'Miradi',
     investTreasuryBrowseCta: 'Vinjari miduara',
     investTawarruqTitle: 'Tawarruq ya washirika',
     investTawarruqBody:
       'Unapohitaji fedha kubwa nje ya hazina ya mduara, omba Tawarruq kupitia washirika — tofauti na Qard isiyo na riba.',
     investTawarruqCta: 'Gundua Tawarruq',
     investYourCircles: 'Miduara yako',
+    investMultiHint:
+      'Uko katika miduara zaidi ya moja? Fungua kila mduara kwa hisa, miradi, na taarifa yake — hazina zinabaki tofauti.',
+    investActiveProjects: 'Miradi hai ya miduara',
+    investActiveProjectsDesc:
+      'Miradi katika kila mduara uliojiunga. Ufadhili na thamani ziko kwenye hazina ya mduara huo.',
+    investStatementCta: 'Taarifa',
     investEmptyTitle: 'Bado hakuna miduara',
     investEmptyDesc:
       'Jiunge au unda mduara ili ufikie hisa na rekodi za uwekezaji wa hazina.',

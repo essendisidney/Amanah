@@ -191,11 +191,12 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
               type="number"
               min={0}
               max={90}
+              className="min-h-11"
               defaultValue={Number(settings?.auto_fine_grace_days ?? 3)}
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" size="sm">
+            <Button type="submit" className="min-h-11">
               {dict.officer.saveAutoFine}
             </Button>
           </div>
@@ -203,7 +204,7 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
         <form action={runAutoFinesAction}>
           <input type="hidden" name="jamiyaId" value={jamiya.id} />
           <input type="hidden" name="slug" value={slug} />
-          <Button type="submit" size="sm" variant="outline">
+          <Button type="submit" variant="outline" className="min-h-11">
             {dict.officer.runAutoFinesNow}
           </Button>
         </form>

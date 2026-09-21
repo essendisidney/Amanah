@@ -165,13 +165,13 @@ export function CircleOpsPanel({
             {formatCurrency(fund.repaid, currency)}
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
-            <Button asChild size="sm">
+            <Button asChild className="min-h-11">
               <Link href={'/finance/qard' as Route}>Request / repay loan</Link>
             </Button>
-            <Button asChild size="sm" variant="outline">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={'/finance/welfare' as Route}>Welfare fund</Link>
             </Button>
-            <Button asChild size="sm" variant="outline">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={'/wallet' as Route}>Top up Money</Link>
             </Button>
           </div>
@@ -249,13 +249,15 @@ export function CircleOpsPanel({
               </select>
             </div>
             <div className="flex flex-wrap gap-2 sm:col-span-2">
-              <Button type="submit">Save settings</Button>
+              <Button type="submit" className="min-h-11">
+                Save settings
+              </Button>
             </div>
           </form>
           <form action={assessPenaltiesAction}>
             <input type="hidden" name="jamiyaId" value={jamiyaId} />
             <input type="hidden" name="slug" value={slug} />
-            <Button type="submit" variant="outline" size="sm">
+            <Button type="submit" variant="outline" className="min-h-11">
               Assess late contribution penalties now
             </Button>
           </form>
@@ -438,9 +440,9 @@ export function CircleOpsPanel({
                         step="0.01"
                         required
                         placeholder="Deposit"
-                        className="h-10"
+                        className="min-h-11"
                       />
-                      <Button type="submit" size="sm" className="min-h-10 shrink-0">
+                      <Button type="submit" className="min-h-11 shrink-0">
                         Deposit
                       </Button>
                     </form>
@@ -456,9 +458,9 @@ export function CircleOpsPanel({
                         step="0.01"
                         required
                         placeholder="Withdraw"
-                        className="h-10"
+                        className="min-h-11"
                       />
-                      <Button type="submit" size="sm" variant="outline" className="min-h-10 shrink-0">
+                      <Button type="submit" variant="outline" className="min-h-11 shrink-0">
                         Withdraw
                       </Button>
                     </form>
