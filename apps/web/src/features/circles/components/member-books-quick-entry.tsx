@@ -28,6 +28,8 @@ export function MemberBooksQuickEntry({
   parValue,
   defaultShareAmount = 5000,
   defaultMonthAmount = 2000,
+  defaultShareDate,
+  defaultStartDate,
   defaultMonths = 6,
 }: Props) {
   const today = new Date().toISOString().slice(0, 10);

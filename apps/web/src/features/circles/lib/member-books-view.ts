@@ -6,6 +6,8 @@ export function resolveBooksView(
 ): BooksView {
   if (raw === 'home' || raw === 'roster') return 'home';
   if (raw === 'grid' || raw === 'member' || raw === 'import') return raw;
+  // Bare /books with no view → home hub (not auto-member; that crashed Enter payments).
+  if (!raw) return 'home';
   return memberId ? 'member' : 'home';
 }
 
