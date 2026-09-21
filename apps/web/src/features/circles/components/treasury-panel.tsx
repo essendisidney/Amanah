@@ -589,7 +589,10 @@ export function TreasuryPanel({
 
       {canManage ? (
         <section className="space-y-3">
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+          <h2
+            id="member-fining"
+            className="scroll-mt-24 font-[family-name:var(--font-display)] text-xl font-semibold"
+          >
             Member fining
           </h2>
           <div id="open-fines" className="space-y-2 scroll-mt-24">

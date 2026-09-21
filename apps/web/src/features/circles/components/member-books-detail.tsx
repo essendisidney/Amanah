@@ -146,7 +146,7 @@ export function MemberBooksDetail({
       id: b.id,
       date: b.effective_date,
       amount: Number(b.amount) || 0,
-      label: 'Loan disbursed',
+      label: 'Facility disbursed',
       notes: b.notes,
       voidKind: 'book_entry' as const,
     })),
@@ -154,7 +154,7 @@ export function MemberBooksDetail({
       id: b.id,
       date: b.effective_date,
       amount: Number(b.amount) || 0,
-      label: 'Loan repayment',
+      label: 'Facility repayment',
       notes: b.notes,
       voidKind: 'book_entry' as const,
     })),
@@ -175,7 +175,7 @@ export function MemberBooksDetail({
         <div>
           <h2 className="text-2xl font-semibold text-foreground">{memberLabel}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Shares, monthly savings, and loans for this member.
+            Shares, monthly savings, and facilities for this member.
           </p>
         </div>
         <Link
@@ -189,7 +189,7 @@ export function MemberBooksDetail({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Share capital" value={formatCurrency(totals.shareAmount, currency)} sub={totals.shareShares > 0 ? `${totals.shareShares.toLocaleString()} shares` : 'None recorded'} />
         <Stat label="Contributions" value={formatCurrency(totals.savings, currency)} sub={`${contributionRows.length} month${contributionRows.length === 1 ? '' : 's'}`} />
-        <Stat label="Loan outstanding" value={formatCurrency(loanOutstanding, currency)} sub={`Borrowed ${formatCurrency(totals.loanDisbursed + totals.qardAmount, currency)}`} />
+        <Stat label="Facility outstanding" value={formatCurrency(loanOutstanding, currency)} sub={`Disbursed ${formatCurrency(totals.loanDisbursed + totals.qardAmount, currency)}`} />
         <Stat label="Repaid" value={formatCurrency(totals.loanRepaid + totals.qardRepaid, currency)} sub="Cashbook + Qard" />
       </div>
 

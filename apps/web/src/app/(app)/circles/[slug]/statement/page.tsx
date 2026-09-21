@@ -198,7 +198,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           hint: 'Monthly member books',
         },
         {
-          label: 'Penalties',
+          label: 'Fines',
           value: money(summary.penalties_total, jamiya.currency),
           hint:
             Number(summary.penalties_open ?? 0) > 0
@@ -208,12 +208,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                 : 'No fines recorded',
         },
         {
-          label: 'Loan outstanding',
+          label: 'Facility outstanding',
           value: money(summary.loan_outstanding, jamiya.currency),
           hint:
             Number(summary.loan_principal ?? 0) > 0
               ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-              : 'No Qard loans',
+              : 'No open facility',
         },
       ]
     : isRotating
@@ -229,7 +229,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             hint: 'Merry-go-round pot position',
           },
           {
-            label: 'Penalties',
+            label: 'Fines',
             value: money(summary.penalties_total, jamiya.currency),
             hint:
               Number(summary.penalties_open ?? 0) > 0
@@ -239,12 +239,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                   : 'No fines recorded',
           },
           {
-            label: 'Loan outstanding',
+            label: 'Facility outstanding',
             value: money(summary.loan_outstanding, jamiya.currency),
             hint:
               Number(summary.loan_principal ?? 0) > 0
                 ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-                : 'No Qard loans',
+                : 'No open facility',
           },
         ]
       : [
@@ -259,7 +259,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             hint: 'Dedicated pocket balances',
           },
           {
-            label: 'Penalties',
+            label: 'Fines',
             value: money(summary.penalties_total, jamiya.currency),
             hint:
               Number(summary.penalties_open ?? 0) > 0
@@ -269,12 +269,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                   : 'No fines recorded',
           },
           {
-            label: 'Loan outstanding',
+            label: 'Facility outstanding',
             value: money(summary.loan_outstanding, jamiya.currency),
             hint:
               Number(summary.loan_principal ?? 0) > 0
                 ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-                : 'No Qard loans',
+                : 'No open facility',
           },
         ];
 
@@ -393,10 +393,10 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {isShareDividend
-              ? 'Share capital, monthly books, penalties, and loans for this member.'
+              ? 'Share capital, monthly books, fines, and facility balance for this member.'
               : isRotating
-                ? 'Merry-go-round cycles, pot slot, penalties, and loans for this member.'
-                : 'Savings contributions, pockets, penalties, and loans for this member.'}
+                ? 'Merry-go-round cycles, pot slot, fines, and facility balance for this member.'
+                : 'Savings contributions, pockets, fines, and facility balance for this member.'}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -533,13 +533,15 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       />
 
       <StatementSection
-        title="Fines & penalties"
-        description="Late, missed, or other fines assessed against this member."
+        title="Fines"
+        description="Late or meeting fines assessed against this member. Officers record them from Treasury → Member fining."
         empty="No fines on this statement."
         emptyHref={
-          isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
+          isOfficer
+            ? (`/circles/${slug}/treasury#member-fining` as Route)
+            : (`/circles/${slug}` as Route)
         }
-        emptyLabel={isOfficer ? 'Open treasury' : 'Back to circle'}
+        emptyLabel={isOfficer ? 'Record a fine' : 'Back to circle'}
         rows={penalties.map((p) => ({
           key: String(p.id),
           title: kindLabel(p.kind),
@@ -560,6 +562,27 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         }
       />
 
+      {isOfficer ? (
+        <div
+          id="record-fine"
+          className="space-y-3 rounded-xl border border-border bg-card p-5 print:hidden"
+        >
+          <div>
+            <h3 className="font-semibold text-foreground">Record a fine for {viewedName}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Same as Treasury → Member fining. It will show under Fines on this statement.
+            </p>
+          </div>
+          <p className="text-sm">
+            <Link
+              href={`/circles/${slug}/treasury#member-fining` as Route}
+              className="font-medium text-accent underline-offset-4 hover:underline"
+            >
+              Open full fine form on Treasury →
+            </Link>
+          </p>
+        </div>
+      ) : null}
       {isOfficer &&
       penalties.some((p) => String(p.status) === 'open') ? (
         <div className="space-y-2 print:hidden">
