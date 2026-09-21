@@ -182,7 +182,7 @@ export function MemberBooksDetail({
           href={`/circles/${slug}/statement?memberId=${memberId}` as Route}
           className="text-sm font-medium text-accent underline-offset-4 hover:underline"
         >
-          Full statement →
+          Full 360 →
         </Link>
       </div>
 

@@ -103,7 +103,7 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
                     {formatCurrency(m.savings, currency)}
                   </span>
                   <span>
-                    <span className="text-muted-foreground">Loan </span>
+                    <span className="text-muted-foreground">Facility </span>
                     {formatCurrency(m.loanOut, currency)}
                   </span>
                   {isIncomplete(m) ? (
@@ -115,16 +115,16 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Link
-                  href={booksHref(slug, 'member', m.id) as Route}
+                  href={`/circles/${slug}/statement?memberId=${m.id}` as Route}
                   className="inline-flex min-h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                 >
-                  Enter payments
+                  Open 360
                 </Link>
                 <Link
                   href={booksHref(slug, 'member', m.id) as Route}
                   className="inline-flex min-h-10 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-muted/50"
                 >
-                  View record
+                  Enter payments
                 </Link>
               </div>
             </div>

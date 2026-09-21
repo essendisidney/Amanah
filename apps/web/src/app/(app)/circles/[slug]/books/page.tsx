@@ -425,11 +425,14 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             Member payments
           </h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Record shares, monthly savings, and facilities for each member — or preview the whole
-            chama totals below.
+            Whole chama 360 is at the top. For one person, tap <strong className="font-medium text-foreground">Open 360</strong>{' '}
+            on their name.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" className="min-h-11">
+            <Link href={`#chama-glance`}>Whole chama 360</Link>
+          </Button>
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/officer#chama-glance` as Route}>Officer console</Link>
           </Button>

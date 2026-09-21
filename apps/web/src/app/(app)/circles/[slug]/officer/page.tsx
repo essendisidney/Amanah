@@ -381,15 +381,23 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               href={`/circles/${slug}/statement` as Route}
               className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
             >
-              Statements
+              Member 360
             </Link>
           ) : (
-            <Link
-              href={`/circles/${slug}/treasury` as Route}
-              className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-            >
-              Treasury
-            </Link>
+            <>
+              <Link
+                href={`/circles/${slug}/books#chama-glance` as Route}
+                className="rounded-md border border-accent/40 bg-accent/5 px-3 py-2 text-sm font-medium min-h-11 inline-flex items-center"
+              >
+                Whole chama 360
+              </Link>
+              <Link
+                href={`/circles/${slug}/treasury` as Route}
+                className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
+              >
+                Treasury
+              </Link>
+            </>
           )}
           <Link
             href={`/circles/${slug}/community` as Route}

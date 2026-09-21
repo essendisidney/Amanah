@@ -301,13 +301,13 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-            {viewingOther ? 'Member statement' : 'My statement'}
+            {viewingOther ? 'Member 360' : 'My 360'}
           </p>
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
-            {jamiya.name}
+            {viewingOther ? viewedName : jamiya.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {viewingOther ? `${viewedName} · ` : ''}
+            {viewingOther ? `${jamiya.name} · ` : ''}
             Member ID {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
             {stmt.payout_position != null ? ` · payout slot ${stmt.payout_position}` : ''}
             {stmt.joined_at ? ` · joined ${formatDate(stmt.joined_at)}` : ''}
@@ -407,14 +407,14 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       <section className="space-y-3">
         <div>
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            At a glance
+            {viewingOther ? `${viewedName}'s 360` : 'Your 360'}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {isShareDividend
-              ? 'Share capital, monthly books, fines, and facility balance for this member.'
+              ? 'Share capital, monthly books, fines, and facility balance — one screen.'
               : isRotating
-                ? 'Merry-go-round cycles, pot slot, fines, and facility balance for this member.'
-                : 'Savings contributions, pockets, fines, and facility balance for this member.'}
+                ? 'Merry-go-round cycles, pot slot, fines, and facility balance — one screen.'
+                : 'Savings contributions, pockets, fines, and facility balance — one screen.'}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
