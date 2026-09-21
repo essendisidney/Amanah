@@ -200,10 +200,7 @@ export function CreateCircleForm({
         <div className="space-y-3">
           <div>
             <Label>How will this circle work?</Label>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Pick one first. Templates below fill amounts and cadence — they will not hide this
-              choice.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Pick one. Templates fill amounts next.</p>
           </div>
           <input type="hidden" {...register('challengeKind')} />
           <div className="grid gap-3 sm:grid-cols-3">
@@ -212,17 +209,17 @@ export function CreateCircleForm({
                 {
                   value: 'rotating' as const,
                   title: 'Merry-go-round',
-                  hint: 'Monthly contributions · payout slots · who gets the pot',
+                  hint: 'Contributions · payout slots',
                 },
                 {
                   value: 'share_dividend' as const,
                   title: 'Table banking',
-                  hint: 'Share capital · monthly savings grid · loans',
+                  hint: 'Shares · savings · loans',
                 },
                 {
                   value: 'savings' as const,
                   title: 'Savings',
-                  hint: 'Contribution calendar · goals · no rotating pot',
+                  hint: 'Calendar · goals',
                 },
               ] as const
             ).map((card) => {

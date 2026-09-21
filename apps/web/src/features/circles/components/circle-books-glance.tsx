@@ -37,19 +37,19 @@ export function CircleBooksGlance({
     {
       label: 'Members',
       value: String(n(data.members_active)),
-      hint: 'Active + suspended',
+      hint: 'Active',
       href: `/circles/${slug}/statement` as Route,
     },
     {
       label: 'Share capital',
       value: formatCurrency(n(data.share_capital), currency),
-      hint: 'All member buy-ins',
+      hint: 'Buy-ins',
       href: `/circles/${slug}/books?view=grid` as Route,
     },
     {
       label: 'Books contributions',
       value: formatCurrency(n(data.book_contributions), currency),
-      hint: 'Monthly member books total',
+      hint: 'Monthly books',
       href: `/circles/${slug}/books?view=grid` as Route,
     },
     {

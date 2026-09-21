@@ -59,7 +59,7 @@ export function TopUpForm({
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
         {provider === 'intasend' || provider === 'mpesa' || provider === 'tendepay' ? (
-          <p className="text-xs text-muted-foreground">You can test with as little as Ksh 10.</p>
+          <p className="text-xs text-muted-foreground">Min Ksh 10.</p>
         ) : null}
       </div>
       {needsPhone ? (

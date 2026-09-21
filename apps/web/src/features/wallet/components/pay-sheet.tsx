@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useEffect, useState, type ComponentType } from 'react';
+import { useState, type ComponentType } from 'react';
 import {
   ArrowUpFromLine,
   Calculator,
@@ -28,7 +28,7 @@ type PayLabels = Dictionary['paySheet'];
 type PayLink = {
   href: Route;
   label: string;
-  hint: string;
+  hint?: string;
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   tint: string;
 };
@@ -68,11 +68,8 @@ function LinkGroup({
                 >
                   <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-semibold text-foreground">
-                    {action.label}
-                  </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{action.hint}</span>
+                <span className="min-w-0 flex-1 text-[15px] font-semibold text-foreground">
+                  {action.label}
                 </span>
                 <ChevronRight
                   className="h-4 w-4 shrink-0 text-muted-foreground/70"
@@ -105,13 +102,7 @@ export function PaySheet({
   dueCircleName?: string | null;
   dueOverdue?: boolean;
 }) {
-  const [ready, setReady] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-
-  useEffect(() => {
-    const id = window.requestAnimationFrame(() => setReady(true));
-    return () => window.cancelAnimationFrame(id);
-  }, []);
 
   const primary: PayLink[] = [
     ...(dueHref
@@ -120,7 +111,6 @@ export function PaySheet({
           {
             href: '/circles' as Route,
             label: labels.payCircle,
-            hint: labels.payCircleHint,
             icon: LayoutGrid,
             tint: 'amanah-tint-pay',
           } satisfies PayLink,
@@ -128,21 +118,18 @@ export function PaySheet({
     {
       href: '/wallet#withdraw' as Route,
       label: labels.withdraw,
-      hint: labels.withdrawHint,
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
     },
     {
       href: '/finance/insights' as Route,
       label: labels.insights,
-      hint: labels.insightsHint,
       icon: ChartNoAxesCombined,
       tint: 'amanah-tint-send',
     },
     {
       href: '/wallet' as Route,
       label: labels.openMoney,
-      hint: labels.openMoneyHint,
       icon: Wallet,
       tint: 'amanah-tint-add',
     },
@@ -152,68 +139,55 @@ export function PaySheet({
     {
       href: '/finance/goals' as Route,
       label: labels.goals,
-      hint: labels.goalsHint,
       icon: Target,
       tint: 'amanah-tint-send',
     },
     {
       href: '/finance/qard' as Route,
       label: labels.qard,
-      hint: labels.qardHint,
       icon: Landmark,
       tint: 'amanah-tint-pay',
     },
     {
       href: '/finance/welfare' as Route,
       label: labels.welfare,
-      hint: labels.welfareHint,
       icon: HandHeart,
       tint: 'amanah-tint-add',
     },
     {
       href: '/finance/invest' as Route,
       label: labels.invest,
-      hint: labels.investHint,
       icon: TrendingUp,
       tint: 'amanah-tint-send',
     },
     {
       href: '/finance/tawarruq' as Route,
       label: labels.tawarruq,
-      hint: labels.tawarruqHint,
       icon: Landmark,
       tint: 'amanah-tint-withdraw',
     },
     {
       href: '/sadaka' as Route,
       label: labels.sadaka,
-      hint: labels.sadakaHint,
       icon: HandHeart,
       tint: 'amanah-tint-add',
     },
     {
       href: '/zakat' as Route,
       label: labels.zakat,
-      hint: labels.zakatHint,
       icon: Calculator,
       tint: 'amanah-tint-pay',
     },
     {
       href: '/finance' as Route,
       label: labels.allFinance,
-      hint: labels.allFinanceHint,
       icon: Wallet,
       tint: 'amanah-tint-send',
     },
   ];
 
   return (
-    <div
-      className={cn(
-        'relative mx-auto w-full max-w-[390px] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:max-w-md',
-        ready ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-      )}
-    >
+    <div className="relative mx-auto w-full max-w-[390px] md:max-w-md">
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-x-6 -top-8 h-56 rounded-[2.5rem] bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.12)_0%,_rgba(91,141,239,0.08)_45%,_transparent_70%)]"
@@ -276,7 +250,6 @@ export function PaySheet({
           <span className="relative text-[15px] font-semibold tracking-tight">
             {labels.addMoney}
           </span>
-          <span className="relative text-xs text-white/70">{labels.addMoneyHint}</span>
         </Link>
 
         {dueHref && dueAmountLabel ? (
@@ -302,11 +275,9 @@ export function PaySheet({
                 <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground">
                   {dueAmountLabel}
                 </p>
-                <p className="mt-1 truncate text-xs text-muted-foreground">
-                  {dueCircleName
-                    ? `${labels.payDueHint} · ${dueCircleName}`
-                    : labels.payDueHint}
-                </p>
+                {dueCircleName ? (
+                  <p className="mt-1 truncate text-xs text-muted-foreground">{dueCircleName}</p>
+                ) : null}
               </div>
               <ChevronRight
                 className="mt-1 h-5 w-5 shrink-0 text-muted-foreground"

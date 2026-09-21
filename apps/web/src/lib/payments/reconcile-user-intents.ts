@@ -3,12 +3,25 @@ import { getPaymentStatus } from '@/lib/payments/orchestrator';
 import { logger } from '@/lib/observability';
 
 const STALE_MS = 6 * 60 * 60 * 1000;
+/** Never block Money page render waiting on provider status. */
+const BUDGET_MS = 2500;
+const MAX_ROWS = 3;
 
 /**
  * On Money page load: settle paid IntaSend/TendePay intents, and clear
  * long-stuck processing rows so the UI does not look unpaid.
+ * Hard time budget — page must not hang if the rail is slow.
  */
 export async function reconcileUserPaymentIntents(userId: string): Promise<void> {
+  await Promise.race([
+    reconcileInner(userId),
+    new Promise<void>((resolve) => {
+      setTimeout(resolve, BUDGET_MS);
+    }),
+  ]);
+}
+
+async function reconcileInner(userId: string): Promise<void> {
   const admin = createServiceRoleClient();
   const { data } = await admin
     .from('payment_intents')
@@ -17,7 +30,7 @@ export async function reconcileUserPaymentIntents(userId: string): Promise<void>
     .in('status', ['pending', 'processing'])
     .in('provider', ['intasend', 'tendepay', 'paystack'])
     .order('created_at', { ascending: false })
-    .limit(8);
+    .limit(MAX_ROWS);
 
   const rows = (data ?? []) as Array<{
     id: string;
@@ -28,12 +41,12 @@ export async function reconcileUserPaymentIntents(userId: string): Promise<void>
     created_at: string;
   }>;
 
-  for (const row of rows) {
-    const age = Date.now() - new Date(row.created_at).getTime();
-    const ref = row.provider_reference?.trim() || row.checkout_request_id?.trim() || '';
+  await Promise.allSettled(
+    rows.map(async (row) => {
+      const age = Date.now() - new Date(row.created_at).getTime();
+      const ref = row.provider_reference?.trim() || row.checkout_request_id?.trim() || '';
 
-    if (row.provider === 'intasend' || row.provider === 'tendepay') {
-      if (ref) {
+      if ((row.provider === 'intasend' || row.provider === 'tendepay') && ref) {
         try {
           const status = await getPaymentStatus(
             ref,
@@ -46,14 +59,14 @@ export async function reconcileUserPaymentIntents(userId: string): Promise<void>
               p_checkout_request_id: row.checkout_request_id,
               p_metadata: { source: 'wallet_page_reconcile', provider: row.provider },
             });
-            continue;
+            return;
           }
           if (status.ok && status.status === 'failed') {
             await admin.rpc('fail_payment_intent', {
               p_intent_id: row.id,
               p_error_message: `${row.provider} ${status.status}`,
             });
-            continue;
+            return;
           }
         } catch (err) {
           logger.warn('wallet reconcile status failed', {
@@ -62,13 +75,13 @@ export async function reconcileUserPaymentIntents(userId: string): Promise<void>
           });
         }
       }
-    }
 
-    if (age > STALE_MS) {
-      await admin.rpc('fail_payment_intent', {
-        p_intent_id: row.id,
-        p_error_message: 'Expired — no confirmation. Retry if you still need to top up.',
-      });
-    }
-  }
+      if (age > STALE_MS) {
+        await admin.rpc('fail_payment_intent', {
+          p_intent_id: row.id,
+          p_error_message: 'Expired — no confirmation. Retry if you still need to top up.',
+        });
+      }
+    }),
+  );
 }
