@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
-import { redirectWithCircleNotice } from '../lib/circle-notice';
+import { redirectWithCircleNotice, mapMoneyError } from '../lib/circle-notice';
 import { booksPath } from '../lib/books-path';
 
 function revalidateBooks(slug: string) {
@@ -12,6 +12,21 @@ function revalidateBooks(slug: string) {
 }
 
 type LoanEventType = 'disbursement' | 'profit' | 'repayment' | 'rollover';
+
+const LOAN_EVENT_ERRORS: Record<string, string> = {
+  REPAYMENT_EXCEEDS_PRINCIPAL:
+    'Repayment is more than the loan balance. Save a New loan first (or lower the amount).',
+  REPAYMENT_AMOUNT_REQUIRED: 'Enter a repayment amount.',
+  DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the new loan amount.',
+  PROFIT_AMOUNT_REQUIRED: 'Enter the profit amount.',
+  PROFIT_EXCEEDS_REPAYMENT: 'Profit portion cannot be more than the total repayment.',
+  INVALID_NEW_PRINCIPAL: 'Enter a valid new loan balance for the rollover.',
+  INVALID_EVENT_TYPE: 'Invalid loan event type.',
+  INVALID_AMOUNT: 'Enter a valid amount.',
+  INVALID_DATE: 'Pick a valid date.',
+  FORBIDDEN: 'Only circle officers can record loan ledger events.',
+  UNAUTHENTICATED: 'Sign in again, then retry.',
+};
 
 export async function recordMemberLoanEventAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
@@ -24,11 +39,25 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
   const effectiveDate = String(formData.get('effectiveDate') ?? '');
   const notes = String(formData.get('notes') ?? '').trim();
 
-  if (!jamiyaId || !slug || !memberId || !effectiveDate) return;
+  if (!jamiyaId || !slug || !memberId) {
+    return;
+  }
+  if (!effectiveDate) {
+    redirectWithCircleNotice(slug, 'Pick a date for this loan event.', 'error', booksPath(memberId));
+  }
 
   const allowed: LoanEventType[] = ['disbursement', 'profit', 'repayment', 'rollover'];
   if (!allowed.includes(eventType)) {
     redirectWithCircleNotice(slug, 'Invalid loan event type.', 'error', booksPath(memberId));
+  }
+
+  if (eventType !== 'rollover' && (!Number.isFinite(amount) || amount <= 0)) {
+    redirectWithCircleNotice(
+      slug,
+      'Enter an amount greater than zero.',
+      'error',
+      booksPath(memberId),
+    );
   }
 
   const { data, error } = await callRpc('record_member_loan_event', {
@@ -49,11 +78,16 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
     redirectWithCircleNotice(slug, error.message, 'error', booksPath(memberId));
   }
 
-  const result = data as { ok?: boolean; error?: string; principal_outstanding?: number } | null;
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    principal_outstanding?: number;
+  } | null;
   if (!result?.ok) {
+    const code = result?.error ?? 'FAILED';
     redirectWithCircleNotice(
       slug,
-      result?.error ?? 'Could not save loan event.',
+      LOAN_EVENT_ERRORS[code] ?? mapMoneyError(code) ?? `Could not save loan event (${code}).`,
       'error',
       booksPath(memberId),
     );
@@ -62,11 +96,19 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
   revalidateBooks(slug);
   const balance =
     result.principal_outstanding != null
-      ? ` Balance now ${result.principal_outstanding.toLocaleString()}.`
+      ? ` Balance now ${Number(result.principal_outstanding).toLocaleString()}.`
       : '';
+  const label =
+    eventType === 'disbursement'
+      ? 'New loan'
+      : eventType === 'repayment'
+        ? 'Repayment'
+        : eventType === 'profit'
+          ? 'Profit'
+          : 'Rollover';
   redirectWithCircleNotice(
     slug,
-    `Loan ${eventType.replace('_', ' ')} recorded.${balance}`,
+    `${label} recorded.${balance}`,
     'success',
     booksPath(memberId),
   );

@@ -287,7 +287,7 @@ BEGIN
       p_jamiya_id, p_member_id, 'loan_profit', v_profit, COALESCE(v_currency, 'KES'),
       p_effective_date, v_uid, COALESCE(p_notes, 'Profit on repayment'), jsonb_build_object('loan_event_id', v_event_id)
     );
-  ELSIF p_book_type IS NOT NULL THEN
+  ELSIF v_book_type IS NOT NULL THEN
     INSERT INTO public.book_entries (
       jamiya_id, member_id, entry_type, amount, currency, effective_date, entered_by, notes, metadata
     ) VALUES (

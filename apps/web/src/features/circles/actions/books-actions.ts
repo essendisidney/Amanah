@@ -46,16 +46,62 @@ export async function recordMemberBookEntryAction(formData: FormData): Promise<v
   const notes = String(formData.get('notes') ?? '').trim();
 
   const allowed = new Set(['contribution', 'loan', 'loan_repayment']);
-  if (
-    !jamiyaId ||
-    !slug ||
-    !memberId ||
-    !allowed.has(entryType) ||
-    !effectiveDate ||
-    !Number.isFinite(amount) ||
-    amount <= 0
-  ) {
+  if (!jamiyaId || !slug || !memberId) {
     return;
+  }
+  if (!allowed.has(entryType)) {
+    redirectWithCircleNotice(slug, 'Unknown entry type.', 'error', booksPath(memberId));
+  }
+  if (!effectiveDate) {
+    redirectWithCircleNotice(slug, 'Pick a date.', 'error', booksPath(memberId));
+  }
+  if (!Number.isFinite(amount) || amount <= 0) {
+    redirectWithCircleNotice(
+      slug,
+      'Enter an amount greater than zero.',
+      'error',
+      booksPath(memberId),
+    );
+  }
+
+  // Keep loan ledger + books in sync (Asha Excel path).
+  if (entryType === 'loan' || entryType === 'loan_repayment') {
+    const { data, error } = await callRpc('record_member_loan_event', {
+      p_jamiya_id: jamiyaId,
+      p_member_id: memberId,
+      p_event_type: entryType === 'loan' ? 'disbursement' : 'repayment',
+      p_amount: amount,
+      p_effective_date: effectiveDate,
+      p_notes: notes || entryType.replaceAll('_', ' '),
+      p_profit_amount: 0,
+      p_new_principal: null,
+    });
+    if (error) {
+      redirectWithCircleNotice(slug, error.message, 'error', booksPath(memberId));
+    }
+    const result = data as { ok?: boolean; error?: string; principal_outstanding?: number } | null;
+    if (!result?.ok) {
+      const code = result?.error ?? 'FAILED';
+      const messages: Record<string, string> = {
+        REPAYMENT_EXCEEDS_PRINCIPAL:
+          'Repayment is more than the loan balance. Save the loan first (or lower the amount).',
+        REPAYMENT_AMOUNT_REQUIRED: 'Enter a repayment amount.',
+        DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the loan amount.',
+      };
+      redirectWithCircleNotice(
+        slug,
+        messages[code] ?? `Could not record ${entryType.replaceAll('_', ' ')} (${code}).`,
+        'error',
+        booksPath(memberId),
+      );
+    }
+    revalidateBooks(slug);
+    redirectWithCircleNotice(
+      slug,
+      entryType === 'loan' ? 'Loan recorded.' : 'Loan repayment recorded.',
+      'success',
+      booksPath(memberId),
+    );
   }
 
   const result = await importRows(jamiyaId, [
@@ -68,7 +114,7 @@ export async function recordMemberBookEntryAction(formData: FormData): Promise<v
     },
   ]);
 
-  if (!result.ok) {
+  if (!result.ok || !result.imported) {
     redirectWithCircleNotice(
       slug,
       result.error ?? 'Could not record entry.',
@@ -78,13 +124,7 @@ export async function recordMemberBookEntryAction(formData: FormData): Promise<v
   }
 
   revalidateBooks(slug);
-  const label =
-    entryType === 'contribution'
-      ? 'Savings recorded.'
-      : entryType === 'loan'
-        ? 'Loan recorded.'
-        : 'Loan repayment recorded.';
-  redirectWithCircleNotice(slug, label, 'success', booksPath(memberId));
+  redirectWithCircleNotice(slug, 'Savings recorded.', 'success', booksPath(memberId));
 }
 
 /** Backfill monthly savings in one go (e.g. Feb–Aug × 2000). */

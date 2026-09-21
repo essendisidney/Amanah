@@ -144,6 +144,7 @@ export function MemberLoanLedger({
           eventType="repayment"
           showProfitSplit
           defaultDate={today}
+          helpText="Total paid. Put any profit portion in the field next to it (rest reduces loan balance). Save a New loan first if balance is 0."
         />
         <LoanEventForm
           title="Rollover + top-up"
