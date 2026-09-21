@@ -273,7 +273,13 @@ export async function levyFineAction(formData: FormData): Promise<void> {
   const amountRaw = String(formData.get('amount') ?? '').trim();
   const amount = amountRaw ? Number(amountRaw) : null;
   const notes = String(formData.get('notes') ?? '').trim() || null;
-  if (!jamiyaId || !slug || !memberId || !fineCategoryId) return;
+  const returnPath = String(formData.get('returnPath') ?? '/treasury').trim() || '/treasury';
+  if (!jamiyaId || !slug || !memberId || !fineCategoryId) {
+    if (slug) {
+      redirectWithCircleNotice(slug, 'Pick member and fine category.', 'error', returnPath);
+    }
+    return;
+  }
 
   const { data, error } = await callRpc('levy_member_fine', {
     p_jamiya_id: jamiyaId,
@@ -284,17 +290,17 @@ export async function levyFineAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    redirectWithCircleNotice(slug, error.message, 'error', '/treasury');
+    redirectWithCircleNotice(slug, error.message, 'error', returnPath);
     return;
   }
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    redirectWithCircleNotice(slug, result?.error ?? 'Could not levy fine.', 'error', '/treasury');
+    redirectWithCircleNotice(slug, result?.error ?? 'Could not levy fine.', 'error', returnPath);
     return;
   }
 
   revalidateTreasury(slug);
-  redirectWithCircleNotice(slug, 'Fine added to member statement.', 'success', '/treasury');
+  redirectWithCircleNotice(slug, 'Fine added to member statement.', 'success', returnPath);
 }
 
 export async function resolveMemberPenaltyAction(formData: FormData): Promise<void> {

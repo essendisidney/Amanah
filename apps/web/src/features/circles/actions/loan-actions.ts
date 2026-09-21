@@ -38,17 +38,22 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
   const newPrincipal = formData.get('newPrincipal');
   const effectiveDate = String(formData.get('effectiveDate') ?? '');
   const notes = String(formData.get('notes') ?? '').trim();
+  const returnPathRaw = String(formData.get('returnPath') ?? '').trim();
+  const back =
+    returnPathRaw && returnPathRaw.startsWith('/')
+      ? returnPathRaw.replace(`/circles/${slug}`, '') || '/statement'
+      : booksPath(memberId);
 
   if (!jamiyaId || !slug || !memberId) {
     return;
   }
   if (!effectiveDate) {
-    redirectWithCircleNotice(slug, 'Pick a date for this loan event.', 'error', booksPath(memberId));
+    redirectWithCircleNotice(slug, 'Pick a date for this facility event.', 'error', back);
   }
 
   const allowed: LoanEventType[] = ['disbursement', 'profit', 'repayment', 'rollover'];
   if (!allowed.includes(eventType)) {
-    redirectWithCircleNotice(slug, 'Invalid loan event type.', 'error', booksPath(memberId));
+    redirectWithCircleNotice(slug, 'Invalid facility event type.', 'error', back);
   }
 
   if (eventType !== 'rollover' && (!Number.isFinite(amount) || amount <= 0)) {
@@ -56,7 +61,7 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
       slug,
       'Enter an amount greater than zero.',
       'error',
-      booksPath(memberId),
+      back,
     );
   }
 
@@ -75,7 +80,7 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
   });
 
   if (error) {
-    redirectWithCircleNotice(slug, error.message, 'error', booksPath(memberId));
+    redirectWithCircleNotice(slug, error.message, 'error', back);
   }
 
   const result = data as {
@@ -87,9 +92,9 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
     const code = result?.error ?? 'FAILED';
     redirectWithCircleNotice(
       slug,
-      LOAN_EVENT_ERRORS[code] ?? mapMoneyError(code) ?? `Could not save loan event (${code}).`,
+      LOAN_EVENT_ERRORS[code] ?? mapMoneyError(code) ?? `Could not save facility event (${code}).`,
       'error',
-      booksPath(memberId),
+      back,
     );
   }
 
@@ -106,10 +111,5 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
         : eventType === 'profit'
           ? 'Profit'
           : 'Rollover';
-  redirectWithCircleNotice(
-    slug,
-    `${label} recorded.${balance}`,
-    'success',
-    booksPath(memberId),
-  );
+  redirectWithCircleNotice(slug, `${label} recorded.${balance}`, 'success', back);
 }

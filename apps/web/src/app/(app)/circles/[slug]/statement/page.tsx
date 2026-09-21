@@ -9,14 +9,16 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
+import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { OpenPenaltiesPanel } from '@/features/circles/components/open-penalties-panel';
+import { StatementOfficerMoney } from '@/features/circles/components/statement-officer-money';
 
 export const metadata: Metadata = { title: 'Member statement' };
 export const dynamic = 'force-dynamic';
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ memberId?: string }>;
+  searchParams?: Promise<{ memberId?: string; notice?: string; noticeType?: string }>;
 };
 
 type StatementSummary = {
@@ -133,6 +135,21 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         .in('status', ['active', 'suspended'])
         .order('created_at')
     : { data: [] as never[] };
+
+  const { data: fineCatData } = isOfficer
+    ? await supabase
+        .from('fine_categories')
+        .select('id, name, default_amount, currency')
+        .eq('jamiya_id', jamiya.id)
+        .eq('is_active', true)
+        .order('name')
+    : { data: [] as never[] };
+  const fineCategories = (fineCatData ?? []) as Array<{
+    id: string;
+    name: string;
+    default_amount: number | string;
+    currency: string;
+  }>;
 
   const memberRows = (allMembers ?? []) as Array<{
     id: string;
@@ -280,6 +297,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
   return (
     <AppPage>
+      <CircleNoticeBanner notice={qs.notice} noticeType={qs.noticeType} />
       <div className="flex flex-wrap items-end justify-between gap-4 print:hidden">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
@@ -534,14 +552,10 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Fines"
-        description="Late or meeting fines assessed against this member. Officers record them from Treasury → Member fining."
+        description="Late or meeting fines for this member. Officers can record below."
         empty="No fines on this statement."
-        emptyHref={
-          isOfficer
-            ? (`/circles/${slug}/treasury#member-fining` as Route)
-            : (`/circles/${slug}` as Route)
-        }
-        emptyLabel={isOfficer ? 'Record a fine' : 'Back to circle'}
+        emptyHref={isOfficer ? (`#record-money` as Route) : (`/circles/${slug}` as Route)}
+        emptyLabel={isOfficer ? 'Record a fine below' : 'Back to circle'}
         rows={penalties.map((p) => ({
           key: String(p.id),
           title: kindLabel(p.kind),
@@ -563,26 +577,18 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       />
 
       {isOfficer ? (
-        <div
-          id="record-fine"
-          className="space-y-3 rounded-xl border border-border bg-card p-5 print:hidden"
-        >
-          <div>
-            <h3 className="font-semibold text-foreground">Record a fine for {viewedName}</h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Same as Treasury → Member fining. It will show under Fines on this statement.
-            </p>
-          </div>
-          <p className="text-sm">
-            <Link
-              href={`/circles/${slug}/treasury#member-fining` as Route}
-              className="font-medium text-accent underline-offset-4 hover:underline"
-            >
-              Open full fine form on Treasury →
-            </Link>
-          </p>
-        </div>
+        <StatementOfficerMoney
+          jamiyaId={jamiya.id}
+          slug={slug}
+          memberId={memberId}
+          memberLabel={viewedName}
+          currency={jamiya.currency}
+          facilityBalance={Number(summary.loan_outstanding ?? 0)}
+          fineCategories={fineCategories}
+          returnPath={`/statement?memberId=${memberId}`}
+        />
       ) : null}
+
       {isOfficer &&
       penalties.some((p) => String(p.status) === 'open') ? (
         <div className="space-y-2 print:hidden">
