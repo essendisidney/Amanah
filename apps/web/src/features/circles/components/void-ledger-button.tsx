@@ -12,7 +12,7 @@ export function VoidLedgerButton({
   memberId,
   kind,
   id,
-  label = 'Void',
+  label = 'Undo',
   returnPath,
 }: {
   slug: string;
@@ -50,10 +50,11 @@ export function VoidLedgerButton({
           {returnPath ? <input type="hidden" name="returnPath" value={returnPath} /> : null}
           <div>
             <p className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Void this line?
+              Undo this entry?
             </p>
             <p className="mt-1 text-sm text-muted-foreground">
-              This removes the recorded amount. You can re-enter it correctly afterwards.
+              For officers only — not an approval. It deletes a mistaken line from the books so you
+              can re-enter it correctly. Members do not see or confirm this.
             </p>
           </div>
           <div className="space-y-1">
@@ -68,7 +69,7 @@ export function VoidLedgerButton({
           </div>
           <div className="flex flex-wrap gap-2">
             <Button type="submit" variant="destructive" className="min-h-11">
-              Yes, void
+              Yes, remove
             </Button>
             <Button
               type="button"

@@ -414,7 +414,7 @@ export function MerryGoRoundPaymentsGrid({
                           memberId={mobileMemberId}
                           kind="contribution"
                           id={contribId}
-                          label="Void"
+                          label="Undo"
                         />
                       ) : null}
                     </div>
@@ -484,7 +484,7 @@ export function MerryGoRoundPaymentsGrid({
                               memberId={m.id}
                               kind="contribution"
                               id={contribId}
-                              label="Void"
+                              label="Undo"
                             />
                           ) : null}
                         </div>
