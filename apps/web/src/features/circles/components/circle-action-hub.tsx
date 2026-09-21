@@ -20,28 +20,17 @@ type Props = {
 };
 
 /** Near-reach action hub: everything important for this circle in one glance. */
-export function CircleActionHub({ groups, challengeKind }: Props) {
+export function CircleActionHub({ groups }: Props) {
   const visible = groups.filter((g) => g.items.length > 0);
   if (visible.length === 0) return null;
 
-  const isRotating = challengeKind === 'rotating' || !challengeKind;
-  const isShareDividend = challengeKind === 'share_dividend';
-  const subtitle = isRotating
-    ? 'Slots, monthly contributions, statement, and loans — merry-go-round only.'
-    : isShareDividend
-      ? 'Shares, member payments grid, treasury, statement, and loans.'
-      : 'Savings calendar, goals, statement, and loans for this circle.';
-
   return (
-    <nav className="amanah-surface space-y-5 px-4 py-5 sm:px-5" aria-label="Circle actions">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Quick actions
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
-      </div>
+    <nav className="amanah-surface space-y-4 px-4 py-5 sm:px-5" aria-label="Circle actions">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Quick actions
+      </p>
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((group) => (
           <div key={group.title} className="space-y-2">
             <h3 className="text-xs font-semibold uppercase tracking-wide text-foreground">
@@ -54,30 +43,11 @@ export function CircleActionHub({ groups, challengeKind }: Props) {
                     href={item.href}
                     className={
                       item.primary
-                        ? 'flex min-h-11 flex-col justify-center rounded-xl bg-primary px-3.5 py-2.5 text-primary-foreground shadow-sm transition-transform active:scale-[0.99]'
-                        : 'flex min-h-11 flex-col justify-center rounded-xl border border-border/70 bg-background/70 px-3.5 py-2.5 transition-colors hover:border-primary/30 hover:bg-secondary/50'
+                        ? 'flex min-h-11 items-center rounded-xl bg-primary px-3.5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-transform active:scale-[0.99]'
+                        : 'flex min-h-11 items-center rounded-xl border border-border/70 bg-background/70 px-3.5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:border-primary/30 hover:bg-secondary/50'
                     }
                   >
-                    <span
-                      className={
-                        item.primary
-                          ? 'text-sm font-semibold'
-                          : 'text-sm font-semibold text-foreground'
-                      }
-                    >
-                      {item.label}
-                    </span>
-                    {item.hint ? (
-                      <span
-                        className={
-                          item.primary
-                            ? 'mt-0.5 text-xs text-primary-foreground/80'
-                            : 'mt-0.5 text-xs text-muted-foreground'
-                        }
-                      >
-                        {item.hint}
-                      </span>
-                    ) : null}
+                    {item.label}
                   </Link>
                 </li>
               ))}

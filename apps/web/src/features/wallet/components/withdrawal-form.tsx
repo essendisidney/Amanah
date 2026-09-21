@@ -78,14 +78,11 @@ export function WithdrawalForm({
                 Pays to linked number <span className="font-medium">{linkedPhone}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                Change it on{' '}
+                Change on{' '}
                 <Link href={'/profile' as Route} className="underline underline-offset-2">
                   Profile
                 </Link>
-                . Checker sees this locked destination.
-              </p>
-              <p className="text-xs leading-relaxed text-muted-foreground">
-                {labels.withdrawMpesaHint}
+                . {labels.withdrawMpesaHint}
               </p>
             </>
           ) : (

@@ -358,10 +358,6 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiyaRow.name}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Role: {(membership as { role: string }).role.replaceAll('_', ' ')}
-            {planInfo?.plan_id ? ` · Plan ${planInfo.plan?.name ?? planInfo.plan_id}` : ''}
-          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -370,44 +366,9 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           >
             Circle
           </Link>
-          <Link
-            href={`/circles/${slug}/arrears` as Route}
-            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-          >
-            {dict.circle.arrears}
-          </Link>
-          {isRotating ? (
-            <Link
-              href={`/circles/${slug}/statement` as Route}
-              className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-            >
-              Member 360
-            </Link>
-          ) : (
-            <>
-              <Link
-                href={`/circles/${slug}/books#chama-glance` as Route}
-                className="rounded-md border border-accent/40 bg-accent/5 px-3 py-2 text-sm font-medium min-h-11 inline-flex items-center"
-              >
-                Whole chama 360
-              </Link>
-              <Link
-                href={`/circles/${slug}/treasury` as Route}
-                className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-              >
-                Treasury
-              </Link>
-            </>
-          )}
-          <Link
-            href={`/circles/${slug}/community` as Route}
-            className="rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center"
-          >
-            Community
-          </Link>
           <details className="relative">
             <summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm min-h-11 inline-flex items-center">
-              More tools
+              More
             </summary>
             <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
               {isRotating ? (

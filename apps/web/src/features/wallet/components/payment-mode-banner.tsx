@@ -17,8 +17,8 @@ const COPY: Record<
   // Checkout is obvious from the button — no provider brand banner.
   paystack: null,
   intasend: {
-    title: 'M-Pesa via partner rail',
-    body: 'Safaricom may show a bank partner name (e.g. Co-op) on the PIN prompt — you are still topping up Jameiyah. Enter PIN only for amounts you started here.',
+    title: 'M-Pesa',
+    body: 'Approve the prompt on your phone. Partner names (e.g. Co-op) still credit Jameiyah.',
     tone: 'live',
   },
   tendepay: {

@@ -11,16 +11,11 @@ import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
-import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { IntasendTrustBadge } from '@/features/wallet/components/intasend-trust-badge';
 import { hasValidProfilePhone } from '@/features/profile/components/profile-onboarding-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { t } from '@/i18n/dictionaries';
 import { paymentProvider } from '@/lib/payments/provider';
-import {
-  requireRealProviders,
-  shouldBlockSimulatedPayments,
-} from '@/lib/production-cutover';
+import { reconcileUserPaymentIntents } from '@/lib/payments/reconcile-user-intents';
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -104,7 +99,7 @@ export default async function WalletPage({ searchParams }: Props) {
         .select('id, type, status, amount, currency, direction, reference, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(40),
+        .limit(12),
       supabase
         .from('payment_intents')
         .select('id, status, amount, currency, provider, phone, error_message, created_at')
@@ -121,7 +116,7 @@ export default async function WalletPage({ searchParams }: Props) {
         .limit(10),
       supabase
         .from('profiles')
-        .select('full_name, phone, mpesa_phone')
+        .select('phone, mpesa_phone')
         .eq('id', user.id)
         .maybeSingle(),
       supabase
@@ -136,8 +131,6 @@ export default async function WalletPage({ searchParams }: Props) {
     ]);
 
   const labels = dict.wallet;
-  const wallets = (walletResult.data ?? []) as unknown as WalletRow[];
-  const transactions = (txResult.data ?? []) as unknown as TxRow[];
   type IntentRow = {
     id: string;
     status: string;
@@ -148,8 +141,6 @@ export default async function WalletPage({ searchParams }: Props) {
     error_message: string | null;
     created_at: string;
   };
-  const failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
-  const pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
   type WithdrawalRow = {
     id: string;
     amount: number | string;
@@ -160,24 +151,13 @@ export default async function WalletPage({ searchParams }: Props) {
     created_at: string;
     error_message: string | null;
   };
+
+  let wallets = (walletResult.data ?? []) as unknown as WalletRow[];
+  const transactions = (txResult.data ?? []) as unknown as TxRow[];
+  let failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
+  let pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
   const pendingWithdrawals = (withdrawalResult.data ?? []) as unknown as WithdrawalRow[];
-  const primary = wallets[0];
-  const primaryCurrency = primary?.currency ?? 'KES';
-  const available = primary
-    ? typeof primary.available_balance === 'number'
-      ? primary.available_balance
-      : Number(primary.available_balance)
-    : 0;
-  const balance = primary
-    ? typeof primary.balance === 'number'
-      ? primary.balance
-      : Number(primary.balance)
-    : 0;
-  const provider = paymentProvider();
-  const liveLocked = shouldBlockSimulatedPayments();
-  const requireReal = requireRealProviders();
-  const displayName =
-    (profileResult.data as { full_name?: string | null } | null)?.full_name ?? 'Member';
+
   const withdrawPhone =
     (profileResult.data as { mpesa_phone?: string | null; phone?: string | null } | null)
       ?.mpesa_phone ??
@@ -186,6 +166,43 @@ export default async function WalletPage({ searchParams }: Props) {
   const hasPhone = hasValidProfilePhone(
     (profileResult.data as { phone?: string | null } | null)?.phone ?? withdrawPhone,
   );
+
+  await reconcileUserPaymentIntents(user.id);
+
+  const [freshWallets, freshFailed, freshPending] = await Promise.all([
+    supabase
+      .from('wallets')
+      .select('balance, available_balance, currency, updated_at')
+      .eq('user_id', user.id)
+      .order('currency', { ascending: true }),
+    supabase
+      .from('payment_intents')
+      .select('id, status, amount, currency, provider, phone, error_message, created_at')
+      .eq('user_id', user.id)
+      .in('status', ['failed', 'expired', 'cancelled'])
+      .order('created_at', { ascending: false })
+      .limit(10),
+    supabase
+      .from('payment_intents')
+      .select('id, status, amount, currency, provider, phone, error_message, created_at')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'processing'])
+      .order('created_at', { ascending: false })
+      .limit(10),
+  ]);
+
+  wallets = (freshWallets.data ?? []) as unknown as WalletRow[];
+  failedIntents = (freshFailed.data ?? []) as unknown as IntentRow[];
+  pendingIntents = (freshPending.data ?? []) as unknown as IntentRow[];
+
+  const primary = wallets[0];
+  const primaryCurrency = primary?.currency ?? 'KES';
+  const available = primary
+    ? typeof primary.available_balance === 'number'
+      ? primary.available_balance
+      : Number(primary.available_balance)
+    : 0;
+  const provider = paymentProvider();
 
   return (
     <AppPage>
@@ -212,12 +229,6 @@ export default async function WalletPage({ searchParams }: Props) {
           ) : null}
         </div>
       ) : null}
-
-      <PaymentModeBanner
-        provider={provider}
-        requireReal={requireReal}
-        simulatedBlocked={liveLocked}
-      />
 
       {!hasPhone ? (
         <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -248,11 +259,6 @@ export default async function WalletPage({ searchParams }: Props) {
           <p className="amanah-money mt-2 text-4xl font-bold tracking-tight md:text-5xl">
             {formatCurrency(available, primaryCurrency)}
           </p>
-          <p className="mt-2 text-sm text-white/80">
-            {t(labels.totalBalance, {
-              amount: formatCurrency(balance, primaryCurrency),
-            })}
-          </p>
         </section>
       )}
 
@@ -277,82 +283,6 @@ export default async function WalletPage({ searchParams }: Props) {
             </Link>
           );
         })}
-      </section>
-
-      <section id="more" className="scroll-mt-24 space-y-3">
-        <div>
-          <h2 className="text-lg font-bold tracking-tight">{labels.moreTitle}</h2>
-          <p className="text-sm text-muted-foreground">{labels.moreDesc}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {[
-            {
-              href: '/finance/goals',
-              title: labels.moreGoals,
-              desc: labels.moreGoalsDesc,
-              icon: TrendingUp,
-            },
-            {
-              href: '/finance/qard',
-              title: labels.moreQard,
-              desc: labels.moreQardDesc,
-              icon: Landmark,
-            },
-            {
-              href: '/finance/insights',
-              title: labels.quickInsights,
-              desc: labels.moreDesc,
-              icon: ChartNoAxesCombined,
-            },
-            {
-              href: '/finance/welfare',
-              title: dict.finance.welfareTitle,
-              desc: dict.finance.welfareDesc,
-              icon: HandHeart,
-            },
-            {
-              href: '/sadaka',
-              title: dict.common.sadaka,
-              desc: labels.moreSadakaDesc,
-              icon: HandHeart,
-            },
-            {
-              href: '/zakat',
-              title: labels.moreZakat,
-              desc: labels.moreZakatDesc,
-              icon: Calculator,
-            },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href as Route}
-                className="amanah-surface flex items-start gap-3 px-3 py-3 transition-colors hover:border-primary/30"
-              >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-foreground">{item.title}</span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">{item.desc}</span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white">
-        <div className="flex items-start justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent">Jameiyah</p>
-          <span className="text-accent">✦</span>
-        </div>
-        <p className="mt-8 font-mono text-lg tracking-[0.22em] text-white/90">
-          {String(user.id).replace(/-/g, '').slice(0, 4)} ···· ····{' '}
-          {displayName.replace(/\s+/g, '').slice(0, 4).toUpperCase().padEnd(4, 'X')}
-        </p>
-        <p className="mt-6 text-sm font-semibold tracking-wide">{displayName.toUpperCase()}</p>
       </section>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -386,52 +316,9 @@ export default async function WalletPage({ searchParams }: Props) {
         </section>
       </div>
 
-      {provider === 'intasend' ? <IntasendTrustBadge /> : null}
-
-      {pendingWithdrawals.length > 0 ? (
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">
-              {labels.withdrawalsInProgress}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {labels.pendingWithdrawalsHint}
-            </p>
-          </div>
-          <ul className="amanah-surface divide-y divide-border/70">
-            {pendingWithdrawals.map((row) => (
-              <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold">
-                    {formatCurrency(Number(row.amount), row.currency)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {row.destination_type === 'mpesa'
-                      ? row.destination_phone ?? 'M-Pesa'
-                      : row.destination_type}{' '}
-                    · {formatDate(row.created_at)}
-                  </p>
-                  {row.error_message ? (
-                    <p className="mt-0.5 text-xs text-destructive">{row.error_message}</p>
-                  ) : null}
-                </div>
-                <StatusBadge status={row.status} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
       {pendingIntents.length > 0 ? (
         <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {provider === 'intasend' || provider === 'mpesa' || provider === 'tendepay'
-                ? labels.pendingStkHint
-                : labels.pendingPaystackHint}
-            </p>
-          </div>
+          <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
           <ul className="amanah-surface divide-y divide-border/70">
             {pendingIntents.map((intent) => {
               const canCheck =
@@ -469,13 +356,16 @@ export default async function WalletPage({ searchParams }: Props) {
       ) : null}
 
       {failedIntents.length > 0 ? (
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">{labels.failedPayments}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{labels.failedPaymentsHint}</p>
-          </div>
+        <details className="space-y-3">
+          <summary className="cursor-pointer text-lg font-bold tracking-tight">
+            {labels.failedPayments}
+            <span className="ml-2 text-sm font-normal text-muted-foreground">
+              ({failedIntents.length})
+            </span>
+          </summary>
+          <p className="text-xs text-muted-foreground">{labels.failedPaymentsHint}</p>
           <ul className="amanah-surface divide-y divide-border/70">
-            {failedIntents.map((intent) => (
+            {failedIntents.slice(0, 5).map((intent) => (
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold">
@@ -492,6 +382,33 @@ export default async function WalletPage({ searchParams }: Props) {
                     retrying: dict.walletForms.retrying,
                   }}
                 />
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+
+      {pendingWithdrawals.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold tracking-tight">{labels.withdrawalsInProgress}</h2>
+          <ul className="amanah-surface divide-y divide-border/70">
+            {pendingWithdrawals.map((row) => (
+              <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold">
+                    {formatCurrency(Number(row.amount), row.currency)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {row.destination_type === 'mpesa'
+                      ? row.destination_phone ?? 'M-Pesa'
+                      : row.destination_type}{' '}
+                    · {formatDate(row.created_at)}
+                  </p>
+                  {row.error_message ? (
+                    <p className="mt-0.5 text-xs text-destructive">{row.error_message}</p>
+                  ) : null}
+                </div>
+                <StatusBadge status={row.status} />
               </li>
             ))}
           </ul>
@@ -545,6 +462,62 @@ export default async function WalletPage({ searchParams }: Props) {
           </ul>
         )}
       </section>
+
+      <details id="more" className="scroll-mt-24">
+        <summary className="cursor-pointer text-lg font-bold tracking-tight">
+          {labels.moreTitle}
+        </summary>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {[
+            {
+              href: '/finance/goals',
+              title: labels.moreGoals,
+              icon: TrendingUp,
+            },
+            {
+              href: '/finance/qard',
+              title: labels.moreQard,
+              icon: Landmark,
+            },
+            {
+              href: '/finance/insights',
+              title: labels.quickInsights,
+              icon: ChartNoAxesCombined,
+            },
+            {
+              href: '/finance/welfare',
+              title: dict.finance.welfareTitle,
+              icon: HandHeart,
+            },
+            {
+              href: '/sadaka',
+              title: dict.common.sadaka,
+              icon: HandHeart,
+            },
+            {
+              href: '/zakat',
+              title: labels.moreZakat,
+              icon: Calculator,
+            },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href as Route}
+                className="amanah-surface flex items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30"
+              >
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="text-sm font-semibold text-foreground">{item.title}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </details>
+
+      {provider === 'intasend' ? <IntasendTrustBadge /> : null}
     </AppPage>
   );
 }
