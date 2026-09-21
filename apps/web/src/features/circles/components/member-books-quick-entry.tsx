@@ -1,6 +1,5 @@
 import { Button, Input, Label } from '@jamiya/ui';
 import {
-  recordMemberBookEntryAction,
   recordMemberSharesAction,
   recordMonthlySavingsAction,
 } from '@/features/circles/actions/books-actions';
@@ -41,7 +40,8 @@ export function MemberBooksQuickEntry({
         <h2 className="text-lg font-semibold">Enter payments for {memberLabel}</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Share buy-in (usually {defaultShareAmount.toLocaleString()} on 5 Feb), then monthly
-          savings (usually {defaultMonthAmount.toLocaleString()} each month). Add a loan if needed.
+          savings (usually {defaultMonthAmount.toLocaleString()} each month). Facilities go in the
+          ledger below.
         </p>
       </div>
 
@@ -130,39 +130,6 @@ export function MemberBooksQuickEntry({
           </div>
           <Button type="submit" className="min-h-11 w-full sm:w-auto">
             Save monthly savings
-          </Button>
-        </form>
-
-        <form
-          action={recordMemberBookEntryAction}
-          className="space-y-3 rounded-xl border border-border bg-card p-4 lg:col-span-2"
-        >
-          <h3 className="font-semibold">3. Loan (optional)</h3>
-          <input type="hidden" name="jamiyaId" value={jamiyaId} />
-          <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="memberId" value={memberId} />
-          <input type="hidden" name="entryType" value="loan" />
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="space-y-1">
-              <Label htmlFor="loanAmount">Amount</Label>
-              <Input id="loanAmount" name="amount" type="number" min="1" step="1" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="loanDate">Date</Label>
-              <Input
-                id="loanDate"
-                name="effectiveDate"
-                type="date"
-                defaultValue={shareDate}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="loanNotes">Notes</Label>
-              <Input id="loanNotes" name="notes" placeholder="Optional" />
-            </div>
-          </div>
-          <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-            Save loan
           </Button>
         </form>
       </div>

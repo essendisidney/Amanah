@@ -63,11 +63,8 @@ export function MemberLoanLedger({
       <div>
         <h2 className="text-lg font-semibold">Facility ledger — profit & rollovers</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Like Asha&apos;s Excel:{' '}
-          <strong className="font-medium text-foreground">NEW FACILITY</strong>,{' '}
-          <strong className="font-medium text-foreground">PROFIT</strong>,{' '}
-          <strong className="font-medium text-foreground">REPAYMENT</strong>, and{' '}
-          <strong className="font-medium text-foreground">rollover + top-up</strong>.
+          Record facilities here only — New facility, profit, repayment, rollover. Do not use a
+          separate loan form elsewhere on this page.
         </p>
       </div>
 

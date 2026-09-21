@@ -98,7 +98,8 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
     myMember?.status === 'active' && OFFICER_ROLES.has(myMember.role ?? '');
 
   if (!isOfficer) {
-    redirect(`/circles/${slug}/statement`);
+    // Members use their statement; outsiders go back to the circle (avoids statement 404).
+    redirect(myMember ? `/circles/${slug}/statement` : `/circles/${slug}`);
   }
 
   const { data: membersData, error: membersError } = await supabase
@@ -508,7 +509,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
           </div>
           <details className="rounded-xl border border-border bg-card">
             <summary className="cursor-pointer px-5 py-4 text-sm font-medium text-muted-foreground hover:text-foreground">
-              Fix one month, repayment, or share count (advanced)
+              Fix one month or share count (advanced)
             </summary>
             <div className="border-t border-border px-5 py-4">
               <MemberBooksRecordForms

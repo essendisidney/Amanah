@@ -3,12 +3,17 @@ export function formatCurrency(
   currency = 'KES',
   locale = 'en-KE',
 ): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  const code = (currency || 'KES').trim().toUpperCase() || 'KES';
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: code,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(Number.isFinite(amount) ? amount : 0);
+  } catch {
+    return `${code} ${(Number.isFinite(amount) ? amount : 0).toLocaleString(locale)}`;
+  }
 }
 
 export function formatDate(

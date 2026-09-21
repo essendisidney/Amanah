@@ -120,62 +120,6 @@ export function MemberBooksRecordForms({
           Save this month
         </Button>
       </form>
-
-      <form
-        action={recordMemberBookEntryAction}
-        className="space-y-3 rounded-xl border border-border bg-card p-5"
-      >
-        <h3 className="font-semibold">Facility</h3>
-        <input type="hidden" name="jamiyaId" value={jamiyaId} />
-        <input type="hidden" name="slug" value={slug} />
-        <input type="hidden" name="memberId" value={memberId} />
-        <input type="hidden" name="entryType" value="loan" />
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label htmlFor="loanAmount">Amount</Label>
-            <Input id="loanAmount" name="amount" type="number" min="1" step="0.01" required />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="loanDate">Date</Label>
-            <Input id="loanDate" name="effectiveDate" type="date" defaultValue={today} required />
-          </div>
-          <div className="space-y-1 sm:col-span-2">
-            <Label htmlFor="loanNotes">Notes</Label>
-            <Input id="loanNotes" name="notes" placeholder="From sheet" />
-          </div>
-        </div>
-        <Button type="submit" className="min-h-11">
-          Save facility
-        </Button>
-      </form>
-
-      <form
-        action={recordMemberBookEntryAction}
-        className="space-y-3 rounded-xl border border-border bg-card p-5 lg:col-span-2"
-      >
-        <h3 className="font-semibold">Facility repayment</h3>
-        <input type="hidden" name="jamiyaId" value={jamiyaId} />
-        <input type="hidden" name="slug" value={slug} />
-        <input type="hidden" name="memberId" value={memberId} />
-        <input type="hidden" name="entryType" value="loan_repayment" />
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="space-y-1">
-            <Label htmlFor="repayAmount">Amount paid</Label>
-            <Input id="repayAmount" name="amount" type="number" min="1" step="0.01" required />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="repayDate">Date</Label>
-            <Input id="repayDate" name="effectiveDate" type="date" defaultValue={today} required />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="repayNotes">Notes</Label>
-            <Input id="repayNotes" name="notes" placeholder="Paid fully / installment" />
-          </div>
-        </div>
-        <Button type="submit" className="min-h-11">
-          Save repayment
-        </Button>
-      </form>
     </section>
   );
 }
