@@ -1,6 +1,5 @@
--- Fix Asha repayment bug: typo p_book_type (undefined) aborted the transaction
--- after inserting the event, so ledger saves never stuck. Also write both
--- principal + profit book lines on repayment, and keep books forms in sync.
+-- Disbursement was setting facility status to 'open', but the check only allows
+-- 'active' | 'closed'. That blocked every New facility save for Asha.
 
 CREATE OR REPLACE FUNCTION public.record_member_loan_event(
   p_jamiya_id UUID,
@@ -137,7 +136,6 @@ BEGIN
     END
   WHERE id = v_facility.id;
 
-  -- Book lines (fixed: was `p_book_type`, which is undefined and aborted the txn)
   IF p_event_type = 'repayment' THEN
     v_principal_paid := v_amount - v_profit;
     IF v_principal_paid > 0 THEN
