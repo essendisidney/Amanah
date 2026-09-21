@@ -595,6 +595,10 @@ export function TreasuryPanel({
           >
             Member fining
           </h2>
+          <p className="text-sm text-muted-foreground">
+            Record late / meeting fines here for any member. You can also fine from that
+            member&apos;s 360 (Open 360 → Record fine).
+          </p>
           <div id="open-fines" className="space-y-2 scroll-mt-24">
             <h3 className="text-sm font-medium text-foreground">Open fines</h3>
             <OpenPenaltiesPanel slug={slug} rows={openPenalties} returnPath="/treasury" />

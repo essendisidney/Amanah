@@ -45,13 +45,17 @@ export function StatementOfficerMoney({
           Record for {memberLabel}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Fine, new facility, or repayment — stays on this statement after save.
+          Fine, new facility, or repayment — stays on this statement after save. Fines are here
+          (not on Member payments).
         </p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <form action={levyFineAction} className="space-y-3 rounded-lg border border-border p-4">
+        <form action={levyFineAction} className="space-y-3 rounded-lg border border-accent/30 bg-accent/5 p-4">
           <h3 className="font-semibold">Record fine</h3>
+          <p className="text-xs text-muted-foreground">
+            Late meeting, missed duty, etc. Needs a fine category from Treasury first.
+          </p>
           <input type="hidden" name="jamiyaId" value={jamiyaId} />
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="memberId" value={memberId} />

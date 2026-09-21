@@ -115,10 +115,16 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
               </div>
               <div className="flex flex-wrap gap-2">
                 <Link
-                  href={`/circles/${slug}/statement?memberId=${m.id}` as Route}
+                  href={`/circles/${slug}/statement?memberId=${m.id}#record-money` as Route}
                   className="inline-flex min-h-10 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                 >
                   Open 360
+                </Link>
+                <Link
+                  href={`/circles/${slug}/statement?memberId=${m.id}#record-money` as Route}
+                  className="inline-flex min-h-10 items-center rounded-md border border-border px-4 text-sm font-medium hover:bg-muted/50"
+                >
+                  Fine
                 </Link>
                 <Link
                   href={booksHref(slug, 'member', m.id) as Route}

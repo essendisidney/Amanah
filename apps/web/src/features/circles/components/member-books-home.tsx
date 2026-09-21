@@ -29,7 +29,7 @@ export function MemberBooksHome({ slug, currency, members }: Props) {
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
           Two places — whole chama totals above, or one member&apos;s full picture below.
         </p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <a
             href="#chama-glance"
             className="rounded-lg border border-accent/30 bg-accent/5 px-4 py-4 transition-colors hover:border-accent/50"
@@ -47,6 +47,20 @@ export function MemberBooksHome({ slug, currency, members }: Props) {
             <div className="mt-3">
               <MemberBooksMemberPicker slug={slug} members={pickerMembers} />
             </div>
+          </div>
+          <div className="rounded-lg border border-border px-4 py-4">
+            <p className="font-semibold text-foreground">Record a fine</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Open that member&apos;s 360, then scroll to{' '}
+              <strong className="font-medium text-foreground">Record fine</strong>. Or use Treasury →
+              Member fining.
+            </p>
+            <Link
+              href={`/circles/${slug}/treasury#member-fining` as Route}
+              className="mt-3 inline-flex min-h-10 items-center text-sm font-medium text-accent underline-offset-4 hover:underline"
+            >
+              Open Treasury fining →
+            </Link>
           </div>
         </div>
       </section>
