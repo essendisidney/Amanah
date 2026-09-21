@@ -864,7 +864,8 @@ export const en: Dictionary = {
     retrying: 'Retrying…',
     checkStatus: 'Check status',
     checkingStatus: 'Checking…',
-    stepUpHint: 'We SMS a 6-digit code to your profile phone before money moves.',
+    stepUpHint:
+      'For M-Pesa, approve the prompt on your phone. Other methods may SMS a code first.',
     verificationCode: 'SMS code',
     sendCode: 'Send new code',
     confirmWithCode: 'Confirm',

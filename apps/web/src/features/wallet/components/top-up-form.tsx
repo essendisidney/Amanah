@@ -79,8 +79,17 @@ export function TopUpForm({
           {labels.simulatedHint}
         </p>
       )}
-      {provider !== 'simulated' && !needsOtp ? (
+      {provider !== 'simulated' &&
+      !needsOtp &&
+      provider !== 'mpesa' &&
+      provider !== 'intasend' &&
+      provider !== 'tendepay' ? (
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
+      ) : null}
+      {provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay' ? (
+        <p className="text-xs text-muted-foreground">
+          You will get an M-Pesa prompt on this number — enter your PIN there (no SMS code).
+        </p>
       ) : null}
       {returnPath && !needsOtp ? (
         <p className="text-xs text-muted-foreground">

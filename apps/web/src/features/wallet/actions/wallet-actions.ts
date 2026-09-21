@@ -50,7 +50,10 @@ export async function topUpWalletAction(
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
-  const skipStepUp = provider === 'simulated' && !requireReal;
+  // STK Push already proves phone possession (PIN on handset) — skip Taifa SMS step-up.
+  const stkProvider =
+    provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
+  const skipStepUp = (provider === 'simulated' && !requireReal) || stkProvider;
   if (!skipStepUp) {
     if (resend) {
       return sendWalletStepUpOtp('wallet_top_up');
