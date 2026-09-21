@@ -47,8 +47,14 @@ export async function requestWithdrawalAction(
   const { sendWalletStepUpOtp, consumeWalletStepUpOtp } = await import(
     '@/lib/wallet/step-up'
   );
+  const provider = paymentProvider();
+  const requireReal = process.env.REQUIRE_REAL_PROVIDERS === 'true';
+  // Live M-Pesa B2C already targets the linked phone — skip Taifa SMS step-up.
+  const stkProvider =
+    provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
   const skipStepUp =
-    paymentProvider() === 'simulated' && process.env.REQUIRE_REAL_PROVIDERS !== 'true';
+    (provider === 'simulated' && !requireReal) ||
+    (stkProvider && destinationType === 'mpesa');
   if (!skipStepUp) {
     if (resend) {
       return sendWalletStepUpOtp('wallet_withdraw');

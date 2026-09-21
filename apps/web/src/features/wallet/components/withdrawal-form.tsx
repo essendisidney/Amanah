@@ -84,6 +84,9 @@ export function WithdrawalForm({
                 </Link>
                 . Checker sees this locked destination.
               </p>
+              <p className="text-xs text-muted-foreground">
+                No SMS code — funds go to your linked M-Pesa after approval.
+              </p>
             </>
           ) : (
             <>
