@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
+import { CircleBooksGlance } from '@/features/circles/components/circle-books-glance';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import {
   confirmCircleDualApprovalAction,
@@ -172,6 +173,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     { data: cases },
     { data: dualPending },
     { data: planPack },
+    { data: glancePack },
     { data: plans },
     { data: dualSettings },
     { data: pendingLoans },
@@ -220,6 +222,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .order('created_at', { ascending: false })
         .limit(30),
       callRpc('get_circle_plan', { p_jamiya_id: jamiya.id }),
+      callRpc('circle_books_glance', { p_jamiya_id: jamiya.id }),
       db
         .from('platform_plans')
         .select('id, name, price_kes, max_members')
@@ -245,6 +248,10 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .limit(40),
     ]);
 
+  const glance =
+    glancePack && typeof glancePack === 'object' && (glancePack as { ok?: boolean }).ok
+      ? (glancePack as Record<string, unknown>)
+      : null;
   const memberRows = (members ?? []) as Array<{
     id: string;
     role: string;
@@ -463,6 +470,30 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         }
         recordPaymentLabel={isRotating ? 'Record contributions' : 'Record payment'}
       />
+
+      {glance ? (
+        <CircleBooksGlance
+          slug={slug}
+          currency={jamiyaRow.currency}
+          data={{
+            members_active: Number(glance.members_active ?? 0),
+            share_capital: Number(glance.share_capital ?? 0),
+            book_contributions: Number(glance.book_contributions ?? 0),
+            schedule_contributions_paid: Number(glance.schedule_contributions_paid ?? 0),
+            schedule_contributions_outstanding: Number(
+              glance.schedule_contributions_outstanding ?? 0,
+            ),
+            facility_disbursed: Number(glance.facility_disbursed ?? 0),
+            facility_repaid: Number(glance.facility_repaid ?? 0),
+            facility_outstanding: Number(glance.facility_outstanding ?? 0),
+            profit_paid: Number(glance.profit_paid ?? 0),
+            fines_open: Number(glance.fines_open ?? 0),
+            fines_paid: Number(glance.fines_paid ?? 0),
+            fines_total: Number(glance.fines_total ?? 0),
+            qard_outstanding: Number(glance.qard_outstanding ?? 0),
+          }}
+        />
+      ) : null}
 
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-3 rounded-xl border border-border bg-card p-5">

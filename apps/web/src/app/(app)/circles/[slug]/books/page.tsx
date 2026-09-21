@@ -15,6 +15,7 @@ import { MemberBooksRecordForms } from '@/features/circles/components/member-boo
 import { MemberBooksQuickEntry } from '@/features/circles/components/member-books-quick-entry';
 import { MemberBooksMemberSwitcher } from '@/features/circles/components/member-books-member-switcher';
 import { MemberLoanLedger } from '@/features/circles/components/member-loan-ledger';
+import { CircleBooksGlance } from '@/features/circles/components/circle-books-glance';
 import { resolveBooksView } from '@/features/circles/lib/member-books-view';
 import { callRpc } from '@/lib/supabase/rpc';
 import { AppPage } from '@/components/app-page';
@@ -141,6 +142,32 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             .in('borrower_id', userIds)
         : Promise.resolve({ data: [] }),
     ]);
+
+  const { data: glancePack } = await callRpc('circle_books_glance', {
+    p_jamiya_id: jamiya.id,
+  });
+  const glanceRaw =
+    glancePack && typeof glancePack === 'object' ? (glancePack as Record<string, unknown>) : null;
+  const glance =
+    glanceRaw?.ok
+      ? {
+          members_active: Number(glanceRaw.members_active ?? 0),
+          share_capital: Number(glanceRaw.share_capital ?? 0),
+          book_contributions: Number(glanceRaw.book_contributions ?? 0),
+          schedule_contributions_paid: Number(glanceRaw.schedule_contributions_paid ?? 0),
+          schedule_contributions_outstanding: Number(
+            glanceRaw.schedule_contributions_outstanding ?? 0,
+          ),
+          facility_disbursed: Number(glanceRaw.facility_disbursed ?? 0),
+          facility_repaid: Number(glanceRaw.facility_repaid ?? 0),
+          facility_outstanding: Number(glanceRaw.facility_outstanding ?? 0),
+          profit_paid: Number(glanceRaw.profit_paid ?? 0),
+          fines_open: Number(glanceRaw.fines_open ?? 0),
+          fines_paid: Number(glanceRaw.fines_paid ?? 0),
+          fines_total: Number(glanceRaw.fines_total ?? 0),
+          qard_outstanding: Number(glanceRaw.qard_outstanding ?? 0),
+        }
+      : null;
 
   const profilesById = new Map(
     ((profileRows ?? []) as Profile[]).map((p) => [p.id, p]),
@@ -397,13 +424,23 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
             Member payments
           </h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Record shares, monthly savings, and loans for each member.
+            Record shares, monthly savings, and facilities for each member — or preview the whole
+            chama totals below.
           </p>
         </div>
-        <Button asChild variant="outline" size="sm" className="min-h-11">
-          <Link href={`/circles/${slug}` as Route}>← Back to circle</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm" className="min-h-11">
+            <Link href={`/circles/${slug}/officer#chama-glance` as Route}>Officer console</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="min-h-11">
+            <Link href={`/circles/${slug}` as Route}>← Back to circle</Link>
+          </Button>
+        </div>
       </div>
+
+      {view === 'home' && glance ? (
+        <CircleBooksGlance slug={slug} currency={currency} data={glance} />
+      ) : null}
 
       {view === 'home' ? (
         <MemberBooksHome slug={slug} currency={currency} members={homeMembers} />
