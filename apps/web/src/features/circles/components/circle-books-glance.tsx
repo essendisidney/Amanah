@@ -99,21 +99,18 @@ export function CircleBooksGlance({
     <section id="chama-glance" className="scroll-mt-24 space-y-3">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-            Whole chama
-          </p>
-          <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold">
-            360 view — all members
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Chama 360
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Totals for the whole group: contributions, facilities issued, outstanding, profit, fines.
+            Whole-group totals — contributions, facilities, outstanding, fines.
           </p>
         </div>
         <Link
           href={`/circles/${slug}/statement` as Route}
-          className="inline-flex min-h-10 items-center rounded-md border border-border bg-card px-4 text-sm font-medium hover:bg-muted/50"
+          className="text-sm font-medium text-accent underline-offset-4 hover:underline"
         >
-          Open one member&apos;s 360 →
+          Member 360 →
         </Link>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

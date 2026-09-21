@@ -308,9 +308,8 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {viewingOther ? `${jamiya.name} · ` : ''}
-            Member ID {stmt.member_code ?? '—'} · {stmt.role?.replaceAll('_', ' ')} · {stmt.status}
-            {stmt.payout_position != null ? ` · payout slot ${stmt.payout_position}` : ''}
-            {stmt.joined_at ? ` · joined ${formatDate(stmt.joined_at)}` : ''}
+            {stmt.member_code ? `ID ${stmt.member_code}` : 'Member'}
+            {stmt.status ? ` · ${stmt.status}` : ''}
           </p>
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
@@ -410,11 +409,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             {viewingOther ? `${viewedName}'s 360` : 'Your 360'}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            {isShareDividend
-              ? 'Share capital, monthly books, fines, and facility balance — one screen.'
-              : isRotating
-                ? 'Merry-go-round cycles, pot slot, fines, and facility balance — one screen.'
-                : 'Savings contributions, pockets, fines, and facility balance — one screen.'}
+            Shares, savings, facility, and fines for this member.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

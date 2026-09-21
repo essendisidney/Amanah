@@ -30,11 +30,11 @@ export function TopUpForm({
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
   const needsOtp = Boolean(state.needsOtp);
   const amountDefault =
-    defaultAmount && Number.isFinite(defaultAmount) && defaultAmount >= 100
+    defaultAmount && Number.isFinite(defaultAmount) && defaultAmount >= 10
       ? Math.ceil(defaultAmount)
       : provider === 'simulated'
         ? 50000
-        : 1000;
+        : 10;
   const needsPhone =
     provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
   const linkedPhone = defaultPhone.trim();
@@ -52,12 +52,15 @@ export function TopUpForm({
           name="amount"
           type="number"
           inputMode="decimal"
-          min={100}
-          step={100}
+          min={10}
+          step={1}
           defaultValue={amountDefault}
           required
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
+        {provider === 'intasend' || provider === 'mpesa' || provider === 'tendepay' ? (
+          <p className="text-xs text-muted-foreground">You can test with as little as Ksh 10.</p>
+        ) : null}
       </div>
       {needsPhone ? (
         <div className="space-y-2">

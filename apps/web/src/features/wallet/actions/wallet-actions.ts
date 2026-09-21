@@ -29,8 +29,8 @@ export async function topUpWalletAction(
   const { getSafeReturnPath, withNoticeQuery } = await import('@/features/auth/lib/types');
   const returnPath = getSafeReturnPath(String(formData.get('next') ?? ''));
 
-  if (!Number.isFinite(amount) || amount < 100) {
-    return { success: false, message: 'Enter an amount of at least 100.' };
+  if (!Number.isFinite(amount) || amount < 10) {
+    return { success: false, message: 'Enter an amount of at least Ksh 10.' };
   }
 
   if (

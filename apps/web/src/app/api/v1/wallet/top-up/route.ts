@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     otp?: string;
   } | null;
 
-  if (!body?.amount || body.amount < 100) {
+  if (!body?.amount || body.amount < 10) {
     return NextResponse.json({ ok: false, error: 'INVALID_AMOUNT' }, { status: 400 });
   }
 

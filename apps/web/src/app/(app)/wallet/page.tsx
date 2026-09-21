@@ -365,7 +365,7 @@ export default async function WalletPage({ searchParams }: Props) {
               provider={provider}
               defaultPhone={withdrawPhone}
               defaultAmount={
-                Number.isFinite(amountPrefill) && amountPrefill >= 100
+                Number.isFinite(amountPrefill) && amountPrefill >= 10
                   ? amountPrefill
                   : undefined
               }
