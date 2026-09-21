@@ -129,8 +129,6 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      </section>
-
       <section id="circles" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/70">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
@@ -148,14 +146,17 @@ export default async function LandingPage() {
               {
                 title: 'Merry-go-round',
                 body: 'Monthly contributions, payout turns, and a board that shows who has received the pot.',
+                href: null as Route | null,
               },
               {
                 title: 'Table banking',
                 body: 'Share buy-in, monthly savings, and loans. Paste past Excel records once names match, or enter one member at a time.',
+                href: null as Route | null,
               },
               {
                 title: 'Savings',
                 body: 'A contribution calendar and shared goals — school fees, a trip, a wedding — without a rotating pot.',
+                href: null as Route | null,
               },
               {
                 title: 'Sadaka & zakat',
@@ -166,8 +167,11 @@ export default async function LandingPage() {
               <li key={item.title} className="rounded-2xl border border-[#0d5c45]/10 bg-white p-6">
                 <h3 className="text-xl font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.body}</p>
-                {'href' in item && item.href ? (
-                  <Link href={item.href} className="mt-4 inline-block text-sm font-semibold text-[#0d5c45] hover:underline">
+                {item.href ? (
+                  <Link
+                    href={item.href}
+                    className="mt-4 inline-block text-sm font-semibold text-[#0d5c45] hover:underline"
+                  >
                     Open giving →
                   </Link>
                 ) : null}
@@ -191,7 +195,7 @@ export default async function LandingPage() {
               },
               {
                 title: 'Members',
-                body: 'Join with a code from WhatsApp, pay from Money, and open your statement. You see your circle — not everyone else’s private groups.',
+                body: 'Join with a code from WhatsApp, pay from Money, and open your statement. You see your circle — not everyone else\u2019s private groups.',
               },
               {
                 title: 'Mosques & campaigns',
