@@ -45,6 +45,17 @@ export async function POST(request: Request) {
 
   logger.info('intasend webhook', { state, apiRef, invoiceId, trackingId });
 
+  const expectedChallenge = (process.env.INTASEND_WEBHOOK_CHALLENGE ?? '').trim();
+  if (expectedChallenge) {
+    const challenge = String(
+      body.challenge ?? invoice.challenge ?? '',
+    ).trim();
+    if (challenge && challenge !== expectedChallenge) {
+      logger.warn('intasend webhook challenge mismatch');
+      return NextResponse.json({ ok: false, error: 'INVALID_CHALLENGE' }, { status: 401 });
+    }
+  }
+
   const admin = createServiceRoleClient();
 
   const intentId =

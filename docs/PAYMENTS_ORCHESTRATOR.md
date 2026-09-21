@@ -29,6 +29,8 @@ payment_intents + ledger RPCs (source of truth)
 | `TENDEPAY_STK_PATH` / `TENDEPAY_DISBURSE_PATH` / `TENDEPAY_STATUS_PATH` | Override provisional paths |
 
 Webhooks: `POST /api/webhooks/intasend`, `POST /api/webhooks/tendepay`  
+IntaSend dashboard endpoint (required): `https://jameiyah.com/api/webhooks/intasend`  
+Challenge (optional, matches Vercel `INTASEND_WEBHOOK_CHALLENGE`): `jameiyah-live`  
 Health: `GET /api/v1/payments/orchestrator-health` (includes `bakeOff` block)
 
 ## Phase map

@@ -12,6 +12,7 @@ import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
+import { IntasendTrustBadge } from '@/features/wallet/components/intasend-trust-badge';
 import { hasValidProfilePhone } from '@/features/profile/components/profile-onboarding-banner';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
@@ -356,6 +357,8 @@ export default async function WalletPage({ searchParams }: Props) {
           </div>
         </section>
       </div>
+
+      {provider === 'intasend' ? <IntasendTrustBadge /> : null}
 
       {pendingIntents.length > 0 ? (
         <section className="space-y-3">
