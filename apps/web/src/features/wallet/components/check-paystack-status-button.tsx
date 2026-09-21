@@ -3,7 +3,7 @@
 import { useActionState } from 'react';
 import { Button } from '@jamiya/ui';
 import {
-  checkPaystackIntentAction,
+  checkPaymentIntentAction,
   type WalletActionState,
 } from '../actions/wallet-actions';
 import type { Dictionary } from '@/i18n/dictionaries';
@@ -17,7 +17,7 @@ export function CheckPaystackStatusButton({
   intentId: string;
   labels: Pick<Dictionary['walletForms'], 'checkStatus' | 'checkingStatus'>;
 }) {
-  const [state, action, pending] = useActionState(checkPaystackIntentAction, initial);
+  const [state, action, pending] = useActionState(checkPaymentIntentAction, initial);
 
   return (
     <form action={action} className="space-y-1 text-right">
@@ -33,3 +33,6 @@ export function CheckPaystackStatusButton({
     </form>
   );
 }
+
+/** Alias — works for Paystack, IntaSend, and TendePay intents. */
+export const CheckPaymentStatusButton = CheckPaystackStatusButton;

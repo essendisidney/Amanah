@@ -14,7 +14,7 @@ export function IntasendTrustBadge() {
       >
         <span className="text-xs font-semibold text-foreground">Safe &amp; Secure Checkout</span>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          Powered by IntaSend · M-Pesa · Visa · Mastercard
+          Powered by IntaSend · M-Pesa (partner rail) · Visa · Mastercard
         </span>
       </a>
     </div>

@@ -337,6 +337,14 @@ export async function checkPaystackIntentAction(
   _prev: WalletActionState,
   formData: FormData,
 ): Promise<WalletActionState> {
+  return checkPaymentIntentAction(_prev, formData);
+}
+
+/** Re-verify a pending payment intent (Paystack / IntaSend / TendePay) and settle if paid. */
+export async function checkPaymentIntentAction(
+  _prev: WalletActionState,
+  formData: FormData,
+): Promise<WalletActionState> {
   const intentId = String(formData.get('intentId') ?? '');
   if (!intentId) return { success: false, message: 'Missing payment intent.' };
 
@@ -348,7 +356,9 @@ export async function checkPaystackIntentAction(
 
   const { data: intent } = await supabase
     .from('payment_intents')
-    .select('id, user_id, provider, status, provider_reference')
+    .select(
+      'id, user_id, provider, status, provider_reference, checkout_request_id',
+    )
     .eq('id', intentId)
     .maybeSingle();
 
@@ -358,35 +368,109 @@ export async function checkPaystackIntentAction(
     provider: string;
     status: string;
     provider_reference: string | null;
+    checkout_request_id: string | null;
   } | null;
 
   if (!row || row.user_id !== user.id) {
     return { success: false, message: 'Payment not found.' };
   }
-  if (row.provider !== 'paystack') {
-    return { success: false, message: 'Check status is only for card/M-Pesa checkout payments.' };
+
+  if (row.status === 'completed' || row.status === 'succeeded') {
+    return { success: true, message: 'Already credited to your wallet.' };
   }
 
-  const { paystackReferenceForIntent, settlePaystackReference } = await import(
-    '@/lib/payments/paystack'
-  );
-  const reference = row.provider_reference || paystackReferenceForIntent(intentId);
-  const settled = await settlePaystackReference(reference);
+  if (row.provider === 'paystack') {
+    const { paystackReferenceForIntent, settlePaystackReference } = await import(
+      '@/lib/payments/paystack'
+    );
+    const reference = row.provider_reference || paystackReferenceForIntent(intentId);
+    const settled = await settlePaystackReference(reference);
 
-  revalidatePath('/wallet');
-  revalidatePath('/dashboard');
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
 
-  if (!settled.ok) {
-    return { success: false, message: settled.error ?? 'Could not verify payment yet.' };
+    if (!settled.ok) {
+      return { success: false, message: settled.error ?? 'Could not verify payment yet.' };
+    }
+    if (settled.status === 'success') {
+      return { success: true, message: 'Payment confirmed. Wallet updated.' };
+    }
+    if (settled.status === 'failed' || settled.status === 'abandoned') {
+      return { success: false, message: `Payment marked as ${settled.status}.` };
+    }
+    return {
+      success: false,
+      message: 'Still pending. Finish checkout or wait a moment and check again.',
+    };
   }
-  if (settled.status === 'success') {
-    return { success: true, message: 'Payment confirmed. Wallet updated.' };
+
+  if (row.provider === 'intasend' || row.provider === 'tendepay') {
+    const ref =
+      row.provider_reference?.trim() ||
+      row.checkout_request_id?.trim() ||
+      null;
+    if (!ref) {
+      return {
+        success: false,
+        message: 'Waiting for the M-Pesa prompt. Approve on your phone, then check again.',
+      };
+    }
+
+    const { getPaymentStatus } = await import('@/lib/payments/orchestrator');
+    const { createServiceRoleClient } = await import('@/lib/supabase/service');
+    const status = await getPaymentStatus(
+      ref,
+      row.provider as 'intasend' | 'tendepay',
+    );
+
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
+
+    if (!status.ok) {
+      return {
+        success: false,
+        message: status.error ?? 'Could not verify payment yet. Try again shortly.',
+      };
+    }
+
+    if (status.status === 'success') {
+      const admin = createServiceRoleClient();
+      const { error } = await admin.rpc('complete_payment_intent', {
+        p_intent_id: intentId,
+        p_provider_reference: status.providerReference ?? ref,
+        p_checkout_request_id: row.checkout_request_id,
+        p_metadata: { source: 'wallet_check_status', provider: row.provider },
+      });
+      if (error) {
+        return { success: false, message: error.message };
+      }
+      revalidatePath('/wallet');
+      revalidatePath('/dashboard');
+      return { success: true, message: 'Payment confirmed. Wallet updated.' };
+    }
+
+    if (status.status === 'failed') {
+      const admin = createServiceRoleClient();
+      await admin.rpc('fail_payment_intent', {
+        p_intent_id: intentId,
+        p_error_message: `${row.provider} reported failed`,
+      });
+      revalidatePath('/wallet');
+      return {
+        success: false,
+        message: 'Payment failed or was cancelled. You can retry below.',
+      };
+    }
+
+    return {
+      success: false,
+      message:
+        'Still processing. If you already entered your PIN, wait a few seconds and check again.',
+    };
   }
-  if (settled.status === 'failed' || settled.status === 'abandoned') {
-    return { success: false, message: `Payment marked as ${settled.status}.` };
-  }
+
   return {
     success: false,
-    message: 'Still pending. Finish checkout or wait a moment and check again.',
+    message: 'Status check is not available for this payment method yet.',
   };
 }

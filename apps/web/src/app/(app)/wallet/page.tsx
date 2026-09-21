@@ -84,8 +84,15 @@ export default async function WalletPage({ searchParams }: Props) {
     redirect(`/login?next=${encodeURIComponent(walletNext)}`);
   }
 
-  const [{ dict }, walletResult, txResult, intentResult, pendingResult, profileResult] =
-    await Promise.all([
+  const [
+    { dict },
+    walletResult,
+    txResult,
+    intentResult,
+    pendingResult,
+    profileResult,
+    withdrawalResult,
+  ] = await Promise.all([
       getDictionary(),
       supabase
         .from('wallets')
@@ -117,6 +124,15 @@ export default async function WalletPage({ searchParams }: Props) {
         .select('full_name, phone, mpesa_phone')
         .eq('id', user.id)
         .maybeSingle(),
+      supabase
+        .from('withdrawal_requests')
+        .select(
+          'id, amount, currency, status, destination_type, destination_phone, created_at, error_message',
+        )
+        .eq('user_id', user.id)
+        .in('status', ['pending', 'processing'])
+        .order('created_at', { ascending: false })
+        .limit(10),
     ]);
 
   const labels = dict.wallet;
@@ -134,6 +150,17 @@ export default async function WalletPage({ searchParams }: Props) {
   };
   const failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
   const pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
+  type WithdrawalRow = {
+    id: string;
+    amount: number | string;
+    currency: string;
+    status: string;
+    destination_type: string;
+    destination_phone: string | null;
+    created_at: string;
+    error_message: string | null;
+  };
+  const pendingWithdrawals = (withdrawalResult.data ?? []) as unknown as WithdrawalRow[];
   const primary = wallets[0];
   const primaryCurrency = primary?.currency ?? 'KES';
   const available = primary
@@ -336,6 +363,7 @@ export default async function WalletPage({ searchParams }: Props) {
               currency={primaryCurrency}
               labels={dict.walletForms}
               provider={provider}
+              defaultPhone={withdrawPhone}
               defaultAmount={
                 Number.isFinite(amountPrefill) && amountPrefill >= 100
                   ? amountPrefill
@@ -360,44 +388,92 @@ export default async function WalletPage({ searchParams }: Props) {
 
       {provider === 'intasend' ? <IntasendTrustBadge /> : null}
 
-      {pendingIntents.length > 0 ? (
+      {pendingWithdrawals.length > 0 ? (
         <section className="space-y-3">
           <div>
-            <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{labels.pendingPaystackHint}</p>
+            <h2 className="text-lg font-bold tracking-tight">
+              {labels.withdrawalsInProgress}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {labels.pendingWithdrawalsHint}
+            </p>
           </div>
           <ul className="amanah-surface divide-y divide-border/70">
-            {pendingIntents.map((intent) => (
-              <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
+            {pendingWithdrawals.map((row) => (
+              <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div>
                   <p className="text-sm font-semibold">
-                    {formatCurrency(Number(intent.amount), intent.currency)}
+                    {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {intent.provider} · {formatDate(intent.created_at)}
+                    {row.destination_type === 'mpesa'
+                      ? row.destination_phone ?? 'M-Pesa'
+                      : row.destination_type}{' '}
+                    · {formatDate(row.created_at)}
                   </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={intent.status} />
-                  {intent.provider === 'paystack' ? (
-                    <CheckPaystackStatusButton
-                      intentId={intent.id}
-                      labels={{
-                        checkStatus: dict.walletForms.checkStatus,
-                        checkingStatus: dict.walletForms.checkingStatus,
-                      }}
-                    />
+                  {row.error_message ? (
+                    <p className="mt-0.5 text-xs text-destructive">{row.error_message}</p>
                   ) : null}
                 </div>
+                <StatusBadge status={row.status} />
               </li>
             ))}
           </ul>
         </section>
       ) : null}
 
+      {pendingIntents.length > 0 ? (
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {provider === 'intasend' || provider === 'mpesa' || provider === 'tendepay'
+                ? labels.pendingStkHint
+                : labels.pendingPaystackHint}
+            </p>
+          </div>
+          <ul className="amanah-surface divide-y divide-border/70">
+            {pendingIntents.map((intent) => {
+              const canCheck =
+                intent.provider === 'paystack' ||
+                intent.provider === 'intasend' ||
+                intent.provider === 'tendepay';
+              return (
+                <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold">
+                      {formatCurrency(Number(intent.amount), intent.currency)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {intent.phone ? `${intent.phone} · ` : ''}
+                      {formatDate(intent.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status={intent.status} />
+                    {canCheck ? (
+                      <CheckPaystackStatusButton
+                        intentId={intent.id}
+                        labels={{
+                          checkStatus: dict.walletForms.checkStatus,
+                          checkingStatus: dict.walletForms.checkingStatus,
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
       {failedIntents.length > 0 ? (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">{labels.failedPayments}</h2>
+          <div>
+            <h2 className="text-lg font-bold tracking-tight">{labels.failedPayments}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{labels.failedPaymentsHint}</p>
+          </div>
           <ul className="amanah-surface divide-y divide-border/70">
             {failedIntents.map((intent) => (
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">

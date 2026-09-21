@@ -263,7 +263,11 @@ export type Dictionary = {
     withdraw: string;
     paymentsInProgress: string;
     pendingPaystackHint: string;
+    pendingStkHint: string;
     failedPayments: string;
+    failedPaymentsHint: string;
+    withdrawalsInProgress: string;
+    pendingWithdrawalsHint: string;
     historyTitle: string;
     historyEmpty: string;
     availableLabel: string;
@@ -309,6 +313,9 @@ export type Dictionary = {
     checkStatus: string;
     checkingStatus: string;
     stepUpHint: string;
+    stkPromptHint: string;
+    intasendPartnerHint: string;
+    withdrawMpesaHint: string;
     verificationCode: string;
     sendCode: string;
     confirmWithCode: string;
@@ -815,7 +822,14 @@ export const en: Dictionary = {
     paymentsInProgress: 'In progress',
     pendingPaystackHint:
       'Already paid? Wait a moment or check status.',
+    pendingStkHint:
+      'Approve the M-Pesa PIN prompt on your phone. Partner names (e.g. Co-op) still credit Jameiyah. Then tap Check status if the balance is slow.',
     failedPayments: 'Failed — retry',
+    failedPaymentsHint:
+      'Retry sends a fresh M-Pesa prompt. Cancel any old prompt you no longer want.',
+    withdrawalsInProgress: 'Withdrawals',
+    pendingWithdrawalsHint:
+      'Requested cash-outs wait for admin approval, then land on your M-Pesa — no PIN prompt.',
     historyTitle: 'History',
     historyEmpty:
       'Top-ups, contributions, and payouts will appear here.',
@@ -866,6 +880,12 @@ export const en: Dictionary = {
     checkingStatus: 'Checking…',
     stepUpHint:
       'For M-Pesa, approve the prompt on your phone. Other methods may SMS a code first.',
+    stkPromptHint:
+      'You will get an M-Pesa prompt on this number — enter your PIN there (no SMS code).',
+    intasendPartnerHint:
+      "M-Pesa may show a bank partner name (e.g. Co-op) on the PIN screen — that is Jameiyah's top-up rail. Enter PIN only for amounts you started here. No SMS code.",
+    withdrawMpesaHint:
+      'No SMS code and no PIN prompt for cash-out. After admin approval, funds land on this M-Pesa number.',
     verificationCode: 'SMS code',
     sendCode: 'Send new code',
     confirmWithCode: 'Confirm',
@@ -1386,7 +1406,14 @@ export const sw: Dictionary = {
     paymentsInProgress: 'Inaendelea',
     pendingPaystackHint:
       'Ulishalipa? Subiri kidogo au angalia hali.',
+    pendingStkHint:
+      'Idhinisha ombi la PIN la M-Pesa kwenye simu. Majina ya washirika (k.m. Co-op) bado yanaongeza salio la Jameiyah. Kisha bofya Angalia hali ikiwa salio linachelewa.',
     failedPayments: 'Imeshindikana — jaribu tena',
+    failedPaymentsHint:
+      'Jaribu tena hutuma ombi jipya la M-Pesa. Ghairi ombi la zamani usilotaka.',
+    withdrawalsInProgress: 'Utoaji',
+    pendingWithdrawalsHint:
+      'Maombi ya kutoa yanangoja idhini ya msimamizi, kisha yanaingia M-Pesa — bila ombi la PIN.',
     historyTitle: 'Historia',
     historyEmpty:
       'Ongezeko, michango, na malipo yataonekana hapa.',
@@ -1435,7 +1462,14 @@ export const sw: Dictionary = {
     retrying: 'Inajaribu tena…',
     checkStatus: 'Angalia hali',
     checkingStatus: 'Inaangalia…',
-    stepUpHint: 'Tunatuma SMS ya nambari 6 kwenye simu ya wasifu kabla pesa haijahanishwa.',
+    stepUpHint:
+      'Kwa M-Pesa, idhinisha ombi kwenye simu yako. Njia zingine zinaweza kutuma SMS ya msimbo kwanza.',
+    stkPromptHint:
+      'Utapata ombi la M-Pesa kwenye nambari hii — weka PIN pale (hakuna msimbo wa SMS).',
+    intasendPartnerHint:
+      'M-Pesa inaweza kuonyesha jina la benki mshirika (k.m. Co-op) kwenye skrini ya PIN — hiyo ni njia ya ongezeko la Jameiyah. Weka PIN tu kwa kiasi ulichoanza hapa. Hakuna msimbo wa SMS.',
+    withdrawMpesaHint:
+      'Hakuna msimbo wa SMS wala ombi la PIN kwa utoaji. Baada ya idhini ya msimamizi, pesa zinaingia M-Pesa hii.',
     verificationCode: 'Msimbo wa SMS',
     sendCode: 'Tuma msimbo mpya',
     confirmWithCode: 'Thibitisha',

@@ -17,12 +17,14 @@ export function TopUpForm({
   provider = 'simulated',
   labels,
   defaultAmount,
+  defaultPhone = '',
   returnPath,
 }: {
   currency?: string;
-  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack' | 'intasend';
+  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack' | 'intasend' | 'tendepay';
   labels: Dictionary['walletForms'];
   defaultAmount?: number;
+  defaultPhone?: string;
   returnPath?: string | null;
 }) {
   const [state, action, pending] = useActionState(topUpWalletAction, initial);
@@ -35,6 +37,8 @@ export function TopUpForm({
         : 1000;
   const needsPhone =
     provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
+  const linkedPhone = defaultPhone.trim();
+  const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
 
   return (
     <form action={action} className="space-y-4">
@@ -64,9 +68,17 @@ export function TopUpForm({
             type="tel"
             inputMode="tel"
             placeholder={KE_PHONE_PLACEHOLDER}
+            defaultValue={hasLinkedPhone ? linkedPhone : undefined}
             required
             className="h-11 text-base sm:h-10 sm:text-sm"
           />
+          {provider === 'intasend' ? (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {labels.intasendPartnerHint}
+            </p>
+          ) : (
+            <p className="text-xs text-muted-foreground">{labels.stkPromptHint}</p>
+          )}
         </div>
       ) : provider === 'paystack' ? (
         <p className="text-xs text-muted-foreground">{labels.paystackHint}</p>
@@ -85,11 +97,6 @@ export function TopUpForm({
       provider !== 'intasend' &&
       provider !== 'tendepay' ? (
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
-      ) : null}
-      {provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay' ? (
-        <p className="text-xs text-muted-foreground">
-          You will get an M-Pesa prompt on this number — enter your PIN there (no SMS code).
-        </p>
       ) : null}
       {returnPath && !needsOtp ? (
         <p className="text-xs text-muted-foreground">

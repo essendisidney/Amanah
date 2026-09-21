@@ -43,6 +43,13 @@ function toMsisdn(phone: string): string {
   return digits;
 }
 
+/** M-Pesa / IntaSend narrative display is short — keep it brand-first. */
+function truncateNarrative(raw: string, max = 22): string {
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (cleaned.length <= max) return cleaned || 'Jameiyah';
+  return `${cleaned.slice(0, max - 1)}…`;
+}
+
 export function isIntasendConfigured(): boolean {
   return Boolean(secretKey() && publishableKey());
 }
@@ -87,13 +94,18 @@ export const intasendAdapter: PaymentAdapter = {
     }
 
     const msisdn = toMsisdn(phone);
+    // Keep api_ref = intent UUID for webhook settle. Narrative is what members may see
+    // alongside the partner STK label (e.g. co-op-bank-stk-push).
+    const narrative = truncateNarrative(
+      input.description?.trim() || 'Jameiyah top-up',
+    );
     const { ok, status, json } = await intasendFetch('/payment/mpesa-stk-push/', {
       amount: Math.round(Number(input.amount)),
       phone_number: msisdn,
       currency: (input.currency ?? 'KES').toUpperCase(),
       api_ref: input.intentId,
       email: input.email ?? undefined,
-      narrative: input.description ?? 'Jameiyah payment',
+      narrative,
     });
 
     if (!ok) {
@@ -134,7 +146,8 @@ export const intasendAdapter: PaymentAdapter = {
       status: 'processing',
       checkoutRequestId: tracking,
       providerReference: invoiceId ?? tracking,
-      customerMessage: 'M-Pesa prompt sent. Enter your PIN to complete payment.',
+      customerMessage:
+        "M-Pesa prompt sent. The name may show a bank partner (e.g. Co-op) — that is Jameiyah's payment rail. Enter your PIN to credit your wallet.",
     };
   },
 
@@ -180,7 +193,9 @@ export const intasendAdapter: PaymentAdapter = {
           name: input.beneficiaryName ?? 'Jameiyah member',
           account: Number(accountRaw),
           amount: Math.round(Number(input.amount)),
-          narrative: input.narrative ?? `disbursement:${input.disbursementId}`,
+          narrative: truncateNarrative(
+            input.narrative ?? `Jameiyah withdraw`,
+          ),
           ...(input.method === 'mpesa_b2b'
             ? {
                 account_type: input.accountType ?? 'Paybill',

@@ -125,8 +125,7 @@ export async function runWithdrawalDisbursement(
     phone,
     beneficiaryName: opts?.beneficiaryName,
     narrative:
-      opts?.narrative ??
-      `Jameiyah withdrawal ${withdrawal.id.slice(0, 8)}`,
+      opts?.narrative ?? 'Jameiyah withdraw',
     method: 'mpesa_b2c',
     metadata: {
       kind: 'withdrawal',

@@ -90,7 +90,12 @@ export async function requestWithdrawalAction(
     return { success: false, message: error.message };
   }
 
-  const result = data as { ok?: boolean; error?: string } | null;
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    destination_phone?: string | null;
+    status?: string;
+  } | null;
   if (!result?.ok) {
     const code = result?.error ?? 'FAILED';
     const messages: Record<string, string> = {
@@ -109,7 +114,18 @@ export async function requestWithdrawalAction(
 
   revalidatePath('/wallet');
   revalidatePath('/notifications');
-  return { success: true, message: 'Withdrawal requested. Pending processing.' };
+  const dest =
+    typeof result.destination_phone === 'string' && result.destination_phone
+      ? result.destination_phone
+      : phone || null;
+  const destBit = dest ? ` to ${dest}` : '';
+  return {
+    success: true,
+    message:
+      destinationType === 'mpesa'
+        ? `Withdrawal requested${destBit}. An admin will approve & send — money arrives on M-Pesa (no PIN prompt). Watch status below.`
+        : 'Withdrawal requested. Pending admin processing.',
+  };
 }
 
 export async function processWithdrawalAction(formData: FormData): Promise<void> {

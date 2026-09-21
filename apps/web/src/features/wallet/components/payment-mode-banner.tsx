@@ -11,19 +11,24 @@ const COPY: Record<
   },
   mpesa: {
     title: 'M-Pesa',
-    body: 'Approve the prompt on your phone to add money.',
+    body: 'Approve the prompt on your phone to add money to Jameiyah.',
     tone: 'live',
   },
   // Checkout is obvious from the button — no provider brand banner.
   paystack: null,
   intasend: {
+    title: 'M-Pesa via partner rail',
+    body: 'Safaricom may show a bank partner name (e.g. Co-op) on the PIN prompt — you are still topping up Jameiyah. Enter PIN only for amounts you started here.',
+    tone: 'live',
+  },
+  tendepay: {
     title: 'M-Pesa',
-    body: 'Approve the prompt on your phone to add money.',
+    body: 'Approve the prompt on your phone to add money to Jameiyah.',
     tone: 'live',
   },
   bank: {
     title: 'Bank transfer',
-    body: 'Top-ups queue a bank transfer for settlement.',
+    body: 'Top-ups create a bank transfer for settlement.',
     tone: 'live',
   },
 };
