@@ -75,13 +75,6 @@ export function TopUpForm({
             required
             className="h-11 text-base sm:h-10 sm:text-sm"
           />
-          {provider === 'intasend' ? (
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {labels.intasendPartnerHint}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">{labels.stkPromptHint}</p>
-          )}
         </div>
       ) : provider === 'paystack' ? (
         <p className="text-xs text-muted-foreground">{labels.paystackHint}</p>

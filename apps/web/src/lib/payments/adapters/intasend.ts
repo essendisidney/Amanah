@@ -146,8 +146,7 @@ export const intasendAdapter: PaymentAdapter = {
       status: 'processing',
       checkoutRequestId: tracking,
       providerReference: invoiceId ?? tracking,
-      customerMessage:
-        "M-Pesa prompt sent. The name may show a bank partner (e.g. Co-op) — that is Jameiyah's payment rail. Enter your PIN to credit your wallet.",
+      customerMessage: 'M-Pesa prompt sent. Approve the PIN on your phone.',
     };
   },
 

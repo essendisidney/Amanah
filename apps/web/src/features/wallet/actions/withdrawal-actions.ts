@@ -123,7 +123,7 @@ export async function requestWithdrawalAction(
     success: true,
     message:
       destinationType === 'mpesa'
-        ? `Withdrawal requested${destBit}. An admin will approve & send — money arrives on M-Pesa (no PIN prompt). Watch status below.`
+        ? `Withdrawal requested${destBit}. Waiting for admin approval.`
         : 'Withdrawal requested. Pending admin processing.',
   };
 }

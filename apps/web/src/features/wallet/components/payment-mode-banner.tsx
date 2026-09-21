@@ -16,11 +16,7 @@ const COPY: Record<
   },
   // Checkout is obvious from the button — no provider brand banner.
   paystack: null,
-  intasend: {
-    title: 'M-Pesa',
-    body: 'Approve the prompt on your phone. Partner names (e.g. Co-op) still credit Jameiyah.',
-    tone: 'live',
-  },
+  intasend: null,
   tendepay: {
     title: 'M-Pesa',
     body: 'Approve the prompt on your phone to add money to Jameiyah.',
