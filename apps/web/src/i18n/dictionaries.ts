@@ -545,9 +545,9 @@ export type Dictionary = {
 export const en: Dictionary = {
   langName: 'English',
   brand: {
-    tagline: 'Community Finance · Digital · For All Kenyans',
+    tagline: 'Community Finance · Digital · For All',
     description:
-      'Community finance, digital, for all Kenyans — trusted circles, wallet, and savings.',
+      'Community finance, digital, for all — trusted circles, wallet, and savings.',
   },
   common: {
     sadaka: 'Sadaka',
@@ -1128,9 +1128,9 @@ export const en: Dictionary = {
 export const sw: Dictionary = {
   langName: 'Kiswahili',
   brand: {
-    tagline: 'Fedha za Jamii · Kidijitali · Kwa Wakenya Wote',
+    tagline: 'Fedha za Jamii · Kidijitali · Kwa Wote',
     description:
-      'Fedha za jamii, kidijitali, kwa Wakenya wote — miduara yenye uaminifu, pochi, na akiba.',
+      'Fedha za jamii, kidijitali, kwa wote — miduara yenye uaminifu, pochi, na akiba.',
   },
   common: {
     sadaka: 'Sadaka',

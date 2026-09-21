@@ -1,8 +1,8 @@
 /** Brand & product constants */
 export const APP_NAME = 'Jameiyah';
 export const APP_DESCRIPTION =
-  'Community finance, digital, for all Kenyans — trusted circles, wallet, and savings.';
-export const APP_TAGLINE = 'Community Finance · Digital · For All Kenyans';
+  'Community finance, digital, for all — trusted circles, wallet, and savings.';
+export const APP_TAGLINE = 'Community Finance · Digital · For All';
 
 /** Supported currencies (ISO 4217). Expand as markets open. */
 export const SUPPORTED_CURRENCIES = ['KES', 'USD', 'AED', 'SAR', 'GBP'] as const;
