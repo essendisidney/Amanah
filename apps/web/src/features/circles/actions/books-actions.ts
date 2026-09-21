@@ -84,9 +84,9 @@ export async function recordMemberBookEntryAction(formData: FormData): Promise<v
       const code = result?.error ?? 'FAILED';
       const messages: Record<string, string> = {
         REPAYMENT_EXCEEDS_PRINCIPAL:
-          'Repayment is more than the loan balance. Save the loan first (or lower the amount).',
+          'Repayment is more than the facility balance. Save the facility first (or lower the amount).',
         REPAYMENT_AMOUNT_REQUIRED: 'Enter a repayment amount.',
-        DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the loan amount.',
+        DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the facility amount.',
       };
       redirectWithCircleNotice(
         slug,
@@ -98,7 +98,7 @@ export async function recordMemberBookEntryAction(formData: FormData): Promise<v
     revalidateBooks(slug);
     redirectWithCircleNotice(
       slug,
-      entryType === 'loan' ? 'Loan recorded.' : 'Loan repayment recorded.',
+      entryType === 'loan' ? 'Facility recorded.' : 'Facility repayment recorded.',
       'success',
       booksPath(memberId),
     );

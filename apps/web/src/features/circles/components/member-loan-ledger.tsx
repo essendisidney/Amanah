@@ -37,7 +37,7 @@ type Props = {
 };
 
 const EVENT_LABELS: Record<string, string> = {
-  disbursement: 'New loan',
+  disbursement: 'New facility',
   profit: 'Profit paid',
   repayment: 'Repayment',
   rollover: 'Rollover',
@@ -61,17 +61,18 @@ export function MemberLoanLedger({
   return (
     <section className="space-y-4 rounded-xl border border-border bg-card p-5">
       <div>
-        <h2 className="text-lg font-semibold">Loan ledger — profit & rollovers</h2>
+        <h2 className="text-lg font-semibold">Facility ledger — profit & rollovers</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Like Asha&apos;s Excel: <strong className="font-medium text-foreground">NEW LOAN</strong>,{' '}
-          <strong className="font-medium text-foreground">INTEREST/profit</strong>,{' '}
+          Like Asha&apos;s Excel:{' '}
+          <strong className="font-medium text-foreground">NEW FACILITY</strong>,{' '}
+          <strong className="font-medium text-foreground">PROFIT</strong>,{' '}
           <strong className="font-medium text-foreground">REPAYMENT</strong>, and{' '}
           <strong className="font-medium text-foreground">rollover + top-up</strong>.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Loan balance" value={formatCurrency(principal, currency)} />
+        <Stat label="Facility balance" value={formatCurrency(principal, currency)} />
         <Stat
           label="Suggested profit"
           value={formatCurrency(suggestedProfit, currency)}
@@ -79,7 +80,7 @@ export function MemberLoanLedger({
         />
         <Stat label="Profit paid (total)" value={formatCurrency(totals.profit_paid, currency)} />
         <Stat
-          label="Borrowed / repaid"
+          label="Disbursed / repaid"
           value={`${formatCurrency(totals.disbursed, currency)} / ${formatCurrency(totals.repaid_principal, currency)}`}
         />
       </div>
@@ -115,12 +116,12 @@ export function MemberLoanLedger({
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted-foreground">No loan events yet for {memberLabel}.</p>
+        <p className="text-sm text-muted-foreground">No facility events yet for {memberLabel}.</p>
       )}
 
       <div className="grid gap-4 lg:grid-cols-2">
         <LoanEventForm
-          title="New loan"
+          title="New facility"
           jamiyaId={jamiyaId}
           slug={slug}
           memberId={memberId}
@@ -144,7 +145,7 @@ export function MemberLoanLedger({
           eventType="repayment"
           showProfitSplit
           defaultDate={today}
-          helpText="Total paid. Put any profit portion in the field next to it (rest reduces loan balance). Save a New loan first if balance is 0."
+          helpText="Total paid. Put any profit portion beside it (rest reduces facility balance). Save a New facility first if balance is 0."
         />
         <LoanEventForm
           title="Rollover + top-up"
@@ -154,7 +155,7 @@ export function MemberLoanLedger({
           eventType="rollover"
           showRollover
           defaultDate={today}
-          helpText="Profit paid on closing the old loan, then new balance after rollover (e.g. Sarah 50,000 → 40,300 with top-up)."
+          helpText="Profit paid on closing the old facility, then new balance after rollover (e.g. Sarah 50,000 → 40,300 with top-up)."
         />
       </div>
     </section>
@@ -210,7 +211,7 @@ function LoanEventForm({
               <Input id={`${eventType}-profit`} name="profitAmount" type="number" min={0} step="1" />
             </div>
             <div className="space-y-1">
-              <Label htmlFor={`${eventType}-new`}>New loan balance</Label>
+              <Label htmlFor={`${eventType}-new`}>New facility balance</Label>
               <Input id={`${eventType}-new`} name="newPrincipal" type="number" min={0} step="1" required />
             </div>
           </>
@@ -231,7 +232,14 @@ function LoanEventForm({
         {showProfitSplit ? (
           <div className="space-y-1">
             <Label htmlFor={`${eventType}-profit-split`}>Profit portion</Label>
-            <Input id={`${eventType}-profit-split`} name="profitAmount" type="number" min={0} step="1" defaultValue={0} />
+            <Input
+              id={`${eventType}-profit-split`}
+              name="profitAmount"
+              type="number"
+              min={0}
+              step="1"
+              defaultValue={0}
+            />
           </div>
         ) : null}
         <div className="space-y-1">

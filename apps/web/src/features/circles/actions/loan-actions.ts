@@ -15,16 +15,16 @@ type LoanEventType = 'disbursement' | 'profit' | 'repayment' | 'rollover';
 
 const LOAN_EVENT_ERRORS: Record<string, string> = {
   REPAYMENT_EXCEEDS_PRINCIPAL:
-    'Repayment is more than the loan balance. Save a New loan first (or lower the amount).',
+    'Repayment is more than the facility balance. Save a New facility first (or lower the amount).',
   REPAYMENT_AMOUNT_REQUIRED: 'Enter a repayment amount.',
-  DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the new loan amount.',
+  DISBURSEMENT_AMOUNT_REQUIRED: 'Enter the new facility amount.',
   PROFIT_AMOUNT_REQUIRED: 'Enter the profit amount.',
   PROFIT_EXCEEDS_REPAYMENT: 'Profit portion cannot be more than the total repayment.',
-  INVALID_NEW_PRINCIPAL: 'Enter a valid new loan balance for the rollover.',
-  INVALID_EVENT_TYPE: 'Invalid loan event type.',
+  INVALID_NEW_PRINCIPAL: 'Enter a valid new facility balance for the rollover.',
+  INVALID_EVENT_TYPE: 'Invalid facility event type.',
   INVALID_AMOUNT: 'Enter a valid amount.',
   INVALID_DATE: 'Pick a valid date.',
-  FORBIDDEN: 'Only circle officers can record loan ledger events.',
+  FORBIDDEN: 'Only circle officers can record facility ledger events.',
   UNAUTHENTICATED: 'Sign in again, then retry.',
 };
 
@@ -100,7 +100,7 @@ export async function recordMemberLoanEventAction(formData: FormData): Promise<v
       : '';
   const label =
     eventType === 'disbursement'
-      ? 'New loan'
+      ? 'New facility'
       : eventType === 'repayment'
         ? 'Repayment'
         : eventType === 'profit'

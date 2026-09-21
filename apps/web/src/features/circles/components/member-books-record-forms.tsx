@@ -125,7 +125,7 @@ export function MemberBooksRecordForms({
         action={recordMemberBookEntryAction}
         className="space-y-3 rounded-xl border border-border bg-card p-5"
       >
-        <h3 className="font-semibold">Loan</h3>
+        <h3 className="font-semibold">Facility</h3>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="memberId" value={memberId} />
@@ -145,7 +145,7 @@ export function MemberBooksRecordForms({
           </div>
         </div>
         <Button type="submit" className="min-h-11">
-          Save loan
+          Save facility
         </Button>
       </form>
 
@@ -153,7 +153,7 @@ export function MemberBooksRecordForms({
         action={recordMemberBookEntryAction}
         className="space-y-3 rounded-xl border border-border bg-card p-5 lg:col-span-2"
       >
-        <h3 className="font-semibold">Loan repayment</h3>
+        <h3 className="font-semibold">Facility repayment</h3>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="memberId" value={memberId} />
