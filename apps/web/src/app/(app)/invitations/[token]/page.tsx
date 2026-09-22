@@ -204,7 +204,7 @@ export default async function InvitationPage({ params }: Props) {
             {isExpired
               ? 'This invitation has expired. Ask the circle admin for a new link.'
               : preview.status === 'accepted'
-                ? 'You already joined this circle. Open it from My circles.'
+                ? 'You already joined this circle. Open it below.'
                 : `This invitation is ${preview.status.replaceAll('_', ' ')}.`}
           </AlertDescription>
         </Alert>
@@ -215,13 +215,11 @@ export default async function InvitationPage({ params }: Props) {
           <Button asChild>
             <Link href={`/circles/${preview.jamiya_slug}` as Route}>Open circle</Link>
           </Button>
-        ) : null}
-        <Button asChild variant="outline">
-          <Link href={'/circles' as Route}>My circles</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href={'/dashboard' as Route}>Dashboard</Link>
-        </Button>
+        ) : (
+          <Button asChild variant="outline">
+            <Link href={'/dashboard' as Route}>Go to dashboard</Link>
+          </Button>
+        )}
       </div>
     
     </AppPage>

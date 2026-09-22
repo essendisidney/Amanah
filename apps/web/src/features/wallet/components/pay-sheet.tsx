@@ -11,11 +11,9 @@ import {
   ChevronRight,
   HandHeart,
   Landmark,
-  LayoutGrid,
   Plus,
   Target,
   TrendingUp,
-  Wallet,
   X,
 } from 'lucide-react';
 import { formatCurrency } from '@jamiya/shared';
@@ -104,17 +102,8 @@ export function PaySheet({
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
 
+  // Money tab covers wallet; Pay keeps withdraw + insights + tools.
   const primary: PayLink[] = [
-    ...(dueHref
-      ? []
-      : [
-          {
-            href: '/circles' as Route,
-            label: labels.payCircle,
-            icon: LayoutGrid,
-            tint: 'amanah-tint-pay',
-          } satisfies PayLink,
-        ]),
     {
       href: '/wallet#withdraw' as Route,
       label: labels.withdraw,
@@ -126,12 +115,6 @@ export function PaySheet({
       label: labels.insights,
       icon: ChartNoAxesCombined,
       tint: 'amanah-tint-send',
-    },
-    {
-      href: '/wallet' as Route,
-      label: labels.openMoney,
-      icon: Wallet,
-      tint: 'amanah-tint-add',
     },
   ];
 
@@ -178,12 +161,6 @@ export function PaySheet({
       icon: Calculator,
       tint: 'amanah-tint-pay',
     },
-    {
-      href: '/finance' as Route,
-      label: labels.allFinance,
-      icon: Wallet,
-      tint: 'amanah-tint-send',
-    },
   ];
 
   return (
@@ -214,10 +191,7 @@ export function PaySheet({
         </div>
 
         {available != null && Number.isFinite(available) ? (
-          <Link
-            href={'/wallet' as Route}
-            className="flex items-center justify-between gap-3 rounded-[1.25rem] bg-white/50 px-4 py-3 dark:bg-white/[0.05]"
-          >
+          <div className="flex items-center justify-between gap-3 rounded-[1.25rem] bg-white/50 px-4 py-3 dark:bg-white/[0.05]">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {labels.balanceLabel}
@@ -226,8 +200,7 @@ export function PaySheet({
                 {formatCurrency(available, currency)}
               </p>
             </div>
-            <span className="text-xs font-semibold text-primary">{labels.openMoney} →</span>
-          </Link>
+          </div>
         ) : null}
 
         <Link

@@ -1,5 +1,3 @@
-import Link from 'next/link';
-import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
@@ -93,9 +91,7 @@ export default async function WelfarePage({ searchParams }: Props) {
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          <Link href={'/finance' as Route} className="hover:text-primary">
-            Finance
-          </Link>
+          Money
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           Welfare fund
@@ -116,9 +112,6 @@ export default async function WelfarePage({ searchParams }: Props) {
                 ? 'Create a fund for one of your circles below so members can contribute and claim.'
                 : 'Ask a circle officer (chair, treasurer, or admin) to create a welfare fund first.'
             }
-            {...(adminCircles.length === 0
-              ? { actionLabel: 'Back to Finance', actionHref: '/finance' as Route }
-              : {})}
           />
         ) : (
           <ul className="divide-y divide-border border-y border-border">
@@ -262,8 +255,6 @@ export default async function WelfarePage({ searchParams }: Props) {
           <EmptyState
             title="No claims yet"
             description="When someone files a medical, funeral, or accident claim, it will show here for review."
-            actionLabel="Back to Finance"
-            actionHref={'/finance' as Route}
           />
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">

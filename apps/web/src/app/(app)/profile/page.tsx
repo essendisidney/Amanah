@@ -129,7 +129,6 @@ export default async function ProfilePage({ searchParams }: Props) {
         : labels.scoreBuilding;
 
   const youLinks: Array<{ href: Route; title: string; meta: string | null }> = [
-    { href: '/wallet', title: labels.linkMoney, meta: null },
     { href: '/finance/goals', title: labels.linkGoals, meta: null },
     {
       href: '/profile#kyc-documents' as Route,

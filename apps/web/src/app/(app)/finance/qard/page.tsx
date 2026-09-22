@@ -132,9 +132,7 @@ export default async function QardPage({ searchParams }: Props) {
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          <Link href={'/finance' as Route} className="hover:text-primary">
-            Finance
-          </Link>
+          Money
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           Member loan
@@ -148,9 +146,9 @@ export default async function QardPage({ searchParams }: Props) {
       {memberships.length === 0 ? (
         <EmptyState
           title="Join a circle first"
-          description="Qard Hassan is available inside an active circle. Create or join one, then return here."
-          actionLabel="Go to Circles"
-          actionHref={'/circles' as Route}
+          description="Qard Hassan is available inside an active circle. Use Circles to create or join one, then return here."
+          actionLabel="Create a circle"
+          actionHref={'/circles/new' as Route}
         />
       ) : null}
 
@@ -391,8 +389,6 @@ export default async function QardPage({ searchParams }: Props) {
           <EmptyState
             title="No loans yet"
             description="Ask for an interest-free loan from this circle. The treasurer approves, then you repay."
-            actionLabel="Back to Finance"
-            actionHref={'/finance' as Route}
           />
         )}
       </section>

@@ -61,7 +61,9 @@ export default async function InvestPage() {
     {
       title: labels.investSharesTitle,
       body: labels.investSharesBody,
-      href: circles[0] ? (`/circles/${circles[0].slug}/shares` as Route) : ('/circles' as Route),
+      href: circles[0]
+        ? (`/circles/${circles[0].slug}/shares` as Route)
+        : ('/circles/new' as Route),
       cta: circles.length ? labels.investSharesCta : labels.investSharesJoinCta,
     },
     {
@@ -69,7 +71,7 @@ export default async function InvestPage() {
       body: labels.investTreasuryBody,
       href: circles[0]
         ? (`/circles/${circles[0].slug}/treasury` as Route)
-        : ('/circles' as Route),
+        : ('/circles/new' as Route),
       cta: circles.length ? labels.investTreasuryCta : labels.investTreasuryBrowseCta,
     },
     {
@@ -84,9 +86,7 @@ export default async function InvestPage() {
     <div className="space-y-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          <Link href={'/finance' as Route} className="hover:text-primary">
-            {labels.eyebrow}
-          </Link>
+          {labels.eyebrow}
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
           {labels.investTitle}
@@ -95,11 +95,6 @@ export default async function InvestPage() {
         {circles.length > 1 ? (
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{labels.investMultiHint}</p>
         ) : null}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/finance' as Route}>{labels.backToFinance}</Link>
-          </Button>
-        </div>
       </div>
 
       <section className="divide-y divide-border border-y border-border">
@@ -197,8 +192,8 @@ export default async function InvestPage() {
           <EmptyState
             title={labels.investEmptyTitle}
             description={labels.investEmptyDesc}
-            actionLabel={labels.investEmptyCta}
-            actionHref={'/circles' as Route}
+            actionLabel={labels.investSharesJoinCta}
+            actionHref={'/circles/new' as Route}
           />
         )}
       </section>

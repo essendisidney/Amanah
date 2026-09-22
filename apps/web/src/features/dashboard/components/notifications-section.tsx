@@ -40,17 +40,10 @@ export function NotificationsSection({
       />
 
       {notifications.length === 0 ? (
-        <div className="space-y-3">
-          <EmptyState
-            title={labels.notificationsEmptyTitle}
-            description={labels.notificationsEmptyDesc}
-            actionLabel={labels.createACircle}
-            actionHref={'/circles' as Route}
-          />
-          <Button asChild variant="outline" size="sm" className="min-h-11">
-            <Link href={'/notifications' as Route}>{common.viewAll}</Link>
-          </Button>
-        </div>
+        <EmptyState
+          title={labels.notificationsEmptyTitle}
+          description={labels.notificationsEmptyDesc}
+        />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border bg-card">
           {notifications.map((item) => {

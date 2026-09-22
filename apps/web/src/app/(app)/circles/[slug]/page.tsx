@@ -776,11 +776,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               hint: 'Name, phone, relationship for each member',
               primary: true as const,
             },
-            {
-              href: '/wallet' as Route,
-              label: 'Wallet',
-              hint: 'Top up and pay from Money',
-            },
           ]
         : [
             {
@@ -807,11 +802,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   },
                 ]
               : []),
-            {
-              href: '/wallet' as Route,
-              label: 'Wallet',
-              hint: 'Top up and pay from Money',
-            },
           ],
     },
     {
@@ -1336,10 +1326,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           )}
         </section>
       ) : null}
-
-      <Button asChild variant="outline" className="rounded-full">
-        <Link href={'/circles' as Route}>Back to My circles</Link>
-      </Button>
     </AppPage>
   );
 }

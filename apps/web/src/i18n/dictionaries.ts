@@ -150,6 +150,9 @@ export type Dictionary = {
     noCirclesTitle: string;
     noCirclesDesc: string;
     createACircle: string;
+    yourCircle: string;
+    joinWithInvite: string;
+    viewAllCircles: string;
     position: string;
     payoutsTitle: string;
     payoutsDesc: string;
@@ -707,6 +710,9 @@ export const en: Dictionary = {
     noCirclesTitle: 'No circles yet',
     noCirclesDesc: 'Create a circle or accept an invite.',
     createACircle: 'Create a circle',
+    yourCircle: 'Your circle',
+    joinWithInvite: 'Join with invite',
+    viewAllCircles: 'All circles',
     position: 'Position #{n}',
     payoutsTitle: 'Payout schedule',
     payoutsDesc: 'Your upcoming turns.',
@@ -1279,6 +1285,9 @@ export const sw: Dictionary = {
     noCirclesTitle: 'Bado hakuna miduara',
     noCirclesDesc: 'Unda mduara au kubali mwaliko.',
     createACircle: 'Unda mduara',
+    yourCircle: 'Mduara wako',
+    joinWithInvite: 'Jiunge kwa mwaliko',
+    viewAllCircles: 'Miduara yote',
     position: 'Nafasi #{n}',
     payoutsTitle: 'Ratiba ya malipo',
     payoutsDesc: 'Zamu zako zinazokuja.',

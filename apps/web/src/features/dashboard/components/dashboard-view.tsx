@@ -1,10 +1,9 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Plus, LayoutGrid, CircleDollarSign, Wallet } from 'lucide-react';
+import { Plus, CircleDollarSign } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
-import { RedeemInviteCodeForm } from '@/features/circles/components/redeem-invite-code-form';
 
 function greetingForHour(hour: number, labels: Dictionary['dashboard']) {
   if (hour < 12) return labels.greetingMorning;
@@ -45,6 +44,7 @@ export function DashboardView({
       )}#top-up` as Route)
     : ('/wallet#top-up' as Route);
 
+  // Circles + Money live in the tab bar — home only keeps task shortcuts.
   const actions = [
     {
       href: '/wallet#top-up' as Route,
@@ -65,20 +65,9 @@ export function DashboardView({
           icon: CircleDollarSign,
           tint: 'amanah-tint-pay',
         },
-    {
-      href: '/circles' as Route,
-      label: labels.quickCircles,
-      icon: LayoutGrid,
-      tint: 'amanah-tint-send',
-    },
-    {
-      href: '/wallet' as Route,
-      label: labels.quickMoney,
-      icon: Wallet,
-      tint: 'amanah-tint-withdraw',
-    },
   ];
   const circle = data.jamiyas[0] ?? null;
+  const hasMultipleCircles = data.jamiyas.length > 1;
   const recent = data.activity.slice(0, 3);
 
   return (
@@ -108,10 +97,12 @@ export function DashboardView({
             aria-hidden
             className="pointer-events-none absolute -inset-x-4 -top-6 h-40 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,_rgba(25,184,121,0.08)_0%,_rgba(91,141,239,0.05)_45%,_transparent_70%)]"
           />
-          <p className="amanah-money relative text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
-            {formatCurrency(available, currency)}
-          </p>
-          <p className="relative text-sm text-muted-foreground">{labels.available}</p>
+          <Link href={'/wallet' as Route} className="relative block">
+            <p className="amanah-money text-[3.25rem] font-bold leading-none tracking-tight text-foreground md:text-6xl">
+              {formatCurrency(available, currency)}
+            </p>
+            <p className="mt-1.5 text-sm text-muted-foreground">{labels.available}</p>
+          </Link>
         </section>
 
         {needsTopUpForDue ? (
@@ -180,57 +171,70 @@ export function DashboardView({
         ) : null}
 
         <section className="space-y-3">
-          <h2 className="text-sm font-medium text-muted-foreground">{labels.quickCircles}</h2>
-
           {!circle ? (
-            <div className="amanah-surface space-y-4 px-4 py-4">
+            <div className="amanah-surface space-y-3 px-4 py-4">
               <div>
                 <p className="font-semibold text-foreground">{labels.noCirclesTitle}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{labels.noCirclesDesc}</p>
               </div>
-              <RedeemInviteCodeForm
-                title="Join with invite code"
-                hint="Paste the code or invitation link from WhatsApp/SMS."
-                placeholder="Invite code or link"
-                submitLabel="Open invitation"
-                workingLabel="Opening…"
-                invalidLabel="Enter a valid invite code or link."
-              />
-              <Link
-                href={'/circles/new' as Route}
-                className="inline-flex text-sm font-semibold text-primary hover:underline"
-              >
-                {labels.createACircle}
-              </Link>
+              <div className="flex flex-wrap gap-x-4 gap-y-2">
+                <Link
+                  href={'/circles?redeem=1' as Route}
+                  className="text-sm font-semibold text-primary hover:underline"
+                >
+                  {labels.joinWithInvite}
+                </Link>
+                <Link
+                  href={'/circles/new' as Route}
+                  className="text-sm font-semibold text-primary hover:underline"
+                >
+                  {labels.createACircle}
+                </Link>
+              </div>
             </div>
           ) : (
-            <Link
-              href={`/circles/${circle.jamiya.slug}` as Route}
-              className="amanah-glass amanah-circle-mint block rounded-[1.75rem] px-5 py-4 transition-transform duration-200 active:scale-[0.99]"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-[15px] font-semibold tracking-tight text-foreground">
-                    {circle.jamiya.name}
-                  </p>
-                  <p className="mt-1 text-xs capitalize text-muted-foreground">
-                    {circle.jamiya.status.replaceAll('_', ' ')} · {circle.jamiya.memberCount}{' '}
-                    {common.members}
+            <>
+              <div className="flex items-baseline justify-between gap-3">
+                <h2 className="text-sm font-medium text-muted-foreground">
+                  {labels.yourCircle}
+                </h2>
+                {hasMultipleCircles ? (
+                  <Link
+                    href={'/circles' as Route}
+                    className="text-sm font-medium text-primary"
+                  >
+                    {labels.viewAllCircles}
+                  </Link>
+                ) : null}
+              </div>
+              <Link
+                href={`/circles/${circle.jamiya.slug}` as Route}
+                className="amanah-glass amanah-circle-mint block rounded-[1.75rem] px-5 py-4 transition-transform duration-200 active:scale-[0.99]"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-semibold tracking-tight text-foreground">
+                      {circle.jamiya.name}
+                    </p>
+                    <p className="mt-1 text-xs capitalize text-muted-foreground">
+                      {circle.jamiya.status.replaceAll('_', ' ')} · {circle.jamiya.memberCount}{' '}
+                      {common.members}
+                    </p>
+                  </div>
+                  <p className="amanah-money shrink-0 text-lg font-semibold text-foreground">
+                    {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
                   </p>
                 </div>
-                <p className="amanah-money shrink-0 text-lg font-semibold text-foreground">
-                  {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
-                </p>
-              </div>
-              <div className="amanah-progress mt-3 h-1 overflow-hidden rounded-full">
-                <span
-                  className="amanah-progress-fill block h-full rounded-full"
-                  style={{
-                    width: `${Math.min(100, Math.max(8, circle.jamiya.memberCount * 12))}%`,
-                  }}
-                />
-              </div>
-            </Link>
+                <div className="amanah-progress mt-3 h-1 overflow-hidden rounded-full">
+                  <span
+                    className="amanah-progress-fill block h-full rounded-full"
+                    style={{
+                      width: `${Math.min(100, Math.max(8, circle.jamiya.memberCount * 12))}%`,
+                    }}
+                  />
+                </div>
+              </Link>
+            </>
           )}
         </section>
 

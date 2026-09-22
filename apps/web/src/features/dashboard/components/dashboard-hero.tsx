@@ -39,9 +39,6 @@ export function DashboardHero({
         <Button asChild className="min-h-11">
           <Link href={'/circles/new' as Route}>{labels.createCircle}</Link>
         </Button>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/circles' as Route}>{labels.myCircles}</Link>
-        </Button>
         {profile && !profile.profile_completed ? (
           <Button asChild variant="accent" className="col-span-2 min-h-11 sm:col-span-1">
             <Link href={'/profile' as Route}>{labels.completeProfile}</Link>

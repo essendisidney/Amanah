@@ -36,10 +36,6 @@ export function MemberCircleLinks({ slug, hasDue, showGoals }: Props) {
       label: 'Members',
       hash: true,
     },
-    {
-      href: '/wallet',
-      label: 'Money',
-    },
     ...(showGoals
       ? [
           {

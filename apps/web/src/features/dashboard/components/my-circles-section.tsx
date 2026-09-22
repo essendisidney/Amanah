@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Button } from '@jamiya/ui';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
@@ -22,11 +21,6 @@ export function MyCirclesSection({
       <SectionHeader
         title={labels.myCirclesTitle}
         description={labels.myCirclesDesc}
-        action={
-          <Button asChild size="sm" variant="outline">
-            <Link href={'/circles' as Route}>{common.viewAll}</Link>
-          </Button>
-        }
       />
 
       {jamiyas.length === 0 ? (

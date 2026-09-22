@@ -71,9 +71,7 @@ export default async function GoalsPage({
     <div className="space-y-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          <Link href={'/finance' as Route} className="hover:text-primary">
-            Finance
-          </Link>
+          Money
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
@@ -81,14 +79,6 @@ export default async function GoalsPage({
           <strong className="font-medium text-foreground">whole circle</strong> where each member
           can put in a different amount toward the same challenge (school fees, Hajj, wedding…).
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/finance' as Route}>Back to Finance</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/wallet#top-up' as Route}>Open Money</Link>
-          </Button>
-        </div>
       </div>
 
       <div className="amanah-surface p-5">
@@ -100,8 +90,6 @@ export default async function GoalsPage({
           <EmptyState
             title="No goals yet"
             description="Create your first savings goal above — Hajj, emergency, or any target you care about."
-            actionLabel="Open Money"
-            actionHref={'/wallet#top-up' as Route}
           />
         ) : null}
         {goals.map((goal) => {

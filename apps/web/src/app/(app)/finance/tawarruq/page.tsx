@@ -42,9 +42,7 @@ export default async function TawarruqPage() {
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          <Link href={'/finance' as Route} className="hover:text-primary">
-            {labels.eyebrow}
-          </Link>
+          {labels.eyebrow}
         </p>
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           {labels.tawarruqTitle}
@@ -56,11 +54,6 @@ export default async function TawarruqPage() {
           </Link>
           .
         </p>
-        <div className="mt-4">
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/finance' as Route}>{labels.backToFinance}</Link>
-          </Button>
-        </div>
       </div>
 
       <form
@@ -113,8 +106,6 @@ export default async function TawarruqPage() {
           <EmptyState
             title="No applications yet"
             description="Submit a request above when you need partner Sharia finance beyond circle Qard."
-            actionLabel={labels.backToFinance}
-            actionHref={'/finance' as Route}
           />
         )}
       </section>

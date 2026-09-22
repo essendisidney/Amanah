@@ -4,12 +4,9 @@ import {
   Calculator,
   HandHeart,
   Landmark,
-  LayoutGrid,
   Target,
-  Wallet,
 } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, toE164Kenya } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
 import type { InsightsData } from '../lib/get-insights-data';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
@@ -31,25 +28,8 @@ export function InsightsView({
   const payDefaultPhone =
     toE164Kenya(payPhoneRaw) ?? (/^\+[1-9]\d{7,14}$/.test(payPhoneRaw) ? payPhoneRaw : '');
 
+  // Skip Circles / Money — those are already tabs.
   const nextStops = [
-    {
-      href: '/wallet' as Route,
-      label: payLabels.title,
-      hint: payLabels.subtitle,
-      icon: Wallet,
-    },
-    {
-      href: '/wallet' as Route,
-      label: payLabels.openMoney,
-      hint: payLabels.openMoneyHint,
-      icon: Wallet,
-    },
-    {
-      href: '/circles' as Route,
-      label: payLabels.payCircle,
-      hint: payLabels.payCircleHint,
-      icon: LayoutGrid,
-    },
     {
       href: '/finance/goals' as Route,
       label: payLabels.goals,
@@ -80,10 +60,6 @@ export function InsightsView({
     <div className="space-y-8">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
-          <Link href={'/wallet' as Route} className="hover:text-primary">
-            {payLabels.openMoney}
-          </Link>
-          <span className="text-muted-foreground"> · </span>
           {payLabels.insights}
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
@@ -92,14 +68,6 @@ export function InsightsView({
         <p className="mt-2 text-muted-foreground">
           A quiet snapshot of how {name} is saving and contributing this month.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Button asChild className="min-h-11">
-            <Link href={'/wallet' as Route}>{payLabels.openMoney}</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/wallet#top-up' as Route}>{payLabels.addMoney}</Link>
-          </Button>
-        </div>
       </div>
 
       <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
@@ -152,14 +120,9 @@ export function InsightsView({
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">Upcoming dues</h2>
-            <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
-          </div>
-          <Button asChild size="sm" variant="ghost">
-            <Link href={'/circles' as Route}>{payLabels.payCircle}</Link>
-          </Button>
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Upcoming dues</h2>
+          <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
         </div>
         {dashboard.contributions.length === 0 ? (
           <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground">
@@ -201,7 +164,7 @@ export function InsightsView({
             const Icon = item.icon;
             return (
               <li
-                key={item.href}
+                key={`${item.href}-${item.label}`}
                 className="border-b border-border/60 last:border-0"
               >
                 <Link
@@ -230,14 +193,9 @@ export function InsightsView({
       </section>
 
       <section className="space-y-3">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">Recent activity</h2>
-            <p className="text-sm text-muted-foreground">Latest wallet movements</p>
-          </div>
-          <Button asChild size="sm" variant="ghost">
-            <Link href={'/wallet' as Route}>{payLabels.openMoney}</Link>
-          </Button>
+        <div>
+          <h2 className="text-lg font-bold tracking-tight">Recent activity</h2>
+          <p className="text-sm text-muted-foreground">Latest wallet movements</p>
         </div>
         {dashboard.activity.length === 0 ? (
           <EmptyState
