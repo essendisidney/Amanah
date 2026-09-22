@@ -95,7 +95,9 @@ export function TopUpForm({
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
       ) : null}
       {returnPath && !needsOtp ? (
-        <p className="text-xs text-muted-foreground">Continues to your contribution after.</p>
+        <p className="text-xs text-muted-foreground">
+          After top-up you will continue to your contribution.
+        </p>
       ) : null}
       {needsOtp ? (
         <div className="space-y-2">

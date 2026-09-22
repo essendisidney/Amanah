@@ -100,8 +100,9 @@ export default async function WelfarePage({ searchParams }: Props) {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           Welfare fund
         </h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Medical, funeral, and accident support.
+        <p className="mt-2 max-w-2xl text-muted-foreground">
+          Medical, funeral, and accident support alongside regular circle savings — especially for
+          boda/tuktuk stages.
         </p>
       </div>
 
@@ -175,7 +176,7 @@ export default async function WelfarePage({ searchParams }: Props) {
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Contribute
           </h2>
-          <p className="text-sm text-muted-foreground">Pays from your wallet.</p>
+          <p className="text-sm text-muted-foreground">Debits your wallet into the circle fund.</p>
           <form action={contributeWelfareFormAction} className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="contribJamiya">Circle</Label>
