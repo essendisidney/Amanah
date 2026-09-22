@@ -3,9 +3,11 @@ import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
+import { isComplianceRole } from '@jamiya/auth';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
+import { getUserProfile } from '@/lib/supabase/auth';
 import { callRpc } from '@/lib/supabase/rpc';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
@@ -73,6 +75,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   } | null;
   if (!jamiya) notFound();
 
+  const profile = await getUserProfile(user.id);
+  const isPlatformAdmin = isComplianceRole(profile?.platform_role ?? 'member');
+
   const { data: myMembership } = await supabase
     .from('members')
     .select('id, role, status, member_code')
@@ -86,12 +91,57 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     status: string;
     member_code: string | null;
   } | null;
-  if (!me) notFound();
 
-  const isOfficer = ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(me.role);
-  let memberId = me.id;
-  if (qs.memberId && isOfficer) {
+  if (!me && !isPlatformAdmin) {
+    return (
+      <AppPage className="space-y-4">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          Statement unavailable
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          You need an active membership in {jamiya.name} to open a member statement.
+        </p>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
+        </Button>
+      </AppPage>
+    );
+  }
+
+  const isOfficer = me
+    ? ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(me.role)
+    : false;
+  const canBrowseMembers = isOfficer || isPlatformAdmin;
+
+  let memberId = me?.id ?? '';
+  if (qs.memberId && canBrowseMembers) {
     memberId = qs.memberId;
+  } else if (!memberId && canBrowseMembers) {
+    const { data: firstMember } = await supabase
+      .from('members')
+      .select('id')
+      .eq('jamiya_id', jamiya.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    memberId = (firstMember as { id: string } | null)?.id ?? '';
+  }
+
+  if (!memberId) {
+    return (
+      <AppPage className="space-y-4">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          No members yet
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Add people to {jamiya.name} before opening a statement.
+        </p>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
+        </Button>
+      </AppPage>
+    );
   }
 
   const { data: planPack } = await callRpc('get_circle_plan', { p_jamiya_id: jamiya.id });
@@ -99,7 +149,8 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
     ok?: boolean;
     plan?: { exports_included?: boolean; name?: string };
   } | null;
-  const canExportOthers = isOfficer || Boolean(planInfo?.plan?.exports_included);
+  const canExportOthers =
+    isOfficer || isPlatformAdmin || Boolean(planInfo?.plan?.exports_included);
 
   const { data } = await callRpc('member_circle_statement', {
     p_jamiya_id: jamiya.id,
@@ -124,10 +175,26 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   } | null;
 
   if (!stmt?.ok) {
-    notFound();
+    return (
+      <AppPage className="space-y-4">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          Could not load statement
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {stmt?.error === 'FORBIDDEN'
+            ? 'You do not have permission to view this member statement.'
+            : stmt?.error
+              ? `Error: ${stmt.error}`
+              : 'The statement service returned an empty response. Try again shortly.'}
+        </p>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
+        </Button>
+      </AppPage>
+    );
   }
 
-  const { data: allMembers } = isOfficer
+  const { data: allMembers } = canBrowseMembers
     ? await supabase
         .from('members')
         .select('id, member_code, user_id')
@@ -189,7 +256,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   const isShareDividend = jamiya.challenge_kind === 'share_dividend';
   const isRotating = jamiya.challenge_kind === 'rotating' || !jamiya.challenge_kind;
 
-  const viewingOther = memberId !== me.id;
+  const viewingOther = !me || memberId !== me.id;
   const viewedMember = memberRows.find((m) => m.id === memberId);
   const viewedProfile = viewedMember ? profileMap.get(viewedMember.user_id) : null;
   const viewedName =
@@ -330,11 +397,11 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/treasury` as Route}>Treasury</Link>
           </Button>
-          {memberId === me.id || canExportOthers ? (
+          {(!me || memberId === me.id) || canExportOthers ? (
             <Button asChild size="sm" className="min-h-11">
               <a
                 href={`/api/circles/${slug}/statement.pdf${
-                  memberId !== me.id ? `?memberId=${memberId}` : ''
+                  !me || memberId !== me.id ? `?memberId=${memberId}` : ''
                 }`}
               >
                 Download PDF
@@ -349,7 +416,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         </div>
       </div>
 
-      {memberId !== me.id && !canExportOthers ? (
+      {me && memberId !== me.id && !canExportOthers ? (
         <p className="rounded-md border border-accent/30 bg-accent-muted/50 px-3 py-2 text-sm text-muted-foreground print:hidden">
           Viewing another member’s statement is allowed for officers. PDF download for others
           needs Starter/Pro — upgrade under Officer → Circle plan.
@@ -374,7 +441,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         </p>
       </header>
 
-      {isOfficer && memberRows.length ? (
+      {canBrowseMembers && memberRows.length ? (
         <form
           className="flex w-full flex-col gap-2 print:hidden sm:flex-row sm:flex-wrap sm:items-end"
           method="get"

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
+import { isComplianceRole } from '@jamiya/auth';
 import { createClient } from '@/lib/supabase/server';
+import { getUserProfile } from '@/lib/supabase/auth';
 import { callRpc } from '@/lib/supabase/rpc';
 import { buildStatementPdf } from '@/lib/statements/build-statement-pdf';
 
@@ -35,6 +37,9 @@ export async function GET(request: Request, { params }: Params) {
     return NextResponse.json({ error: 'NOT_FOUND' }, { status: 404 });
   }
 
+  const profile = await getUserProfile(user.id);
+  const isPlatformAdmin = isComplianceRole(profile?.platform_role ?? 'member');
+
   const { data: myMembership } = await supabase
     .from('members')
     .select('id, role, status, member_code')
@@ -47,16 +52,34 @@ export async function GET(request: Request, { params }: Params) {
     role: string;
     member_code: string | null;
   } | null;
-  if (!me) {
+  if (!me && !isPlatformAdmin) {
     return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
   }
 
-  const isOfficer = ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(me.role);
-  let memberId = me.id;
-  if (memberIdParam && isOfficer) memberId = memberIdParam;
+  const isOfficer = me
+    ? ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(me.role)
+    : false;
+  const canBrowseMembers = isOfficer || isPlatformAdmin;
 
-  // Officers can export any member PDF; other members need Starter/Pro for others' statements.
-  if (memberId !== me.id && !isOfficer) {
+  let memberId = me?.id ?? '';
+  if (memberIdParam && canBrowseMembers) memberId = memberIdParam;
+  if (!memberId && canBrowseMembers) {
+    const { data: firstMember } = await supabase
+      .from('members')
+      .select('id')
+      .eq('jamiya_id', jamiya.id)
+      .eq('status', 'active')
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    memberId = (firstMember as { id: string } | null)?.id ?? '';
+  }
+  if (!memberId) {
+    return NextResponse.json({ error: 'NO_MEMBERS' }, { status: 404 });
+  }
+
+  // Officers / platform admins can export any member PDF; other members need Starter/Pro for others.
+  if (me && memberId !== me.id && !isOfficer && !isPlatformAdmin) {
     const { data: planPack } = await callRpc('get_circle_plan', { p_jamiya_id: jamiya.id });
     const plan = planPack as {
       ok?: boolean;
