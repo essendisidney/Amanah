@@ -10,6 +10,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test src/lib/finance/state-machine.test.ts",
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "eslint-config-next": "15.3.9",
     "rimraf": "^6.0.1",
     "tailwindcss": "^4.1.8",
+    "tsx": "^4.23.14",
     "typescript": "^5.8.3"
   }
 }

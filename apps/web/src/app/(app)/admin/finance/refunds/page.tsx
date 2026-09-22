@@ -5,7 +5,7 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
-import { requestRefundAction } from '@/features/admin/actions/refund-actions';
+import { requestRefundAction, completeRefundAction, cancelRefundAction } from '@/features/admin/actions/refund-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Refunds' };
@@ -103,9 +103,9 @@ export default async function AdminRefundsPage() {
             {rows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
               >
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold tabular-nums">
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
@@ -114,9 +114,30 @@ export default async function AdminRefundsPage() {
                   </p>
                   <p className="text-[11px] text-muted-foreground">
                     {formatDate(row.created_at)}
+                    {row.completed_at ? ` · done ${formatDate(row.completed_at)}` : ''}
                   </p>
                 </div>
-                <StatusBadge status={row.status} />
+                <div className="flex flex-wrap items-center gap-2">
+                  <StatusBadge status={row.status} />
+                  {row.status === 'pending' || row.status === 'processing' || row.status === 'failed' ? (
+                    <>
+                      {(row.status === 'pending' || row.status === 'processing') && (
+                        <form action={completeRefundAction}>
+                          <input type="hidden" name="refundId" value={row.id} />
+                          <Button type="submit" size="sm" className="min-h-10">
+                            Complete
+                          </Button>
+                        </form>
+                      )}
+                      <form action={cancelRefundAction}>
+                        <input type="hidden" name="refundId" value={row.id} />
+                        <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                          Cancel
+                        </Button>
+                      </form>
+                    </>
+                  ) : null}
+                </div>
               </li>
             ))}
           </ul>

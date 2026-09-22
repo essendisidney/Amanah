@@ -47,3 +47,70 @@ export async function requestRefundAction(formData: FormData) {
     ),
   );
 }
+
+export async function completeRefundAction(formData: FormData) {
+  await requireAdminAccess('admin');
+  const refundId = String(formData.get('refundId') ?? '').trim();
+  if (!refundId) {
+    redirect(withNoticeQuery('/admin/finance/refunds', 'Missing refund id.', 'error'));
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('complete_refund', {
+    p_refund_id: refundId,
+    p_provider_reference: null,
+  });
+
+  const ok =
+    !error &&
+    data &&
+    typeof data === 'object' &&
+    (data as { ok?: boolean }).ok === true;
+
+  revalidatePath('/admin/finance');
+  revalidatePath('/admin/finance/refunds');
+  revalidatePath('/admin/finance/journal');
+  revalidatePath('/wallet');
+
+  redirect(
+    withNoticeQuery(
+      '/admin/finance/refunds',
+      ok
+        ? 'Refund completed (journal reverse posted).'
+        : `Complete failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+      ok ? 'success' : 'error',
+    ),
+  );
+}
+
+export async function cancelRefundAction(formData: FormData) {
+  await requireAdminAccess('admin');
+  const refundId = String(formData.get('refundId') ?? '').trim();
+  if (!refundId) {
+    redirect(withNoticeQuery('/admin/finance/refunds', 'Missing refund id.', 'error'));
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('cancel_refund', {
+    p_refund_id: refundId,
+    p_reason: 'admin_cancel',
+  });
+
+  const ok =
+    !error &&
+    data &&
+    typeof data === 'object' &&
+    (data as { ok?: boolean }).ok === true;
+
+  revalidatePath('/admin/finance/refunds');
+
+  redirect(
+    withNoticeQuery(
+      '/admin/finance/refunds',
+      ok
+        ? 'Refund cancelled.'
+        : `Cancel failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+      ok ? 'success' : 'error',
+    ),
+  );
+}

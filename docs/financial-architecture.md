@@ -80,6 +80,6 @@ App: `lib/finance/state-machine.ts`. DB: `private.assert_*_transition` + hardene
 
 ## Deferred (roadmap toward full engine)
 
-Still ahead of full DE SoT cutover: maker-checker policy engine, member journal statements, live Co-op/KCB adapters, automated finance test suite.
+Still ahead of full DE SoT cutover: maker-checker policy engine, contribution/sadaka sidecar reverse on refund, live Co-op/KCB adapters, broader automated finance suite.
 
-**Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, Admin Finance + Reconcile + Architecture; [payment-provider-integration.md](./payment-provider-integration.md).
+**Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, complete/cancel refund with reverse journal + wallet debit for top-ups, Admin Finance + Reconcile + Journal + Refunds + Architecture; member wallet “Ledger posts”; [payment-provider-integration.md](./payment-provider-integration.md).

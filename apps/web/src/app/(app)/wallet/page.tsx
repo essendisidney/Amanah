@@ -87,6 +87,7 @@ export default async function WalletPage({ searchParams }: Props) {
     pendingResult,
     profileResult,
     withdrawalResult,
+    journalResult,
   ] = await Promise.all([
       getDictionary(),
       supabase
@@ -128,6 +129,12 @@ export default async function WalletPage({ searchParams }: Props) {
         .in('status', ['pending', 'processing'])
         .order('created_at', { ascending: false })
         .limit(10),
+      supabase
+        .from('journal_entries')
+        .select('id, domain, description, currency, source_type, posted_at')
+        .eq('user_id', user.id)
+        .order('posted_at', { ascending: false })
+        .limit(8),
     ]);
 
   const labels = dict.wallet;
@@ -157,6 +164,14 @@ export default async function WalletPage({ searchParams }: Props) {
   let failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
   let pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
   const pendingWithdrawals = (withdrawalResult.data ?? []) as unknown as WithdrawalRow[];
+  const journalEntries = (journalResult.data ?? []) as unknown as Array<{
+    id: string;
+    domain: string;
+    description: string | null;
+    currency: string;
+    source_type: string;
+    posted_at: string;
+  }>;
 
   const withdrawPhone =
     (profileResult.data as { mpesa_phone?: string | null; phone?: string | null } | null)
@@ -462,6 +477,32 @@ export default async function WalletPage({ searchParams }: Props) {
           </ul>
         )}
       </section>
+
+      {journalEntries.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="text-lg font-bold tracking-tight">Ledger posts</h2>
+          <p className="text-xs text-muted-foreground">
+            Append-only journal for your money movements (projection alongside wallet history).
+          </p>
+          <ul className="amanah-surface divide-y divide-border/70">
+            {journalEntries.map((row) => (
+              <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold">
+                    {row.description ?? row.source_type}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {row.domain} · {formatRelativeTime(row.posted_at)}
+                  </p>
+                </div>
+                <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {row.source_type}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <details id="more" className="scroll-mt-24">
         <summary className="cursor-pointer text-lg font-bold tracking-tight">
