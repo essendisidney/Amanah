@@ -183,77 +183,80 @@ export function CircleOpsPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Penalties & payout compliance
           </h2>
-          <form
-            action={updatePenaltySettingsAction}
-            className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
-          >
-            <input type="hidden" name="jamiyaId" value={jamiyaId} />
-            <input type="hidden" name="slug" value={slug} />
-            <div className="space-y-1">
-              <Label htmlFor="lateContributionPenalty">Late contribution penalty</Label>
-              <Input
-                id="lateContributionPenalty"
-                name="lateContributionPenalty"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={settings.lateContributionPenalty}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="missedContributionPenalty">Missed contribution penalty</Label>
-              <Input
-                id="missedContributionPenalty"
-                name="missedContributionPenalty"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={settings.missedContributionPenalty}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="lateLoanPenaltyFixed">Late loan penalty (fixed)</Label>
-              <Input
-                id="lateLoanPenaltyFixed"
-                name="lateLoanPenaltyFixed"
-                type="number"
-                min="0"
-                step="0.01"
-                defaultValue={settings.lateLoanPenaltyFixed}
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="lateLoanPenaltyPct">Late loan penalty (%)</Label>
-              <Input
-                id="lateLoanPenaltyPct"
-                name="lateLoanPenaltyPct"
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                defaultValue={settings.lateLoanPenaltyPct}
-              />
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="payoutComplianceMode">Payout compliance mode</Label>
-              <select
-                id="payoutComplianceMode"
-                name="payoutComplianceMode"
-                defaultValue={settings.payoutComplianceMode}
-                className="h-10 w-full border border-input bg-background px-3"
-              >
-                <option value="block">Block if member has arrears</option>
-                <option value="approve">Officer may approve despite arrears</option>
-                <option value="deduct">Deduct arrears/penalties from payout</option>
-                <option value="allow">Allow payout regardless</option>
-              </select>
-            </div>
-            <div className="flex flex-wrap gap-2 sm:col-span-2">
-              <Button type="submit" className="min-h-11">
-                Save settings
-              </Button>
-            </div>
-          </form>
+          <details className="rounded-xl border border-border bg-card p-5">
+            <summary className="cursor-pointer text-sm font-medium">Edit settings</summary>
+            <form
+              action={updatePenaltySettingsAction}
+              className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-2"
+            >
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="slug" value={slug} />
+              <div className="space-y-1">
+                <Label htmlFor="lateContributionPenalty">Late contribution penalty</Label>
+                <Input
+                  id="lateContributionPenalty"
+                  name="lateContributionPenalty"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={settings.lateContributionPenalty}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="missedContributionPenalty">Missed contribution penalty</Label>
+                <Input
+                  id="missedContributionPenalty"
+                  name="missedContributionPenalty"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={settings.missedContributionPenalty}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="lateLoanPenaltyFixed">Late loan penalty (fixed)</Label>
+                <Input
+                  id="lateLoanPenaltyFixed"
+                  name="lateLoanPenaltyFixed"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  defaultValue={settings.lateLoanPenaltyFixed}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="lateLoanPenaltyPct">Late loan penalty (%)</Label>
+                <Input
+                  id="lateLoanPenaltyPct"
+                  name="lateLoanPenaltyPct"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  defaultValue={settings.lateLoanPenaltyPct}
+                />
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label htmlFor="payoutComplianceMode">Payout compliance mode</Label>
+                <select
+                  id="payoutComplianceMode"
+                  name="payoutComplianceMode"
+                  defaultValue={settings.payoutComplianceMode}
+                  className="h-10 w-full border border-input bg-background px-3"
+                >
+                  <option value="block">Block if member has arrears</option>
+                  <option value="approve">Officer may approve despite arrears</option>
+                  <option value="deduct">Deduct arrears/penalties from payout</option>
+                  <option value="allow">Allow payout regardless</option>
+                </select>
+              </div>
+              <div className="flex flex-wrap gap-2 sm:col-span-2">
+                <Button type="submit" className="min-h-11">
+                  Save settings
+                </Button>
+              </div>
+            </form>
+          </details>
           <form action={assessPenaltiesAction}>
             <input type="hidden" name="jamiyaId" value={jamiyaId} />
             <input type="hidden" name="slug" value={slug} />
@@ -267,63 +270,68 @@ export function CircleOpsPanel({
       {canManage ? (
         <section className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-            Backdated / migration book entry
+            Book entries
           </h2>
-          <form
-            action={createBookEntryAction}
-            className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
-          >
-            <input type="hidden" name="jamiyaId" value={jamiyaId} />
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="currency" value={currency} />
-            <div className="space-y-1">
-              <Label htmlFor="entryType">Type</Label>
-              <select
-                id="entryType"
-                name="entryType"
-                required
-                className="h-10 w-full border border-input bg-background px-3"
-              >
-                {ENTRY_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {t.replaceAll('_', ' ')}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="amount">Amount</Label>
-              <Input id="amount" name="amount" type="number" step="0.01" required />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="effectiveDate">Transaction date</Label>
-              <Input id="effectiveDate" name="effectiveDate" type="date" required />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="memberId">Member (optional)</Label>
-              <select
-                id="memberId"
-                name="memberId"
-                className="h-10 w-full border border-input bg-background px-3"
-                defaultValue=""
-              >
-                <option value="">Circle-level</option>
-                {members.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.memberCode ? `${m.memberCode} · ` : ''}
-                    {m.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1 sm:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea id="notes" name="notes" rows={2} />
-            </div>
-            <Button type="submit" className="sm:col-span-2 w-fit">
-              Record book entry
-            </Button>
-          </form>
+          <details className="rounded-xl border border-border bg-card p-5">
+            <summary className="cursor-pointer text-sm font-medium">
+              Add backdated / migration entry
+            </summary>
+            <form
+              action={createBookEntryAction}
+              className="mt-4 grid max-w-2xl gap-3 sm:grid-cols-2"
+            >
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="currency" value={currency} />
+              <div className="space-y-1">
+                <Label htmlFor="entryType">Type</Label>
+                <select
+                  id="entryType"
+                  name="entryType"
+                  required
+                  className="h-10 w-full border border-input bg-background px-3"
+                >
+                  {ENTRY_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {t.replaceAll('_', ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="amount">Amount</Label>
+                <Input id="amount" name="amount" type="number" step="0.01" required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="effectiveDate">Transaction date</Label>
+                <Input id="effectiveDate" name="effectiveDate" type="date" required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="memberId">Member (optional)</Label>
+                <select
+                  id="memberId"
+                  name="memberId"
+                  className="h-10 w-full border border-input bg-background px-3"
+                  defaultValue=""
+                >
+                  <option value="">Circle-level</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.memberCode ? `${m.memberCode} · ` : ''}
+                      {m.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1 sm:col-span-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea id="notes" name="notes" rows={2} />
+              </div>
+              <Button type="submit" className="sm:col-span-2 w-fit">
+                Record book entry
+              </Button>
+            </form>
+          </details>
           {bookEntries.length ? (
             <ul className="divide-y divide-border rounded-xl border border-border bg-card">
               {bookEntries.map((row) => (
@@ -350,22 +358,22 @@ export function CircleOpsPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Announcements
           </h2>
-          <form
-            action={broadcastAnnouncementAction}
-            className="max-w-2xl space-y-3 rounded-xl border border-border bg-card p-5"
-          >
-            <input type="hidden" name="jamiyaId" value={jamiyaId} />
-            <input type="hidden" name="slug" value={slug} />
-            <div className="space-y-1">
-              <Label htmlFor="title">Title</Label>
-              <Input id="title" name="title" required />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="body">Message</Label>
-              <Textarea id="body" name="body" rows={3} required />
-            </div>
-            <Button type="submit">Broadcast to members</Button>
-          </form>
+          <details className="max-w-2xl rounded-xl border border-border bg-card p-5">
+            <summary className="cursor-pointer text-sm font-medium">Broadcast message</summary>
+            <form action={broadcastAnnouncementAction} className="mt-4 space-y-3">
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="slug" value={slug} />
+              <div className="space-y-1">
+                <Label htmlFor="title">Title</Label>
+                <Input id="title" name="title" required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="body">Message</Label>
+                <Textarea id="body" name="body" rows={3} required />
+              </div>
+              <Button type="submit">Broadcast to members</Button>
+            </form>
+          </details>
           {announcements.length ? (
             <ul className="divide-y divide-border rounded-xl border border-border bg-card">
               {announcements.map((row) => (
@@ -402,9 +410,6 @@ export function CircleOpsPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Savings pockets
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Popular picks: Hajj, Umra, and Udhiyah — deposit from your wallet, withdraw back.
-          </p>
 
           {pockets.length ? (
             <ul className="divide-y divide-border rounded-xl border border-border bg-card">
@@ -469,65 +474,68 @@ export function CircleOpsPanel({
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-muted-foreground">No pockets yet — create one below.</p>
+            <p className="text-sm text-muted-foreground">No pockets yet.</p>
           )}
 
-          <form
-            action={createSavingsPocketAction}
-            className="grid max-w-xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
-          >
-            <input type="hidden" name="jamiyaId" value={jamiyaId} />
-            <input type="hidden" name="memberId" value={myMemberId} />
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="currency" value={currency} />
-            <div className="space-y-1">
-              <Label htmlFor="category">Category</Label>
-              <select
-                id="category"
-                name="category"
-                className="h-10 w-full border border-input bg-background px-3"
-                defaultValue="hajj"
-              >
-                {POCKET_CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="label">Label (optional)</Label>
-              <Input id="label" name="label" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="targetAmount">Target amount (optional)</Label>
-              <Input
-                id="targetAmount"
-                name="targetAmount"
-                type="number"
-                inputMode="decimal"
-                min="0"
-                step="0.01"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="durationMonths">Goal period (Hajj / Umra / Udhiyah / custom)</Label>
-              <select
-                id="durationMonths"
-                name="durationMonths"
-                className="h-10 w-full border border-input bg-background px-3"
-                defaultValue="12"
-              >
-                <option value="1">1 month</option>
-                <option value="3">3 months</option>
-                <option value="6">6 months</option>
-                <option value="12">12 months</option>
-              </select>
-            </div>
-            <Button type="submit" className="min-h-11 w-full sm:w-fit sm:col-span-2">
-              Create pocket
-            </Button>
-          </form>
+          <details className="max-w-xl rounded-xl border border-border bg-card p-5">
+            <summary className="cursor-pointer text-sm font-medium">Create pocket</summary>
+            <form
+              action={createSavingsPocketAction}
+              className="mt-4 grid gap-3 sm:grid-cols-2"
+            >
+              <input type="hidden" name="jamiyaId" value={jamiyaId} />
+              <input type="hidden" name="memberId" value={myMemberId} />
+              <input type="hidden" name="slug" value={slug} />
+              <input type="hidden" name="currency" value={currency} />
+              <div className="space-y-1">
+                <Label htmlFor="category">Category</Label>
+                <select
+                  id="category"
+                  name="category"
+                  className="h-10 w-full border border-input bg-background px-3"
+                  defaultValue="hajj"
+                >
+                  {POCKET_CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="label">Label (optional)</Label>
+                <Input id="label" name="label" />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="targetAmount">Target amount (optional)</Label>
+                <Input
+                  id="targetAmount"
+                  name="targetAmount"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="durationMonths">Goal period</Label>
+                <select
+                  id="durationMonths"
+                  name="durationMonths"
+                  className="h-10 w-full border border-input bg-background px-3"
+                  defaultValue="12"
+                >
+                  <option value="1">1 month</option>
+                  <option value="3">3 months</option>
+                  <option value="6">6 months</option>
+                  <option value="12">12 months</option>
+                </select>
+              </div>
+              <Button type="submit" className="min-h-11 w-full sm:w-fit sm:col-span-2">
+                Create pocket
+              </Button>
+            </form>
+          </details>
         </section>
       ) : null}
     </div>

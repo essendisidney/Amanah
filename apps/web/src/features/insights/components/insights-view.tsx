@@ -25,49 +25,41 @@ export function InsightsView({
   payLabels: Dictionary['paySheet'];
 }) {
   const { dashboard, monthInflow, monthOutflow, currency, onTimeRate, openDueTotal } = data;
-  const name = dashboard.profile?.full_name?.split(' ')[0] ?? 'there';
 
   const nextStops = [
     {
       href: '/wallet' as Route,
       label: payLabels.title,
-      hint: payLabels.subtitle,
       icon: Wallet,
     },
     {
       href: '/wallet' as Route,
       label: payLabels.openMoney,
-      hint: payLabels.openMoneyHint,
       icon: Wallet,
     },
     {
       href: '/circles' as Route,
       label: payLabels.payCircle,
-      hint: payLabels.payCircleHint,
       icon: LayoutGrid,
     },
     {
       href: '/finance/goals' as Route,
       label: payLabels.goals,
-      hint: payLabels.goalsHint,
       icon: Target,
     },
     {
       href: '/finance/qard' as Route,
       label: payLabels.qard,
-      hint: payLabels.qardHint,
       icon: Landmark,
     },
     {
       href: '/sadaka' as Route,
       label: payLabels.sadaka,
-      hint: payLabels.sadakaHint,
       icon: HandHeart,
     },
     {
       href: '/zakat' as Route,
       label: payLabels.zakat,
-      hint: payLabels.zakatHint,
       icon: Calculator,
     },
   ];
@@ -85,9 +77,7 @@ export function InsightsView({
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
           {payLabels.insights}
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          A quiet snapshot of how {name} is saving and contributing this month.
-        </p>
+        <p className="mt-2 text-muted-foreground">This month’s inflows and open dues.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild className="min-h-11">
             <Link href={'/wallet' as Route}>{payLabels.openMoney}</Link>
@@ -118,13 +108,13 @@ export function InsightsView({
             value: onTimeRate == null ? '—' : `${onTimeRate}%`,
             hint:
               onTimeRate == null
-                ? 'Pay a few cycles to unlock'
+                ? undefined
                 : `${data.paidCount} on time · ${data.lateCount} late`,
           },
           {
             label: 'Active circles',
             value: String(dashboard.stats.activeCircles),
-            hint: 'Memberships in good standing',
+            hint: undefined,
           },
           {
             label: 'Open dues',
@@ -134,7 +124,7 @@ export function InsightsView({
           {
             label: 'Upcoming payouts',
             value: String(dashboard.stats.upcomingPayouts),
-            hint: 'Turns headed your way',
+            hint: undefined,
           },
         ].map((stat) => (
           <div key={stat.label} className="amanah-surface px-3 py-3.5">
@@ -142,7 +132,9 @@ export function InsightsView({
               {stat.label}
             </p>
             <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">{stat.value}</p>
-            <p className="mt-1 text-[11px] text-muted-foreground">{stat.hint}</p>
+            {stat.hint ? (
+              <p className="mt-1 text-[11px] text-muted-foreground">{stat.hint}</p>
+            ) : null}
           </div>
         ))}
       </section>
@@ -151,7 +143,6 @@ export function InsightsView({
         <div className="flex items-end justify-between gap-3">
           <div>
             <h2 className="text-lg font-bold tracking-tight">Upcoming dues</h2>
-            <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
           </div>
           <Button asChild size="sm" variant="ghost">
             <Link href={'/circles' as Route}>{payLabels.payCircle}</Link>
@@ -159,7 +150,7 @@ export function InsightsView({
         </div>
         {dashboard.contributions.length === 0 ? (
           <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground">
-            No open contributions. You are clear for now.
+            No open contributions.
           </p>
         ) : (
           <div className="space-y-3">
@@ -185,20 +176,12 @@ export function InsightsView({
       </section>
 
       <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-bold tracking-tight">{payLabels.sectionSee}</h2>
-          <p className="text-sm text-muted-foreground">
-            Everything under Pay — tap any tool to continue.
-          </p>
-        </div>
+        <h2 className="text-lg font-bold tracking-tight">{payLabels.sectionSee}</h2>
         <ul className="overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/40">
           {nextStops.map((item) => {
             const Icon = item.icon;
             return (
-              <li
-                key={item.href}
-                className="border-b border-border/60 last:border-0"
-              >
+              <li key={`${item.href}-${item.label}`} className="border-b border-border/60 last:border-0">
                 <Link
                   href={item.href}
                   className="flex items-center gap-3 px-4 py-3.5 transition-colors active:bg-secondary/40"
@@ -206,13 +189,8 @@ export function InsightsView({
                   <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-foreground">
-                      {item.label}
-                    </span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">
-                      {item.hint}
-                    </span>
+                  <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
+                    {item.label}
                   </span>
                   <span className="text-muted-foreground" aria-hidden>
                     →
@@ -226,10 +204,7 @@ export function InsightsView({
 
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight">Recent activity</h2>
-            <p className="text-sm text-muted-foreground">Latest wallet movements</p>
-          </div>
+          <h2 className="text-lg font-bold tracking-tight">Recent activity</h2>
           <Button asChild size="sm" variant="ghost">
             <Link href={'/wallet' as Route}>{payLabels.openMoney}</Link>
           </Button>
@@ -237,7 +212,7 @@ export function InsightsView({
         {dashboard.activity.length === 0 ? (
           <EmptyState
             title="No wallet activity yet"
-            description="Top up to start tracking inflows and outflows here."
+            description="Top up to start tracking here."
             actionLabel={payLabels.addMoney}
             actionHref={'/wallet#top-up' as Route}
           />

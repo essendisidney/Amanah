@@ -136,10 +136,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiya.name}
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            Register share purchases and allocate dividends, profits, and equity for investment
-            groups.
-          </p>
+          <p className="mt-2 text-muted-foreground">Share register and dividends.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
@@ -156,15 +153,31 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
               <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
             </Button>
           ) : null}
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/report` as Route}>GL reports</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/journal` as Route}>Journal</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/invoices` as Route}>Invoices</Link>
-          </Button>
+          <details className="relative">
+            <summary className="cursor-pointer list-none rounded-md border border-border px-3 py-2 text-sm min-h-9 inline-flex items-center">
+              More
+            </summary>
+            <div className="absolute right-0 z-20 mt-1 flex min-w-[10rem] flex-col gap-1 rounded-md border border-border bg-card p-2 shadow-md">
+              <Link
+                href={`/circles/${slug}/report` as Route}
+                className="rounded px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                GL reports
+              </Link>
+              <Link
+                href={`/circles/${slug}/journal` as Route}
+                className="rounded px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                Journal
+              </Link>
+              <Link
+                href={`/circles/${slug}/invoices` as Route}
+                className="rounded px-2 py-1.5 text-sm hover:bg-muted"
+              >
+                Invoices
+              </Link>
+            </div>
+          </details>
         </div>
       </div>
 

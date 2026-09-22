@@ -25,13 +25,16 @@ export function NokBulkImportForm({
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">
-        Paste many rows:{' '}
-        <span className="font-mono text-xs text-foreground">
-          member_code_or_name, nok_name, phone, relationship
-        </span>
-        . One per line. Relationship: spouse, parent, sibling, child, guardian, friend, other.
-      </p>
+      <details className="text-sm text-muted-foreground">
+        <summary className="cursor-pointer font-medium text-foreground">Format</summary>
+        <p className="mt-2">
+          Paste rows:{' '}
+          <span className="font-mono text-xs text-foreground">
+            member_code_or_name, nok_name, phone, relationship
+          </span>
+          . One per line. Relationship: spouse, parent, sibling, child, guardian, friend, other.
+        </p>
+      </details>
       {state.message ? (
         <Alert variant={state.success ? 'success' : 'destructive'}>
           <AlertDescription>{state.message}</AlertDescription>

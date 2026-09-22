@@ -123,9 +123,6 @@ export default async function CircleElectionsPage({ params }: Props) {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
           Elections · {j.name}
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Nominate and vote for chair, treasurer, secretary, or circle admin.
-        </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
@@ -180,21 +177,11 @@ export default async function CircleElectionsPage({ params }: Props) {
           Active & recent
         </h2>
         {!electionRows.length ? (
-          canManage ? (
-            <EmptyState
-              title="No elections yet"
-              description="Open an election above to nominate and vote for chair, treasurer, secretary, or circle admin."
-              actionLabel="Open community"
-              actionHref={`/circles/${slug}/community` as Route}
-            />
-          ) : (
-            <EmptyState
-              title="No elections yet"
-              description="Officers open elections for circle seats. Check Community for meetings, or return to the circle hub."
-              actionLabel="Open community"
-              actionHref={`/circles/${slug}/community` as Route}
-            />
-          )
+          <EmptyState
+            title="No elections yet"
+            actionLabel="Open community"
+            actionHref={`/circles/${slug}/community` as Route}
+          />
         ) : (
           electionRows.map((election) => {
             const cands = candRows.filter((c) => c.election_id === election.id);

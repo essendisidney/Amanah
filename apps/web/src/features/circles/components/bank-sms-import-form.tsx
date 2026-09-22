@@ -52,10 +52,6 @@ export function BankSmsImportForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-3 rounded-xl border border-border bg-card p-5">
-      <p className="text-sm text-muted-foreground">
-        Paste one or more bank / M-Pesa SMS messages (blank line between each). Amount, direction,
-        provider, and reference are filled from the text.
-      </p>
       {notice ? (
         <Alert variant={notice.type === 'success' ? 'success' : 'destructive'}>
           <AlertDescription>{notice.message}</AlertDescription>

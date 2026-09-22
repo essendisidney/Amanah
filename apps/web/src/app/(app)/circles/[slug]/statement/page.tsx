@@ -206,31 +206,29 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           value: money(summary.share_capital, jamiya.currency),
           hint:
             Number(summary.share_units ?? 0) > 0
-              ? `${Number(summary.share_units).toLocaleString()} share units`
-              : 'Buy-in / shares held',
+              ? `${Number(summary.share_units).toLocaleString()} units`
+              : undefined,
         },
         {
           label: 'Books contributions',
           value: money(summary.book_contributions ?? summary.contributions_so_far, jamiya.currency),
-          hint: 'Monthly member books',
+          hint: undefined,
         },
         {
           label: 'Fines',
           value: money(summary.penalties_total, jamiya.currency),
           hint:
             Number(summary.penalties_open ?? 0) > 0
-              ? `${money(summary.penalties_open, jamiya.currency)} still open`
-              : Number(summary.penalties_total ?? 0) > 0
-                ? 'All settled'
-                : 'No fines recorded',
+              ? `${money(summary.penalties_open, jamiya.currency)} open`
+              : undefined,
         },
         {
           label: 'Facility outstanding',
           value: money(summary.loan_outstanding, jamiya.currency),
           hint:
             Number(summary.loan_principal ?? 0) > 0
-              ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-              : 'No open facility',
+              ? `Repaid ${money(summary.loan_repaid, jamiya.currency)}`
+              : undefined,
         },
       ]
     : isRotating
@@ -238,60 +236,56 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           {
             label: 'Contributions so far',
             value: money(summary.contributions_so_far, jamiya.currency),
-            hint: `${summary.cycles_paid ?? 0} cycles paid · ${summary.cycles_open ?? 0} open`,
+            hint: `${summary.cycles_paid ?? 0} paid · ${summary.cycles_open ?? 0} open`,
           },
           {
             label: 'Payout slot',
             value: stmt.payout_position != null ? String(stmt.payout_position) : '—',
-            hint: 'Merry-go-round pot position',
+            hint: undefined,
           },
           {
             label: 'Fines',
             value: money(summary.penalties_total, jamiya.currency),
             hint:
               Number(summary.penalties_open ?? 0) > 0
-                ? `${money(summary.penalties_open, jamiya.currency)} still open`
-                : Number(summary.penalties_total ?? 0) > 0
-                  ? 'All settled'
-                  : 'No fines recorded',
+                ? `${money(summary.penalties_open, jamiya.currency)} open`
+                : undefined,
           },
           {
             label: 'Facility outstanding',
             value: money(summary.loan_outstanding, jamiya.currency),
             hint:
               Number(summary.loan_principal ?? 0) > 0
-                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-                : 'No open facility',
+                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)}`
+                : undefined,
           },
         ]
       : [
           {
             label: 'Contributions so far',
             value: money(summary.contributions_so_far, jamiya.currency),
-            hint: 'Schedule + monthly books',
+            hint: undefined,
           },
           {
             label: 'Savings pockets',
             value: money(summary.savings_total, jamiya.currency),
-            hint: 'Dedicated pocket balances',
+            hint: undefined,
           },
           {
             label: 'Fines',
             value: money(summary.penalties_total, jamiya.currency),
             hint:
               Number(summary.penalties_open ?? 0) > 0
-                ? `${money(summary.penalties_open, jamiya.currency)} still open`
-                : Number(summary.penalties_total ?? 0) > 0
-                  ? 'All settled'
-                  : 'No fines recorded',
+                ? `${money(summary.penalties_open, jamiya.currency)} open`
+                : undefined,
           },
           {
             label: 'Facility outstanding',
             value: money(summary.loan_outstanding, jamiya.currency),
             hint:
               Number(summary.loan_principal ?? 0) > 0
-                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-                : 'No open facility',
+                ? `Repaid ${money(summary.loan_repaid, jamiya.currency)}`
+                : undefined,
           },
         ];
 
@@ -351,8 +345,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       {memberId !== me.id && !canExportOthers ? (
         <p className="rounded-md border border-accent/30 bg-accent-muted/50 px-3 py-2 text-sm text-muted-foreground print:hidden">
-          Viewing another member’s statement is allowed for officers. PDF download for others
-          needs Starter/Pro — upgrade under Officer → Circle plan.
+          PDF for other members needs Starter/Pro — upgrade under Officer.
         </p>
       ) : null}
 
@@ -408,9 +401,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             {viewingOther ? `${viewedName}'s 360` : 'Your 360'}
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Shares, savings, facility, and fines for this member.
-          </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {snapshotCards.map((card) => (
@@ -419,7 +409,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                 {card.label}
               </p>
               <p className="mt-2 text-2xl font-semibold tabular-nums">{card.value}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
+              {card.hint ? (
+                <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
+              ) : null}
             </div>
           ))}
         </div>
@@ -461,7 +453,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Share capital"
-        description="Member buy-in / share lots held in this circle."
         empty="No share capital recorded for this member."
         emptyHref={
           isOfficer && isShareDividend
@@ -492,11 +483,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Schedule contributions"
-        description={
-          isRotating
-            ? 'Merry-go-round monthly dues by cycle — paid vs still owing.'
-            : 'Contribution calendar dues for this member.'
-        }
         empty="No schedule contributions yet."
         emptyHref={`/circles/${slug}#calendar` as Route}
         emptyLabel="Open calendar"
@@ -524,7 +510,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Monthly contributions (books)"
-        description="Savings recorded in member books / payment grid (table banking style)."
         empty="No monthly book contributions recorded."
         emptyHref={
           isOfficer && isShareDividend
@@ -547,7 +532,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Fines"
-        description="Late or meeting fines for this member. Officers can record below."
         empty="No fines on this statement."
         emptyHref={isOfficer ? (`#record-money` as Route) : (`/circles/${slug}` as Route)}
         emptyLabel={isOfficer ? 'Record a fine below' : 'Back to circle'}
@@ -610,7 +594,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Loans (Qard)"
-        description="Interest-free loans issued to this member and repayments so far."
         empty="No loans on this statement."
         emptyHref={'/finance/qard' as Route}
         emptyLabel="Open Qard"
@@ -636,7 +619,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Circle projects"
-        description="Group projects funded from this circle's treasury (land, stock, equipment). Shared pool — not a personal portfolio."
         empty="No active circle projects."
         emptyHref={
           isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
@@ -665,7 +647,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Savings pockets"
-        description="Dedicated savings balances held for this member in the circle."
         empty="No savings pockets yet."
         emptyHref={
           isOfficer ? (`/circles/${slug}/treasury` as Route) : (`/circles/${slug}` as Route)
@@ -683,7 +664,6 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
 
       <StatementSection
         title="Other book entries"
-        description="Adjustments, deposits, and other cashbook lines linked to this member."
         empty="No other book entries."
         rows={otherBooks.map((b) => ({
           key: String(b.id),

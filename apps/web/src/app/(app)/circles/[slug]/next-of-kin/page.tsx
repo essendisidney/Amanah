@@ -173,7 +173,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
             {jamiya.name}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Emergency contacts for every member — name, phone, and relationship.
+            Emergency contacts for each member.
           </p>
         </div>
         <Button asChild variant="outline" className="min-h-11 rounded-full">
@@ -210,9 +210,11 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
           <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
             Add or update next of kin
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Pick a member, then save their emergency contact. Saving again updates the same person.
-          </p>
+          {activeMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Pick a member, then save their emergency contact.
+            </p>
+          ) : null}
           <NextOfKinForm
             jamiyaId={jamiya.id}
             slug={slug}
