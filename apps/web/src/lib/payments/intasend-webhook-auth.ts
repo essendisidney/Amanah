@@ -1,5 +1,15 @@
 import { timingSafeEqual } from 'node:crypto';
 
+function timingSafeStringEqual(a: string, b: string): boolean {
+  try {
+    const ba = Buffer.from(a, 'utf8');
+    const bb = Buffer.from(b, 'utf8');
+    return ba.length === bb.length && timingSafeEqual(ba, bb);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * IntaSend webhook auth:
  * 1. If INTASEND_WEBHOOK_CHALLENGE is set, body/invoice challenge MUST match.
@@ -25,7 +35,7 @@ export function verifyIntasendWebhook(input: {
     if (!challenge) {
       return { ok: false, error: 'MISSING_CHALLENGE' };
     }
-    if (!safeEqual(challenge, expectedChallenge)) {
+    if (!timingSafeStringEqual(challenge, expectedChallenge)) {
       return { ok: false, error: 'INVALID_CHALLENGE' };
     }
   }
@@ -37,22 +47,10 @@ export function verifyIntasendWebhook(input: {
       input.headers.get('x-webhook-signature') ??
       ''
     ).trim();
-    if (!sig || !safeEqual(sig, secret)) {
+    if (!sig || !timingSafeStringEqual(sig, secret)) {
       return { ok: false, error: 'INVALID_SIGNATURE' };
     }
   }
 
   return { ok: true };
 }
-
-const safe = {
-  equal(a: string, b: string): boolean {
-    try {
-      const ba = Buffer.from(a, 'utf8');
-      const bb = Buffer.from(b, 'utf8');
-      return ba.length === bb.length && timingSafeEqual(ba, bb);
-    } catch {
-      return false;
-    }
-  },
-};
