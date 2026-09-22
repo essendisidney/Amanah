@@ -28,6 +28,9 @@ export function MemberBooksHome({ slug, currency, members }: Props) {
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-foreground">Members</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Open 360 for the full picture, or enter payments when you need to record.
+            </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">

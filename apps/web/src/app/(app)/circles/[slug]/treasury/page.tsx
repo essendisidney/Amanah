@@ -198,6 +198,10 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
             {jamiya.name} treasury
           </h1>
+          <p className="mt-2 max-w-2xl text-muted-foreground">
+            Chama cashbook — accounts, deposits, expenses, fines, investments, and backdated
+            records in one place.
+          </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm" className="min-h-11">

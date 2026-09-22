@@ -102,6 +102,9 @@ export function CircleBooksGlance({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Chama 360
           </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Whole-group totals — contributions, facilities, outstanding, fines.
+          </p>
         </div>
         <Link
           href={`/circles/${slug}/statement` as Route}

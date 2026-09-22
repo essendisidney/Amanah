@@ -441,131 +441,127 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
       />
 
       {glance ? (
-        <details className="rounded-xl border border-border bg-card px-5 py-4">
-          <summary className="cursor-pointer text-sm font-semibold">Chama totals</summary>
-          <div className="mt-4">
-            <CircleBooksGlance
-              slug={slug}
-              currency={jamiyaRow.currency}
-              data={{
-                members_active: Number(glance.members_active ?? 0),
-                share_capital: Number(glance.share_capital ?? 0),
-                book_contributions: Number(glance.book_contributions ?? 0),
-                schedule_contributions_paid: Number(glance.schedule_contributions_paid ?? 0),
-                schedule_contributions_outstanding: Number(
-                  glance.schedule_contributions_outstanding ?? 0,
-                ),
-                facility_disbursed: Number(glance.facility_disbursed ?? 0),
-                facility_repaid: Number(glance.facility_repaid ?? 0),
-                facility_outstanding: Number(glance.facility_outstanding ?? 0),
-                profit_paid: Number(glance.profit_paid ?? 0),
-                fines_open: Number(glance.fines_open ?? 0),
-                fines_paid: Number(glance.fines_paid ?? 0),
-                fines_total: Number(glance.fines_total ?? 0),
-                qard_outstanding: Number(glance.qard_outstanding ?? 0),
-              }}
-            />
-          </div>
-        </details>
+        <CircleBooksGlance
+          slug={slug}
+          currency={jamiyaRow.currency}
+          data={{
+            members_active: Number(glance.members_active ?? 0),
+            share_capital: Number(glance.share_capital ?? 0),
+            book_contributions: Number(glance.book_contributions ?? 0),
+            schedule_contributions_paid: Number(glance.schedule_contributions_paid ?? 0),
+            schedule_contributions_outstanding: Number(
+              glance.schedule_contributions_outstanding ?? 0,
+            ),
+            facility_disbursed: Number(glance.facility_disbursed ?? 0),
+            facility_repaid: Number(glance.facility_repaid ?? 0),
+            facility_outstanding: Number(glance.facility_outstanding ?? 0),
+            profit_paid: Number(glance.profit_paid ?? 0),
+            fines_open: Number(glance.fines_open ?? 0),
+            fines_paid: Number(glance.fines_paid ?? 0),
+            fines_total: Number(glance.fines_total ?? 0),
+            qard_outstanding: Number(glance.qard_outstanding ?? 0),
+          }}
+        />
       ) : null}
 
-      <details className="rounded-xl border border-border bg-card px-5 py-4">
-        <summary className="cursor-pointer text-sm font-semibold">
-          Plan & dual approval
-          <span className="ml-2 font-normal text-muted-foreground">
-            {planInfo?.plan?.name ?? 'Free'}
-            {jamiyaRow.dual_approval_enabled ? ' · dual on' : ''}
-          </span>
-        </summary>
-        <div className="mt-4 grid gap-6 lg:grid-cols-2">
-          <div className="space-y-3">
-            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Circle plan
-            </h2>
-            <p className="text-sm text-muted-foreground">
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Circle plan
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Current:{' '}
+            <span className="font-medium text-foreground">
               {planInfo?.plan?.name ?? 'Free'}
-              {planInfo?.status && planInfo.status !== 'active'
-                ? ` · ${planInfo.status.replaceAll('_', ' ')}`
-                : ''}
-              {planInfo?.renews_at ? ` · renews ${formatDate(planInfo.renews_at)}` : ''}
-              {' · '}
-              <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
-                Pricing
-              </Link>
-            </p>
-            {planInfo?.status === 'past_due' ? (
-              <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3">
-                <p className="text-xs text-destructive">
-                  Past due — top up Money, then tap a plan to reactivate.
-                </p>
-                <Button asChild size="sm" className="min-h-11">
-                  <Link
-                    href={
-                      `/wallet?next=${encodeURIComponent(`/circles/${slug}/officer`)}#top-up` as Route
-                    }
-                  >
-                    Top up Money
-                  </Link>
-                </Button>
-              </div>
-            ) : null}
-            <div className="flex flex-wrap gap-2">
-              {planRows.map((plan) => (
-                <form key={plan.id} action={setCirclePlanAction}>
-                  <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
-                  <input type="hidden" name="slug" value={slug} />
-                  <input type="hidden" name="planId" value={plan.id} />
-                  <Button
-                    type="submit"
-                    variant={planInfo?.plan_id === plan.id ? 'default' : 'outline'}
-                    className="min-h-11"
-                  >
-                    {plan.name}
-                    {Number(plan.price_kes) > 0
-                      ? ` · ${formatCurrency(Number(plan.price_kes), 'KES')}`
-                      : ''}
-                  </Button>
-                </form>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
-              Dual approval
-            </h2>
-            <form action={setCircleDualApprovalAction} className="space-y-3">
-              <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
-              <input type="hidden" name="slug" value={slug} />
-              <input type="hidden" name="enabled" value="false" />
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  name="enabled"
-                  value="true"
-                  defaultChecked={Boolean(jamiyaRow.dual_approval_enabled)}
-                />
-                Second officer for payouts & loans at/above threshold
-              </label>
-              <div className="space-y-1">
-                <Label htmlFor="threshold">Threshold ({jamiyaRow.currency})</Label>
-                <Input
-                  id="threshold"
-                  name="threshold"
-                  type="number"
-                  min={0}
-                  step={100}
-                  className="min-h-11"
-                  defaultValue={Number(jamiyaRow.dual_approval_threshold ?? 10000)}
-                />
-              </div>
-              <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                Save
+            </span>
+            {planInfo?.status && planInfo.status !== 'active'
+              ? ` · ${planInfo.status.replaceAll('_', ' ')}`
+              : ''}
+            {planInfo?.renews_at
+              ? ` · renews ${formatDate(planInfo.renews_at)}`
+              : ''}
+            . Starter and Pro charge the officer wallet in KES for 30 days (auto-renews if
+            balance allows). See{' '}
+            <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
+              pricing
+            </Link>
+            .
+          </p>
+          {planInfo?.status === 'past_due' ? (
+            <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3">
+              <p className="text-xs text-destructive">
+                Plan is past due. Top up Money, then tap the plan button again to reactivate.
+              </p>
+              <Button asChild size="sm" className="min-h-11">
+                <Link
+                  href={
+                    `/wallet?next=${encodeURIComponent(`/circles/${slug}/officer`)}#top-up` as Route
+                  }
+                >
+                  Top up Money
+                </Link>
               </Button>
-            </form>
+            </div>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            {planRows.map((plan) => (
+              <form key={plan.id} action={setCirclePlanAction}>
+                <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="planId" value={plan.id} />
+                <Button
+                  type="submit"
+                  variant={planInfo?.plan_id === plan.id ? 'default' : 'outline'}
+                  className="min-h-11"
+                >
+                  {plan.name}
+                  {Number(plan.price_kes) > 0
+                    ? ` · ${formatCurrency(Number(plan.price_kes), 'KES')}`
+                    : ''}
+                </Button>
+              </form>
+            ))}
           </div>
         </div>
-      </details>
+
+        <div className="space-y-3 rounded-xl border border-border bg-card p-5">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+            Dual approval
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Require a second officer for payouts and loan approvals at/above the threshold.
+          </p>
+          <form action={setCircleDualApprovalAction} className="space-y-3">
+            <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="enabled" value="false" />
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                name="enabled"
+                value="true"
+                defaultChecked={Boolean(jamiyaRow.dual_approval_enabled)}
+              />
+              Enable dual approval
+            </label>
+            <div className="space-y-1">
+              <Label htmlFor="threshold">Threshold ({jamiyaRow.currency})</Label>
+              <Input
+                id="threshold"
+                name="threshold"
+                type="number"
+                min={0}
+                step={100}
+                className="min-h-11"
+                defaultValue={Number(jamiyaRow.dual_approval_threshold ?? 10000)}
+              />
+            </div>
+            <Button type="submit" className="min-h-11 w-full sm:w-auto">
+              Save dual-approval settings
+            </Button>
+          </form>
+        </div>
+      </section>
 
       <section id="officer-qard" className="space-y-3">
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">

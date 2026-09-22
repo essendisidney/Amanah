@@ -16,7 +16,7 @@ const widthClasses: Record<NonNullable<AppPageProps['width']>, string> = {
 
 export function AppPage({ children, className, width = 'default' }: AppPageProps) {
   return (
-    <div className={cn('relative space-y-6', widthClasses[width], className)}>{children}</div>
+    <div className={cn('relative space-y-8', widthClasses[width], className)}>{children}</div>
   );
 }
 
@@ -42,9 +42,7 @@ export function PageHeader({ eyebrow, title, subtitle, action }: PageHeaderProps
         >
           {title}
         </h1>
-        {subtitle ? (
-          <p className="mt-1.5 max-w-xl text-sm text-muted-foreground">{subtitle}</p>
-        ) : null}
+        {subtitle ? <p className="mt-2 max-w-2xl text-muted-foreground">{subtitle}</p> : null}
       </div>
       {action}
     </header>

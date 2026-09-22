@@ -1127,6 +1127,9 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">
               Run this circle
             </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Payments, people, and ops — kept off the member view above.
+            </p>
           </div>
 
           {paymentProvider() === 'simulated' ? (

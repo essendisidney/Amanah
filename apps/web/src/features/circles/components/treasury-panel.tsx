@@ -287,11 +287,15 @@ export function TreasuryPanel({
       </section>
 
       {canManage ? (
-        <details className="rounded-xl border border-border bg-card">
-          <summary className="cursor-pointer list-none px-5 py-4 font-[family-name:var(--font-display)] text-xl font-semibold marker:content-none [&::-webkit-details-marker]:hidden">
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Pay supplier / utility
-          </summary>
-          <div className="space-y-3 border-t border-border px-5 py-4">
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Live B2B to M-Pesa Paybill or Till (IntaSend). Dual approval applies when enabled.
+            Bank destinations settle in the cashbook (manual rail for now).
+          </p>
+
           <form
             action={createCirclePayoutDestinationAction}
             className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
@@ -434,8 +438,7 @@ export function TreasuryPanel({
               ))}
             </ul>
           ) : null}
-          </div>
-        </details>
+        </section>
       ) : null}
 
       {canManage ? (
@@ -443,6 +446,9 @@ export function TreasuryPanel({
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Record payment / expense
           </h2>
+          <p className="text-sm text-muted-foreground">
+            Online treasurer cashbook — deposits, withdrawals, income, expenses, and transfers.
+          </p>
           <form
             action={recordTreasuryEntryAction}
             className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
@@ -589,6 +595,9 @@ export function TreasuryPanel({
           >
             Member fining
           </h2>
+          <p className="text-sm text-muted-foreground">
+            Record a fine for any member. Same form also lives on their 360.
+          </p>
           <div id="open-fines" className="space-y-2 scroll-mt-24">
             <h3 className="text-sm font-medium text-foreground">Open fines</h3>
             <OpenPenaltiesPanel slug={slug} rows={openPenalties} returnPath="/treasury" />
@@ -669,6 +678,10 @@ export function TreasuryPanel({
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           Circle projects
         </h2>
+        <p className="text-sm text-muted-foreground">
+          Land, stock, equipment, and other group ventures. Funding debits a treasury account and
+          shows on member statements.
+        </p>
         {investments.length === 0 ? (
           <p className="text-sm text-muted-foreground">No projects tracked yet.</p>
         ) : (
@@ -802,11 +815,10 @@ export function TreasuryPanel({
       </section>
 
       {canManage ? (
-        <details className="rounded-xl border border-border bg-card">
-          <summary className="cursor-pointer list-none px-5 py-4 font-[family-name:var(--font-display)] text-xl font-semibold marker:content-none [&::-webkit-details-marker]:hidden">
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Income & expense categories
-          </summary>
-          <div className="space-y-3 border-t border-border px-5 py-4">
+          </h2>
           <ul className="flex flex-wrap gap-2 text-sm text-muted-foreground">
             {categories.map((c) => (
               <li key={c.id} className="rounded-full border border-border px-3 py-1">
@@ -840,18 +852,17 @@ export function TreasuryPanel({
               Add
             </Button>
           </form>
-          </div>
-        </details>
+        </section>
       ) : null}
 
       {canManage ? (
-        <details className="rounded-xl border border-border bg-card">
-          <summary className="cursor-pointer list-none px-5 py-4 font-[family-name:var(--font-display)] text-xl font-semibold marker:content-none [&::-webkit-details-marker]:hidden">
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Bank SMS / alerts
-          </summary>
-          <div className="space-y-3 border-t border-border px-5 py-4">
+          </h2>
           <p className="text-sm text-muted-foreground">
-            Paste bank or M-Pesa SMS, then auto-match to cashbook rows.
+            Paste Equity, KCB, Co-op, Absa, NCBA, Stanbic, or M-Pesa SMS. We parse amount, direction,
+            and reference, then you can auto-match to cashbook rows (±3 days).
           </p>
           <form action={matchBankAlertsAction} className="flex flex-wrap gap-2">
             <input type="hidden" name="jamiyaId" value={jamiyaId} />
@@ -897,16 +908,14 @@ export function TreasuryPanel({
               ))}
             </ul>
           ) : null}
-          </div>
-        </details>
+        </section>
       ) : null}
 
       {canManage ? (
-        <details className="rounded-xl border border-border bg-card">
-          <summary className="cursor-pointer list-none px-5 py-4 font-[family-name:var(--font-display)] text-xl font-semibold marker:content-none [&::-webkit-details-marker]:hidden">
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
             Backdate records (CSV)
-          </summary>
-          <div className="space-y-3 border-t border-border px-5 py-4">
+          </h2>
           <p className="text-sm text-muted-foreground">
             Columns: entry_type, amount, effective_date, member_id (optional), notes
           </p>
@@ -923,8 +932,7 @@ export function TreasuryPanel({
               Import rows
             </Button>
           </form>
-          </div>
-        </details>
+        </section>
       ) : null}
 
       <section className="space-y-3">

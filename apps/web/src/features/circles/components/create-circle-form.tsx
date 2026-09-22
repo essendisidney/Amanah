@@ -198,7 +198,10 @@ export function CreateCircleForm({
 
       <form onSubmit={handleSubmit(onValid)} className="space-y-6" noValidate>
         <div className="space-y-3">
-          <Label>How will this circle work?</Label>
+          <div>
+            <Label>How will this circle work?</Label>
+            <p className="mt-1 text-sm text-muted-foreground">Pick one. Templates fill amounts next.</p>
+          </div>
           <input type="hidden" {...register('challengeKind')} />
           <div className="grid gap-3 sm:grid-cols-3">
             {(
@@ -267,6 +270,10 @@ export function CreateCircleForm({
               </button>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Templates set name, amount, and cadence — and update the circle type cards above so you
+            always see what you are creating.
+          </p>
         </div>
 
         <div className="space-y-2">
@@ -332,6 +339,10 @@ export function CreateCircleForm({
               placeholder="Leave blank for an open chama"
               {...register('maxMembers')}
             />
+            <p className="text-xs text-muted-foreground">
+              Leave blank for an open chama (no fixed size). Only set a number if you want a hard
+              member cap.
+            </p>
             <FieldError message={fieldError('maxMembers')} />
           </div>
 
@@ -347,6 +358,11 @@ export function CreateCircleForm({
               placeholder={challengeKind === 'rotating' ? 'e.g. 10 or 12' : 'Leave blank'}
               {...register('cycleCount')}
             />
+            <p className="text-xs text-muted-foreground">
+              {challengeKind === 'rotating'
+                ? 'Usually matches how many members take a payout turn.'
+                : 'Not needed for savings or table banking.'}
+            </p>
             <FieldError message={fieldError('cycleCount')} />
           </div>
         </div>
@@ -359,7 +375,13 @@ export function CreateCircleForm({
                 className="mt-1"
                 {...register('slotPricingEnabled')}
               />
-              <span className="font-medium text-foreground">Early-slot fee / late-slot rebate</span>
+              <span>
+                <span className="font-medium text-foreground">Early-slot fee / late-slot rebate</span>
+                <span className="mt-0.5 block text-muted-foreground">
+                  Facilitation fee for early payout turns; rebate shown for later savers. Not
+                  interest — review with your Shariah advisor before enabling.
+                </span>
+              </span>
             </label>
             {slotPricingEnabled ? (
               <div className="grid gap-4 sm:grid-cols-2">
@@ -450,6 +472,7 @@ export function CreateCircleForm({
               step={100}
               {...register('joinFeeAmount')}
             />
+            <p className="text-xs text-muted-foreground">Charged from wallet when a member joins.</p>
             <FieldError message={fieldError('joinFeeAmount')} />
           </div>
           <div className="space-y-2">
@@ -461,6 +484,9 @@ export function CreateCircleForm({
               step={10}
               {...register('transactionFeeAmount')}
             />
+            <p className="text-xs text-muted-foreground">
+              Disclosed platform/circle fee charged after each contribution payment.
+            </p>
             <FieldError message={fieldError('transactionFeeAmount')} />
           </div>
         </div>

@@ -30,6 +30,9 @@ export function MemberBooksRecordForms({
         className="space-y-3 rounded-xl border border-border bg-card p-5"
       >
         <h3 className="font-semibold">Shares one off</h3>
+        <p className="text-sm text-muted-foreground">
+          SHARES ONE OFF — usually 5,000 on 5 Feb.
+        </p>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="memberId" value={memberId} />
@@ -62,6 +65,7 @@ export function MemberBooksRecordForms({
         className="space-y-3 rounded-xl border border-border bg-card p-5"
       >
         <h3 className="font-semibold">Monthly contributions (bulk)</h3>
+        <p className="text-sm text-muted-foreground">Same amount each month, e.g. 2,000 × 6 from Feb.</p>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="memberId" value={memberId} />
@@ -93,6 +97,7 @@ export function MemberBooksRecordForms({
         className="space-y-3 rounded-xl border border-border bg-card p-5"
       >
         <h3 className="font-semibold">One month only</h3>
+        <p className="text-sm text-muted-foreground">If one month differs (e.g. Viola March 3,000).</p>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         <input type="hidden" name="memberId" value={memberId} />

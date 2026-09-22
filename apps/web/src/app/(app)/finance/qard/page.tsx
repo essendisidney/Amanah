@@ -140,14 +140,15 @@ export default async function QardPage({ searchParams }: Props) {
           Member loan
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Interest-free (Qard Hassan). Cap is half of what you have paid in that circle.
+          Ask. The officer approves. You repay. No interest (Qard Hassan). You can borrow up to
+          half of what you have already paid in that circle.
         </p>
       </div>
 
       {memberships.length === 0 ? (
         <EmptyState
           title="Join a circle first"
-          description="Available inside an active circle."
+          description="Qard Hassan is available inside an active circle. Create or join one, then return here."
           actionLabel="Go to Circles"
           actionHref={'/circles' as Route}
         />
@@ -389,7 +390,7 @@ export default async function QardPage({ searchParams }: Props) {
         ) : (
           <EmptyState
             title="No loans yet"
-            description="Ask above — the treasurer approves, then you repay."
+            description="Ask for an interest-free loan from this circle. The treasurer approves, then you repay."
             actionLabel="Back to Finance"
             actionHref={'/finance' as Route}
           />

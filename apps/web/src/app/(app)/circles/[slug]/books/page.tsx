@@ -528,16 +528,11 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
           <MemberBooksBackBar slug={slug} title="Paste from Excel" />
           <div className="rounded-xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">
-              Paste header + member rows from Excel. Preview first — import stays off until names match.
+              From <strong className="font-medium text-foreground">HALAL CHAMA INVESTMENT.xlsx</strong>{' '}
+              → tab <strong className="font-medium text-foreground">AMANAH TEST</strong>: select rows
+              1–10 (header + members), copy, paste below. Include both header rows. Preview first —
+              import stays off until every name matches a member.
             </p>
-            <details className="mt-3">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                How to paste
-              </summary>
-              <p className="mt-2 text-sm text-muted-foreground">
-                From your sheet, copy rows 1–10 (both header rows + members) and paste below.
-              </p>
-            </details>
             {members.length > 0 ? (
               <div className="mt-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -550,6 +545,10 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
                       return labelFor(p, m);
                     })
                     .join(' · ')}
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Names must match these (or a close spelling). If any name does not match, import is
+                  blocked until you fix it.
                 </p>
               </div>
             ) : (

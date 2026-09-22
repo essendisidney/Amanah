@@ -10,16 +10,14 @@ export function EmptyState({
   actionHref,
 }: {
   title: string;
-  description?: string;
+  description: string;
   actionLabel?: string;
   actionHref?: Route;
 }) {
   return (
     <div className="flex flex-col items-start gap-3 rounded-xl border border-dashed border-border bg-muted/40 px-5 py-8">
       <h3 className="font-medium text-foreground">{title}</h3>
-      {description ? (
-        <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-      ) : null}
+      <p className="max-w-md text-sm text-muted-foreground">{description}</p>
       {actionLabel && actionHref ? (
         <Button asChild size="sm" className="mt-1">
           <Link href={actionHref}>{actionLabel}</Link>

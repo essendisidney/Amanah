@@ -62,6 +62,10 @@ export function MemberLoanLedger({
     <section className="space-y-4 rounded-xl border border-border bg-card p-5">
       <div>
         <h2 className="text-lg font-semibold">Facility ledger — profit & rollovers</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Record facilities here only — New facility, profit, repayment, rollover. Do not use a
+          separate loan form elsewhere on this page.
+        </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -138,6 +142,7 @@ export function MemberLoanLedger({
           eventType="repayment"
           showProfitSplit
           defaultDate={today}
+          helpText="Total paid. Put any profit portion beside it (rest reduces facility balance). Save a New facility first if balance is 0."
         />
         <LoanEventForm
           title="Rollover + top-up"
@@ -147,6 +152,7 @@ export function MemberLoanLedger({
           eventType="rollover"
           showRollover
           defaultDate={today}
+          helpText="Profit paid on closing the old facility, then new balance after rollover (e.g. Sarah 50,000 → 40,300 with top-up)."
         />
       </div>
     </section>
@@ -173,6 +179,7 @@ function LoanEventForm({
   defaultAmount,
   showProfitSplit = false,
   showRollover = false,
+  helpText,
 }: {
   title: string;
   jamiyaId: string;
@@ -183,10 +190,12 @@ function LoanEventForm({
   defaultAmount?: number;
   showProfitSplit?: boolean;
   showRollover?: boolean;
+  helpText?: string;
 }) {
   return (
     <form action={recordMemberLoanEventAction} className="space-y-3 rounded-lg border border-border p-4">
       <h3 className="font-semibold">{title}</h3>
+      {helpText ? <p className="text-xs text-muted-foreground">{helpText}</p> : null}
       <input type="hidden" name="jamiyaId" value={jamiyaId} />
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="memberId" value={memberId} />

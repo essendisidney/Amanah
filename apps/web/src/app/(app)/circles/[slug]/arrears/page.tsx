@@ -108,7 +108,7 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
-      <div className="flex flex-wrap items-end justify-between gap-3">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
             {dict.officer.arrearsEyebrow}
@@ -125,7 +125,7 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
             <input type="hidden" name="dueWithinDays" value="7" />
             <input type="hidden" name="returnTo" value="arrears" />
             <Button type="submit" size="sm" className="min-h-11">
-              Nudge dues
+              Nudge dues (7 days)
             </Button>
           </form>
           <form action={remindInvoicesAction}>
@@ -133,14 +133,14 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="returnTo" value="arrears" />
             <Button type="submit" size="sm" variant="outline" disabled={!members.length}>
-              Remind
+              Remind open invoices
             </Button>
           </form>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/circles/${slug}/invoices` as Route}>{dict.circle.invoices}</Link>
-          </Button>
-          <Button asChild variant="ghost" size="sm">
             <Link href={`/circles/${slug}/officer` as Route}>{dict.circle.officerConsole}</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/circles/${slug}/invoices` as Route}>{dict.circle.invoices}</Link>
           </Button>
         </div>
       </div>
@@ -215,11 +215,22 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
           {dict.officer.memberArrears}
         </h2>
         {!members.length ? (
-          <EmptyState
-            title={dict.officer.noArrears}
-            actionLabel={dict.circle.invoices}
-            actionHref={`/circles/${slug}/invoices` as Route}
-          />
+          <div className="space-y-3">
+            <EmptyState
+              title={dict.officer.noArrears}
+              description="All members are current. Use invoices or treasury for related books."
+              actionLabel={dict.circle.invoices}
+              actionHref={`/circles/${slug}/invoices` as Route}
+            />
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="min-h-11">
+                <Link href={`/circles/${slug}/treasury` as Route}>{dict.circle.treasury}</Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11">
+                <Link href={`/circles/${slug}/officer` as Route}>{dict.circle.officerConsole}</Link>
+              </Button>
+            </div>
+          </div>
         ) : (
           <ul className="divide-y divide-border rounded-xl border border-border bg-card">
             {members.map((row) => {
