@@ -36,9 +36,11 @@ const LAYERS = [
 ] as const;
 
 const ADMIN_MAP = [
-  { href: '/admin' as Route, label: 'Inbox', role: 'Ops queues (KYC, money out, disputes…)' },
   { href: '/admin/finance' as Route, label: 'Finance', role: 'MuM KPIs, exceptions, journal feed' },
   { href: '/admin/finance/reconcile' as Route, label: 'Reconcile', role: 'Stuck intents + run reconcile' },
+  { href: '/admin/finance/journal' as Route, label: 'Journal', role: 'Append-only double-entry browser' },
+  { href: '/admin/finance/refunds' as Route, label: 'Refunds', role: 'Queue refunds (no edit of posts)' },
+  { href: '/admin/architecture' as Route, label: 'Architecture', role: 'How the stack is built' },
   { href: '/admin/observability' as Route, label: 'Health', role: 'Provider / cron / webhook health' },
   { href: '/admin/transactions' as Route, label: 'Transactions', role: 'Wallet ledger browse' },
   { href: '/admin/audit' as Route, label: 'Audit', role: 'Who changed what' },

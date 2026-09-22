@@ -17,6 +17,8 @@ const PRIMARY: Array<{ href: Route; label: string }> = [
 const MORE: Array<{ href: Route; label: string }> = [
   { href: '/admin/finance' as Route, label: 'Finance' },
   { href: '/admin/finance/reconcile' as Route, label: 'Reconcile' },
+  { href: '/admin/finance/journal' as Route, label: 'Journal' },
+  { href: '/admin/finance/refunds' as Route, label: 'Refunds' },
   { href: '/admin/architecture' as Route, label: 'Architecture' },
   { href: '/admin/insights' as Route, label: 'Insights' },
   { href: '/admin/tawarruq' as Route, label: 'Tawarruq' },

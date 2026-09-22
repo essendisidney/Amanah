@@ -166,6 +166,12 @@ export default async function AdminFinancePage() {
             <Link href={'/admin/finance/reconcile' as Route}>Reconcile queue</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/journal' as Route}>Journal</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/refunds' as Route}>Refunds</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/architecture' as Route}>How it is built</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
