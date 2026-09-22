@@ -9,6 +9,7 @@ import { getAdminFinanceKpis } from '@/features/admin/lib/finance-kpis';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
 import { resolveIntentExceptionAction } from '@/features/admin/actions/finance-resolve-actions';
+import { reprocessWebhookAction } from '@/features/admin/actions/webhook-reprocess-actions';
 
 export const metadata: Metadata = { title: 'Admin · Finance' };
 export const dynamic = 'force-dynamic';
@@ -170,6 +171,12 @@ export default async function AdminFinancePage() {
             <Link href={'/admin/finance/journal' as Route}>Journal</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/integrity' as Route}>Integrity</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/accounts' as Route}>Accounts</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance/refunds' as Route}>Refunds</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
@@ -226,7 +233,7 @@ export default async function AdminFinancePage() {
             key={wh.id}
             className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
           >
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="font-medium">
                 {wh.provider} · {wh.event_type ?? 'callback'} · {wh.status}
               </p>
@@ -238,9 +245,19 @@ export default async function AdminFinancePage() {
                 {wh.error_message ? ` · ${wh.error_message}` : ''}
               </p>
             </div>
-            <p className="font-mono text-xs text-muted-foreground">
-              {wh.fingerprint.slice(0, 12)}…
-            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="font-mono text-xs text-muted-foreground">
+                {wh.fingerprint.slice(0, 12)}…
+              </p>
+              {(wh.status === 'failed' || wh.status === 'received') && (
+                <form action={reprocessWebhookAction}>
+                  <input type="hidden" name="eventId" value={wh.id} />
+                  <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                    Reprocess
+                  </Button>
+                </form>
+              )}
+            </div>
           </li>
         ))}
       </Section>
