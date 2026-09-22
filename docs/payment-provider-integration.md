@@ -18,7 +18,7 @@ Scaffold is live: `lib/payments/adapters/bank-rails.ts` (`coop` / `kcb` / `bank`
 
 1. Set env (`COOP_BANK_*` / `KCB_BANK_*` or shared `BANK_API_*`) and Edge `payments-bank`.
 2. Optional: `PAYMENT_PROVIDER=coop|kcb|bank`, `BANK_RAIL=coop|kcb`.
-3. **Webhook** — `POST /api/webhooks/<provider>` that verifies, `ingest_webhook_event`, settles via `complete_payment_intent`.
+3. **Webhook** — `POST /api/webhooks/bank` (secret: `BANK_WEBHOOK_SECRET` or fallback `BANK_ALERT_WEBHOOK_SECRET`). Body: `{ status, reference, intent_id, rail?: "coop"|"kcb" }`.
 4. Keep secrets server-side only.
 5. Tests — see `src/lib/finance/bank-rails.test.ts`.
 

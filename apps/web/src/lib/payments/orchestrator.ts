@@ -8,6 +8,7 @@ import {
   bankAdapter,
   coopBankAdapter,
   kcbBankAdapter,
+  isBankRailConfigured,
 } from './adapters/bank-rails';
 import { isPaystackConfigured } from '@/lib/payments/paystack';
 import { paymentProvider } from './provider';
@@ -231,6 +232,13 @@ export function orchestratorHealth(): {
   failoverCollect: PaymentProviderId | null;
   failoverDisburse: PaymentProviderId | null;
   adapters: Record<PaymentProviderId, { configured: boolean }>;
+  bankRails?: {
+    rail: string;
+    coop: boolean;
+    kcb: boolean;
+    generic: boolean;
+    webhook: string;
+  };
   bakeOff?: {
     intasend: boolean;
     tendepay: boolean;
@@ -247,15 +255,24 @@ export function orchestratorHealth(): {
     adapters: {
       simulated: { configured: true },
       mpesa: { configured: darajaAdapter.isConfigured() },
-      bank: { configured: Boolean(process.env.BANK_API_URL && process.env.BANK_API_KEY) },
+      bank: { configured: isBankRailConfigured('generic') },
+      coop: { configured: isBankRailConfigured('coop') },
+      kcb: { configured: isBankRailConfigured('kcb') },
       paystack: { configured: isPaystackConfigured() },
       intasend: { configured: isIntasendConfigured() },
       tendepay: { configured: isTendepayConfigured() },
     },
+    bankRails: {
+      rail: (process.env.BANK_RAIL ?? 'generic').toLowerCase(),
+      coop: isBankRailConfigured('coop'),
+      kcb: isBankRailConfigured('kcb'),
+      generic: isBankRailConfigured('generic'),
+      webhook: '/api/webhooks/bank',
+    },
     bakeOff: {
       intasend: isIntasendConfigured(),
       tendepay: isTendepayConfigured(),
-      note: 'Flip PAYMENT_PROVIDER=intasend|tendepay in staging; compare STK + B2C latency and settlement. Daraja is default failover.',
+      note: 'Flip PAYMENT_PROVIDER=intasend|tendepay in staging; compare STK + B2C latency and settlement. Daraja is default failover. Bank rails: coop|kcb via BANK_RAIL / COOP_BANK_* / KCB_BANK_*.',
     },
   };
 }

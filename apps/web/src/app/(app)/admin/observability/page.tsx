@@ -131,8 +131,16 @@ export default async function AdminObservabilityPage() {
       value: `${orch.adapters.intasend.configured ? 'intasend✓' : 'intasend–'} / ${orch.adapters.tendepay.configured ? 'tendepay✓' : 'tendepay–'}`,
     },
     {
+      label: 'Bank rails (coop / kcb / generic)',
+      value: `${orch.bankRails?.coop ? 'coop✓' : 'coop–'} / ${orch.bankRails?.kcb ? 'kcb✓' : 'kcb–'} / ${orch.bankRails?.generic ? 'bank✓' : 'bank–'}`,
+    },
+    {
+      label: 'Bank payment webhook',
+      value: orch.bankRails?.webhook ?? '/api/webhooks/bank',
+    },
+    {
       label: 'payments-bank health',
-      value: bank.ok ? 'ok' : `${bank.error ?? 'down'}${provider === 'bank' ? '' : ' (info)'}`,
+      value: bank.ok ? 'ok' : `${bank.error ?? 'down'}${provider === 'bank' || provider === 'coop' || provider === 'kcb' ? '' : ' (info)'}`,
     },
     {
       label: 'Bank API configured',
@@ -141,6 +149,14 @@ export default async function AdminObservabilityPage() {
     {
       label: 'Bank SMS webhook secret',
       value: process.env.BANK_ALERT_WEBHOOK_SECRET?.trim() ? 'set' : 'missing',
+    },
+    {
+      label: 'Bank payment webhook secret',
+      value:
+        process.env.BANK_WEBHOOK_SECRET?.trim() ||
+        process.env.BANK_ALERT_WEBHOOK_SECRET?.trim()
+          ? 'set'
+          : 'missing',
     },
   ];
 

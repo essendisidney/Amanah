@@ -246,6 +246,79 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "disburse") {
+      const disbursementId = body.disbursement_id as string | undefined;
+      const requireReal = env("REQUIRE_REAL_PROVIDERS") === "true";
+      const hasBank = Boolean(env("BANK_API_KEY") && env("BANK_API_URL"));
+      if (!disbursementId) {
+        return Response.json({ ok: false, error: "DISBURSEMENT_REQUIRED" }, { status: 400 });
+      }
+      if (!hasBank) {
+        return Response.json(
+          {
+            ok: false,
+            error: requireReal ? "BANK_NOT_CONFIGURED" : "BANK_NOT_CONFIGURED",
+          },
+          { status: 503 },
+        );
+      }
+      const bank = await callBankApi({
+        idempotency_key: disbursementId,
+        direction: "disbursement",
+        amount: body.amount,
+        currency: body.currency ?? "KES",
+        account_number: body.account_number,
+        beneficiary_name: body.beneficiary_name,
+        narrative: body.narrative,
+        rail: body.rail ?? env("BANK_RAIL") ?? "generic",
+        metadata: body.metadata ?? {},
+      });
+      if (!bank.ok) {
+        return Response.json({ ok: false, error: bank.error }, { status: 502 });
+      }
+      return Response.json({
+        ok: true,
+        status: bank.status === "settled" || bank.status === "completed"
+          ? "completed"
+          : "processing",
+        reference: bank.reference,
+        raw: bank.raw,
+      });
+    }
+
+    if (action === "status") {
+      const reference = String(body.reference ?? "").trim();
+      if (!reference) {
+        return Response.json({ ok: false, error: "REFERENCE_REQUIRED" }, { status: 400 });
+      }
+      const hasBank = Boolean(env("BANK_API_KEY") && env("BANK_API_URL"));
+      if (!hasBank) {
+        return Response.json({ ok: false, error: "BANK_NOT_CONFIGURED", status: "unknown" });
+      }
+      const base = env("BANK_API_URL").replace(/\/$/, "");
+      const key = env("BANK_API_KEY");
+      const res = await fetch(`${base}/transfers/${encodeURIComponent(reference)}`, {
+        headers: {
+          Authorization: `Bearer ${key}`,
+          Accept: "application/json",
+        },
+      });
+      const raw = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return Response.json({
+          ok: false,
+          error: `BANK_HTTP_${res.status}`,
+          status: "unknown",
+          raw,
+        });
+      }
+      const status =
+        typeof raw === "object" && raw && "status" in raw
+          ? String((raw as { status: unknown }).status)
+          : "unknown";
+      return Response.json({ ok: true, reference, status, raw });
+    }
+
     if (action === "confirm") {
       if (body.job_id) {
         await supabase
