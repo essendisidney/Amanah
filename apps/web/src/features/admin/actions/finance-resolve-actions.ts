@@ -5,17 +5,17 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
 
 export async function resolveIntentExceptionAction(formData: FormData) {
   await requireAdminAccess('admin');
   const intentId = String(formData.get('intentId') ?? '').trim();
   const action = String(formData.get('action') ?? 'match').trim();
   const note = String(formData.get('note') ?? '').trim() || null;
+  const dest = financeReturnPath(formData, '/admin/finance');
 
   if (!intentId || !['match', 'manual', 'waive'].includes(action)) {
-    redirect(
-      withNoticeQuery('/admin/finance', 'Invalid resolve request.', 'error'),
-    );
+    redirect(withNoticeQuery(dest, 'Invalid resolve request.', 'error'));
   }
 
   const supabase = await createClient();
@@ -35,10 +35,11 @@ export async function resolveIntentExceptionAction(formData: FormData) {
   revalidatePath('/admin/finance/reconcile');
   revalidatePath('/admin/finance/settlements');
   revalidatePath('/admin/finance/integrity');
+  revalidatePath(`/admin/finance/intents/${intentId}`);
 
   redirect(
     withNoticeQuery(
-      '/admin/finance',
+      dest,
       ok
         ? `Exception ${action} applied.`
         : `Resolve failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,

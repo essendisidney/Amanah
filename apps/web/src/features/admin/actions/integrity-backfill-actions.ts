@@ -7,21 +7,22 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
+import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
 
-function revalidateIntegrity() {
+function revalidateIntegrity(intentId?: string) {
   revalidatePath('/admin/finance/integrity');
   revalidatePath('/admin/finance');
   revalidatePath('/admin/finance/journal');
   revalidatePath('/admin/finance/accounts');
+  if (intentId) revalidatePath(`/admin/finance/intents/${intentId}`);
 }
 
 export async function backfillIntentJournalAction(formData: FormData) {
   await requireAdminAccess('admin');
   const intentId = String(formData.get('intentId') ?? '').trim();
+  const dest = financeReturnPath(formData, '/admin/finance/integrity');
   if (!intentId) {
-    redirect(
-      withNoticeQuery('/admin/finance/integrity', 'Missing payment intent.', 'error'),
-    );
+    redirect(withNoticeQuery(dest, 'Missing payment intent.', 'error'));
   }
 
   const supabase = await createClient();
@@ -42,10 +43,10 @@ export async function backfillIntentJournalAction(formData: FormData) {
     });
   }
 
-  revalidateIntegrity();
+  revalidateIntegrity(intentId);
   redirect(
     withNoticeQuery(
-      '/admin/finance/integrity',
+      dest,
       ok
         ? `Journal ${(data as { action?: string }).action ?? 'posted'} for intent.`
         : `Backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,

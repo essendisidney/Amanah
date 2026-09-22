@@ -173,7 +173,14 @@ export default async function AdminFinanceReconcilePage({ searchParams }: Props)
                       {row.reconcile_status}
                     </p>
                   </div>
-                  <StatusBadge status={row.reconcile_status || row.status} />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={row.reconcile_status || row.status} />
+                    <Button asChild size="sm" variant="outline" className="min-h-10">
+                      <Link href={`/admin/finance/intents/${row.id}` as Route}>
+                        Case file
+                      </Link>
+                    </Button>
+                  </div>
                 </li>
               );
             })}

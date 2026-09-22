@@ -158,6 +158,9 @@ export default async function AdminSettlementsPage({ searchParams }: Props) {
                   <p className="tabular-nums text-sm font-semibold">
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
+                  <Button asChild size="sm" variant="outline" className="min-h-9">
+                    <Link href={`/admin/finance/intents/${row.id}` as Route}>Case</Link>
+                  </Button>
                   <form action={backfillOneSettlementAction}>
                     <input type="hidden" name="intentId" value={row.id} />
                     <Button type="submit" variant="outline" size="sm" className="min-h-9">
@@ -194,7 +197,12 @@ export default async function AdminSettlementsPage({ searchParams }: Props) {
                   </p>
                   {row.payment_intent_id ? (
                     <p className="font-mono text-[10px] text-muted-foreground">
-                      intent {row.payment_intent_id}
+                      <Link
+                        href={`/admin/finance/intents/${row.payment_intent_id}` as Route}
+                        className="text-primary hover:underline"
+                      >
+                        intent {row.payment_intent_id}
+                      </Link>
                     </p>
                   ) : null}
                 </div>

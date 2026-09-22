@@ -5,11 +5,13 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
 
-function revalidateSettlements() {
+function revalidateSettlements(extra?: string) {
   revalidatePath('/admin/finance/settlements');
   revalidatePath('/admin/finance/integrity');
   revalidatePath('/admin/finance');
+  if (extra) revalidatePath(extra);
 }
 
 export async function backfillMissingSettlementsAction(formData: FormData) {
@@ -18,6 +20,7 @@ export async function backfillMissingSettlementsAction(formData: FormData) {
   const limit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(200, Math.floor(limitRaw)))
     : 50;
+  const dest = financeReturnPath(formData, '/admin/finance/settlements');
 
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('backfill_missing_settlements', {
@@ -33,10 +36,10 @@ export async function backfillMissingSettlementsAction(formData: FormData) {
   const posted = (data as { posted?: number })?.posted ?? 0;
   const failed = (data as { failed?: number })?.failed ?? 0;
 
-  revalidateSettlements();
+  revalidateSettlements(dest.startsWith('/admin/finance/intents/') ? dest : undefined);
   redirect(
     withNoticeQuery(
-      '/admin/finance/settlements',
+      dest,
       ok
         ? `Settlement backfill: ${posted} posted, ${failed} failed.`
         : `Backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
@@ -48,10 +51,9 @@ export async function backfillMissingSettlementsAction(formData: FormData) {
 export async function backfillOneSettlementAction(formData: FormData) {
   await requireAdminAccess('admin');
   const intentId = String(formData.get('intentId') ?? '').trim();
+  const dest = financeReturnPath(formData, '/admin/finance/settlements');
   if (!intentId) {
-    redirect(
-      withNoticeQuery('/admin/finance/settlements', 'Missing payment intent.', 'error'),
-    );
+    redirect(withNoticeQuery(dest, 'Missing payment intent.', 'error'));
   }
 
   const supabase = await createClient();
@@ -66,10 +68,10 @@ export async function backfillOneSettlementAction(formData: FormData) {
     typeof data === 'object' &&
     (data as { ok?: boolean }).ok === true;
 
-  revalidateSettlements();
+  revalidateSettlements(`/admin/finance/intents/${intentId}`);
   redirect(
     withNoticeQuery(
-      '/admin/finance/settlements',
+      dest,
       ok
         ? 'Settlement mirrored.'
         : `Mirror failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
@@ -83,11 +85,10 @@ export async function markSettlementStatusAction(formData: FormData) {
   const settlementId = String(formData.get('settlementId') ?? '').trim();
   const status = String(formData.get('status') ?? '').trim();
   const note = String(formData.get('note') ?? '').trim() || null;
+  const dest = financeReturnPath(formData, '/admin/finance/settlements');
 
   if (!settlementId || !['settled', 'failed', 'disputed'].includes(status)) {
-    redirect(
-      withNoticeQuery('/admin/finance/settlements', 'Invalid settlement update.', 'error'),
-    );
+    redirect(withNoticeQuery(dest, 'Invalid settlement update.', 'error'));
   }
 
   const supabase = await createClient();
@@ -103,10 +104,10 @@ export async function markSettlementStatusAction(formData: FormData) {
     typeof data === 'object' &&
     (data as { ok?: boolean }).ok === true;
 
-  revalidateSettlements();
+  revalidateSettlements(dest.startsWith('/admin/finance/intents/') ? dest : undefined);
   redirect(
     withNoticeQuery(
-      '/admin/finance/settlements',
+      dest,
       ok
         ? `Settlement marked ${status}.`
         : `Update failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,

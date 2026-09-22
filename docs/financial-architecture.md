@@ -68,6 +68,7 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 | `/admin` | Ops inbox (KYC, money out, disputes…) |
 | `/admin/finance` | MuM KPIs, exceptions, journal feed |
 | `/admin/finance/reconcile` | Stuck intents + run reconcile |
+| `/admin/finance/intents/[id]` | Case file: intent + webhooks + journal + settlements + refunds |
 | `/admin/finance/journal` | Append-only journal browser (debits/credits) |
 | `/admin/finance/accounts` | Chart of accounts + journal totals |
 | `/admin/finance/settlements` | PSP settlements mirror + backfill / dispute |

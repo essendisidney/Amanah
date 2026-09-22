@@ -210,6 +210,9 @@ export default async function AdminFinanceIntegrityPage() {
                   <p className="tabular-nums text-sm font-semibold">
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
+                  <Button asChild size="sm" variant="outline" className="min-h-9">
+                    <Link href={`/admin/finance/intents/${row.id}` as Route}>Case</Link>
+                  </Button>
                   <form action={backfillIntentJournalAction}>
                     <input type="hidden" name="intentId" value={row.id} />
                     <Button type="submit" variant="outline" size="sm" className="min-h-9">

@@ -249,6 +249,13 @@ export default async function AdminFinancePage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {wh.payment_intent_id ? (
+                <Button asChild size="sm" variant="outline" className="min-h-10">
+                  <Link href={`/admin/finance/intents/${wh.payment_intent_id}` as Route}>
+                    Case file
+                  </Link>
+                </Button>
+              ) : null}
               <p className="font-mono text-xs text-muted-foreground">
                 {wh.fingerprint.slice(0, 12)}…
               </p>
@@ -346,6 +353,9 @@ function IntentLine({
           <p className="font-semibold">{formatCurrency(amount, row.currency)}</p>
           <StatusBadge status={row.reconcile_status} />
         </div>
+        <Button asChild size="sm" variant="outline" className="min-h-10">
+          <Link href={`/admin/finance/intents/${row.id}` as Route}>Case file</Link>
+        </Button>
         {showResolve ? (
           <div className="flex flex-wrap gap-1.5">
             <form action={resolveIntentExceptionAction}>

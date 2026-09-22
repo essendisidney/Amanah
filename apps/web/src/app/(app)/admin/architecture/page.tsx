@@ -23,7 +23,7 @@ const LAYERS = [
   },
   {
     title: '4. Settlement & reconcile layers',
-    body: 'intent.status ≠ settlement_status ≠ reconcile_status. settlements + provider_transactions mirror PSP cash. Webhook inbox (webhook_events) dedupes by fingerprint.',
+    body: 'intent.status ≠ settlement_status ≠ reconcile_status. settlements + provider_transactions mirror PSP cash. Webhook inbox (webhook_events) dedupes by fingerprint. Case file: /admin/finance/intents/[id].',
   },
   {
     title: '5. Journal projection',
@@ -38,6 +38,11 @@ const LAYERS = [
 const ADMIN_MAP = [
   { href: '/admin/finance' as Route, label: 'Finance', role: 'MuM KPIs, exceptions, journal feed' },
   { href: '/admin/finance/reconcile' as Route, label: 'Reconcile', role: 'Stuck intents + run reconcile' },
+  {
+    href: '/admin/finance' as Route,
+    label: 'Intent case file',
+    role: 'Open via Case file on queues → /admin/finance/intents/[id]',
+  },
   { href: '/admin/finance/journal' as Route, label: 'Journal', role: 'Append-only double-entry browser' },
   { href: '/admin/finance/accounts' as Route, label: 'Accounts', role: 'Chart of accounts + totals' },
   { href: '/admin/finance/settlements' as Route, label: 'Settlements', role: 'PSP cash mirror + backfill' },

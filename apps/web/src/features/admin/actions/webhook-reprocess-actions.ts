@@ -7,12 +7,14 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
+import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
 
 export async function reprocessWebhookAction(formData: FormData) {
   await requireAdminAccess('admin');
   const eventId = String(formData.get('eventId') ?? '').trim();
+  const dest = financeReturnPath(formData, '/admin/finance');
   if (!eventId) {
-    redirect(withNoticeQuery('/admin/finance', 'Missing webhook event.', 'error'));
+    redirect(withNoticeQuery(dest, 'Missing webhook event.', 'error'));
   }
 
   const supabase = await createClient();
@@ -31,7 +33,6 @@ export async function reprocessWebhookAction(formData: FormData) {
     const intentId =
       (data as { result?: { payment_intent_id?: string } }).result?.payment_intent_id ??
       null;
-    // Prefer intent from event row
     const { data: ev } = await supabase
       .from('webhook_events')
       .select('payment_intent_id')
@@ -43,6 +44,7 @@ export async function reprocessWebhookAction(formData: FormData) {
       await mirrorSettlementAfterComplete(admin, id, {
         source: 'webhook_reprocess',
       });
+      revalidatePath(`/admin/finance/intents/${id}`);
     }
   }
 
@@ -52,7 +54,7 @@ export async function reprocessWebhookAction(formData: FormData) {
 
   redirect(
     withNoticeQuery(
-      '/admin/finance',
+      dest,
       ok
         ? `Webhook reprocessed (${(data as { action?: string }).action ?? 'ok'}).`
         : `Reprocess failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
