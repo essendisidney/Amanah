@@ -21,6 +21,8 @@ type Props = {
   walletAvailable: number | null;
   walletCurrency: string;
   circleName?: string;
+  /** Linked M-Pesa / profile phone for STK (prefilled, often hidden). */
+  defaultPhone?: string | null;
   /** When false, omit id="pay" (use for stacked lists). Default true. */
   showAnchor?: boolean;
   labels: Dictionary['contributionCard'];
@@ -37,6 +39,7 @@ export function NextContributionCard({
   walletAvailable,
   walletCurrency,
   circleName,
+  defaultPhone = '',
   showAnchor = true,
   labels,
 }: Props) {
@@ -54,6 +57,11 @@ export function NextContributionCard({
     walletAvailable != null && walletCurrency === currency
       ? Math.min(remaining, walletAvailable)
       : remaining;
+  const linkedPhone = (defaultPhone ?? '').trim();
+  const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
+  const payLabel = ahead
+    ? t(labels.payAmountAhead, { amount: formatCurrency(remaining, currency) })
+    : t(labels.payAmount, { amount: formatCurrency(remaining, currency) });
 
   const dueMeta = [
     circleName,
@@ -93,134 +101,150 @@ export function NextContributionCard({
         ) : null}
       </div>
 
-      {!canCover ? (
-        <p className="text-sm text-muted-foreground">
-          {walletAvailable == null
-            ? labels.needWallet
-            : t(labels.needMore, { amount: formatCurrency(shortfall, currency) })}{' '}
-          {labels.orPayPhone}
-        </p>
+      {canCover ? (
+        <form action={ahead ? payContributionAheadAction : payContributionAction}>
+          <input type="hidden" name="contributionId" value={contributionId} />
+          <input type="hidden" name="slug" value={slug} />
+          <Button type="submit" className="min-h-12 w-full text-base">
+            {payLabel}
+          </Button>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            {labels.paysFromBalanceShort}
+          </p>
+        </form>
       ) : (
-        <p className="text-sm text-muted-foreground">{labels.paysFromBalance}</p>
+        <form action={payContributionStkAction} className="space-y-3">
+          <input type="hidden" name="contributionId" value={contributionId} />
+          <input type="hidden" name="slug" value={slug} />
+          <input type="hidden" name="amount" value={String(remaining)} />
+          {hasLinkedPhone ? (
+            <input type="hidden" name="phone" value={linkedPhone} />
+          ) : (
+            <label className="block text-xs text-muted-foreground">
+              {labels.mpesaPhone}
+              <input
+                name="phone"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                required
+                placeholder="07…"
+                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground"
+              />
+            </label>
+          )}
+          <Button type="submit" className="min-h-12 w-full text-base">
+            {payLabel}
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            {hasLinkedPhone
+              ? t(labels.stkToLinked, { phone: linkedPhone })
+              : labels.stkApproveHint}
+          </p>
+        </form>
       )}
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end">
-        {canCover ? (
-          <form
-            action={ahead ? payContributionAheadAction : payContributionAction}
-            className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end"
-          >
-            <input type="hidden" name="contributionId" value={contributionId} />
-            <input type="hidden" name="slug" value={slug} />
-            <label className="block text-xs text-muted-foreground">
-              {labels.amountOptional}
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                min={1}
-                step="0.01"
-                max={remaining}
-                placeholder={String(remaining)}
-                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
-              />
-            </label>
-            <Button type="submit" className="min-h-11 w-full sm:w-auto">
-              {ahead ? labels.payAhead : labels.pay}
-            </Button>
-          </form>
-        ) : (
-          <form
-            action={payContributionStkAction}
-            className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end"
-          >
-            <input type="hidden" name="contributionId" value={contributionId} />
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="amount" value={String(remaining)} />
-            <label className="block text-xs text-muted-foreground">
-              {labels.mpesaPhone}
-              <input
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="07…"
-                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-44 sm:text-sm"
-              />
-            </label>
-            <Button type="submit" className="min-h-11 w-full sm:w-auto">
-              {labels.payPhone}
-            </Button>
-          </form>
-        )}
+      <details className="text-sm">
+        <summary className="cursor-pointer font-medium text-muted-foreground">
+          {labels.moreOptions}
+        </summary>
+        <div className="mt-3 space-y-3 border-t border-border/60 pt-3">
+          {canCover ? (
+            <>
+              <form
+                action={ahead ? payContributionAheadAction : payContributionAction}
+                className="flex flex-col gap-2 sm:flex-row sm:items-end"
+              >
+                <input type="hidden" name="contributionId" value={contributionId} />
+                <input type="hidden" name="slug" value={slug} />
+                <label className="block flex-1 text-xs text-muted-foreground">
+                  {labels.amountOptional}
+                  <input
+                    name="amount"
+                    type="number"
+                    inputMode="decimal"
+                    min={1}
+                    step="0.01"
+                    max={remaining}
+                    placeholder={String(remaining)}
+                    className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
+                  />
+                </label>
+                <Button type="submit" variant="outline" className="min-h-11">
+                  {labels.payPartial}
+                </Button>
+              </form>
+              <form action={payContributionStkAction} className="space-y-2">
+                <input type="hidden" name="contributionId" value={contributionId} />
+                <input type="hidden" name="slug" value={slug} />
+                <input type="hidden" name="amount" value={String(remaining)} />
+                {hasLinkedPhone ? (
+                  <input type="hidden" name="phone" value={linkedPhone} />
+                ) : (
+                  <label className="block text-xs text-muted-foreground">
+                    {labels.mpesaPhone}
+                    <input
+                      name="phone"
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      required
+                      placeholder="07…"
+                      className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
+                    />
+                  </label>
+                )}
+                <Button type="submit" variant="outline" className="min-h-11 w-full">
+                  {labels.payPhoneInstead}
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              {walletAvailable != null && walletAvailable > 0 ? (
+                <form
+                  action={ahead ? payContributionAheadAction : payContributionAction}
+                  className="flex flex-col gap-2 sm:flex-row sm:items-end"
+                >
+                  <input type="hidden" name="contributionId" value={contributionId} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <label className="block flex-1 text-xs text-muted-foreground">
+                    {labels.partialAmount}
+                    <input
+                      name="amount"
+                      type="number"
+                      inputMode="decimal"
+                      min={1}
+                      step="0.01"
+                      max={maxPartial}
+                      defaultValue={maxPartial}
+                      className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
+                    />
+                  </label>
+                  <Button type="submit" variant="outline" className="min-h-11">
+                    {labels.payPartial}
+                  </Button>
+                </form>
+              ) : null}
+              <Button asChild variant="outline" className="min-h-11 w-full">
+                <Link
+                  href={
+                    `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route
+                  }
+                >
+                  {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}
+                </Link>
+              </Button>
+            </>
+          )}
 
-        {!canCover ? (
-          <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
-            <Link
-              href={
-                `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
-              }
-            >
-              {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}
-            </Link>
+          <p className="text-xs text-muted-foreground">{labels.paidTreasurerHint}</p>
+
+          <Button asChild variant="ghost" size="sm" className="min-h-11 w-full justify-start px-0">
+            <Link href={`#calendar` as Route}>{labels.calendar}</Link>
           </Button>
-        ) : null}
-
-        {!canCover && walletAvailable != null && walletAvailable > 0 ? (
-          <form
-            action={ahead ? payContributionAheadAction : payContributionAction}
-            className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-          >
-            <input type="hidden" name="contributionId" value={contributionId} />
-            <input type="hidden" name="slug" value={slug} />
-            <label className="block text-xs text-muted-foreground">
-              {labels.partialAmount}
-              <input
-                name="amount"
-                type="number"
-                inputMode="decimal"
-                min={1}
-                step="0.01"
-                max={maxPartial}
-                defaultValue={maxPartial}
-                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-36 sm:text-sm"
-              />
-            </label>
-            <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-              {labels.payPartial}
-            </Button>
-          </form>
-        ) : null}
-
-        {canCover ? (
-          <form
-            action={payContributionStkAction}
-            className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
-          >
-            <input type="hidden" name="contributionId" value={contributionId} />
-            <input type="hidden" name="slug" value={slug} />
-            <input type="hidden" name="amount" value={String(remaining)} />
-            <label className="block text-xs text-muted-foreground">
-              {labels.mpesaPhone}
-              <input
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                placeholder="07…"
-                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:w-44 sm:text-sm"
-              />
-            </label>
-            <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
-              {labels.payPhoneInstead}
-            </Button>
-          </form>
-        ) : null}
-
-        <Button asChild variant="ghost" size="sm" className="min-h-11">
-          <Link href="#calendar">{labels.calendar}</Link>
-        </Button>
-      </div>
+        </div>
+      </details>
     </section>
   );
 }

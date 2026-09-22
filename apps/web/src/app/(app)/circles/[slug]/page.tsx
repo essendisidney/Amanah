@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
-import { formatCurrency } from '@jamiya/shared';
+import { formatCurrency, toE164Kenya } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { AddPeoplePanel } from '@/features/circles/components/add-people-panel';
@@ -144,6 +144,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: walletData },
     { data: paymentData },
     { data: nextOfKinData },
+    { data: myProfileData },
   ] = await Promise.all([
     supabase
       .from('members')
@@ -200,6 +201,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .from('member_next_of_kin')
       .select('member_id, full_name, phone, relationship, notes')
       .eq('jamiya_id', jamiya.id),
+    supabase
+      .from('profiles')
+      .select('mpesa_phone, phone')
+      .eq('id', user.id)
+      .maybeSingle(),
   ]);
 
   const pendingGraceCount = graceResult.count ?? 0;
@@ -213,6 +219,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       : Number(walletRow.available_balance)
     : null;
   const walletCurrency = walletRow?.currency ?? jamiya.currency;
+  const myProfilePhones = myProfileData as
+    | { mpesa_phone?: string | null; phone?: string | null }
+    | null;
+  const payDefaultPhoneRaw =
+    myProfilePhones?.mpesa_phone?.trim() ||
+    myProfilePhones?.phone?.trim() ||
+    user.phone ||
+    '';
+  const payDefaultPhone =
+    toE164Kenya(payDefaultPhoneRaw) ??
+    (/^\+[1-9]\d{7,14}$/.test(payDefaultPhoneRaw) ? payDefaultPhoneRaw : '');
 
   const memberRows = (membersData ?? []) as unknown as Array<{
     id: string;
@@ -1010,6 +1027,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                 : null
             }
             walletCurrency={walletCurrency}
+            defaultPhone={payDefaultPhone}
             labels={dict.contributionCard}
           />
         </div>

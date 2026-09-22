@@ -8,7 +8,7 @@ import {
   Target,
   Wallet,
 } from 'lucide-react';
-import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
+import { formatCurrency, formatRelativeTime, toE164Kenya } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { InsightsData } from '../lib/get-insights-data';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
@@ -26,6 +26,10 @@ export function InsightsView({
 }) {
   const { dashboard, monthInflow, monthOutflow, currency, onTimeRate, openDueTotal } = data;
   const name = dashboard.profile?.full_name?.split(' ')[0] ?? 'there';
+  const payPhoneRaw =
+    dashboard.profile?.mpesa_phone?.trim() || dashboard.profile?.phone?.trim() || '';
+  const payDefaultPhone =
+    toE164Kenya(payPhoneRaw) ?? (/^\+[1-9]\d{7,14}$/.test(payPhoneRaw) ? payPhoneRaw : '');
 
   const nextStops = [
     {
@@ -176,6 +180,7 @@ export function InsightsView({
                 walletAvailable={dashboard.wallet?.availableBalance ?? null}
                 walletCurrency={dashboard.wallet?.currency ?? item.currency}
                 circleName={item.jamiyaName}
+                defaultPhone={payDefaultPhone}
                 showAnchor={index === 0}
                 labels={contributionLabels}
               />

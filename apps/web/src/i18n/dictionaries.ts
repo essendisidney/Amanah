@@ -225,9 +225,12 @@ export type Dictionary = {
     needMore: string;
     orPayPhone: string;
     paysFromBalance: string;
+    paysFromBalanceShort: string;
     amountOptional: string;
     pay: string;
     payAhead: string;
+    payAmount: string;
+    payAmountAhead: string;
     addMoney: string;
     addMoneyToPay: string;
     partialAmount: string;
@@ -235,6 +238,10 @@ export type Dictionary = {
     mpesaPhone: string;
     payPhone: string;
     payPhoneInstead: string;
+    moreOptions: string;
+    stkApproveHint: string;
+    stkToLinked: string;
+    paidTreasurerHint: string;
     calendar: string;
   };
   circles: {
@@ -775,16 +782,23 @@ export const en: Dictionary = {
     needMore: 'You need about {amount} more to pay in full.',
     orPayPhone: 'Or pay from your phone now.',
     paysFromBalance: 'Pays from your balance. Leave blank for the full amount.',
+    paysFromBalanceShort: 'Pays from your Money balance.',
     amountOptional: 'Amount (optional)',
     pay: 'Pay',
     payAhead: 'Pay ahead',
-    addMoney: 'Add money',
-    addMoneyToPay: 'Add money to pay',
+    payAmount: 'Pay {amount}',
+    payAmountAhead: 'Pay ahead {amount}',
+    addMoney: 'Add money first',
+    addMoneyToPay: 'Top up wallet instead',
     partialAmount: 'Partial amount',
     payPartial: 'Pay partial',
     mpesaPhone: 'M-Pesa phone',
     payPhone: 'Pay with M-Pesa',
     payPhoneInstead: 'Pay with M-Pesa instead',
+    moreOptions: 'More options',
+    stkApproveHint: 'Approve the M-Pesa prompt — the due marks paid when confirmed.',
+    stkToLinked: 'Prompt goes to {phone}. Due marks paid when confirmed.',
+    paidTreasurerHint: 'Paid the treasurer in cash? Ask them to record it on the books.',
     calendar: 'Calendar',
   },
   circles: {
@@ -1340,16 +1354,23 @@ export const sw: Dictionary = {
     needMore: 'Unahitaji takriban {amount} zaidi.',
     orPayPhone: 'Au lipa kutoka simu sasa.',
     paysFromBalance: 'Hulipwa kutoka salio lako. Acha tupu kwa salio lote.',
+    paysFromBalanceShort: 'Hulipwa kutoka salio la Pesa.',
     amountOptional: 'Kiasi (si lazima)',
     pay: 'Lipa',
     payAhead: 'Lipa mapema',
-    addMoney: 'Ongeza pesa',
-    addMoneyToPay: 'Ongeza pesa ili kulipa',
+    payAmount: 'Lipa {amount}',
+    payAmountAhead: 'Lipa mapema {amount}',
+    addMoney: 'Ongeza pesa kwanza',
+    addMoneyToPay: 'Jaza pochi badala yake',
     partialAmount: 'Kiasi cha sehemu',
     payPartial: 'Lipa sehemu',
     mpesaPhone: 'Nambari ya M-Pesa',
     payPhone: 'Lipa kwa M-Pesa',
     payPhoneInstead: 'Lipa kwa M-Pesa badala yake',
+    moreOptions: 'Chaguo zaidi',
+    stkApproveHint: 'Idhinisha ombi la M-Pesa — deni linawekwa limelipwa baada ya kuthibitishwa.',
+    stkToLinked: 'Ombi linatumwa kwa {phone}. Deni linawekwa limelipwa baada ya kuthibitishwa.',
+    paidTreasurerHint: 'Umelipa mweka hazina kwa fedha taslimu? Waombe aweke kwenye vitabu.',
     calendar: 'Kalenda',
   },
   circles: {

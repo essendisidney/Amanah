@@ -152,10 +152,25 @@ export async function payContributionStkAction(formData: FormData): Promise<void
   }
   amount = Math.min(amount, remaining);
 
-  const resolvedPhone = phone || user.phone || '';
+  const profilePhoneFallback =
+    phone ||
+    (
+      await supabase
+        .from('profiles')
+        .select('mpesa_phone, phone')
+        .eq('id', user.id)
+        .maybeSingle()
+        .then((r) => {
+          const p = r.data as { mpesa_phone?: string | null; phone?: string | null } | null;
+          return p?.mpesa_phone?.trim() || p?.phone?.trim() || user.phone || '';
+        })
+    );
+  const resolvedPhone =
+    toE164Kenya(profilePhoneFallback) ??
+    (/^\+[1-9]\d{7,14}$/.test(profilePhoneFallback) ? profilePhoneFallback : '');
   if (
     (provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay') &&
-    !/^\+[1-9]\d{7,14}$/.test(resolvedPhone)
+    !resolvedPhone
   ) {
     redirectWithCircleNotice(
       slug,
@@ -246,7 +261,7 @@ export async function payContributionStkAction(formData: FormData): Promise<void
   redirectWithCircleNotice(
     slug,
     collected.customerMessage ??
-      'Payment started. Approve on your phone if prompted — the due marks paid when confirmed.',
+      'Approve the M-Pesa prompt. This due marks paid automatically when confirmed.',
     'info',
   );
 }
