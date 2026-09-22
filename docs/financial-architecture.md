@@ -65,6 +65,8 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 
 `/admin/finance` — exceptions, completed-but-open intents, failed webhook inbox, recent journal posts. Balances are not editable from this UI.
 
-## Deferred (not in A–F)
+## Deferred (roadmap toward full engine)
 
-Full double-entry cutover (journal as SoT), maker-checker policy engine, live Co-op/KCB adapters, member debit/credit statement UI, integer-only amounts migration.
+Still ahead of full DE SoT cutover: controlled state machine service, maker-checker policies, member journal statements, bank adapters, automated finance test suite.
+
+**In progress / started:** `settlements`, `refunds`, `provider_transactions`, `amount_minor` on intents; Admin Finance command centre + Reconcile queue; [payment-provider-integration.md](./payment-provider-integration.md).

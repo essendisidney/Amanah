@@ -10,9 +10,11 @@ export async function runReconcileNowAction(): Promise<void> {
   await requireAdminAccess('compliance');
   const result = await runPaymentReconcile();
   revalidatePath('/admin/observability');
+  revalidatePath('/admin/finance');
+  revalidatePath('/admin/finance/reconcile');
   redirect(
     withNoticeQuery(
-      '/admin/observability',
+      '/admin/finance/reconcile',
       result.ok
         ? `Reconcile finished. Settled ${result.summary.intents_settled + result.summary.withdrawals_settled}; flagged ${result.summary.needs_admin.length}.`
         : `Reconcile failed: ${result.error ?? 'unknown'}`,
