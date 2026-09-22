@@ -70,7 +70,7 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 | `/admin/finance/reconcile` | Stuck intents + run reconcile |
 | `/admin/finance/journal` | Append-only journal browser (debits/credits) |
 | `/admin/finance/accounts` | Chart of accounts + journal totals |
-| `/admin/finance/integrity` | Wallet vs journal 2000 delta + missing posts |
+| `/admin/finance/integrity` | Wallet vs journal 2000 delta + backfill missing posts |
 | `/admin/finance/refunds` | Queue / complete refunds (never edits posted lines) |
 | `/admin/finance/approvals` | Maker–checker for large refunds (+ withdrawals) |
 | `/admin/architecture` | How the finance stack is built (layers + status maps) |

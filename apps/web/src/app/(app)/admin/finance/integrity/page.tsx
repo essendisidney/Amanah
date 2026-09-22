@@ -5,6 +5,10 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import {
+  backfillIntentJournalAction,
+  backfillMissingJournalsAction,
+} from '@/features/admin/actions/integrity-backfill-actions';
 
 export const metadata: Metadata = { title: 'Admin · Finance integrity' };
 export const dynamic = 'force-dynamic';
@@ -43,7 +47,6 @@ export default async function AdminFinanceIntegrityPage() {
     .order('completed_at', { ascending: false })
     .limit(80);
 
-  // Filter client-side if we can't anti-join easily via supabase client
   const { data: journalSources } = await supabase
     .from('journal_entries')
     .select('source_id')
@@ -59,6 +62,7 @@ export default async function AdminFinanceIntegrityPage() {
 
   const delta = Number(snap.wallet_vs_journal_delta_kes ?? 0);
   const deltaOk = Math.abs(delta) < 1;
+  const missingCount = Number(snap.completed_intents_missing_journal ?? missingRows.length);
 
   return (
     <div className="space-y-6">
@@ -68,11 +72,19 @@ export default async function AdminFinanceIntegrityPage() {
             Ledger integrity
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Compare live wallet SoT to journal projection (account 2000). Gap is expected
-            until full double-entry cutover — this page tracks how close we are.
+            Compare live wallet SoT to journal projection (account 2000). Use Backfill to
+            post missing journals and mirror settlement sidecars — idempotent.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {missingCount > 0 ? (
+            <form action={backfillMissingJournalsAction}>
+              <input type="hidden" name="limit" value="50" />
+              <Button type="submit" className="min-h-11">
+                Backfill up to 50
+              </Button>
+            </form>
+          ) : null}
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance' as Route}>Finance centre</Link>
           </Button>
@@ -138,8 +150,18 @@ export default async function AdminFinanceIntegrityPage() {
       )}
 
       <section className="overflow-hidden rounded-xl border border-border bg-card">
-        <div className="border-b border-border px-4 py-3 text-sm font-semibold">
-          Completed intents without journal post ({missingRows.length})
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+          <p className="text-sm font-semibold">
+            Completed intents without journal post ({missingRows.length})
+          </p>
+          {missingRows.length > 0 ? (
+            <form action={backfillMissingJournalsAction}>
+              <input type="hidden" name="limit" value="50" />
+              <Button type="submit" variant="outline" size="sm" className="min-h-9">
+                Backfill batch
+              </Button>
+            </form>
+          ) : null}
         </div>
         {missingRows.length === 0 ? (
           <p className="px-4 py-8 text-sm text-muted-foreground">All clear.</p>
@@ -159,9 +181,17 @@ export default async function AdminFinanceIntegrityPage() {
                     {row.completed_at ? ` · ${formatDate(row.completed_at)}` : ''}
                   </p>
                 </div>
-                <p className="tabular-nums text-sm font-semibold">
-                  {formatCurrency(Number(row.amount), row.currency)}
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="tabular-nums text-sm font-semibold">
+                    {formatCurrency(Number(row.amount), row.currency)}
+                  </p>
+                  <form action={backfillIntentJournalAction}>
+                    <input type="hidden" name="intentId" value={row.id} />
+                    <Button type="submit" variant="outline" size="sm" className="min-h-9">
+                      Backfill
+                    </Button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>
