@@ -69,7 +69,8 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 | `/admin/finance` | MuM KPIs, exceptions, journal feed |
 | `/admin/finance/reconcile` | Stuck intents + run reconcile |
 | `/admin/finance/journal` | Append-only journal browser (debits/credits) |
-| `/admin/finance/refunds` | Queue refunds (never edits posted lines) |
+| `/admin/finance/refunds` | Queue / complete refunds (never edits posted lines) |
+| `/admin/finance/approvals` | Maker–checker for large refunds (+ withdrawals) |
 | `/admin/architecture` | How the finance stack is built (layers + status maps) |
 
 Balances are not editable from admin UI — corrections via reverse journal only.
@@ -80,6 +81,6 @@ App: `lib/finance/state-machine.ts`. DB: `private.assert_*_transition` + hardene
 
 ## Deferred (roadmap toward full engine)
 
-Still ahead of full DE SoT cutover: maker-checker policy engine, contribution/sadaka sidecar reverse on refund, live Co-op/KCB adapters, broader automated finance suite.
+Still ahead of full DE SoT cutover: live Co-op/KCB adapters, broader automated finance suite, journal-as-SoT cutover.
 
-**Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, complete/cancel refund with reverse journal + wallet debit for top-ups, Admin Finance + Reconcile + Journal + Refunds + Architecture; member wallet “Ledger posts”; [payment-provider-integration.md](./payment-provider-integration.md).
+**Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, complete/cancel refund with reverse journal + wallet debit for top-ups, contribution/sadaka sidecar reverse, refund maker–checker (≥10k), Admin Finance suite + Architecture; member wallet “Ledger posts”; [payment-provider-integration.md](./payment-provider-integration.md).

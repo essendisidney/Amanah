@@ -67,10 +67,25 @@ export async function completeRefundAction(formData: FormData) {
     typeof data === 'object' &&
     (data as { ok?: boolean }).ok === true;
 
+  const pendingDual = Boolean(
+    ok && (data as { pending_dual_approval?: boolean }).pending_dual_approval,
+  );
+
   revalidatePath('/admin/finance');
   revalidatePath('/admin/finance/refunds');
   revalidatePath('/admin/finance/journal');
+  revalidatePath('/admin/finance/approvals');
   revalidatePath('/wallet');
+
+  if (pendingDual) {
+    redirect(
+      withNoticeQuery(
+        '/admin/finance/approvals',
+        'Refund needs a second admin approval (≥ threshold).',
+        'info',
+      ),
+    );
+  }
 
   redirect(
     withNoticeQuery(
