@@ -68,6 +68,8 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 | `/admin` | Ops inbox (KYC, money out, disputes…) |
 | `/admin/finance` | MuM KPIs, exceptions, journal feed |
 | `/admin/finance/reconcile` | Stuck intents + run reconcile |
+| `/admin/finance/journal` | Append-only journal browser (debits/credits) |
+| `/admin/finance/refunds` | Queue refunds (never edits posted lines) |
 | `/admin/architecture` | How the finance stack is built (layers + status maps) |
 
 Balances are not editable from admin UI — corrections via reverse journal only.
