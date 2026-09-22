@@ -76,10 +76,8 @@ export default async function GoalsPage({
           </Link>
         </p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">
-          Save <strong className="font-medium text-foreground">on your own</strong>, or as a{' '}
-          <strong className="font-medium text-foreground">whole circle</strong> where each member
-          can put in a different amount toward the same challenge (school fees, Hajj, wedding…).
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          Personal or circle savings targets.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">

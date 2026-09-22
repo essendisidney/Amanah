@@ -1019,7 +1019,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <CircleSection
           id="merry-go-round"
           title="Who gets the pot"
-          description="Each person’s payout month."
+          description="Payout months"
           padded={false}
         >
           <MerryGoRoundBoard
@@ -1038,7 +1038,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <CircleSection
           id="calendar"
           title="Contribution calendar"
-          description="Due dates and wallet payments for each cycle."
+          description="Due dates and payments"
           padded={false}
         >
           <ContributionCalendar
@@ -1061,7 +1061,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       <CircleSection
         id="members"
         title={`Members (${visibleMemberCount})`}
-        description="Everyone who has joined this chama."
         action={
           canManageOps ? (
             <Button asChild size="sm" variant="outline" className="rounded-full">
@@ -1170,7 +1169,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <CircleSection
               id="monthly-payments"
               title={isRotating ? 'Monthly contributions' : 'Monthly savings grid'}
-              description="Record what each member paid for any month — past or present."
+              description="Any month"
               padded={false}
             >
               <div className="amanah-surface px-4 py-4 sm:px-5">
@@ -1211,7 +1210,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             <CircleSection
               id="contribution-ledger"
               title="Contribution ledger"
-              description="Who has paid, who owes, and payment history from wallet."
+              description="Payment status"
               padded={false}
             >
               <ContributionLedger rows={ledgerRows} payments={paymentHistory} />
@@ -1221,7 +1220,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           <CircleSection
             id="invite-people"
             title="Add people"
-            description="Add one person, paste many phones, or share a join link."
+            description="Invite or add people"
             action={
               !isRotating ? <ExportCircleReportButtons slug={jamiya.slug} /> : undefined
             }
@@ -1232,7 +1231,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           <CircleSection
             id="next-of-kin"
             title="Next of kin"
-            description="Name, phone, and relationship for each member."
+            description="Emergency contacts"
             action={
               <Button asChild size="sm" variant="outline" className="rounded-full">
                 <Link href={`/circles/${slug}/next-of-kin` as Route}>Open full list</Link>
@@ -1249,7 +1248,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
           <CircleSection
             title={`Pending invitations (${invitations.length})`}
-            description="Waiting to accept. Once they join, they appear under Members."
+            description="Pending invites"
             padded={false}
           >
             <PendingInvitationsList

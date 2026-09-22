@@ -18,16 +18,11 @@ export default async function CreateCirclePage({ searchParams }: Props) {
   const defaultSegment = intent === 'business' ? 'boda_stage' : intent === 'family' ? 'womens_circle' : 'general';
   const subtitle =
     intent === 'business'
-      ? 'Set contribution rules for a stage, chama, or workplace circle. You become the circle admin automatically.'
+      ? 'Business or workplace circle.'
       : intent === 'family'
-        ? 'Set contribution rules for a trusted family circle. You become the circle admin automatically.'
-        : 'Set contribution rules for your rotating savings circle. You become the circle admin automatically.';
-  const segmentHint =
-    intent === 'business'
-      ? 'Tip: Boda / tuktuk stage fits many business groups; switch to General if this is a workplace chama.'
-      : intent === 'family'
-        ? 'Tip: Women’s circle is a common family default; switch to General if that fits better.'
-        : null;
+        ? 'Family circle.'
+        : 'Rotating savings circle.';
+  const segmentHint = null;
 
   return (
     <AppPage>
@@ -36,7 +31,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-foreground">
           Create a circle
         </h1>
-        <p className="mt-3 max-w-xl text-muted-foreground">{subtitle}</p>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{subtitle}</p>
         <p className="mt-3 text-sm text-muted-foreground">
           Have an invite?{' '}
           <Link

@@ -91,10 +91,7 @@ export default async function InvestPage() {
         <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
           {labels.investTitle}
         </h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">{labels.investDesc}</p>
-        {circles.length > 1 ? (
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{labels.investMultiHint}</p>
-        ) : null}
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{labels.investDesc}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/finance' as Route}>{labels.backToFinance}</Link>

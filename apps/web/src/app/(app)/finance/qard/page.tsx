@@ -139,8 +139,8 @@ export default async function QardPage({ searchParams }: Props) {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           Member loan
         </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Interest-free (Qard Hassan). Cap is half of what you have paid in that circle.
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          Interest-free (Qard Hassan). Cap is half of what you’ve paid in that circle.
         </p>
       </div>
 

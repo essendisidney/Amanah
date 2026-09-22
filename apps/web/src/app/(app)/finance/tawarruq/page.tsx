@@ -49,8 +49,8 @@ export default async function TawarruqPage() {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
           {labels.tawarruqTitle}
         </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          {labels.tawarruqDesc} Prefer interest-free support from your circle? Try{' '}
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+          {labels.tawarruqDesc} Or try{' '}
           <Link href={'/finance/qard' as Route} className="text-accent underline-offset-4 hover:underline">
             {labels.qardTitle}
           </Link>
@@ -70,10 +70,6 @@ export default async function TawarruqPage() {
         <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
           New application
         </h2>
-        <p className="text-sm text-muted-foreground">
-          After you submit, Jameiyah reviews the request, then may hand it to a partner. You will see
-          status updates below.
-        </p>
         <div className="space-y-2">
           <Label htmlFor="amount">Requested amount (KES)</Label>
           <Input id="amount" name="amount" type="number" min="1000" required />
