@@ -7,6 +7,8 @@ export function paymentProvider(): PaymentProviderId {
   const mode = (process.env.PAYMENT_PROVIDER ?? 'simulated').toLowerCase();
   if (mode === 'mpesa') return 'mpesa';
   if (mode === 'bank') return 'bank';
+  if (mode === 'coop' || mode === 'coop_bank') return 'coop';
+  if (mode === 'kcb' || mode === 'kcb_bank') return 'kcb';
   if (mode === 'paystack') return 'paystack';
   if (mode === 'intasend') return 'intasend';
   if (mode === 'tendepay') return 'tendepay';

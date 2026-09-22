@@ -8,6 +8,7 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { getAdminFinanceKpis } from '@/features/admin/lib/finance-kpis';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
+import { resolveIntentExceptionAction } from '@/features/admin/actions/finance-resolve-actions';
 
 export const metadata: Metadata = { title: 'Admin · Finance' };
 export const dynamic = 'force-dynamic';
@@ -209,13 +210,13 @@ export default async function AdminFinancePage() {
 
       <Section title="Reconcile exceptions" empty="No exceptions flagged.">
         {exRows.map((row) => (
-          <IntentLine key={row.id} row={row} />
+          <IntentLine key={row.id} row={row} showResolve />
         ))}
       </Section>
 
       <Section title="Completed but still open" empty="No open completed intents.">
         {openRows.map((row) => (
-          <IntentLine key={row.id} row={row} />
+          <IntentLine key={row.id} row={row} showResolve />
         ))}
       </Section>
 
@@ -295,13 +296,19 @@ function Section({
   );
 }
 
-function IntentLine({ row }: { row: IntentRow }) {
+function IntentLine({
+  row,
+  showResolve,
+}: {
+  row: IntentRow;
+  showResolve?: boolean;
+}) {
   const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
   const kind =
     typeof row.metadata?.kind === 'string' ? row.metadata.kind : 'wallet_top_up';
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="font-medium">
           {kind.replaceAll('_', ' ')} · {row.provider}
         </p>
@@ -314,9 +321,36 @@ function IntentLine({ row }: { row: IntentRow }) {
           {row.reconcile_status}
         </p>
       </div>
-      <div className="text-right">
-        <p className="font-semibold">{formatCurrency(amount, row.currency)}</p>
-        <StatusBadge status={row.reconcile_status} />
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="text-right">
+          <p className="font-semibold">{formatCurrency(amount, row.currency)}</p>
+          <StatusBadge status={row.reconcile_status} />
+        </div>
+        {showResolve ? (
+          <div className="flex flex-wrap gap-1.5">
+            <form action={resolveIntentExceptionAction}>
+              <input type="hidden" name="intentId" value={row.id} />
+              <input type="hidden" name="action" value="match" />
+              <Button type="submit" size="sm" className="min-h-10">
+                Match
+              </Button>
+            </form>
+            <form action={resolveIntentExceptionAction}>
+              <input type="hidden" name="intentId" value={row.id} />
+              <input type="hidden" name="action" value="manual" />
+              <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                Manual
+              </Button>
+            </form>
+            <form action={resolveIntentExceptionAction}>
+              <input type="hidden" name="intentId" value={row.id} />
+              <input type="hidden" name="action" value="waive" />
+              <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                Waive
+              </Button>
+            </form>
+          </div>
+        ) : null}
       </div>
     </li>
   );

@@ -4,6 +4,11 @@ import { darajaAdapter } from './adapters/daraja';
 import { paystackAdapter } from './adapters/paystack';
 import { intasendAdapter, isIntasendConfigured } from './adapters/intasend';
 import { tendepayAdapter, isTendepayConfigured } from './adapters/tendepay';
+import {
+  bankAdapter,
+  coopBankAdapter,
+  kcbBankAdapter,
+} from './adapters/bank-rails';
 import { isPaystackConfigured } from '@/lib/payments/paystack';
 import { paymentProvider } from './provider';
 import type {
@@ -19,7 +24,7 @@ import type {
  * Payment orchestrator — features call these helpers, never a PSP SDK.
  *
  * Routing:
- * - PAYMENT_PROVIDER = simulated | mpesa | bank | paystack | intasend | tendepay
+ * - PAYMENT_PROVIDER = simulated | mpesa | bank | coop | kcb | paystack | intasend | tendepay
  * - PAYMENT_COLLECT_PROVIDER / PAYMENT_DISBURSE_PROVIDER optional overrides
  */
 
@@ -30,6 +35,9 @@ const COLLECT_IDS = new Set<PaymentProviderId>([
   'paystack',
   'intasend',
   'tendepay',
+  'bank',
+  'coop',
+  'kcb',
   'simulated',
 ]);
 
@@ -37,6 +45,9 @@ const DISBURSE_IDS = new Set<PaymentProviderId>([
   'mpesa',
   'intasend',
   'tendepay',
+  'bank',
+  'coop',
+  'kcb',
   'simulated',
 ]);
 
@@ -61,7 +72,7 @@ export function disburseProvider(): PaymentProviderId {
     return 'tendepay';
   }
   if (paymentProvider() === 'paystack') return 'mpesa';
-  return paymentProvider() === 'bank' ? 'mpesa' : paymentProvider();
+  return paymentProvider();
 }
 
 function adapterFor(id: PaymentProviderId): PaymentAdapter {
@@ -75,8 +86,11 @@ function adapterFor(id: PaymentProviderId): PaymentAdapter {
     case 'tendepay':
       return tendepayAdapter;
     case 'bank':
-      // Bank collections stay on Edge; treat disburse/collect via simulated until bank adapter lands.
-      return simulatedAdapter;
+      return bankAdapter;
+    case 'coop':
+      return coopBankAdapter;
+    case 'kcb':
+      return kcbBankAdapter;
     default:
       return simulatedAdapter;
   }

@@ -28,6 +28,8 @@ const PROVIDERS: PaymentProviderId[] = [
   'simulated',
   'mpesa',
   'bank',
+  'coop',
+  'kcb',
   'paystack',
   'intasend',
   'tendepay',

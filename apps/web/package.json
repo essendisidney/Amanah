@@ -10,7 +10,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/finance/state-machine.test.ts",
+    "test": "node --import tsx --test src/lib/finance/state-machine.test.ts src/lib/finance/bank-rails.test.ts",
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {

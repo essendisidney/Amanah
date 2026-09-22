@@ -82,10 +82,12 @@ Deno.serve(async (req) => {
     const action = (body as { action?: string }).action as string | undefined;
 
     if (action === "health") {
+      const rail = String((body as { rail?: string }).rail ?? env("BANK_RAIL") ?? "generic");
       const hasBank = Boolean(env("BANK_API_KEY") && env("BANK_API_URL"));
       const requireReal = env("REQUIRE_REAL_PROVIDERS") === "true";
       return Response.json({
         ok: true,
+        rail,
         bank_configured: hasBank,
         require_real: requireReal,
         simulated_fallback: !hasBank && !requireReal,

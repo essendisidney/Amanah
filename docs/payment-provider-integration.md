@@ -14,19 +14,15 @@ Feature → collectPayment / disbursePayment / getPaymentStatus
 
 ## Steps to add e.g. KCB or Co-op
 
-1. **Adapter** — implement the same shape as existing adapters under `apps/web/src/lib/payments/adapters/`:
-   - `collect` / STK or redirect
-   - `disburse` (if supported)
-   - `getStatus`
-   - webhook verification helper (HMAC / signature / challenge)
-2. **Register** in the orchestrator / provider registry (`PAYMENT_PROVIDER`, optional collect/disburse overrides).
-3. **Webhook** — `POST /api/webhooks/<provider>` that:
-   - verifies authenticity
-   - `ingest_webhook_event` (fingerprint)
-   - calls `complete_payment_intent` / fail / withdrawal complete
-   - `mark_payment_intent_reconciled` on success
-4. **Env** — sandbox vs production secrets only in Vercel/server env. Never in the browser.
-5. **Tests** — duplicate webhook, failed collect, status poll settle.
+Scaffold is live: `lib/payments/adapters/bank-rails.ts` (`coop` / `kcb` / `bank`) + orchestrator registration.
+
+1. Set env (`COOP_BANK_*` / `KCB_BANK_*` or shared `BANK_API_*`) and Edge `payments-bank`.
+2. Optional: `PAYMENT_PROVIDER=coop|kcb|bank`, `BANK_RAIL=coop|kcb`.
+3. **Webhook** — `POST /api/webhooks/<provider>` that verifies, `ingest_webhook_event`, settles via `complete_payment_intent`.
+4. Keep secrets server-side only.
+5. Tests — see `src/lib/finance/bank-rails.test.ts`.
+
+Until bank credentials are set, adapters return `*_BANK_NOT_CONFIGURED` (set `BANK_ALLOW_SIMULATED=true` only for local smoke).
 
 ## What stays provider-agnostic
 

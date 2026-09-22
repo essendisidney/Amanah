@@ -4,6 +4,8 @@ export type PaymentProviderId =
   | 'simulated'
   | 'mpesa'
   | 'bank'
+  | 'coop'
+  | 'kcb'
   | 'paystack'
   | 'intasend'
   | 'tendepay';
