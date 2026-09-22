@@ -12,6 +12,7 @@ import {
   ingestWebhookEvent,
   webhookFingerprint,
 } from '@/lib/payments/webhook-inbox';
+import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
 
 /**
  * IntaSend collection / send-money callbacks.
@@ -144,6 +145,10 @@ export async function POST(request: Request) {
       await admin.rpc('mark_payment_intent_reconciled', {
         p_intent_id: intentId,
         p_settled: true,
+      });
+      await mirrorSettlementAfterComplete(admin, intentId, {
+        source: 'intasend_webhook',
+        raw: body,
       });
       await finalizeWebhookEvent(admin, inbox.id, 'processed', {
         paymentIntentId: intentId,

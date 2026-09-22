@@ -6,6 +6,7 @@ import {
   failWithdrawal,
 } from '@/lib/payments/disburse-withdrawal';
 import { logger } from '@/lib/observability';
+import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
 
 export type ReconcileSummary = {
   intents_scanned: number;
@@ -155,6 +156,10 @@ export async function runPaymentReconcile(opts?: {
           await admin.rpc('mark_payment_intent_reconciled', {
             p_intent_id: intent.id,
             p_settled: true,
+          });
+          await mirrorSettlementAfterComplete(admin, intent.id, {
+            source: 'daily_reconcile',
+            raw: { ref, polled_status: status.status },
           });
           await insertItem(admin, runId, {
             entity_type: 'payment_intent',

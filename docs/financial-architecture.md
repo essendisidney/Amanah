@@ -63,10 +63,21 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 
 ## Admin
 
-`/admin/finance` — exceptions, completed-but-open intents, failed webhook inbox, recent journal posts. Balances are not editable from this UI.
+| Route | Role |
+|-------|------|
+| `/admin` | Ops inbox (KYC, money out, disputes…) |
+| `/admin/finance` | MuM KPIs, exceptions, journal feed |
+| `/admin/finance/reconcile` | Stuck intents + run reconcile |
+| `/admin/architecture` | How the finance stack is built (layers + status maps) |
+
+Balances are not editable from admin UI — corrections via reverse journal only.
+
+## Status machine
+
+App: `lib/finance/state-machine.ts`. DB: `private.assert_*_transition` + hardened `mark_payment_intent_reconciled`. After every successful complete, `mirrorSettlementAfterComplete` writes `settlements` + `provider_transactions`.
 
 ## Deferred (roadmap toward full engine)
 
-Still ahead of full DE SoT cutover: controlled state machine service, maker-checker policies, member journal statements, bank adapters, automated finance test suite.
+Still ahead of full DE SoT cutover: maker-checker policy engine, member journal statements, live Co-op/KCB adapters, automated finance test suite.
 
-**In progress / started:** `settlements`, `refunds`, `provider_transactions`, `amount_minor` on intents; Admin Finance command centre + Reconcile queue; [payment-provider-integration.md](./payment-provider-integration.md).
+**Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, Admin Finance + Reconcile + Architecture; [payment-provider-integration.md](./payment-provider-integration.md).

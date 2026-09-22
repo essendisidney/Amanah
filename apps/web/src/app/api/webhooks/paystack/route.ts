@@ -10,6 +10,7 @@ import {
   ingestWebhookEvent,
   webhookFingerprint,
 } from '@/lib/payments/webhook-inbox';
+import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -81,6 +82,10 @@ export async function POST(req: Request) {
     await admin.rpc('mark_payment_intent_reconciled', {
       p_intent_id: settled.intentId,
       p_settled: true,
+    });
+    await mirrorSettlementAfterComplete(admin, settled.intentId, {
+      source: 'paystack_webhook',
+      raw: event as Record<string, unknown>,
     });
   }
 
