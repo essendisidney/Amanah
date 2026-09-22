@@ -8,6 +8,7 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import {
   backfillIntentJournalAction,
   backfillMissingJournalsAction,
+  backfillMissingWithdrawalJournalsAction,
 } from '@/features/admin/actions/integrity-backfill-actions';
 import { backfillMissingSettlementsAction } from '@/features/admin/actions/settlement-actions';
 
@@ -20,8 +21,10 @@ type Snapshot = {
   wallet_balances_kes?: number;
   wallet_liability_journal_net_kes?: number;
   wallet_vs_journal_delta_kes?: number;
+  cash_at_platform_1100_net_kes?: number;
   completed_intents_missing_journal?: number;
   completed_intents_missing_settlement?: number;
+  completed_withdrawals_missing_journal?: number;
   settlements_pending?: number;
   settlements_disputed?: number;
   unbalanced_journal_entries?: number;
@@ -97,6 +100,14 @@ export default async function AdminFinanceIntegrityPage() {
               </Button>
             </form>
           ) : null}
+          {(snap.completed_withdrawals_missing_journal ?? 0) > 0 ? (
+            <form action={backfillMissingWithdrawalJournalsAction}>
+              <input type="hidden" name="limit" value="50" />
+              <Button type="submit" variant="outline" className="min-h-11">
+                Backfill withdrawal journals
+              </Button>
+            </form>
+          ) : null}
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance' as Route}>Finance centre</Link>
           </Button>
@@ -135,6 +146,11 @@ export default async function AdminFinanceIntegrityPage() {
               hint: deltaOk ? 'Within KES 1' : 'Investigate projection gaps',
             },
             {
+              label: 'Cash at platform (1100) net',
+              value: formatCurrency(Number(snap.cash_at_platform_1100_net_kes ?? 0), 'KES'),
+              hint: 'Debits − credits (money-out credits 1100)',
+            },
+            {
               label: 'Completed intents missing journal',
               value: String(snap.completed_intents_missing_journal ?? 0),
               hint: 'Should trend to zero',
@@ -143,6 +159,11 @@ export default async function AdminFinanceIntegrityPage() {
               label: 'Completed intents missing settlement',
               value: String(snap.completed_intents_missing_settlement ?? 0),
               hint: 'PSP cash mirror gaps',
+            },
+            {
+              label: 'Completed withdrawals missing journal',
+              value: String(snap.completed_withdrawals_missing_journal ?? 0),
+              hint: 'Dr 2000 / Cr 1100',
             },
             {
               label: 'Settlements pending / disputed',

@@ -228,3 +228,30 @@ export async function mirrorSettlementAfterComplete(
     });
   }
 }
+
+/**
+ * After process_withdrawal succeeds, mirror PSP cash as a disbursement settlement.
+ */
+export async function mirrorDisbursementSettlement(
+  admin: AdminClient,
+  withdrawalId: string,
+  opts?: {
+    provider?: string;
+    providerReference?: string | null;
+    source?: string;
+  },
+): Promise<void> {
+  const { data, error } = await admin.rpc('record_disbursement_settlement', {
+    p_withdrawal_id: withdrawalId,
+    p_provider: opts?.provider ?? null,
+    p_provider_reference: opts?.providerReference ?? null,
+    p_metadata: { source: opts?.source ?? 'post_disburse' },
+  });
+
+  if (error || !(data as { ok?: boolean } | null)?.ok) {
+    logger.warn('mirrorDisbursementSettlement skipped', {
+      withdrawalId,
+      error: error?.message ?? (data as { error?: string } | null)?.error,
+    });
+  }
+}

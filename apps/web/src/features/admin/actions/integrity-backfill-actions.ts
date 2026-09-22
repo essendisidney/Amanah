@@ -100,3 +100,39 @@ export async function backfillMissingJournalsAction(formData: FormData) {
     ),
   );
 }
+
+export async function backfillMissingWithdrawalJournalsAction(formData: FormData) {
+  await requireAdminAccess('admin');
+  const limitRaw = Number(formData.get('limit') ?? 50);
+  const limit = Number.isFinite(limitRaw)
+    ? Math.max(1, Math.min(200, Math.floor(limitRaw)))
+    : 50;
+  const dest = financeReturnPath(formData, '/admin/finance/integrity');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('backfill_missing_withdrawal_journals', {
+    p_limit: limit,
+  });
+
+  const ok =
+    !error &&
+    data &&
+    typeof data === 'object' &&
+    (data as { ok?: boolean }).ok === true;
+
+  const posted = (data as { posted?: number })?.posted ?? 0;
+  const skipped = (data as { skipped?: number })?.skipped ?? 0;
+  const failed = (data as { failed?: number })?.failed ?? 0;
+
+  revalidateIntegrity();
+  revalidatePath('/admin/finance/accounts');
+  redirect(
+    withNoticeQuery(
+      dest,
+      ok
+        ? `Withdrawal journals: ${posted} posted, ${skipped} present, ${failed} failed.`
+        : `Withdrawal backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+      ok ? 'success' : 'error',
+    ),
+  );
+}

@@ -4,6 +4,7 @@ import {
   disburseProvider,
   orchestratorHealth,
 } from '@/lib/payments/orchestrator';
+import { mirrorDisbursementSettlement } from '@/lib/finance/settlements';
 import { logger } from '@/lib/observability';
 
 export type WithdrawalRow = {
@@ -94,6 +95,12 @@ export async function completeWithdrawalWithProviderRef(
   if (!result?.ok) {
     return { ok: false, error: result?.error ?? 'PROCESS_FAILED' };
   }
+
+  await mirrorDisbursementSettlement(admin, withdrawalId, {
+    providerReference: providerReference,
+    source: 'complete_withdrawal',
+  });
+
   return { ok: true };
 }
 
