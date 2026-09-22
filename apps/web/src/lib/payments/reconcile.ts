@@ -138,6 +138,10 @@ export async function runPaymentReconcile(opts?: {
           p_metadata: { source: 'daily_reconcile', polled_status: status.status },
         });
         if (error) {
+          await admin.rpc('mark_payment_intent_exception', {
+            p_intent_id: intent.id,
+            p_note: error.message,
+          });
           await flagItem(admin, runId, summary, {
             entity_type: 'payment_intent',
             entity_id: intent.id,
@@ -148,6 +152,10 @@ export async function runPaymentReconcile(opts?: {
           });
         } else {
           summary.intents_settled += 1;
+          await admin.rpc('mark_payment_intent_reconciled', {
+            p_intent_id: intent.id,
+            p_settled: true,
+          });
           await insertItem(admin, runId, {
             entity_type: 'payment_intent',
             entity_id: intent.id,
@@ -356,8 +364,15 @@ async function flagItem(
     detail?: Record<string, unknown>;
   },
 ) {
-  if (item.entity_type === 'payment_intent') summary.intents_flagged += 1;
-  else summary.withdrawals_flagged += 1;
+  if (item.entity_type === 'payment_intent') {
+    summary.intents_flagged += 1;
+    await admin.rpc('mark_payment_intent_exception', {
+      p_intent_id: item.entity_id,
+      p_note: item.reason,
+    });
+  } else {
+    summary.withdrawals_flagged += 1;
+  }
   summary.needs_admin.push({
     entity_type: item.entity_type,
     entity_id: item.entity_id,

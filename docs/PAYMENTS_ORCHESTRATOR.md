@@ -31,6 +31,8 @@ payment_intents + ledger RPCs (source of truth)
 Webhooks: `POST /api/webhooks/intasend`, `POST /api/webhooks/tendepay`  
 IntaSend dashboard endpoint (required): `https://jameiyah.com/api/webhooks/intasend`  
 Challenge (optional, matches Vercel `INTASEND_WEBHOOK_CHALLENGE`): `jameiyah-live`  
+When challenge env is set, callbacks **must** include a matching `challenge`. Optional `INTASEND_WEBHOOK_SECRET` for signature header.  
+Durable inbox: `webhook_events` (fingerprint dedupe). See [financial-architecture.md](./financial-architecture.md).  
 Health: `GET /api/v1/payments/orchestrator-health` (includes `bakeOff` block)
 
 ## Phase map

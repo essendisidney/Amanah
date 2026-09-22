@@ -6,6 +6,11 @@ import {
   completeWithdrawalWithProviderRef,
   failWithdrawal,
 } from '@/lib/payments/disburse-withdrawal';
+import {
+  finalizeWebhookEvent,
+  ingestWebhookEvent,
+  webhookFingerprint,
+} from '@/lib/payments/webhook-inbox';
 
 /**
  * TendePay collection / B2C callbacks (bake-off).
@@ -49,6 +54,27 @@ export async function POST(request: Request) {
   const admin = createServiceRoleClient();
   const intentId = /^[0-9a-f-]{36}$/i.test(apiRef) ? apiRef : null;
 
+  const fingerprint = webhookFingerprint('tendepay', [
+    state,
+    apiRef,
+    providerRef,
+  ]);
+  const inbox = await ingestWebhookEvent(admin, {
+    provider: 'tendepay',
+    fingerprint,
+    payload: body,
+    eventType: state || 'callback',
+    externalId: providerRef || apiRef || null,
+    paymentIntentId: intentId,
+  });
+
+  if (inbox.duplicate) {
+    await finalizeWebhookEvent(admin, inbox.id, 'ignored', {
+      paymentIntentId: intentId,
+    });
+    return NextResponse.json({ ok: true, duplicate: true });
+  }
+
   const success =
     state === 'COMPLETE' ||
     state === 'COMPLETED' ||
@@ -67,14 +93,28 @@ export async function POST(request: Request) {
       });
       if (error) {
         logger.warn('tendepay complete failed', { error: error.message, intentId });
+        await finalizeWebhookEvent(admin, inbox.id, 'failed', {
+          error: error.message,
+          paymentIntentId: intentId,
+        });
         return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
       }
+      await admin.rpc('mark_payment_intent_reconciled', {
+        p_intent_id: intentId,
+        p_settled: true,
+      });
+      await finalizeWebhookEvent(admin, inbox.id, 'processed', {
+        paymentIntentId: intentId,
+      });
       return NextResponse.json({ ok: true, settled });
     }
     if (failed) {
       await admin.rpc('fail_payment_intent', {
         p_intent_id: intentId,
         p_error_message: `TendePay ${state}`,
+      });
+      await finalizeWebhookEvent(admin, inbox.id, 'processed', {
+        paymentIntentId: intentId,
       });
       return NextResponse.json({ ok: true, failed: true });
     }
@@ -101,6 +141,9 @@ export async function POST(request: Request) {
           withdrawal.id,
           providerRef || apiRef || `tendepay:${withdrawal.id}`,
         );
+        await finalizeWebhookEvent(admin, inbox.id, done.ok ? 'processed' : 'failed', {
+          error: done.error,
+        });
         return NextResponse.json({
           ok: done.ok,
           withdrawalId: withdrawal.id,
@@ -109,6 +152,7 @@ export async function POST(request: Request) {
         });
       }
       await failWithdrawal(withdrawal.id, `TendePay B2C ${state}`);
+      await finalizeWebhookEvent(admin, inbox.id, 'processed');
       return NextResponse.json({ ok: true, withdrawalId: withdrawal.id, failed: true });
     }
   }
@@ -116,6 +160,10 @@ export async function POST(request: Request) {
   if (providerRef) {
     await getPaymentStatus(providerRef, 'tendepay');
   }
+
+  await finalizeWebhookEvent(admin, inbox.id, 'ignored', {
+    paymentIntentId: intentId,
+  });
 
   return NextResponse.json({ ok: true, pending: true, state });
 }
