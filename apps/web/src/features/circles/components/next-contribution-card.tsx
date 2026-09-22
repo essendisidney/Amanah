@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { formatCurrency, formatDate } from '@jamiya/shared';
+import { formatCurrency, formatDate, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import {
   payContributionAction,
@@ -21,12 +21,38 @@ type Props = {
   walletAvailable: number | null;
   walletCurrency: string;
   circleName?: string;
-  /** Linked M-Pesa / profile phone for STK (prefilled, often hidden). */
+  /** Prefill for STK — editable so another person’s M-Pesa can pay. */
   defaultPhone?: string | null;
   /** When false, omit id="pay" (use for stacked lists). Default true. */
   showAnchor?: boolean;
   labels: Dictionary['contributionCard'];
 };
+
+function StkPhoneField({
+  defaultPhone,
+  label,
+}: {
+  defaultPhone: string;
+  label: string;
+}) {
+  const linked = defaultPhone.trim();
+  const hasLinked = /^\+[1-9]\d{7,14}$/.test(linked);
+  return (
+    <label className="block text-xs text-muted-foreground">
+      {label}
+      <input
+        name="phone"
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel"
+        required
+        placeholder={KE_PHONE_PLACEHOLDER}
+        defaultValue={hasLinked ? linked : undefined}
+        className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground sm:h-10 sm:text-sm"
+      />
+    </label>
+  );
+}
 
 export function NextContributionCard({
   contributionId,
@@ -58,7 +84,6 @@ export function NextContributionCard({
       ? Math.min(remaining, walletAvailable)
       : remaining;
   const linkedPhone = (defaultPhone ?? '').trim();
-  const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
   const payLabel = ahead
     ? t(labels.payAmountAhead, { amount: formatCurrency(remaining, currency) })
     : t(labels.payAmount, { amount: formatCurrency(remaining, currency) });
@@ -117,29 +142,12 @@ export function NextContributionCard({
           <input type="hidden" name="contributionId" value={contributionId} />
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="amount" value={String(remaining)} />
-          {hasLinkedPhone ? (
-            <input type="hidden" name="phone" value={linkedPhone} />
-          ) : (
-            <label className="block text-xs text-muted-foreground">
-              {labels.mpesaPhone}
-              <input
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                required
-                placeholder="07…"
-                className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base text-foreground"
-              />
-            </label>
-          )}
+          <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
           <Button type="submit" className="min-h-12 w-full text-base">
             {payLabel}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            {hasLinkedPhone
-              ? t(labels.stkToLinked, { phone: linkedPhone })
-              : labels.stkApproveHint}
+            {labels.stkAnyNumberHint}
           </p>
         </form>
       )}
@@ -178,25 +186,11 @@ export function NextContributionCard({
                 <input type="hidden" name="contributionId" value={contributionId} />
                 <input type="hidden" name="slug" value={slug} />
                 <input type="hidden" name="amount" value={String(remaining)} />
-                {hasLinkedPhone ? (
-                  <input type="hidden" name="phone" value={linkedPhone} />
-                ) : (
-                  <label className="block text-xs text-muted-foreground">
-                    {labels.mpesaPhone}
-                    <input
-                      name="phone"
-                      type="tel"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      required
-                      placeholder="07…"
-                      className="mt-1 block h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
-                    />
-                  </label>
-                )}
+                <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
                 <Button type="submit" variant="outline" className="min-h-11 w-full">
                   {labels.payPhoneInstead}
                 </Button>
+                <p className="text-xs text-muted-foreground">{labels.stkAnyNumberHint}</p>
               </form>
             </>
           ) : (

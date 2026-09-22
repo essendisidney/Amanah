@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import type { Route } from 'next';
 import { useActionState } from 'react';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
@@ -67,27 +65,17 @@ export function TopUpForm({
       {needsPhone ? (
         <div className="space-y-2">
           <Label htmlFor="phone">{labels.mpesaPhone}</Label>
-          {hasLinkedPhone ? (
-            <>
-              <input type="hidden" name="phone" value={linkedPhone} />
-              <p className="rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm">
-                {linkedPhone}{' '}
-                <Link href={'/profile' as Route} className="text-xs underline underline-offset-2">
-                  Change
-                </Link>
-              </p>
-            </>
-          ) : (
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              inputMode="tel"
-              placeholder={KE_PHONE_PLACEHOLDER}
-              required
-              className="h-11 text-base sm:h-10 sm:text-sm"
-            />
-          )}
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            placeholder={KE_PHONE_PLACEHOLDER}
+            defaultValue={hasLinkedPhone ? linkedPhone : undefined}
+            required
+            className="h-11 text-base sm:h-10 sm:text-sm"
+          />
+          <p className="text-xs text-muted-foreground">{labels.stkPromptHint}</p>
         </div>
       ) : provider === 'paystack' ? (
         <p className="text-xs text-muted-foreground">{labels.paystackHint}</p>

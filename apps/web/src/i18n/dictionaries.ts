@@ -244,6 +244,7 @@ export type Dictionary = {
     moreOptions: string;
     stkApproveHint: string;
     stkToLinked: string;
+    stkAnyNumberHint: string;
     paidTreasurerHint: string;
     calendar: string;
   };
@@ -807,6 +808,8 @@ export const en: Dictionary = {
     moreOptions: 'More options',
     stkApproveHint: 'Approve the M-Pesa prompt — the due marks paid when confirmed.',
     stkToLinked: 'Prompt goes to {phone}. Due marks paid when confirmed.',
+    stkAnyNumberHint:
+      'Approve the prompt on that phone. Change the number if someone else is paying for you.',
     paidTreasurerHint: 'Paid the treasurer in cash? Ask them to record it on the books.',
     calendar: 'Calendar',
   },
@@ -890,7 +893,7 @@ export const en: Dictionary = {
     checkingStatus: 'Checking…',
     stepUpHint:
       'For M-Pesa, approve the prompt on your phone. Other methods may SMS a code first.',
-    stkPromptHint: 'Approve the prompt on this number.',
+    stkPromptHint: 'Approve the prompt on this number. You can change it if someone else is paying.',
     intasendPartnerHint: 'Partner names (e.g. Co-op) still credit Jameiyah.',
     withdrawMpesaHint: 'Pays to your linked M-Pesa after approval.',
     verificationCode: 'SMS code',
@@ -1385,6 +1388,8 @@ export const sw: Dictionary = {
     moreOptions: 'Chaguo zaidi',
     stkApproveHint: 'Idhinisha ombi la M-Pesa — deni linawekwa limelipwa baada ya kuthibitishwa.',
     stkToLinked: 'Ombi linatumwa kwa {phone}. Deni linawekwa limelipwa baada ya kuthibitishwa.',
+    stkAnyNumberHint:
+      'Idhinisha ombi kwenye simu hiyo. Badilisha nambari ikiwa mtu mwingine anakulipia.',
     paidTreasurerHint: 'Umelipa mweka hazina kwa fedha taslimu? Waombe aweke kwenye vitabu.',
     calendar: 'Kalenda',
   },
@@ -1469,7 +1474,7 @@ export const sw: Dictionary = {
     stepUpHint:
       'Kwa M-Pesa, idhinisha ombi kwenye simu yako. Njia zingine zinaweza kutuma SMS ya msimbo kwanza.',
     stkPromptHint:
-      'Utapata ombi la M-Pesa kwenye nambari hii — weka PIN pale (hakuna msimbo wa SMS).',
+      'Idhinisha ombi kwenye nambari hii. Unaweza kubadilisha ikiwa mtu mwingine anakulipia.',
     intasendPartnerHint:
       'Majina ya washirika (k.m. Co-op) bado yanalipa Jameiyah.',
     withdrawMpesaHint:
