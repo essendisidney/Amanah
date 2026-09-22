@@ -70,6 +70,7 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 | `/admin/finance/reconcile` | Stuck intents + run reconcile |
 | `/admin/finance/journal` | Append-only journal browser (debits/credits) |
 | `/admin/finance/accounts` | Chart of accounts + journal totals |
+| `/admin/finance/settlements` | PSP settlements mirror + backfill / dispute |
 | `/admin/finance/integrity` | Wallet vs journal 2000 delta + backfill missing posts |
 | `/admin/finance/refunds` | Queue / complete refunds (never edits posted lines) |
 | `/admin/finance/approvals` | Maker–checker for large refunds (+ withdrawals) |
@@ -83,6 +84,6 @@ App: `lib/finance/state-machine.ts`. DB: `private.assert_*_transition` + hardene
 
 ## Deferred (roadmap toward full engine)
 
-Still ahead of full DE SoT cutover: live Co-op/KCB credentials + webhooks, broader automated finance suite, journal-as-SoT cutover.
+Still ahead of full DE SoT cutover: live Co-op/KCB credentials + webhooks, broader automated finance suite, journal-as-SoT cutover. Settlement ops queue + integrity counts are live.
 
 **Shipped foundations:** settlements/refunds/provider_transactions, amount_minor, state machine, complete/cancel refund with reverse journal + sidecars, refund maker–checker, Co-op/KCB bank adapter scaffold, Admin Finance resolve (match/manual/waive); [payment-provider-integration.md](./payment-provider-integration.md).

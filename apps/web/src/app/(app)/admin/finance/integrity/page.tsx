@@ -9,6 +9,7 @@ import {
   backfillIntentJournalAction,
   backfillMissingJournalsAction,
 } from '@/features/admin/actions/integrity-backfill-actions';
+import { backfillMissingSettlementsAction } from '@/features/admin/actions/settlement-actions';
 
 export const metadata: Metadata = { title: 'Admin · Finance integrity' };
 export const dynamic = 'force-dynamic';
@@ -20,6 +21,9 @@ type Snapshot = {
   wallet_liability_journal_net_kes?: number;
   wallet_vs_journal_delta_kes?: number;
   completed_intents_missing_journal?: number;
+  completed_intents_missing_settlement?: number;
+  settlements_pending?: number;
+  settlements_disputed?: number;
   unbalanced_journal_entries?: number;
   checked_at?: string;
 };
@@ -81,12 +85,23 @@ export default async function AdminFinanceIntegrityPage() {
             <form action={backfillMissingJournalsAction}>
               <input type="hidden" name="limit" value="50" />
               <Button type="submit" className="min-h-11">
-                Backfill up to 50
+                Backfill journals
+              </Button>
+            </form>
+          ) : null}
+          {(snap.completed_intents_missing_settlement ?? 0) > 0 ? (
+            <form action={backfillMissingSettlementsAction}>
+              <input type="hidden" name="limit" value="50" />
+              <Button type="submit" variant="outline" className="min-h-11">
+                Backfill settlements
               </Button>
             </form>
           ) : null}
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance' as Route}>Finance centre</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/settlements' as Route}>Settlements</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance/accounts' as Route}>Chart of accounts</Link>
@@ -123,6 +138,16 @@ export default async function AdminFinanceIntegrityPage() {
               label: 'Completed intents missing journal',
               value: String(snap.completed_intents_missing_journal ?? 0),
               hint: 'Should trend to zero',
+            },
+            {
+              label: 'Completed intents missing settlement',
+              value: String(snap.completed_intents_missing_settlement ?? 0),
+              hint: 'PSP cash mirror gaps',
+            },
+            {
+              label: 'Settlements pending / disputed',
+              value: `${snap.settlements_pending ?? 0} / ${snap.settlements_disputed ?? 0}`,
+              hint: 'Open settlement rows',
             },
             {
               label: 'Unbalanced journal entries',

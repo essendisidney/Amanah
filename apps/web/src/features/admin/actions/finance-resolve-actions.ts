@@ -33,6 +33,8 @@ export async function resolveIntentExceptionAction(formData: FormData) {
 
   revalidatePath('/admin/finance');
   revalidatePath('/admin/finance/reconcile');
+  revalidatePath('/admin/finance/settlements');
+  revalidatePath('/admin/finance/integrity');
 
   redirect(
     withNoticeQuery(

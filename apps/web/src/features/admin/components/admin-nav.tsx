@@ -19,6 +19,7 @@ const MORE: Array<{ href: Route; label: string }> = [
   { href: '/admin/finance/reconcile' as Route, label: 'Reconcile' },
   { href: '/admin/finance/journal' as Route, label: 'Journal' },
   { href: '/admin/finance/accounts' as Route, label: 'Accounts' },
+  { href: '/admin/finance/settlements' as Route, label: 'Settlements' },
   { href: '/admin/finance/integrity' as Route, label: 'Integrity' },
   { href: '/admin/finance/refunds' as Route, label: 'Refunds' },
   { href: '/admin/finance/approvals' as Route, label: 'Approvals' },

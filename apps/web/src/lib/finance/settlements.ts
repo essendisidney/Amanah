@@ -170,6 +170,21 @@ async function upsertProviderTx(
 /**
  * After complete_payment_intent succeeds, load the intent and write settlement layers.
  */
+function inferDirection(
+  metadata: Record<string, unknown> | null | undefined,
+): 'collection' | 'disbursement' {
+  const kind = String(metadata?.kind ?? '').toLowerCase();
+  if (
+    kind.includes('withdraw') ||
+    kind.includes('disburse') ||
+    kind.includes('payout') ||
+    kind.includes('b2c')
+  ) {
+    return 'disbursement';
+  }
+  return 'collection';
+}
+
 export async function mirrorSettlementAfterComplete(
   admin: AdminClient,
   paymentIntentId: string,
@@ -177,7 +192,7 @@ export async function mirrorSettlementAfterComplete(
 ): Promise<void> {
   const { data } = await admin
     .from('payment_intents')
-    .select('id, amount, currency, provider, provider_reference, status')
+    .select('id, amount, currency, provider, provider_reference, status, metadata')
     .eq('id', paymentIntentId)
     .maybeSingle();
 
@@ -189,6 +204,7 @@ export async function mirrorSettlementAfterComplete(
     provider: string;
     provider_reference: string | null;
     status: string;
+    metadata: Record<string, unknown> | null;
   };
 
   if (intent.status !== 'completed') return;
@@ -200,6 +216,7 @@ export async function mirrorSettlementAfterComplete(
     amount: intent.amount,
     currency: intent.currency,
     status: 'settled',
+    direction: inferDirection(intent.metadata),
     metadata: { source: opts?.source ?? 'post_complete' },
     raw: opts?.raw,
   });

@@ -40,6 +40,7 @@ const ADMIN_MAP = [
   { href: '/admin/finance/reconcile' as Route, label: 'Reconcile', role: 'Stuck intents + run reconcile' },
   { href: '/admin/finance/journal' as Route, label: 'Journal', role: 'Append-only double-entry browser' },
   { href: '/admin/finance/accounts' as Route, label: 'Accounts', role: 'Chart of accounts + totals' },
+  { href: '/admin/finance/settlements' as Route, label: 'Settlements', role: 'PSP cash mirror + backfill' },
   { href: '/admin/finance/integrity' as Route, label: 'Integrity', role: 'Wallet vs journal delta' },
   { href: '/admin/finance/refunds' as Route, label: 'Refunds', role: 'Queue refunds (no edit of posts)' },
   { href: '/admin/finance/approvals' as Route, label: 'Approvals', role: 'Maker–checker queue' },

@@ -174,6 +174,9 @@ export default async function AdminFinancePage() {
             <Link href={'/admin/finance/integrity' as Route}>Integrity</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin/finance/settlements' as Route}>Settlements</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
             <Link href={'/admin/finance/accounts' as Route}>Accounts</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11">
