@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { formatCurrency } from '@jamiya/shared';
+import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
@@ -38,6 +38,13 @@ type MembershipRow = {
     cycle_count: number | null;
     start_date: string | null;
   } | null;
+};
+
+type DueSummary = {
+  remaining: number;
+  currency: string;
+  dueDate: string | null;
+  status: string;
 };
 
 export default async function MyCirclesPage({
@@ -90,6 +97,40 @@ export default async function MyCirclesPage({
   const labels = dict.circles;
   const common = dict.common;
   const rows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
+  const memberIds = rows.map((row) => row.id);
+
+  const dueByMember = new Map<string, DueSummary>();
+  if (memberIds.length > 0) {
+    const { data: dueRows } = await supabase
+      .from('contributions')
+      .select('member_id, amount, amount_paid, currency, due_date, status')
+      .in('member_id', memberIds)
+      .in('status', ['pending', 'late', 'partial'])
+      .order('due_date', { ascending: true })
+      .limit(200);
+
+    for (const row of (dueRows ?? []) as Array<{
+      member_id: string;
+      amount: number | string;
+      amount_paid: number | string;
+      currency: string;
+      due_date: string | null;
+      status: string;
+    }>) {
+      if (dueByMember.has(row.member_id)) continue;
+      const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
+      const paid =
+        typeof row.amount_paid === 'number' ? row.amount_paid : Number(row.amount_paid ?? 0);
+      const remaining = Math.max(amount - paid, 0);
+      if (remaining <= 0) continue;
+      dueByMember.set(row.member_id, {
+        remaining,
+        currency: row.currency,
+        dueDate: row.due_date,
+        status: row.status,
+      });
+    }
+  }
 
   return (
     <AppPage>
@@ -154,11 +195,15 @@ export default async function MyCirclesPage({
                   ? jamiya.contribution_amount
                   : Number(jamiya.contribution_amount);
               const identity = circleAccentClass(jamiya.slug);
+              const due = dueByMember.get(row.id);
+              const dueHref = due
+                ? (`/circles/${jamiya.slug}#pay-due` as Route)
+                : (`/circles/${jamiya.slug}` as Route);
 
               return (
                 <li key={row.id} className={identity}>
                   <Link
-                    href={`/circles/${jamiya.slug}` as Route}
+                    href={dueHref}
                     className="amanah-surface flex items-start justify-between gap-4 px-4 py-4 transition-transform active:scale-[0.99] sm:px-5 sm:py-5"
                   >
                     <div className="flex min-w-0 items-start gap-3">
@@ -179,6 +224,22 @@ export default async function MyCirclesPage({
                           {jamiya.status.replaceAll('_', ' ')} · {jamiya.member_count}{' '}
                           {common.members}
                         </p>
+                        {due ? (
+                          <p
+                            className={cn(
+                              'mt-2 text-xs font-semibold',
+                              due.status === 'late'
+                                ? 'text-destructive'
+                                : 'text-primary',
+                            )}
+                          >
+                            {due.status === 'late' ? 'Overdue' : 'Due'}{' '}
+                            {formatCurrency(due.remaining, due.currency)}
+                            {due.dueDate ? ` · ${formatDate(due.dueDate)}` : ''}
+                          </p>
+                        ) : (
+                          <p className="mt-2 text-xs text-muted-foreground">Clear for now</p>
+                        )}
                       </div>
                     </div>
                     <p className="amanah-money shrink-0 text-lg font-semibold text-foreground">

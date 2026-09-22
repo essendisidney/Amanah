@@ -357,7 +357,7 @@ export async function checkPaymentIntentAction(
   const { data: intent } = await supabase
     .from('payment_intents')
     .select(
-      'id, user_id, provider, status, provider_reference, checkout_request_id',
+      'id, user_id, provider, status, provider_reference, checkout_request_id, metadata',
     )
     .eq('id', intentId)
     .maybeSingle();
@@ -369,14 +369,30 @@ export async function checkPaymentIntentAction(
     status: string;
     provider_reference: string | null;
     checkout_request_id: string | null;
+    metadata: Record<string, unknown> | null;
   } | null;
 
   if (!row || row.user_id !== user.id) {
     return { success: false, message: 'Payment not found.' };
   }
 
+  const meta = row.metadata ?? {};
+  const isContribution = meta.kind === 'contribution';
+  const circleSlug = typeof meta.slug === 'string' ? meta.slug : null;
+
+  const revalidateMoneyAndCircle = () => {
+    revalidatePath('/wallet');
+    revalidatePath('/dashboard');
+    if (circleSlug) revalidatePath(`/circles/${circleSlug}`);
+  };
+
   if (row.status === 'completed' || row.status === 'succeeded') {
-    return { success: true, message: 'Already credited to your wallet.' };
+    return {
+      success: true,
+      message: isContribution
+        ? 'Already paid — your due is up to date.'
+        : 'Already credited to your wallet.',
+    };
   }
 
   if (row.provider === 'paystack') {
@@ -386,14 +402,18 @@ export async function checkPaymentIntentAction(
     const reference = row.provider_reference || paystackReferenceForIntent(intentId);
     const settled = await settlePaystackReference(reference);
 
-    revalidatePath('/wallet');
-    revalidatePath('/dashboard');
+    revalidateMoneyAndCircle();
 
     if (!settled.ok) {
       return { success: false, message: settled.error ?? 'Could not verify payment yet.' };
     }
     if (settled.status === 'success') {
-      return { success: true, message: 'Payment confirmed. Wallet updated.' };
+      return {
+        success: true,
+        message: isContribution
+          ? 'Payment confirmed. Your due is marked paid.'
+          : 'Payment confirmed. Wallet updated.',
+      };
     }
     if (settled.status === 'failed' || settled.status === 'abandoned') {
       return { success: false, message: `Payment marked as ${settled.status}.` };
@@ -423,8 +443,7 @@ export async function checkPaymentIntentAction(
       row.provider as 'intasend' | 'tendepay',
     );
 
-    revalidatePath('/wallet');
-    revalidatePath('/dashboard');
+    revalidateMoneyAndCircle();
 
     if (!status.ok) {
       return {
@@ -444,9 +463,13 @@ export async function checkPaymentIntentAction(
       if (error) {
         return { success: false, message: error.message };
       }
-      revalidatePath('/wallet');
-      revalidatePath('/dashboard');
-      return { success: true, message: 'Payment confirmed. Wallet updated.' };
+      revalidateMoneyAndCircle();
+      return {
+        success: true,
+        message: isContribution
+          ? 'Payment confirmed. Your due is marked paid.'
+          : 'Payment confirmed. Wallet updated.',
+      };
     }
 
     if (status.status === 'failed') {
@@ -455,10 +478,10 @@ export async function checkPaymentIntentAction(
         p_intent_id: intentId,
         p_error_message: `${row.provider} reported failed`,
       });
-      revalidatePath('/wallet');
+      revalidateMoneyAndCircle();
       return {
         success: false,
-        message: 'Payment failed or was cancelled. You can retry below.',
+        message: 'Payment failed or was cancelled. You can retry from Pay.',
       };
     }
 

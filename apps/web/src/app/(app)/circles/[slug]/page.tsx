@@ -27,6 +27,8 @@ import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-
 import { MemberTodayStrip } from '@/features/circles/components/member-today-strip';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
+import { PendingContributionStk } from '@/features/circles/components/pending-contribution-stk';
+import { reconcileUserPaymentIntents } from '@/lib/payments/reconcile-user-intents';
 import { ContributionLedger } from '@/features/circles/components/contribution-ledger';
 import { ClaimPayoutSlotForm } from '@/features/circles/components/claim-payout-slot-form';
 import { CircleLinkedGoals } from '@/features/circles/components/circle-linked-goals';
@@ -145,6 +147,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: paymentData },
     { data: nextOfKinData },
     { data: myProfileData },
+    { data: pendingIntentData },
   ] = await Promise.all([
     supabase
       .from('members')
@@ -206,7 +209,56 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .select('mpesa_phone, phone')
       .eq('id', user.id)
       .maybeSingle(),
+    supabase
+      .from('payment_intents')
+      .select('id, status, amount, currency, provider, phone, metadata, created_at')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'processing'])
+      .order('created_at', { ascending: false })
+      .limit(8),
   ]);
+
+  await reconcileUserPaymentIntents(user.id);
+
+  type PendingIntentRow = {
+    id: string;
+    status: string;
+    amount: number | string;
+    currency: string;
+    phone: string | null;
+    metadata: Record<string, unknown> | null;
+  };
+
+  const mapContributionPending = (rows: PendingIntentRow[]) =>
+    rows
+      .filter((row) => {
+        const meta = row.metadata ?? {};
+        return meta.kind === 'contribution' && meta.slug === slug;
+      })
+      .map((row) => ({
+        id: row.id,
+        amount: typeof row.amount === 'number' ? row.amount : Number(row.amount),
+        currency: row.currency,
+        phone: row.phone,
+        status: row.status,
+      }));
+
+  let pendingContributionIntents = mapContributionPending(
+    (pendingIntentData ?? []) as PendingIntentRow[],
+  );
+
+  if (pendingContributionIntents.length > 0) {
+    const { data: freshPending } = await supabase
+      .from('payment_intents')
+      .select('id, status, amount, currency, provider, phone, metadata, created_at')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'processing'])
+      .order('created_at', { ascending: false })
+      .limit(8);
+    pendingContributionIntents = mapContributionPending(
+      (freshPending ?? []) as PendingIntentRow[],
+    );
+  }
 
   const pendingGraceCount = graceResult.count ?? 0;
   const openPenaltyCount = penaltyResult.count ?? 0;
@@ -888,6 +940,14 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+
+      {pendingContributionIntents.length > 0 ? (
+        <PendingContributionStk
+          intents={pendingContributionIntents}
+          checkStatus={dict.walletForms.checkStatus}
+          checkingStatus={dict.walletForms.checkingStatus}
+        />
+      ) : null}
 
       {membership?.status === 'active' ? (
         <MemberTodayStrip

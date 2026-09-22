@@ -61,8 +61,11 @@ export function MemberTodayStrip({
 
       {due && remaining > 0 ? (
         <div className="flex flex-wrap gap-2">
+          <Button asChild className="min-h-11">
+            <a href="#pay-due">Pay {formatCurrency(remaining, currency)}</a>
+          </Button>
           {needsTopUp ? (
-            <Button asChild className="min-h-11">
+            <Button asChild variant="outline" className="min-h-11">
               <Link
                 href={
                   `/wallet?amount=${Math.ceil(remaining)}&next=${encodeURIComponent(
@@ -70,14 +73,10 @@ export function MemberTodayStrip({
                   )}#top-up` as Route
                 }
               >
-                Add money · then pay
+                Top up wallet
               </Link>
             </Button>
-          ) : (
-            <Button asChild className="min-h-11">
-              <a href="#pay-due">Pay {formatCurrency(remaining, currency)}</a>
-            </Button>
-          )}
+          ) : null}
           <Button asChild variant="outline" className="min-h-11">
             <Link href={`/circles/${slug}/statement` as Route}>Statement</Link>
           </Button>
