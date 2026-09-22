@@ -21,7 +21,7 @@ import { AppPage, PageCard, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: 'Profile',
+  title: 'You',
 };
 
 export const dynamic = 'force-dynamic';
@@ -102,6 +102,7 @@ export default async function ProfilePage({ searchParams }: Props) {
   const profile = profileData as unknown as ProfileRow | null;
   const docs = (docsData ?? []) as unknown as KycRow[];
   const hasPhone = hasValidProfilePhone(profile?.phone);
+  const hasMpesa = Boolean(profile?.mpesa_phone?.trim() || (hasPhone && profile?.phone));
   const referrals = (referralData ?? []) as unknown as Array<{
     id: string;
     status: string;
@@ -110,33 +111,37 @@ export default async function ProfilePage({ searchParams }: Props) {
     created_at: string;
   }>;
 
-  const scoreSteps = [
-    { done: hasPhone, label: labels.scoreStepPhone },
+  const setupSteps = [
+    {
+      done: hasPhone,
+      label: labels.scoreStepPhone,
+      href: '/profile#personal-details' as Route,
+    },
     {
       done: Boolean(profile?.profile_completed && profile?.full_name?.trim()),
       label: labels.scoreStepProfile,
+      href: '/profile#personal-details' as Route,
     },
-    { done: docs.length > 0, label: labels.scoreStepDocs },
-    { done: profile?.kyc_status === 'approved', label: labels.scoreStepKyc },
+    {
+      done: hasMpesa,
+      label: labels.mpesaLinkage,
+      href: '/profile#mpesa' as Route,
+    },
+    {
+      done: profile?.kyc_status === 'approved' || docs.length > 0,
+      label: labels.scoreStepKyc,
+      href: '/profile#kyc-documents' as Route,
+    },
   ];
-  const stepsDone = scoreSteps.filter((s) => s.done).length;
-  const amanahScore = Math.round(100 + (stepsDone / scoreSteps.length) * 100);
-  const scoreLabel =
-    stepsDone >= 4
-      ? labels.scoreExcellent
-      : stepsDone >= 2
-        ? labels.scoreStrong
-        : labels.scoreBuilding;
+  const openSteps = setupSteps.filter((s) => !s.done);
+  const setupComplete = openSteps.length === 0;
 
   const youLinks: Array<{ href: Route; title: string; meta: string | null }> = [
-    { href: '/finance/goals', title: labels.linkGoals, meta: null },
     {
       href: '/profile#kyc-documents' as Route,
       title: labels.linkVerification,
       meta: profile?.kyc_status ?? null,
     },
-    { href: '/sadaka', title: dict.common.sadaka, meta: null },
-    { href: '/zakat', title: labels.linkZakat, meta: null },
     { href: '/support', title: labels.linkSupport, meta: null },
   ];
 
@@ -157,71 +162,53 @@ export default async function ProfilePage({ searchParams }: Props) {
         subtitle={profile?.phone || profile?.email || user.email || '—'}
       />
 
-      <section className="amanah-forest space-y-4 rounded-[1.5rem] px-5 py-5 text-white">
+      <section className="amanah-forest space-y-3 rounded-[1.5rem] px-5 py-5 text-white">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
-              {labels.amanahScore}
+              {setupComplete ? labels.setupDone : labels.setupTitle}
             </p>
-            <p className="mt-1 text-sm text-white/75">{labels.scoreHint}</p>
+            <p className="mt-1 text-sm text-white/75">
+              {setupComplete
+                ? labels.scoreHint
+                : `${openSteps.length} step${openSteps.length === 1 ? '' : 's'} left`}
+            </p>
           </div>
-          <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-white/80">
-            {scoreLabel}
-          </span>
         </div>
-        <div className="flex items-end justify-between gap-3">
-          <p className="amanah-money text-4xl font-bold tracking-tight text-white">
-            {amanahScore}
-            <span className="ml-1 text-lg font-semibold text-white/50">/200</span>
-          </p>
-          <p className="text-sm text-white/70">
-            {stepsDone}/{scoreSteps.length}
-          </p>
-        </div>
-        <ul className="grid gap-1.5 sm:grid-cols-2">
-          {scoreSteps.map((step) => (
-            <li
-              key={step.label}
-              className="flex items-center gap-2 text-sm text-white/85"
-            >
-              <span
-                className={
-                  step.done
-                    ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-xs'
-                    : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-white/25 text-xs text-white/40'
-                }
-                aria-hidden
-              >
-                {step.done ? '✓' : '·'}
-              </span>
-              {step.label}
-            </li>
-          ))}
-        </ul>
-        <p className="text-xs text-white/50">{labels.scoreNotCredit}</p>
-        <Link
-          href={'/finance/insights' as Route}
-          className="inline-flex text-sm font-semibold text-white underline-offset-4 hover:underline"
-        >
-          {labels.scoreNext} →
-        </Link>
+        {!setupComplete ? (
+          <ul className="space-y-2">
+            {openSteps.map((step) => (
+              <li key={step.label}>
+                <Link
+                  href={step.href}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3.5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+                >
+                  <span>{step.label}</span>
+                  <span aria-hidden>→</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-white/70">{labels.scoreNotCredit}</p>
+        )}
       </section>
 
       <PageCard className="divide-y divide-border/50 !py-0">
         <ul>
-        {youLinks.map((item) => (
-          <li key={item.href}>
-            <Link
-              href={item.href}
-              className="flex items-center justify-between gap-3 px-4 py-4 text-[15px] font-medium sm:px-5"
-            >
-              <span>{item.title}</span>
-              <span className="text-sm font-normal capitalize text-muted-foreground">
-                {item.meta ? String(item.meta).replaceAll('_', ' ') : '›'}
-              </span>
-            </Link>
-          </li>
-        ))}
+          {youLinks.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className="flex items-center justify-between gap-3 px-4 py-4 text-[15px] font-medium sm:px-5"
+              >
+                <span>{item.title}</span>
+                <span className="text-sm font-normal capitalize text-muted-foreground">
+                  {item.meta ? String(item.meta).replaceAll('_', ' ') : '›'}
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </PageCard>
 
@@ -246,60 +233,64 @@ export default async function ProfilePage({ searchParams }: Props) {
           />
         </PageCard>
 
-        <PageCard>
+        <PageCard id="mpesa">
           <h2 className="mb-4 text-base font-semibold">{labels.mpesaLinkage}</h2>
           <MpesaLinkForm
             labels={labels}
             defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
           />
         </PageCard>
+      </section>
 
-        <ReferralPanel
-          labels={labels}
-          referralCode={profile?.referral_code ?? null}
-          referrals={referrals}
-        />
-
-        <PageCard>
-          <h2 className="mb-4 text-base font-semibold">IPRS identity</h2>
-          <IprsVerifyForm
-            defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
-            defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
-            defaultNationalId={profile?.national_id ?? ''}
-            iprsStatus={profile?.iprs_status ?? 'not_checked'}
+      <details className="amanah-surface overflow-hidden">
+        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">
+          {labels.moreAccount}
+        </summary>
+        <div className="space-y-6 border-t border-border/50 px-5 py-5">
+          <ReferralPanel
+            labels={labels}
+            referralCode={profile?.referral_code ?? null}
+            referrals={referrals}
           />
-        </PageCard>
 
-        <PageCard className="lg:col-span-2">
+          <div>
+            <h2 className="mb-4 text-base font-semibold">IPRS identity</h2>
+            <IprsVerifyForm
+              defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
+              defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
+              defaultNationalId={profile?.national_id ?? ''}
+              iprsStatus={profile?.iprs_status ?? 'not_checked'}
+            />
+          </div>
+
           <div id="kyc-documents" className="space-y-4">
             <h2 className="text-base font-semibold">{labels.kycDocuments}</h2>
             <KycUploadForm labels={labels} />
+            <div className="space-y-3 border-t border-border/50 pt-4">
+              <h3 className="text-sm font-semibold">{labels.uploadedFiles}</h3>
+              {docs.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
+              ) : (
+                <ul className="divide-y divide-border/40">
+                  {docs.map((doc) => (
+                    <li key={doc.id} className="flex items-center justify-between gap-3 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium capitalize">
+                          {doc.document_type.replaceAll('_', ' ')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {doc.file_name} · {formatDate(doc.created_at)}
+                        </p>
+                      </div>
+                      <StatusBadge status={doc.status} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-
-          <div className="mt-6 space-y-3 border-t border-border/50 pt-6">
-            <h2 className="text-base font-semibold">{labels.uploadedFiles}</h2>
-            {docs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
-            ) : (
-              <ul className="divide-y divide-border/40">
-                {docs.map((doc) => (
-                  <li key={doc.id} className="flex items-center justify-between gap-3 py-3">
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium capitalize">
-                        {doc.document_type.replaceAll('_', ' ')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {doc.file_name} · {formatDate(doc.created_at)}
-                      </p>
-                    </div>
-                    <StatusBadge status={doc.status} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </PageCard>
-      </section>
+        </div>
+      </details>
 
       <form action={signOutAction}>
         <Button type="submit" variant="outline" className="min-h-11 w-full rounded-full">

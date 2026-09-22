@@ -403,6 +403,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       status: row.status,
       dueDate: row.due_date,
       isMine: membership?.id === row.member_id,
+      memberId: row.member_id,
+      memberUserId: member?.user_id ?? null,
       memberLabel:
         canManageOps || membership?.id === row.member_id
           ? profile?.full_name || profile?.email || profile?.phone || 'Member'
@@ -712,6 +714,33 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         ),
       ];
 
+  const unpaidOwingMap = new Map<
+    string,
+    { label: string; remaining: number; currency: string; userId: string | null; phone: string | null }
+  >();
+  for (const c of contributions) {
+    if (!['pending', 'late', 'partial'].includes(c.status)) continue;
+    if (isRotating && currentRoundSlot && c.cycleNumber !== currentRoundSlot.cycleNumber) {
+      continue;
+    }
+    const remaining = Math.max(c.amount - c.amountPaid, 0);
+    if (remaining <= 0) continue;
+    const key = c.memberUserId || c.memberId || c.memberLabel || c.id;
+    const existing = unpaidOwingMap.get(key);
+    if (existing) {
+      existing.remaining += remaining;
+    } else {
+      unpaidOwingMap.set(key, {
+        label: c.memberLabel || 'Member',
+        remaining,
+        currency: c.currency,
+        userId: c.memberUserId,
+        phone: c.memberPhone,
+      });
+    }
+  }
+  const unpaidOwing = Array.from(unpaidOwingMap.values());
+
   const recordPaymentHref = canManageOps
     ? isShareDividend
       ? (`/circles/${slug}/books?view=grid` as Route)
@@ -994,6 +1023,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         poolAmount={estimatedPool}
         currency={jamiya.currency}
         memberSummary={memberSummary}
+        personalDue={
+          myOpenDue
+            ? {
+                remaining: Math.max(myOpenDue.amount - myOpenDue.amountPaid, 0),
+                dueDate: myOpenDue.dueDate,
+                status: myOpenDue.status,
+              }
+            : null
+        }
         stats={
           isRotating
             ? [
@@ -1267,6 +1305,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               pendingGrace={pendingGraceCount ?? 0}
               openPenaltyCount={openPenaltyCount}
               unpaidMemberLabels={unpaidMemberLabels}
+              unpaidOwing={unpaidOwing}
               recordPaymentHref={recordPaymentHref}
               recordPaymentLabel={recordPaymentLabel}
               finesHref={`/circles/${slug}/treasury` as Route}

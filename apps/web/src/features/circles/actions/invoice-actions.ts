@@ -59,13 +59,14 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
   const returnTo = String(formData.get('returnTo') ?? 'invoices');
   if (!jamiyaId || !slug) return;
 
-  const pathSuffix = returnTo === 'arrears' ? '/arrears' : '/invoices';
+  const pathSuffix =
+    returnTo === 'arrears' ? '/arrears' : returnTo === 'circle' ? '' : '/invoices';
   const { data, error } = await callRpc('remind_contribution_invoices', {
     p_jamiya_id: jamiyaId,
     ...(userId ? { p_user_id: userId } : {}),
   });
   if (error) {
-    redirectWithCircleNotice(slug, error.message, 'error', pathSuffix);
+    redirectWithCircleNotice(slug, error.message, 'error', pathSuffix || undefined);
     return;
   }
   const result = data as {
@@ -79,7 +80,7 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
       slug,
       result?.error ?? 'Could not send reminders.',
       'error',
-      pathSuffix,
+      pathSuffix || undefined,
     );
     return;
   }
@@ -95,7 +96,7 @@ export async function remindInvoicesAction(formData: FormData): Promise<void> {
       ? `Sent ${result.reminded ?? 0} reminder(s); skipped ${skipped} (24h cooldown).`
       : `Sent ${result.reminded ?? 0} invoice reminder(s).`,
     'success',
-    pathSuffix,
+    pathSuffix || undefined,
   );
 }
 

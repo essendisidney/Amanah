@@ -396,6 +396,9 @@ export type Dictionary = {
     scoreStepDocs: string;
     scoreStepKyc: string;
     scoreNext: string;
+    setupTitle: string;
+    setupDone: string;
+    moreAccount: string;
     appearance: string;
     linkMoney: string;
     linkGoals: string;
@@ -968,6 +971,9 @@ export const en: Dictionary = {
     scoreStepDocs: 'ID document uploaded',
     scoreStepKyc: 'KYC approved',
     scoreNext: 'See savings insights',
+    setupTitle: 'Finish setup',
+    setupDone: 'You’re set up',
+    moreAccount: 'More account',
     appearance: 'Appearance',
     linkMoney: 'Money',
     linkGoals: 'Goals',
@@ -1546,6 +1552,9 @@ export const sw: Dictionary = {
     scoreStepDocs: 'Hati ya kitambulisho',
     scoreStepKyc: 'KYC imeidhinishwa',
     scoreNext: 'Angalia ufahamu wa akiba',
+    setupTitle: 'Maliza usanidi',
+    setupDone: 'Umesanidiwa',
+    moreAccount: 'Akaunti zaidi',
     appearance: 'Muonekano',
     linkMoney: 'Pesa',
     linkGoals: 'Malengo',

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+import type { Route } from 'next';
 import { formatCurrency } from '@jamiya/shared';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { circleAccentClass } from '@/features/circles/lib/circle-accent';
@@ -5,6 +7,12 @@ import { circleAccentClass } from '@/features/circles/lib/circle-accent';
 type Stat = {
   label: string;
   value: string;
+};
+
+type PersonalDue = {
+  remaining: number;
+  dueDate?: string | null;
+  status?: string;
 };
 
 type Props = {
@@ -19,6 +27,8 @@ type Props = {
   currency: string;
   memberSummary: string;
   stats: Stat[];
+  /** Member's open due — shown as the hero number when present. */
+  personalDue?: PersonalDue | null;
 };
 
 export function CircleDetailHero({
@@ -33,9 +43,13 @@ export function CircleDetailHero({
   currency,
   memberSummary,
   stats,
+  personalDue = null,
 }: Props) {
   const accent = circleAccentClass(slug);
   const meta = [kindLabel, roleLabel].filter(Boolean).join(' · ');
+  const dueRemaining = personalDue && personalDue.remaining > 0 ? personalDue.remaining : null;
+  const heroAmount = dueRemaining ?? poolAmount;
+  const heroLabel = dueRemaining != null ? 'You owe' : 'Pool so far';
 
   return (
     <section className={`relative overflow-hidden rounded-2xl ${accent}`}>
@@ -58,9 +72,22 @@ export function CircleDetailHero({
           <StatusBadge status={status} />
         </div>
 
-        <p className="amanah-money mt-6 text-4xl font-bold tracking-tight sm:text-5xl">
-          {formatCurrency(poolAmount, currency)}
+        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          {heroLabel}
+          {dueRemaining != null && personalDue?.status === 'late' ? ' · overdue' : ''}
         </p>
+        <p className="amanah-money mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
+          {formatCurrency(heroAmount, currency)}
+        </p>
+        {dueRemaining != null ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Pool so far {formatCurrency(poolAmount, currency)}
+            {' · '}
+            <Link href={`#pay-due` as Route} className="font-semibold text-primary">
+              Pay now
+            </Link>
+          </p>
+        ) : null}
 
         {stats.length > 0 ? (
           <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-border/60 pt-5 sm:grid-cols-4">

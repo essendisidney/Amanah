@@ -62,7 +62,7 @@ export default async function NotificationsPage() {
       .select('id, type, status, amount, currency, direction, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .limit(40),
+      .limit(20),
   ]);
 
   const notifications = (data ?? []) as unknown as NotificationRow[];
@@ -104,44 +104,16 @@ export default async function NotificationsPage() {
       />
 
       <PageCard className="!py-2">
+        <h2 className="mb-1 px-1 pt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          Updates
+        </h2>
         <ul className="divide-y divide-border/50">
-          {recentTx.length === 0 ? (
-            <li className="py-6 text-sm text-muted-foreground">No money movement yet</li>
+          {notifications.length === 0 ? (
+            <li className="py-6 text-sm text-muted-foreground">
+              {labels.emptyDesc}
+            </li>
           ) : (
-            recentTx.map((tx) => {
-              const amount = typeof tx.amount === 'number' ? tx.amount : Number(tx.amount);
-              const signed =
-                tx.direction === 'debit' || tx.direction === 'out' ? -Math.abs(amount) : amount;
-              return (
-                <li key={tx.id} className="flex items-center justify-between gap-3 py-3.5">
-                  <div className="min-w-0">
-                    <p className="truncate text-[15px] font-medium capitalize">
-                      {tx.type.replaceAll('_', ' ')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatRelativeTime(tx.created_at)}
-                    </p>
-                  </div>
-                  <p
-                    className={`amanah-money text-[15px] font-semibold ${
-                      signed < 0 ? 'amanah-money-out' : 'amanah-money-in'
-                    }`}
-                  >
-                    {signed < 0 ? '−' : '+'}
-                    {formatCurrency(Math.abs(signed), tx.currency)}
-                  </p>
-                </li>
-              );
-            })
-          )}
-        </ul>
-      </PageCard>
-
-      {notifications.length > 0 ? (
-        <PageCard className="!py-2">
-          <h2 className="mb-2 px-1 text-sm font-semibold text-muted-foreground">Updates</h2>
-          <ul className="divide-y divide-border/50">
-            {notifications.slice(0, 12).map((item) => {
+            notifications.map((item) => {
               const href = notificationHref(item.type, item.data, slugByJamiyaId, item.title);
               return (
                 <li key={item.id} className="flex items-start justify-between gap-3 py-3.5">
@@ -166,10 +138,54 @@ export default async function NotificationsPage() {
                   ) : null}
                 </li>
               );
-            })}
+            })
+          )}
+        </ul>
+      </PageCard>
+
+      <details className="group">
+        <summary className="cursor-pointer list-none rounded-[1.35rem] border border-border/70 bg-card/40 px-4 py-3.5 text-sm font-semibold text-foreground">
+          {labels.recentMoney}
+          <span className="ml-2 font-normal text-muted-foreground">
+            ({recentTx.length})
+          </span>
+        </summary>
+        <PageCard className="mt-3 !py-2">
+          <ul className="divide-y divide-border/50">
+            {recentTx.length === 0 ? (
+              <li className="py-6 text-sm text-muted-foreground">No money movement yet</li>
+            ) : (
+              recentTx.map((tx) => {
+                const amount = typeof tx.amount === 'number' ? tx.amount : Number(tx.amount);
+                const signed =
+                  tx.direction === 'debit' || tx.direction === 'out'
+                    ? -Math.abs(amount)
+                    : amount;
+                return (
+                  <li key={tx.id} className="flex items-center justify-between gap-3 py-3.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-[15px] font-medium capitalize">
+                        {tx.type.replaceAll('_', ' ')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatRelativeTime(tx.created_at)}
+                      </p>
+                    </div>
+                    <p
+                      className={`amanah-money text-[15px] font-semibold ${
+                        signed < 0 ? 'amanah-money-out' : 'amanah-money-in'
+                      }`}
+                    >
+                      {signed < 0 ? '−' : '+'}
+                      {formatCurrency(Math.abs(signed), tx.currency)}
+                    </p>
+                  </li>
+                );
+              })
+            )}
           </ul>
         </PageCard>
-      ) : null}
+      </details>
     </AppPage>
   );
 }

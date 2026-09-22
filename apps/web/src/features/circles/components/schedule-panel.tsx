@@ -23,6 +23,8 @@ export type ScheduleContribution = {
   status: string;
   dueDate: string;
   isMine: boolean;
+  memberId?: string;
+  memberUserId?: string | null;
   memberLabel?: string;
   memberPhone?: string | null;
   paidAt?: string | null;

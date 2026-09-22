@@ -2,7 +2,18 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import { nudgeCircleDuesAction } from '@/features/circles/actions/invoice-actions';
+import {
+  nudgeCircleDuesAction,
+  remindInvoicesAction,
+} from '@/features/circles/actions/invoice-actions';
+
+export type UnpaidOwing = {
+  label: string;
+  remaining: number;
+  currency: string;
+  userId?: string | null;
+  phone?: string | null;
+};
 
 export function OfficerOverviewStrip({
   slug,
@@ -17,6 +28,7 @@ export function OfficerOverviewStrip({
   nextPayoutAmount,
   currency,
   unpaidMemberLabels = [],
+  unpaidOwing = [],
   openPenaltyCount = 0,
   recordPaymentHref,
   recordPaymentLabel = 'Record payment',
@@ -34,17 +46,28 @@ export function OfficerOverviewStrip({
   nextPayoutDate: string | null;
   nextPayoutAmount: number | null;
   currency: string;
+  /** @deprecated Prefer unpaidOwing with amounts. */
   unpaidMemberLabels?: string[];
+  unpaidOwing?: UnpaidOwing[];
   openPenaltyCount?: number;
   recordPaymentHref?: string;
   recordPaymentLabel?: string;
   finesHref?: string;
   cycleLabel?: string | null;
 }) {
+  const owing =
+    unpaidOwing.length > 0
+      ? unpaidOwing
+      : unpaidMemberLabels.map((label) => ({
+          label,
+          remaining: 0,
+          currency,
+          userId: null,
+          phone: null,
+        }));
   const attention =
     lateCount + pendingGrace + pendingQard + pendingDual + openCases + openPenaltyCount;
-  const unpaidPreview = unpaidMemberLabels.slice(0, 4);
-  const unpaidMore = Math.max(unpaidMemberLabels.length - unpaidPreview.length, 0);
+  const unpaidPreview = owing.slice(0, 6);
 
   return (
     <section className="amanah-surface px-5 py-5">
@@ -87,26 +110,77 @@ export function OfficerOverviewStrip({
         </div>
       </div>
 
-      {unpaidMemberLabels.length > 0 ? (
-        <div className="mt-4 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3">
+      {owing.length > 0 ? (
+        <div className="mt-4 space-y-2 rounded-xl border border-accent/25 bg-accent/5 px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Still owing ({unpaidMemberLabels.length})
+            Still owing ({owing.length})
           </p>
-          <p className="mt-1 text-sm font-medium text-foreground">
-            {unpaidPreview.join(', ')}
-            {unpaidMore > 0 ? ` +${unpaidMore} more` : ''}
-          </p>
+          <ul className="space-y-2">
+            {unpaidPreview.map((row) => {
+              const smsBody = encodeURIComponent(
+                row.remaining > 0
+                  ? `Hi ${row.label}, reminder: ${formatCurrency(row.remaining, row.currency)} is due for our circle on Jameiyah.`
+                  : `Hi ${row.label}, kindly settle your circle due on Jameiyah.`,
+              );
+              const smsHref = row.phone
+                ? (`sms:${row.phone}?body=${smsBody}` as Route)
+                : null;
+              return (
+                <li
+                  key={`${row.label}-${row.userId ?? ''}`}
+                  className="flex flex-wrap items-center justify-between gap-2"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">{row.label}</p>
+                    {row.remaining > 0 ? (
+                      <p className="amanah-money text-xs text-muted-foreground">
+                        {formatCurrency(row.remaining, row.currency)}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {jamiyaId && row.userId ? (
+                      <form action={remindInvoicesAction}>
+                        <input type="hidden" name="jamiyaId" value={jamiyaId} />
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="userId" value={row.userId} />
+                        <input type="hidden" name="returnTo" value="circle" />
+                        <Button
+                          type="submit"
+                          size="sm"
+                          variant="outline"
+                          className="h-8 rounded-full px-3 text-xs"
+                        >
+                          Remind
+                        </Button>
+                      </form>
+                    ) : null}
+                    {smsHref ? (
+                      <Button asChild size="sm" variant="ghost" className="h-8 rounded-full px-3 text-xs">
+                        <a href={smsHref}>SMS</a>
+                      </Button>
+                    ) : null}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+          {owing.length > unpaidPreview.length ? (
+            <p className="text-xs text-muted-foreground">
+              +{owing.length - unpaidPreview.length} more
+            </p>
+          ) : null}
         </div>
       ) : null}
 
       {attention > 0 ? (
         <div className="mt-4 flex flex-wrap gap-2">
-          {unpaidMemberLabels.length > 0 && recordPaymentHref ? (
+          {owing.length > 0 && recordPaymentHref ? (
             <Link
               href={recordPaymentHref as Route}
               className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
             >
-              Collect {unpaidMemberLabels.length}
+              Collect {owing.length}
             </Link>
           ) : null}
           {lateCount > 0 ? (
@@ -147,22 +221,24 @@ export function OfficerOverviewStrip({
       <dl className="mt-4 grid gap-4 sm:grid-cols-3">
         <div>
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">Open dues</dt>
-          <dd className="mt-1 text-2xl font-semibold">{unpaidMemberLabels.length || lateCount}</dd>
-        </div>
-        <div>
-          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Pending grace</dt>
-          <dd className="mt-1 text-2xl font-semibold">{pendingGrace}</dd>
+          <dd className="mt-1 text-2xl font-semibold">{owing.length || lateCount}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">Next payout</dt>
-          <dd className="mt-1 text-sm font-medium">
-            {nextPayoutLabel && nextPayoutAmount != null
-              ? `${nextPayoutLabel} · ${formatCurrency(nextPayoutAmount, currency)}`
-              : 'None scheduled'}
+          <dd className="mt-1 text-sm font-semibold">
+            {nextPayoutLabel ?? '—'}
+            {nextPayoutDate ? (
+              <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                {formatDate(nextPayoutDate)}
+              </span>
+            ) : null}
           </dd>
-          {nextPayoutDate ? (
-            <p className="mt-1 text-xs text-muted-foreground">{formatDate(nextPayoutDate)}</p>
-          ) : null}
+        </div>
+        <div>
+          <dt className="text-xs uppercase tracking-wide text-muted-foreground">Amount</dt>
+          <dd className="amanah-money mt-1 text-2xl font-semibold">
+            {nextPayoutAmount != null ? formatCurrency(nextPayoutAmount, currency) : '—'}
+          </dd>
         </div>
       </dl>
     </section>
