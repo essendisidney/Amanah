@@ -79,6 +79,10 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 
 Balances are not editable from admin UI — corrections via reverse journal only.
 
+## Refunds
+
+`complete_refund` posts a reversing journal and domain sidecars: contribution, sadaka, **sponsorship** (wallet credit + charge metadata). `wallet_top_up` ledger-debits liability; `platform_tip` reverses tip income only. Unknown `metadata.kind` values fail with `UNSUPPORTED_KIND` (no silent journal-only path).
+
 ## Money-out (withdrawals)
 
 Completed `withdrawal_requests` debit wallet SoT via `process_withdrawal`, then post journal **Dr 2000 / Cr 1100** (`source_type = withdrawal_request`). Disbursement settlements are mirrored with `direction = disbursement` (no `payment_intent`). Backfill from Integrity if historical rows lack journals.

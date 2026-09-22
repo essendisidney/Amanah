@@ -44,8 +44,9 @@ export default async function AdminRefundsPage() {
             Refunds
           </h2>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Queue a refund against a completed intent. Money never edits posted journal
-            lines — completion will post a reversing entry (next engine step).
+            Queue a refund against a completed intent. Completion posts a reversing
+            journal and reverses domain sidecars (contribution, sadaka, sponsorship).
+            Unsupported payment kinds fail closed. Large refunds may require dual approval.
           </p>
         </div>
         <Button asChild variant="outline" className="min-h-11">
@@ -110,7 +111,17 @@ export default async function AdminRefundsPage() {
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                   <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-                    {row.payment_intent_id ?? '—'} · {row.reason ?? 'no reason'}
+                    {row.payment_intent_id ? (
+                      <Link
+                        href={`/admin/finance/intents/${row.payment_intent_id}` as Route}
+                        className="text-primary hover:underline"
+                      >
+                        {row.payment_intent_id}
+                      </Link>
+                    ) : (
+                      '—'
+                    )}{' '}
+                    · {row.reason ?? 'no reason'}
                   </p>
                   <p className="text-[11px] text-muted-foreground">
                     {formatDate(row.created_at)}
