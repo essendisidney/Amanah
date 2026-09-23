@@ -22,6 +22,7 @@ import {
 } from '@jamiya/ui';
 import { createCircleAction } from '../actions/create-circle';
 import { initialCreateCircleState } from '../lib/create-circle-state';
+import { contributionFrequencyLabel } from '../lib/contribution-frequency';
 
 type FormValues = Omit<CreateCircleInput, 'maxMembers' | 'cycleCount'> & {
   maxMembers?: number;
@@ -293,10 +294,7 @@ export function CreateCircleForm({
   };
 
   const frequencyLabel = useMemo(() => {
-    const days = Number(contributionFrequencyDays);
-    if (days === 7) return 'Weekly (every 7 days)';
-    if (days === 30) return 'Monthly (~30 days)';
-    return `Every ${days} days`;
+    return contributionFrequencyLabel(Number(contributionFrequencyDays));
   }, [contributionFrequencyDays]);
 
   const effectivePreset =
@@ -487,16 +485,17 @@ export function CreateCircleForm({
               <div>
                 <Label>Contribution frequency</Label>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  <strong>7 days</strong> means a contribution every week (common for boda stages).{' '}
-                  <strong>30 days</strong> is a calendar-month cadence for most chamas — not the same
-                  as “4 weeks.” Use custom if your group agreed on a different interval.
+                  Schedules add a fixed number of days from the start date for each round. That is{' '}
+                  <strong>not</strong> the same as calendar months (which vary 28–31 days).{' '}
+                  <strong>7 days</strong> ≈ weekly. <strong>30 days</strong> ≈ every 30 days — not
+                  “the 1st of each month.”
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(
                   [
-                    ['weekly', 'Weekly (7 days)'],
-                    ['monthly', 'Monthly (30 days)'],
+                    ['weekly', 'Every 7 days'],
+                    ['monthly', 'Every 30 days'],
                     ['custom', 'Custom'],
                   ] as const
                 ).map(([preset, label]) => {

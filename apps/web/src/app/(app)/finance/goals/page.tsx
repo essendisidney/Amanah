@@ -169,7 +169,7 @@ export default async function GoalsPage({
                     <Button asChild className="min-h-11">
                       <Link
                         href={
-                          `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
+                          `/wallet?focus=top-up&next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
                         }
                       >
                         Top up Money toward this
@@ -180,7 +180,7 @@ export default async function GoalsPage({
                     <Button asChild variant="outline" className="min-h-11">
                       <Link
                         href={
-                          `/wallet?next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
+                          `/wallet?focus=top-up&next=${encodeURIComponent('/finance/goals')}&amount=${topUpAmount}#top-up` as Route
                         }
                       >
                         Top up Money

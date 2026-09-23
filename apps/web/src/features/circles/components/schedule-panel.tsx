@@ -273,7 +273,7 @@ export function ContributionCalendar({
                       <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
                         <Link
                           href={
-                            `/wallet?next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
+                            `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}#calendar`)}&amount=${Math.max(Math.ceil(shortfall), 100)}#top-up` as Route
                           }
                         >
                           {walletAvailable == null ? 'Open Money' : 'Top up, then pay'}

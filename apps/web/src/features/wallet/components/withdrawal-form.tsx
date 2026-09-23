@@ -154,11 +154,21 @@ export function WithdrawalForm({
       {amountValid ? (
         <div className="rounded-lg border border-border bg-muted/30 px-3 py-3 text-sm">
           <p className="font-medium text-foreground">Before you confirm</p>
-          <ul className="mt-1 space-y-0.5 text-muted-foreground">
-            <li>Amount: {formatCurrency(amountValue, currency)}</li>
+          <ul className="mt-1 space-y-1 text-muted-foreground">
+            <li>
+              Wallet debit: {formatCurrency(amountValue, currency)} (this is what leaves your
+              Jameiyah balance).
+            </li>
             <li>Destination: {destinationLabel}</li>
-            <li>Platform fee: none shown before submit (provider rails may still apply).</li>
-            <li>Total leave wallet: {formatCurrency(amountValue, currency)}</li>
+            <li>Jameiyah platform fee: none on this request.</li>
+            <li>
+              M-Pesa / bank provider fees: unknown here. Your provider may take a fee from what
+              arrives or charge separately — we do not quote that amount.
+            </li>
+            <li>
+              Final for Jameiyah: {formatCurrency(amountValue, currency)} wallet debit. Not a
+              guarantee of the exact amount that hits the destination after provider fees.
+            </li>
           </ul>
         </div>
       ) : null}

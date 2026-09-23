@@ -1,9 +1,25 @@
 /**
  * Circle progress / merry-go-round display helpers (pure).
  * Keep UI labels aligned with stored cycle_count, payouts, and contributions.
+ *
+ * Glossary (do not conflate):
+ * - cycle_count / plannedCycles — planned contribution periods (may differ from seat count)
+ * - current_cycle — progress cursor (0 until activate_jamiya; then advanced on settled payouts)
+ * - payout_position / payout slot — which member receives the pot in that turn
+ * - cycle_number — period index on contribution/payout rows
+ * - "round" — UI synonym for a cycle/period (no DB column)
  */
 
 export type CircleKind = 'rotating' | 'savings' | 'share_dividend' | 'other';
+
+/** Compact progress phrase for hero + dashboard (rotating circles). */
+export function cycleProgressPhrase(currentCycle: number, plannedCycles: number): string {
+  if (currentCycle <= 0) {
+    return `not started · ${plannedCycles} rounds planned`;
+  }
+  const current = Math.min(Math.max(currentCycle, 1), plannedCycles);
+  return `cycle ${current}/${plannedCycles}`;
+}
 
 export function memberHeroSummary(input: {
   kind: CircleKind;
@@ -22,8 +38,7 @@ export function memberHeroSummary(input: {
         ? input.cycleCount
         : null;
     if (total != null) {
-      const current = Math.min(Math.max(input.currentCycle, 0), total);
-      return `${status} · ${members} · cycle ${current}/${total}`;
+      return `${status} · ${members} · ${cycleProgressPhrase(input.currentCycle, total)}`;
     }
     return `${status} · ${members}`;
   }
@@ -36,20 +51,25 @@ export function merryGoRoundHeadline(input: {
   currentCycle: number;
   plannedCycles: number | null;
   slotCount: number;
-}): { current: number; total: number; label: string } {
+}): { current: number; total: number; started: boolean; label: string } {
   const planned =
     input.plannedCycles != null && input.plannedCycles > 0
       ? input.plannedCycles
       : input.slotCount > 0
         ? input.slotCount
         : 1;
+  const started = input.currentCycle > 0;
   const current = Math.min(Math.max(input.currentCycle, 0), planned);
   // Prefer 0 when not started (current_cycle 0) rather than forcing 1.
-  const displayCurrent = input.currentCycle <= 0 ? 0 : Math.max(current, 1);
+  const displayCurrent = started ? Math.max(current, 1) : 0;
+  // Seat count can exceed plannedCycles (decoupled config / mid-import). Total stays planned.
   return {
     current: displayCurrent,
     total: planned,
-    label: `Cycle ${displayCurrent} of ${planned}`,
+    started,
+    label: started
+      ? `Cycle ${displayCurrent} of ${planned}`
+      : `Not started · ${planned} rounds planned`,
   };
 }
 

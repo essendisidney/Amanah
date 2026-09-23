@@ -6,6 +6,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
+import { isRotatingKind } from '@/features/circles/lib/circle-mode';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
 
   const { data: jamiyaData } = await supabase
     .from('jamiyas')
-    .select('id, name, slug, segment, currency, contribution_amount, member_count, status')
+    .select('id, name, slug, segment, currency, contribution_amount, member_count, status, challenge_kind')
     .eq('slug', slug)
     .maybeSingle();
   const jamiya = jamiyaData as unknown as {
@@ -33,8 +34,10 @@ export default async function CirclePrintReportPage({ params }: Props) {
     contribution_amount: number | string;
     member_count: number;
     status: string;
+    challenge_kind: string | null;
   } | null;
   if (!jamiya) notFound();
+  const showPayoutPosition = isRotatingKind(jamiya.challenge_kind);
 
   const { data: membershipData } = await supabase
     .from('members')
@@ -453,7 +456,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
               <th className="py-2 pr-2">Name</th>
               <th className="py-2 pr-2">Role</th>
               <th className="py-2 pr-2">Status</th>
-              <th className="py-2 pr-2">Position</th>
+              {showPayoutPosition ? <th className="py-2 pr-2">Position</th> : null}
               <th className="py-2">Phone</th>
             </tr>
           </thead>
@@ -465,7 +468,9 @@ export default async function CirclePrintReportPage({ params }: Props) {
                   <td className="py-2 pr-2">{profile?.full_name ?? profile?.email ?? '—'}</td>
                   <td className="py-2 pr-2 capitalize">{member.role.replaceAll('_', ' ')}</td>
                   <td className="py-2 pr-2">{member.status}</td>
-                  <td className="py-2 pr-2">{member.payout_position ?? '—'}</td>
+                  {showPayoutPosition ? (
+                    <td className="py-2 pr-2">{member.payout_position ?? '—'}</td>
+                  ) : null}
                   <td className="py-2">{profile?.mpesa_phone ?? '—'}</td>
                 </tr>
               );

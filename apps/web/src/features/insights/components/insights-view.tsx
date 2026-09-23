@@ -202,7 +202,7 @@ export function InsightsView({
             title="No wallet activity yet"
             description="Top up to start tracking inflows and outflows here."
             actionLabel={payLabels.addMoney}
-            actionHref={'/wallet#top-up' as Route}
+            actionHref={'/wallet?focus=top-up#top-up' as Route}
           />
         ) : (
           <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">

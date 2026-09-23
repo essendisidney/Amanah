@@ -314,7 +314,7 @@ export default async function QardPage({ searchParams }: Props) {
           </h2>
           {hasActiveRepay ? (
             <Button asChild variant="outline" size="sm" className="min-h-11">
-              <Link href={'/wallet#top-up' as Route}>Top up Money</Link>
+              <Link href={'/wallet?focus=top-up#top-up' as Route}>Top up Money</Link>
             </Button>
           ) : null}
         </div>

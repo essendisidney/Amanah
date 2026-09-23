@@ -57,6 +57,7 @@ export function MembersList({
   jamiyaId,
   canAssignSlots = false,
   maxSlots = 0,
+  showPayoutLabels = false,
 }: {
   members: MemberListItem[];
   slug: string;
@@ -65,6 +66,8 @@ export function MembersList({
   jamiyaId?: string;
   canAssignSlots?: boolean;
   maxSlots?: number;
+  /** Merry-go-round only — hide payout slot chrome on table banking / savings. */
+  showPayoutLabels?: boolean;
 }) {
   if (members.length === 0) {
     return <p className="text-sm text-muted-foreground">No members yet.</p>;
@@ -115,7 +118,9 @@ export function MembersList({
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {member.email ?? member.phone ?? '—'}
-                    {member.payoutPosition ? ` · Payout #${member.payoutPosition}` : ''}
+                    {showPayoutLabels && member.payoutPosition
+                      ? ` · Payout #${member.payoutPosition}`
+                      : ''}
                     {member.joinedAt ? ` · Joined ${formatDate(member.joinedAt)}` : ''}
                   </p>
                 </div>

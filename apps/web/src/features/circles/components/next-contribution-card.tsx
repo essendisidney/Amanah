@@ -223,7 +223,7 @@ export function NextContributionCard({
               <Button asChild variant="outline" className="min-h-11 w-full">
                 <Link
                   href={
-                    `/wallet?next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route
+                    `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route
                   }
                 >
                   {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}

@@ -488,6 +488,15 @@ export type Dictionary = {
     accountBody: string;
     openProfile: string;
     openMoney: string;
+    contactTitle: string;
+    contactBody: string;
+    openWhatsapp: string;
+    ticketTitle: string;
+    ticketBody: string;
+    ticketSubject: string;
+    ticketMessage: string;
+    ticketSubmit: string;
+    ticketSubmitting: string;
     webTitle: string;
     webBody: string;
     tipTitle: string;
@@ -1088,9 +1097,19 @@ export const en: Dictionary = {
       'Update phone and verification on You. Add money or withdraw from Money. Activity shows payment updates.',
     openProfile: 'Open You',
     openMoney: 'Open Money',
+    contactTitle: 'Contact Jameiyah',
+    contactBody:
+      'Reach the platform team on these owner-published channels. Prefer a support ticket below if you need a tracked reply.',
+    openWhatsapp: 'WhatsApp support',
+    ticketTitle: 'Send a support ticket',
+    ticketBody:
+      'Describe the issue. Platform admins see your request and can follow up using your account contact details.',
+    ticketSubject: 'Subject',
+    ticketMessage: 'What happened?',
+    ticketSubmit: 'Send request',
+    ticketSubmitting: 'Sending…',
     webTitle: 'Company site',
-    webBody:
-      'Product and company information is published on the public site. We do not list a separate support phone or email in the app yet.',
+    webBody: 'Product and company information is also on the public site.',
     tipTitle: 'Support Jameiyah',
     tipBody: 'Want to tip the platform (not sadaka)? That is a separate voluntary gift.',
     openTip: 'Support Jameiyah',
@@ -1696,9 +1715,19 @@ export const sw: Dictionary = {
       'Sasisha simu na uthibitisho kwenye Wewe. Ongeza au toa pesa kwenye Pesa. Shughuli inaonyesha masasisho ya malipo.',
     openProfile: 'Fungua Wewe',
     openMoney: 'Fungua Pesa',
+    contactTitle: 'Wasiliana na Jameiyah',
+    contactBody:
+      'Tumia njia hizi zilizochapishwa na mmiliki. Tumia tiketi hapa chini ikiwa unahitaji jibu linalofuatiliwa.',
+    openWhatsapp: 'WhatsApp msaada',
+    ticketTitle: 'Tuma tiketi ya msaada',
+    ticketBody:
+      'Eleza tatizo. Wasimamizi wa jukwaa wataona ombi lako na wanaweza kufuatilia kupitia anwani ya akaunti yako.',
+    ticketSubject: 'Kichwa',
+    ticketMessage: 'Nini kilitokea?',
+    ticketSubmit: 'Tuma ombi',
+    ticketSubmitting: 'Inatuma…',
     webTitle: 'Tovuti ya kampuni',
-    webBody:
-      'Maelezo ya bidhaa na kampuni yapo kwenye tovuti ya umma. Bado hatujaorodhesha simu au barua pepe ya msaada ndani ya programu.',
+    webBody: 'Maelezo ya bidhaa na kampuni yapo pia kwenye tovuti ya umma.',
     tipTitle: 'Saidia Jameiyah',
     tipBody: 'Unataka tipu ya jukwaa (si sadaka)? Hiyo ni zawadi tofauti ya hiari.',
     openTip: 'Saidia Jameiyah',

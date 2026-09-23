@@ -4,6 +4,7 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
 import { isRotatingKind } from '@/features/circles/lib/circle-mode';
+import { cycleProgressPhrase } from '@/features/circles/lib/circle-status-display';
 import type { DashboardJamiya } from '../types';
 import { EmptyState, SectionHeader } from './empty-state';
 import { StatusBadge } from './dashboard-stats';
@@ -52,8 +53,8 @@ export function MyCirclesSection({
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {item.jamiya.memberCount}/{item.jamiya.maxMembers} {common.members}
-                      {showCycle
-                        ? ` · ${common.cycle} ${item.jamiya.currentCycle}/${item.jamiya.cycleCount}`
+                      {showCycle && item.jamiya.cycleCount != null
+                        ? ` · ${cycleProgressPhrase(item.jamiya.currentCycle, item.jamiya.cycleCount)}`
                         : ''}
                       {item.jamiya.startDate
                         ? ` · ${common.starts} ${formatDate(item.jamiya.startDate)}`
@@ -63,10 +64,16 @@ export function MyCirclesSection({
                   <div className="shrink-0 text-sm font-medium text-foreground sm:text-right">
                     {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}
                     <span className="block text-xs font-normal text-muted-foreground">
-                      {common.perCycle}
-                      {item.payoutPosition
-                        ? ` · ${t(labels.position, { n: item.payoutPosition })}`
-                        : ''}
+                      {isRotatingKind(item.jamiya.challengeKind) ? (
+                        <>
+                          {common.perCycle}
+                          {item.payoutPosition
+                            ? ` · ${t(labels.position, { n: item.payoutPosition })}`
+                            : ''}
+                        </>
+                      ) : (
+                        'contribution'
+                      )}
                     </span>
                   </div>
                 </Link>

@@ -68,7 +68,7 @@ export function MemberTodayStrip({
             <Button asChild variant="outline" className="min-h-11">
               <Link
                 href={
-                  `/wallet?amount=${Math.ceil(remaining)}&next=${encodeURIComponent(
+                  `/wallet?focus=top-up&amount=${Math.ceil(remaining)}&next=${encodeURIComponent(
                     `/circles/${slug}#pay-due`,
                   )}#top-up` as Route
                 }

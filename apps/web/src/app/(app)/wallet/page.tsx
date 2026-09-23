@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
@@ -268,7 +268,7 @@ export default async function WalletPage({ searchParams }: Props) {
           title={labels.emptyTitle}
           description={labels.emptyDesc}
           actionLabel={labels.topUp}
-          actionHref={'#top-up' as Route}
+          actionHref={'/wallet?focus=top-up#top-up' as Route}
         />
       ) : (
         <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
@@ -376,7 +376,7 @@ export default async function WalletPage({ searchParams }: Props) {
                       {formatCurrency(Number(intent.amount), intent.currency)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {intent.phone ? `${intent.phone} · ` : ''}
+                      {intent.phone ? `${intent.phone} Â· ` : ''}
                       {formatDate(intent.created_at)}
                     </p>
                   </div>
@@ -446,7 +446,7 @@ export default async function WalletPage({ searchParams }: Props) {
                     {row.destination_type === 'mpesa'
                       ? row.destination_phone ?? 'M-Pesa'
                       : row.destination_type}{' '}
-                    · {formatDate(row.created_at)}
+                    Â· {formatDate(row.created_at)}
                   </p>
                   {row.error_message ? (
                     <p className="mt-0.5 text-xs text-destructive">{row.error_message}</p>
@@ -497,7 +497,7 @@ export default async function WalletPage({ searchParams }: Props) {
                         : 'amanah-money text-sm font-bold'
                     }
                   >
-                    {inflow ? '+' : '−'}
+                    {inflow ? '+' : 'âˆ’'}
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                 </li>
@@ -521,7 +521,7 @@ export default async function WalletPage({ searchParams }: Props) {
                     {row.description ?? row.source_type}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {row.domain} · {formatRelativeTime(row.posted_at)}
+                    {row.domain} Â· {formatRelativeTime(row.posted_at)}
                   </p>
                 </div>
                 <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">

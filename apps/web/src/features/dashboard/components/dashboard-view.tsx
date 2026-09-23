@@ -4,6 +4,7 @@ import { Plus, CircleDollarSign } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
+import { walletTopUpHref } from '@/features/wallet/lib/wallet-focus-href';
 
 function greetingForHour(hour: number, labels: Dictionary['dashboard']) {
   if (hour < 12) return labels.greetingMorning;
@@ -39,15 +40,16 @@ export function DashboardView({
     : 0;
   const needsTopUpForDue = Boolean(nextDue && available <= 0 && dueRemaining > 0);
   const topUpForDueHref = nextDue
-    ? (`/wallet?amount=${Math.ceil(dueRemaining)}&next=${encodeURIComponent(
-        `/circles/${nextDue.jamiyaSlug}#pay`,
-      )}#top-up` as Route)
-    : ('/wallet#top-up' as Route);
+    ? (walletTopUpHref({
+        amount: Math.ceil(dueRemaining),
+        next: `/circles/${nextDue.jamiyaSlug}#pay`,
+      }) as Route)
+    : (walletTopUpHref() as Route);
 
   // Circles + Money live in the tab bar — home only keeps task shortcuts.
   const actions = [
     {
-      href: '/wallet#top-up' as Route,
+      href: walletTopUpHref() as Route,
       label: labels.quickAdd,
       icon: Plus,
       tint: 'amanah-tint-add',

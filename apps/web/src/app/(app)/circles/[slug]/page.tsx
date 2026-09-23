@@ -1199,6 +1199,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           canRecordPayments={Boolean(canManageOps) && isShareDividend}
           jamiyaId={jamiya.id}
           canAssignSlots={Boolean(canManageOps) && isRotating}
+          showPayoutLabels={isRotating}
           maxSlots={Math.max(jamiya.cycle_count ?? 0, jamiya.max_members, 1)}
         />
       </CircleSection>

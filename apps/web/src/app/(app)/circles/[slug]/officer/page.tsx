@@ -495,7 +495,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               <Button asChild size="sm" className="min-h-11">
                 <Link
                   href={
-                    `/wallet?next=${encodeURIComponent(`/circles/${slug}/officer`)}#top-up` as Route
+                    `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}/officer`)}#top-up` as Route
                   }
                 >
                   Top up Money

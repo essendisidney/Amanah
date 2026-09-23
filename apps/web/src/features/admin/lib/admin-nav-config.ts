@@ -18,6 +18,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { href: '/admin/users' as Route, label: 'Users' },
       { href: '/admin/circles' as Route, label: 'Circles' },
       { href: '/admin/kyc' as Route, label: 'KYC' },
+      { href: '/admin/support' as Route, label: 'Support' },
     ],
   },
   {
