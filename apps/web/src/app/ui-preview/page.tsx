@@ -20,6 +20,9 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
+import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
+import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
+import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
 import { cn } from '@/lib/utils';
 import { JameiyahLogo } from '@/components/amanah-logo';
 import { AppPage, PageHeader } from '@/components/app-page';
@@ -211,6 +214,9 @@ export default function UiPreviewPage() {
             <a href="#pay" className="text-primary">
               Pay
             </a>
+            <a href="#circle-detail" className="text-primary">
+              Circle
+            </a>
           </nav>
         </div>
       </header>
@@ -350,6 +356,66 @@ export default function UiPreviewPage() {
             <h3 className="text-sm font-semibold text-foreground">Pay · no dues</h3>
             <PaySheet labels={dict.paySheet} available={110} currency="KES" dues={[]} />
           </div>
+        </section>
+
+        <section
+          id="circle-detail"
+          className="scroll-mt-28 space-y-5"
+          aria-label="Circle detail sample"
+        >
+          <h2 className="text-sm font-semibold text-foreground">Circle detail · member</h2>
+          <CircleDetailHero
+            slug="sisters-circle-sample"
+            name="Sisters Circle"
+            status="active"
+            roleLabel="Member"
+            kindLabel="Merry-go-round"
+            poolAmount={16000}
+            currency="KES"
+            memberSummary="8/10 members"
+            personalDue={{ remaining: 2000, dueDate: '2026-09-30', status: 'pending' }}
+            stats={[
+              { label: 'Each month', value: 'KES 2,000' },
+              { label: 'This month’s pot', value: 'Asha' },
+            ]}
+          />
+          <div id="pay-due" className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Your next contribution
+            </p>
+            <p className="amanah-money text-2xl font-bold text-foreground">{formatCurrency(2000, 'KES')}</p>
+            <p className="text-sm text-muted-foreground">Due 30 Sept 2026 · Sisters Circle</p>
+            <Button className="min-h-11 w-full" disabled>
+              Pay {formatCurrency(2000, 'KES')}
+            </Button>
+          </div>
+          <MemberCircleLinks slug="sisters-circle-sample" hasDue showGoals={false} />
+          <CircleActionHub
+            groups={[
+              {
+                title: 'Money',
+                items: [
+                  { href: '/wallet' as Route, label: 'Wallet', hint: 'Balance and top-up', primary: true },
+                  { href: '/pay' as Route, label: 'Pay', hint: 'Dues and tools' },
+                ],
+              },
+              {
+                title: 'Circle',
+                items: [
+                  {
+                    href: '/circles/sisters-circle-sample/statement' as Route,
+                    label: 'Statement',
+                    hint: 'Your 360',
+                  },
+                  {
+                    href: '/circles/sisters-circle-sample' as Route,
+                    label: 'Members',
+                    hint: 'Who is in',
+                  },
+                ],
+              },
+            ]}
+          />
         </section>
       </main>
 

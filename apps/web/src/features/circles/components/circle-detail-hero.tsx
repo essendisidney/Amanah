@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import { formatCurrency } from '@jamiya/shared';
+import { formatCurrency, formatDate } from '@jamiya/shared';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { circleAccentClass } from '@/features/circles/lib/circle-accent';
 
@@ -49,6 +49,7 @@ export function CircleDetailHero({
   const dueRemaining = personalDue && personalDue.remaining > 0 ? personalDue.remaining : null;
   const heroAmount = dueRemaining ?? poolAmount;
   const heroLabel = dueRemaining != null ? 'You owe' : 'Pool so far';
+  const overdue = personalDue?.status === 'late';
 
   return (
     <section className={`relative overflow-hidden ${accent}`}>
@@ -71,7 +72,7 @@ export function CircleDetailHero({
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {heroLabel}
-              {dueRemaining != null && personalDue?.status === 'late' ? ' · overdue' : ''}
+              {dueRemaining != null && overdue ? ' · overdue' : ''}
             </p>
             <p className="amanah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
               {formatCurrency(heroAmount, currency)}
@@ -79,8 +80,12 @@ export function CircleDetailHero({
             {dueRemaining != null ? (
               <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                 Pool {formatCurrency(poolAmount, currency)}
+                {personalDue?.dueDate ? ` · due ${formatDate(personalDue.dueDate)}` : ''}
                 {' · '}
-                <Link href={`#pay-due` as Route} className="font-semibold text-primary">
+                <Link
+                  href={`#pay-due` as Route}
+                  className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
                   Pay now
                 </Link>
               </p>

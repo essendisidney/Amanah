@@ -18,7 +18,10 @@ type MemberTodayProps = {
   walletAvailable?: number | null;
 };
 
-/** Wave 10 — one job for a member: know what to do today. */
+/**
+ * Welcome-only strip after join.
+ * Ongoing dues live in the hero + NextContributionCard — do not duplicate here.
+ */
 export function MemberTodayStrip({
   welcome,
   circleName,
@@ -27,6 +30,8 @@ export function MemberTodayStrip({
   due,
   walletAvailable,
 }: MemberTodayProps) {
+  if (!welcome) return null;
+
   const remaining = due ? Math.max(due.amount - due.amountPaid, 0) : 0;
   const needsTopUp =
     due != null &&
@@ -35,57 +40,53 @@ export function MemberTodayStrip({
     Number.isFinite(walletAvailable) &&
     walletAvailable < remaining;
 
-  if (!welcome && !due) return null;
-
   return (
-    <section className="amanah-surface space-y-3 border-primary/25 px-5 py-5">
+    <section className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          {welcome ? 'Welcome' : 'Today'}
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+          Welcome
         </p>
-        <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">
-          {welcome ? `You're in ${circleName}` : 'Your next step'}
+        <h2 className="mt-1 text-base font-semibold tracking-tight text-foreground sm:text-lg">
+          You&apos;re in {circleName}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {welcome
-            ? due
-              ? 'Pay your first contribution to stay current with the group.'
-              : 'You’re a member. When a due is posted, pay it here.'
-            : due
-              ? `Pay ${formatCurrency(remaining, currency)} for ${circleName}${
-                  due.dueDate ? ` · due ${formatDate(due.dueDate)}` : ''
-                }.`
-              : null}
+          {due && remaining > 0
+            ? `Pay your first contribution (${formatCurrency(remaining, currency)}${
+                due.dueDate ? ` · due ${formatDate(due.dueDate)}` : ''
+              }) to stay current.`
+            : 'You’re a member. When a due is posted, pay it from this circle page.'}
         </p>
       </div>
 
-      {due && remaining > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          <Button asChild className="min-h-11">
-            <a href="#pay-due">Pay {formatCurrency(remaining, currency)}</a>
-          </Button>
-          {needsTopUp ? (
-            <Button asChild variant="outline" className="min-h-11">
-              <Link
-                href={
-                  `/wallet?focus=top-up&amount=${Math.ceil(remaining)}&next=${encodeURIComponent(
-                    `/circles/${slug}#pay-due`,
-                  )}#top-up` as Route
-                }
-              >
-                Top up wallet
-              </Link>
+      <div className="flex flex-wrap gap-2">
+        {due && remaining > 0 ? (
+          <>
+            <Button asChild className="min-h-11">
+              <a href="#pay-due">Pay {formatCurrency(remaining, currency)}</a>
             </Button>
-          ) : null}
+            {needsTopUp ? (
+              <Button asChild variant="outline" className="min-h-11">
+                <Link
+                  href={
+                    `/wallet?focus=top-up&amount=${Math.ceil(remaining)}&next=${encodeURIComponent(
+                      `/circles/${slug}#pay-due`,
+                    )}#top-up` as Route
+                  }
+                >
+                  Add money
+                </Link>
+              </Button>
+            ) : null}
+          </>
+        ) : (
           <Button asChild variant="outline" className="min-h-11">
-            <Link href={`/circles/${slug}/statement` as Route}>Statement</Link>
+            <a href="#members">See members</a>
           </Button>
-        </div>
-      ) : welcome ? (
+        )}
         <Button asChild variant="outline" className="min-h-11">
-          <a href="#members">See members</a>
+          <Link href={`/circles/${slug}/statement` as Route}>Statement</Link>
         </Button>
-      ) : null}
+      </div>
     </section>
   );
 }

@@ -101,25 +101,25 @@ export function NextContributionCard({
 
   return (
     <section
-      id={showAnchor ? 'pay' : undefined}
-      className="amanah-surface space-y-4 border-primary/20 px-4 py-4 md:px-5 md:py-5"
+      id={showAnchor ? 'pay-due' : undefined}
+      className="amanah-surface space-y-4 border-primary/20 px-4 py-4 sm:px-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {labels.nextTitle}
           </p>
-          <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">
+          <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {formatCurrency(remaining, currency)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">{dueMeta}</p>
         </div>
         {walletAvailable != null ? (
-          <div className="rounded-xl bg-secondary/70 px-3 py-2 text-right">
+          <div className="rounded-lg border border-border/70 bg-muted/40 px-3 py-2 text-right">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               {labels.moneyAvailable}
             </p>
-            <p className="mt-0.5 text-sm font-semibold">
+            <p className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
               {formatCurrency(walletAvailable, walletCurrency)}
             </p>
           </div>
@@ -130,7 +130,7 @@ export function NextContributionCard({
         <form action={ahead ? payContributionAheadAction : payContributionAction}>
           <input type="hidden" name="contributionId" value={contributionId} />
           <input type="hidden" name="slug" value={slug} />
-          <Button type="submit" className="min-h-12 w-full text-base">
+          <Button type="submit" className="min-h-11 w-full">
             {payLabel}
           </Button>
           <p className="mt-2 text-center text-xs text-muted-foreground">
@@ -143,7 +143,7 @@ export function NextContributionCard({
           <input type="hidden" name="slug" value={slug} />
           <input type="hidden" name="amount" value={String(remaining)} />
           <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
-          <Button type="submit" className="min-h-12 w-full text-base">
+          <Button type="submit" className="min-h-11 w-full">
             {payLabel}
           </Button>
           <p className="text-center text-xs text-muted-foreground">

@@ -1077,6 +1077,29 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         }
       />
 
+      {myOpenDue ? (
+        <div id="pay-due">
+          <NextContributionCard
+            contributionId={myOpenDue.id}
+            slug={slug}
+            amount={myOpenDue.amount}
+            amountPaid={myOpenDue.amountPaid}
+            currency={myOpenDue.currency}
+            dueDate={myOpenDue.dueDate}
+            status={myOpenDue.status}
+            walletAvailable={
+              walletAvailable != null && Number.isFinite(walletAvailable)
+                ? walletAvailable
+                : null
+            }
+            walletCurrency={walletCurrency}
+            defaultPhone={payDefaultPhone}
+            labels={dict.contributionCard}
+            showAnchor={false}
+          />
+        </div>
+      ) : null}
+
       {membership?.status === 'active' ? (
         <MemberCircleLinks
           slug={slug}
@@ -1108,28 +1131,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       {isShareDividend ? (
         <div id="goals">
           <CircleLinkedGoals jamiyaId={jamiya.id} slug={slug} userId={user.id} />
-        </div>
-      ) : null}
-
-      {myOpenDue ? (
-        <div id="pay-due">
-          <NextContributionCard
-            contributionId={myOpenDue.id}
-            slug={slug}
-            amount={myOpenDue.amount}
-            amountPaid={myOpenDue.amountPaid}
-            currency={myOpenDue.currency}
-            dueDate={myOpenDue.dueDate}
-            status={myOpenDue.status}
-            walletAvailable={
-              walletAvailable != null && Number.isFinite(walletAvailable)
-                ? walletAvailable
-                : null
-            }
-            walletCurrency={walletCurrency}
-            defaultPhone={payDefaultPhone}
-            labels={dict.contributionCard}
-          />
         </div>
       ) : null}
 
