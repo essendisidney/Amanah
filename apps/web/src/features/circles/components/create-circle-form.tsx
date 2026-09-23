@@ -310,7 +310,7 @@ export function CreateCircleForm({
         </Alert>
       ) : null}
 
-      <nav aria-label="Create circle steps" className="flex flex-wrap gap-2">
+      <nav aria-label="Create circle steps" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {STEPS.map((s) => {
           const active = s.id === step;
           const currentStep = STEPS[Math.max(0, stepIndex)] ?? STEPS[0]!;
@@ -318,24 +318,29 @@ export function CreateCircleForm({
           return (
             <div
               key={s.id}
+              aria-current={active ? 'step' : undefined}
               className={[
-                'inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm',
+                'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm',
                 active
-                  ? 'border-primary bg-primary/10 font-medium text-primary'
+                  ? 'border-primary bg-primary text-primary-foreground'
                   : done
-                    ? 'border-border bg-muted/40 text-foreground'
-                    : 'border-border bg-background text-muted-foreground',
+                    ? 'border-primary/30 bg-primary/8 text-foreground'
+                    : 'border-border bg-card text-muted-foreground',
               ].join(' ')}
             >
               <span
                 className={[
-                  'flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold',
-                  active ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                  active
+                    ? 'bg-primary-foreground text-primary'
+                    : done
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-muted-foreground',
                 ].join(' ')}
               >
                 {s.number}
               </span>
-              {s.label}
+              <span className={active ? 'font-semibold' : 'font-medium'}>{s.label}</span>
             </div>
           );
         })}
@@ -378,18 +383,21 @@ export function CreateCircleForm({
                       key={card.value}
                       type="button"
                       onClick={() => setChallengeKind(card.value)}
+                      aria-pressed={selected}
                       className={[
-                        'rounded-xl border px-4 py-4 text-left transition-colors',
+                        'rounded-xl border-2 px-4 py-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                         selected
-                          ? 'border-primary bg-primary/10 shadow-sm'
-                          : 'border-border bg-background hover:border-primary/40',
+                          ? 'border-primary bg-primary/10 ring-1 ring-primary/30'
+                          : 'border-border bg-card hover:border-primary/40',
                       ].join(' ')}
                     >
                       <p className="text-sm font-semibold text-foreground">{card.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
                       {selected ? (
-                        <p className="mt-2 text-xs font-semibold text-primary">Selected</p>
-                      ) : null}
+                        <p className="mt-2 text-xs font-bold text-primary">Selected</p>
+                      ) : (
+                        <p className="mt-2 text-xs text-muted-foreground">Tap to select</p>
+                      )}
                     </button>
                   );
                 })}

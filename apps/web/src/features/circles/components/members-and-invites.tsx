@@ -81,7 +81,7 @@ export function MembersList({
     );
 
   return (
-    <ul className="space-y-3">
+    <ul className="divide-y divide-border/80 overflow-hidden rounded-xl border border-border bg-card">
       {members.map((member) => {
         const isGone = member.status === 'removed' || member.status === 'left';
         const displayName = member.fullName ?? member.email ?? member.phone ?? 'Member';
@@ -93,20 +93,17 @@ export function MembersList({
               )
             : [];
         return (
-          <li
-            key={member.id}
-            className="rounded-xl border border-border/70 bg-card/80 px-4 py-4 shadow-sm transition-colors hover:border-primary/20 sm:px-5"
-          >
+          <li key={member.id} className="px-4 py-3.5 sm:px-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
-                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
                   {memberInitials(member)}
                 </span>
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     <p className="font-semibold text-foreground">{displayName}</p>
                     {member.memberCode ? (
-                      <span className="rounded-md border border-border/80 bg-secondary/40 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      <span className="rounded border border-border bg-muted/50 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                         {member.memberCode}
                       </span>
                     ) : null}
@@ -126,7 +123,7 @@ export function MembersList({
                 </div>
               </div>
               {canRecordPayments && !isGone ? (
-                <Button asChild size="sm" className="min-h-10 shrink-0 rounded-full px-4">
+                <Button asChild size="sm" className="min-h-10 shrink-0">
                   <Link href={`/circles/${slug}/books?view=member&memberId=${member.id}` as Route}>
                     Enter payments
                   </Link>
@@ -201,23 +198,24 @@ export function MembersList({
                       Reject vouch
                     </Button>
                   </form>
-
-                  <form
-                    action={removeMemberAction}
-                    onSubmit={(event) => {
-                      const label = member.fullName ?? member.phone ?? member.email ?? 'this member';
-                      if (!window.confirm(`Remove ${label} from this circle?`)) {
-                        event.preventDefault();
-                      }
-                    }}
-                  >
-                    <input type="hidden" name="memberId" value={member.id} />
-                    <input type="hidden" name="slug" value={slug} />
-                    <Button type="submit" size="sm" variant="destructive">
-                      Remove
-                    </Button>
-                  </form>
                 </div>
+
+                <form
+                  action={removeMemberAction}
+                  className="border-t border-border/60 pt-3"
+                  onSubmit={(event) => {
+                    const label = member.fullName ?? member.phone ?? member.email ?? 'this member';
+                    if (!window.confirm(`Remove ${label} from this circle?`)) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  <input type="hidden" name="memberId" value={member.id} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <Button type="submit" size="sm" variant="destructive">
+                    Remove from circle
+                  </Button>
+                </form>
 
                 <form
                   action={correctMemberContactAction}

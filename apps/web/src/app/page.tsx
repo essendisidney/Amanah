@@ -56,7 +56,7 @@ export default async function LandingPage() {
 
       <section className="relative z-10 mx-auto flex min-h-[88dvh] w-full max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 lg:pt-6">
         <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-8">
-          <div className="order-2 lg:order-1">
+          <div className="order-1 lg:order-1">
             <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
               {dict.brand.tagline}
             </p>
@@ -111,7 +111,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
+          <div className="order-2 flex justify-center lg:order-2 lg:justify-end">
             <div className="relative w-full max-w-sm">
               <div
                 aria-hidden
@@ -121,8 +121,8 @@ export default async function LandingPage() {
                     'radial-gradient(circle, rgba(197, 160, 68, 0.22) 0%, transparent 68%)',
                 }}
               />
-              <div className="relative overflow-hidden rounded-[1.75rem] border border-[#0d5c45]/15 bg-white/90 p-5 shadow-[0_20px_50px_rgba(11,74,60,0.12)]">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c5a044]">
+              <div className="relative overflow-hidden rounded-2xl border border-[#0d5c45]/20 bg-white p-5 shadow-[0_8px_28px_rgba(11,74,60,0.08)]">
+                <p className="inline-flex rounded-md bg-[#f7f0de] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8a6d1f]">
                   Sample preview — not live data
                 </p>
                 <p className="mt-3 font-[family-name:var(--font-display)] text-xl font-semibold text-[#0b4a3c]">

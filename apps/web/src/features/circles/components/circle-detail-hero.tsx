@@ -27,7 +27,6 @@ type Props = {
   currency: string;
   memberSummary: string;
   stats: Stat[];
-  /** Member's open due — shown as the hero number when present. */
   personalDue?: PersonalDue | null;
 };
 
@@ -52,18 +51,14 @@ export function CircleDetailHero({
   const heroLabel = dueRemaining != null ? 'You owe' : 'Pool so far';
 
   return (
-    <section className={`relative overflow-hidden rounded-2xl ${accent}`}>
-      <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(255,255,255,0.55)_0%,_transparent_52%)] dark:bg-[radial-gradient(ellipse_at_top_left,_rgba(255,255,255,0.08)_0%,_transparent_52%)]"
-        aria-hidden
-      />
-      <div className="amanah-surface relative border-primary/15 px-5 py-6 sm:px-6 sm:py-7">
-        <div className="flex items-start justify-between gap-4">
+    <section className={`relative overflow-hidden ${accent}`}>
+      <div className="amanah-surface relative border-l-4 border-l-primary px-4 py-4 sm:px-5 sm:py-5">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="truncate font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight sm:text-3xl">
+            <h1 className="truncate font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight sm:text-2xl">
               {name}
             </h1>
-            <p className="mt-1 text-sm capitalize text-muted-foreground">
+            <p className="mt-1 text-xs capitalize text-muted-foreground sm:text-sm">
               {status.replaceAll('_', ' ')}
               {meta ? ` · ${meta}` : ''}
               {memberSummary ? ` · ${memberSummary}` : ''}
@@ -72,31 +67,35 @@ export function CircleDetailHero({
           <StatusBadge status={status} />
         </div>
 
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-          {heroLabel}
-          {dueRemaining != null && personalDue?.status === 'late' ? ' · overdue' : ''}
-        </p>
-        <p className="amanah-money mt-1 text-4xl font-bold tracking-tight sm:text-5xl">
-          {formatCurrency(heroAmount, currency)}
-        </p>
-        {dueRemaining != null ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            Pool so far {formatCurrency(poolAmount, currency)}
-            {' · '}
-            <Link href={`#pay-due` as Route} className="font-semibold text-primary">
-              Pay now
-            </Link>
-          </p>
-        ) : null}
+        <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {heroLabel}
+              {dueRemaining != null && personalDue?.status === 'late' ? ' · overdue' : ''}
+            </p>
+            <p className="amanah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
+              {formatCurrency(heroAmount, currency)}
+            </p>
+            {dueRemaining != null ? (
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                Pool {formatCurrency(poolAmount, currency)}
+                {' · '}
+                <Link href={`#pay-due` as Route} className="font-semibold text-primary">
+                  Pay now
+                </Link>
+              </p>
+            ) : null}
+          </div>
+        </div>
 
         {stats.length > 0 ? (
-          <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-border/60 pt-5 sm:grid-cols-4">
+          <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-border/70 pt-3 sm:grid-cols-4">
             {stats.slice(0, 4).map((stat) => (
               <div key={stat.label}>
-                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {stat.label}
                 </dt>
-                <dd className="amanah-money mt-1 text-base font-semibold text-foreground">
+                <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
                   {stat.value}
                 </dd>
               </div>

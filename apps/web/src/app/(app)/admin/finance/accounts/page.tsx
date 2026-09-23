@@ -69,40 +69,32 @@ export default async function AdminChartOfAccountsPage() {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="amanah-table min-w-[640px]">
           <thead>
-            <tr className="border-b border-border text-left text-xs text-muted-foreground">
-              <th className="px-4 py-3 font-medium">Code</th>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Domain</th>
-              <th className="px-4 py-3 font-medium">Normal</th>
-              <th className="px-4 py-3 text-right font-medium">Debits</th>
-              <th className="px-4 py-3 text-right font-medium">Credits</th>
-              <th className="px-4 py-3 text-right font-medium">Net</th>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Domain</th>
+              <th>Normal</th>
+              <th className="text-right">Debits</th>
+              <th className="text-right">Credits</th>
+              <th className="text-right">Net</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody>
             {rows.map((row) => {
               const t = totals.get(row.id) ?? { debit: 0, credit: 0 };
               const net =
                 row.normal_balance === 'credit' ? t.credit - t.debit : t.debit - t.credit;
               return (
                 <tr key={row.id} className={!row.is_active ? 'opacity-50' : undefined}>
-                  <td className="px-4 py-3 font-mono text-xs">{row.code}</td>
-                  <td className="px-4 py-3 font-medium">{row.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{row.domain}</td>
-                  <td className="px-4 py-3 capitalize text-muted-foreground">
-                    {row.normal_balance}
-                  </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
-                    {formatCurrency(t.debit, 'KES')}
-                  </td>
-                  <td className="px-4 py-3 text-right tabular-nums">
-                    {formatCurrency(t.credit, 'KES')}
-                  </td>
-                  <td className="px-4 py-3 text-right font-semibold tabular-nums">
-                    {formatCurrency(net, 'KES')}
-                  </td>
+                  <td className="font-mono text-xs">{row.code}</td>
+                  <td className="font-medium">{row.name}</td>
+                  <td className="text-muted-foreground">{row.domain}</td>
+                  <td className="capitalize text-muted-foreground">{row.normal_balance}</td>
+                  <td className="amount">{formatCurrency(t.debit, 'KES')}</td>
+                  <td className="amount">{formatCurrency(t.credit, 'KES')}</td>
+                  <td className="amount">{formatCurrency(net, 'KES')}</td>
                 </tr>
               );
             })}

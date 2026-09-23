@@ -57,10 +57,10 @@
   --color-slate-soft: var(--slate-soft);
   --color-slate-faint: var(--slate-faint);
 
-  --radius-sm: 0.75rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
 }
 
 :root {
@@ -68,19 +68,19 @@
   --background: #f8fafc;
   --foreground: #111827;
   --muted: #f1f5f9;
-  --muted-foreground: #4b5563;
-  --border: rgba(17, 24, 39, 0.14);
-  --input: rgba(17, 24, 39, 0.18);
+  --muted-foreground: #374151;
+  --border: rgba(17, 24, 39, 0.18);
+  --input: rgba(17, 24, 39, 0.22);
   --ring: #0d5c45;
 
-  --card: rgba(255, 255, 255, 0.9);
+  --card: rgba(255, 255, 255, 0.96);
   --card-foreground: #111827;
 
   /* Text hierarchy */
   --slate: #111827;
-  --slate-soft: #64748b;
-  --slate-faint: #94a3b8;
-  --slate-disabled: #cbd5e1;
+  --slate-soft: #4b5563;
+  --slate-faint: #6b7280;
+  --slate-disabled: #9ca3af;
 
   /* Brand — deep emerald (logo green) */
   --brand: #0d5c45;
@@ -114,8 +114,8 @@
   --coral: #f28b82;
   --coral-muted: #ffe9e7;
 
-  --destructive: #f28b82;
-  --destructive-foreground: #fff8f7;
+  --destructive: #c2410c;
+  --destructive-foreground: #fff7ed;
 
   --success: #0d5c45;
   --warning: #c5a044;
@@ -138,11 +138,11 @@
   --wash-withdraw: #ffe9e7;
 
   /* White glass 85–95% */
-  --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-bg-soft: rgba(255, 255, 255, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.65);
-  --glass-shadow: 0 8px 32px rgba(17, 24, 39, 0.04);
-  --nav-glass: rgba(255, 255, 255, 0.88);
+  --glass-bg: rgba(255, 255, 255, 0.96);
+  --glass-bg-soft: rgba(255, 255, 255, 0.92);
+  --glass-border: rgba(17, 24, 39, 0.12);
+  --glass-shadow: 0 1px 2px rgba(17, 24, 39, 0.04), 0 4px 14px rgba(17, 24, 39, 0.04);
+  --nav-glass: rgba(255, 255, 255, 0.94);
 
   /*
     Atmospheric light — barely perceptible
@@ -241,7 +241,7 @@
 
   html {
     --font-display: var(--font-sans);
-    scroll-padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 
   html,
@@ -297,41 +297,35 @@
   /* White / translucent glass — weightless */
   .amanah-surface {
     border: 1px solid var(--glass-border);
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     background: var(--glass-bg);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.75),
-      var(--glass-shadow);
-    backdrop-filter: blur(28px) saturate(1.2);
-    -webkit-backdrop-filter: blur(28px) saturate(1.2);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
   }
 
   .amanah-glass {
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.8),
-      var(--glass-shadow);
-    backdrop-filter: blur(32px) saturate(1.25);
-    -webkit-backdrop-filter: blur(32px) saturate(1.25);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
   }
 
   .amanah-glass-soft {
     border: 1px solid var(--glass-border);
     background: var(--glass-bg-soft);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(24px) saturate(1.15);
-    -webkit-backdrop-filter: blur(24px) saturate(1.15);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.03);
+    backdrop-filter: blur(12px) saturate(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(1.05);
   }
 
   .amanah-glass-pill {
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.72);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.85),
-      0 4px 16px rgba(17, 24, 39, 0.03);
-    backdrop-filter: blur(18px) saturate(1.15);
-    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+    backdrop-filter: blur(12px) saturate(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(1.05);
   }
 
   .dark .amanah-glass-pill {
@@ -387,11 +381,40 @@
   .amanah-nav-glass {
     border: 1px solid var(--glass-border);
     background: var(--nav-glass);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.7),
-      0 8px 28px rgba(17, 24, 39, 0.06);
-    backdrop-filter: blur(28px) saturate(1.2);
-    -webkit-backdrop-filter: blur(28px) saturate(1.2);
+    box-shadow: 0 2px 12px rgba(17, 24, 39, 0.06);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  }
+
+  /* Compact data tables (admin + statements) */
+  .amanah-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  .amanah-table th {
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border-bottom: 1px solid var(--border);
+  }
+  .amanah-table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  }
+  .amanah-table .amount {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    font-weight: 600;
+  }
+  .amanah-table .actions {
+    text-align: right;
+    white-space: nowrap;
   }
 
   .amanah-pay-glow {

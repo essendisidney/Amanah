@@ -145,12 +145,12 @@ export function AppShell({
 
   return (
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
-      <header className="sticky top-0 z-40 border-b border-border/40 bg-background/75 pt-[env(safe-area-inset-top)] backdrop-blur-xl md:border-transparent md:bg-transparent">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-[4.25rem] md:px-6">
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:border-transparent md:bg-transparent">
+        <div className="mx-auto flex h-12 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-14 md:px-6">
           <JameiyahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
           <nav
-            className="amanah-nav-glass hidden items-center gap-1 rounded-full px-1.5 py-1 md:flex"
+            className="amanah-nav-glass hidden items-center gap-0.5 rounded-xl px-1 py-1 md:flex"
             aria-label="Primary"
           >
             {desktopLinks.map((item) => {
@@ -161,15 +161,15 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors',
                     active
-                      ? 'bg-primary text-primary-foreground shadow-[0_6px_18px_rgba(25,184,121,0.28)]'
-                      : 'text-muted-foreground hover:text-foreground',
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
                   {item.label}
                   {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-white/90 px-1.5 text-[10px] font-semibold text-primary">
+                    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-md bg-white/90 px-1.5 text-[10px] font-semibold text-primary">
                       {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
@@ -185,10 +185,10 @@ export function AppShell({
               <Link
                 href={'/admin' as Route}
                 className={cn(
-                  'inline-flex h-11 w-11 items-center justify-center rounded-full md:hidden',
+                  'inline-flex h-10 w-10 items-center justify-center rounded-lg md:hidden',
                   pathname.startsWith('/admin')
                     ? 'bg-primary/15 text-primary'
-                    : 'text-muted-foreground hover:bg-white/40 dark:hover:bg-white/5',
+                    : 'text-muted-foreground hover:bg-muted',
                 )}
                 aria-label={dict.common.admin}
                 title={dict.common.admin}
@@ -203,9 +203,9 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(7.25rem+env(safe-area-inset-bottom))] pt-5 md:px-6 md:pb-14 md:pt-8">
+      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-12 md:pt-6">
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.08)_0%,_rgba(91,141,239,0.05)_45%,_transparent_72%)]"
+          className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_at_top,_rgba(13,92,69,0.07)_0%,_rgba(197,160,68,0.05)_45%,_transparent_72%)]"
           aria-hidden
         />
         <div className="relative">
@@ -214,33 +214,36 @@ export function AppShell({
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-1 md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur-md md:hidden"
         aria-label="Mobile primary"
       >
-        <ul className="amanah-nav-glass mx-auto grid max-w-lg grid-cols-5 items-end rounded-[1.75rem] px-1 py-1.5">
+        <ul className="mx-auto grid max-w-lg grid-cols-5 items-center gap-0.5">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
             const showBadge = item.href === '/notifications' && liveUnread > 0;
             if (item.center) {
               return (
-                <li key={item.href} className="relative -mt-7 flex justify-center">
+                <li key={item.href} className="flex justify-center">
                   <Link
                     href={item.href}
-                    className="flex flex-col items-center gap-1"
+                    aria-current={active ? 'page' : undefined}
                     aria-label={item.label}
+                    className="flex min-h-12 flex-col items-center justify-center gap-0.5 px-1"
                   >
                     <span
                       className={cn(
-                        'amanah-pay-glow inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95',
-                        active && 'ring-4 ring-primary/25',
+                        'inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors',
+                        active
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-primary/12 text-primary',
                       )}
                     >
-                      <Icon className="h-6 w-6" strokeWidth={1.75} />
+                      <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.75} />
                     </span>
                     <span
                       className={cn(
-                        'text-[11px] font-semibold',
+                        'text-[10px] font-semibold',
                         active ? 'text-primary' : 'text-muted-foreground',
                       )}
                     >
@@ -256,14 +259,16 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'relative flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-semibold',
-                    active ? 'text-primary' : 'text-muted-foreground',
+                    'relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-semibold',
+                    active
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
-                  <Icon className={cn('h-5 w-5', active && 'stroke-[2.4]')} strokeWidth={1.6} />
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.6} />
                   {item.short}
                   {showBadge ? (
-                    <span className="absolute right-[18%] top-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="absolute right-[22%] top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
                   ) : null}
                 </Link>
               </li>

@@ -107,15 +107,19 @@ export function ContributionCalendar({
       kind: circleKind,
     });
     return (
-      <div className="amanah-surface space-y-2 px-4 py-5 text-sm text-muted-foreground">
-        <p className="font-medium text-foreground">{empty.title}</p>
-        <p>{empty.body}</p>
+      <div className="amanah-surface space-y-3 px-4 py-5">
+        <div>
+          <p className="font-semibold text-foreground">{empty.title}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{empty.body}</p>
+        </div>
         {canManageOps && memberCount < 2 && circleStatus !== 'active' ? (
-          <p>
-            <a href="#invite-people" className="font-medium text-primary hover:underline">
-              Invite people
-            </a>
-          </p>
+          <Button asChild size="sm" className="min-h-10">
+            <a href="#invite-people">Invite people</a>
+          </Button>
+        ) : canActivate ? (
+          <Button asChild size="sm" className="min-h-10">
+            <a href="#officer-desk">Go to activate</a>
+          </Button>
         ) : null}
       </div>
     );
