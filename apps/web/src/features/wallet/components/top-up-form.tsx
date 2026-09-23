@@ -1,7 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
-import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
+import { useActionState, useMemo, useState } from 'react';
+import { formatCurrency, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import {
   topUpWalletAction,
@@ -35,17 +35,29 @@ export function TopUpForm({
       : provider === 'simulated'
         ? 50000
         : 10;
+  const [amountText, setAmountText] = useState(String(amountDefault));
   const needsPhone =
     provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
   const linkedPhone = defaultPhone.trim();
   const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
+  const amountValue = Number(amountText);
+  const amountValid =
+    amountText.trim() !== '' && Number.isFinite(amountValue) && amountValue >= 10;
+
+  const destinationHint = useMemo(() => {
+    if (needsPhone) return hasLinkedPhone ? linkedPhone : 'M-Pesa (enter phone)';
+    if (provider === 'paystack') return 'Paystack checkout';
+    if (provider === 'bank') return 'Bank settlement';
+    return 'Wallet (demo credit)';
+  }, [hasLinkedPhone, linkedPhone, needsPhone, provider]);
 
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="currency" value={currency} />
       {returnPath ? <input type="hidden" name="next" value={returnPath} /> : null}
       {needsOtp ? <input type="hidden" name="otp_challenge" value="1" /> : null}
-      <div className="space-y-2">
+
+      <div className="space-y-1.5">
         <Label htmlFor="amount">{t(labels.amount, { currency })}</Label>
         <Input
           id="amount"
@@ -54,16 +66,18 @@ export function TopUpForm({
           inputMode="decimal"
           min={10}
           step={1}
-          defaultValue={amountDefault}
+          value={amountText}
+          onChange={(e) => setAmountText(e.target.value)}
           required
-          className="h-11 text-base sm:h-10 sm:text-sm"
+          className="h-12 text-lg font-semibold tabular-nums sm:h-11 sm:text-base"
         />
         {provider === 'intasend' || provider === 'mpesa' || provider === 'tendepay' ? (
-          <p className="text-xs text-muted-foreground">Min Ksh 10.</p>
+          <p className="text-xs text-muted-foreground">Minimum {formatCurrency(10, currency)}.</p>
         ) : null}
       </div>
+
       {needsPhone ? (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="phone">{labels.mpesaPhone}</Label>
           <Input
             id="phone"
@@ -82,12 +96,13 @@ export function TopUpForm({
       ) : provider === 'bank' ? (
         <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
       ) : (
-        <p className="rounded-md border border-accent/30 bg-accent-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground">
+        <p className="rounded-lg border border-accent/30 bg-accent-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground">
           <span className="font-semibold text-accent">Demo credit (UAT)</span>
           {' — '}
           {labels.simulatedHint}
         </p>
       )}
+
       {provider !== 'simulated' &&
       !needsOtp &&
       provider !== 'mpesa' &&
@@ -95,13 +110,39 @@ export function TopUpForm({
       provider !== 'tendepay' ? (
         <p className="text-xs text-muted-foreground">{labels.stepUpHint}</p>
       ) : null}
+
       {returnPath && !needsOtp ? (
         <p className="text-xs text-muted-foreground">
           After top-up you will continue to your contribution.
         </p>
       ) : null}
+
+      {amountValid && !needsOtp ? (
+        <div className="rounded-lg border border-border bg-muted/40 px-3.5 py-3 text-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            Before you confirm
+          </p>
+          <dl className="mt-2 space-y-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Amount</dt>
+              <dd className="amanah-money font-semibold text-foreground">
+                {formatCurrency(amountValue, currency)}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Destination</dt>
+              <dd className="text-right font-medium text-foreground">{destinationHint}</dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Jameiyah fee</dt>
+              <dd className="font-medium text-foreground">None</dd>
+            </div>
+          </dl>
+        </div>
+      ) : null}
+
       {needsOtp ? (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="otp">{labels.verificationCode}</Label>
           <Input
             id="otp"
@@ -116,6 +157,7 @@ export function TopUpForm({
           />
         </div>
       ) : null}
+
       {state.message ? (
         <p
           className={
@@ -130,8 +172,9 @@ export function TopUpForm({
           {state.message}
         </p>
       ) : null}
+
       <div className="flex flex-col gap-2">
-        <Button type="submit" className="min-h-11 w-full" disabled={pending}>
+        <Button type="submit" className="min-h-11 w-full" disabled={pending || !amountValid}>
           {pending
             ? labels.processing
             : needsOtp

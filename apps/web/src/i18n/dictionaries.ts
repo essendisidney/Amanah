@@ -171,6 +171,8 @@ export type Dictionary = {
     quickMoney: string;
     quickPay: string;
     duePrefix: string;
+    nextContribution: string;
+    nextPayout: string;
     recent: string;
     activity: string;
     nothingYet: string;
@@ -765,6 +767,8 @@ export const en: Dictionary = {
     quickMoney: 'Money',
     quickPay: 'Pay',
     duePrefix: 'Due',
+    nextContribution: 'Next contribution',
+    nextPayout: 'Next payout',
     recent: 'Recent',
     activity: 'Activity',
     nothingYet: 'Nothing yet',
@@ -1379,6 +1383,8 @@ export const sw: Dictionary = {
     quickMoney: 'Pesa',
     quickPay: 'Lipa',
     duePrefix: 'Inadaiwa',
+    nextContribution: 'Mchango unaofuata',
+    nextPayout: 'Malipo yanayofuata',
     recent: 'Hivi karibuni',
     activity: 'Shughuli',
     nothingYet: 'Bado hakuna',

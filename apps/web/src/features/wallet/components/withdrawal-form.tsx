@@ -61,12 +61,12 @@ export function WithdrawalForm({
       <input type="hidden" name="currency" value={currency} />
       <input type="hidden" name="destinationType" value={destinationType} />
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-end justify-between gap-2">
           <Label htmlFor="withdraw-amount">{t(labels.amount, { currency })}</Label>
           <button
             type="button"
-            className="text-xs font-semibold text-primary"
+            className="text-xs font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onClick={() => setAmountText(maxAmount > 0 ? String(Math.floor(maxAmount)) : '')}
             disabled={maxAmount < 100}
           >
@@ -85,28 +85,31 @@ export function WithdrawalForm({
           onChange={(e) => setAmountText(e.target.value)}
           placeholder="0"
           required
-          className="h-11 text-base sm:h-10 sm:text-sm"
+          className="h-12 text-lg font-semibold tabular-nums sm:h-11 sm:text-base"
         />
         {amountError ? <p className="text-sm text-destructive">{amountError}</p> : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          type="button"
-          className="min-h-11"
-          variant={destinationType === 'mpesa' ? 'default' : 'outline'}
-          onClick={() => setDestinationType('mpesa')}
-        >
-          M-Pesa
-        </Button>
-        <Button
-          type="button"
-          className="min-h-11"
-          variant={destinationType === 'bank' ? 'default' : 'outline'}
-          onClick={() => setDestinationType('bank')}
-        >
-          {labels.bank}
-        </Button>
+      <div className="space-y-1.5">
+        <p className="text-sm font-medium text-foreground">Destination</p>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            type="button"
+            className="min-h-11"
+            variant={destinationType === 'mpesa' ? 'default' : 'outline'}
+            onClick={() => setDestinationType('mpesa')}
+          >
+            M-Pesa
+          </Button>
+          <Button
+            type="button"
+            className="min-h-11"
+            variant={destinationType === 'bank' ? 'default' : 'outline'}
+            onClick={() => setDestinationType('bank')}
+          >
+            {labels.bank}
+          </Button>
+        </div>
       </div>
 
       {destinationType === 'mpesa' ? (
@@ -152,24 +155,30 @@ export function WithdrawalForm({
       )}
 
       {amountValid ? (
-        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3 text-sm">
-          <p className="font-medium text-foreground">Before you confirm</p>
-          <ul className="mt-1 space-y-1 text-muted-foreground">
-            <li>
-              Wallet debit: {formatCurrency(amountValue, currency)} (this is what leaves your
-              Jameiyah balance).
-            </li>
-            <li>Destination: {destinationLabel}</li>
-            <li>Jameiyah platform fee: none on this request.</li>
-            <li>
-              M-Pesa / bank provider fees: unknown here. Your provider may take a fee from what
-              arrives or charge separately — we do not quote that amount.
-            </li>
-            <li>
-              Final for Jameiyah: {formatCurrency(amountValue, currency)} wallet debit. Not a
-              guarantee of the exact amount that hits the destination after provider fees.
-            </li>
-          </ul>
+        <div className="rounded-lg border border-border bg-muted/40 px-3.5 py-3 text-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            Before you confirm
+          </p>
+          <dl className="mt-2 space-y-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Wallet debit</dt>
+              <dd className="amanah-money font-semibold text-foreground">
+                {formatCurrency(amountValue, currency)}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Destination</dt>
+              <dd className="text-right font-medium text-foreground">{destinationLabel}</dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">Jameiyah fee</dt>
+              <dd className="font-medium text-foreground">None</dd>
+            </div>
+          </dl>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Provider (M-Pesa / bank) fees are not quoted here. The amount that arrives may differ
+            after their charges.
+          </p>
         </div>
       ) : null}
 

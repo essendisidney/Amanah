@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate, formatRelativeTime } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
-import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
@@ -224,7 +223,7 @@ export default async function WalletPage({ searchParams }: Props) {
   const provider = paymentProvider();
 
   return (
-    <AppPage>
+    <AppPage width="medium">
       <PageHeader title={labels.title} subtitle={labels.subtitle} />
 
       {notices.notice ? (
@@ -232,10 +231,10 @@ export default async function WalletPage({ searchParams }: Props) {
           <p
             className={
               notices.noticeType === 'error'
-                ? 'rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
+                ? 'rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive'
                 : notices.noticeType === 'info'
-                  ? 'rounded-2xl border border-border bg-secondary/60 px-4 py-3 text-sm text-foreground'
-                  : 'rounded-2xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
+                  ? 'rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm text-foreground'
+                  : 'rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary'
             }
             role="status"
           >
@@ -263,58 +262,55 @@ export default async function WalletPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      {wallets.length === 0 ? (
-        <EmptyState
-          title={labels.emptyTitle}
-          description={labels.emptyDesc}
-          actionLabel={labels.topUp}
-          actionHref={'/wallet?focus=top-up#top-up' as Route}
-        />
-      ) : (
-        <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
-            {labels.availableLabel}
-          </p>
-          <p className="amanah-money mt-2 text-4xl font-bold tracking-tight md:text-5xl">
-            {formatCurrency(available, primaryCurrency)}
-          </p>
-        </section>
-      )}
+      <section className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        {wallets.length === 0 ? (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {labels.availableLabel}
+            </p>
+            <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground">
+              {formatCurrency(0, primaryCurrency)}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{labels.emptyDesc}</p>
+          </div>
+        ) : (
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              {labels.availableLabel}
+            </p>
+            <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              {formatCurrency(available, primaryCurrency)}
+            </p>
+          </div>
+        )}
 
-      <section className="grid grid-cols-4 gap-2 sm:gap-3">
-        {[
-          { href: '/wallet?focus=top-up#top-up', label: labels.topUp, icon: Plus },
-          { href: '/pay', label: labels.quickPay, icon: ArrowDownLeft },
-          { href: '/wallet?focus=withdraw#withdraw', label: labels.withdraw, icon: ArrowUpRight },
-          { href: '#more', label: labels.quickMore, icon: ChartNoAxesCombined },
-        ].map((action) => {
-          const Icon = action.icon;
-          return (
-            <Link
-              key={action.label}
-              href={action.href as Route}
-              className="amanah-surface flex flex-col items-center gap-2 px-2 py-3 text-center transition-transform active:scale-[0.98]"
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-primary">
-                <Icon className="h-4 w-4" />
-              </span>
-              <span className="text-[11px] font-semibold sm:text-xs">{action.label}</span>
+        <div className="grid grid-cols-3 gap-2">
+          <Button asChild className="min-h-11 w-full px-2">
+            <Link href={'/wallet?focus=top-up#top-up' as Route}>
+              <Plus className="h-4 w-4" />
+              <span className="truncate">{labels.topUp}</span>
             </Link>
-          );
-        })}
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 w-full px-2">
+            <Link href={'/pay' as Route}>
+              <ArrowDownLeft className="h-4 w-4" />
+              <span className="truncate">{labels.quickPay}</span>
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11 w-full px-2">
+            <Link href={'/wallet?focus=withdraw#withdraw' as Route}>
+              <ArrowUpRight className="h-4 w-4" />
+              <span className="truncate">{labels.withdraw}</span>
+            </Link>
+          </Button>
+        </div>
       </section>
 
-      <div
-        className={
-          focus
-            ? 'grid gap-6'
-            : 'grid gap-6 md:grid-cols-2'
-        }
-      >
+      <div className={focus ? 'grid gap-5' : 'grid gap-5 md:grid-cols-2'}>
         {focus !== 'withdraw' ? (
-          <section id="top-up" className="scroll-mt-24 space-y-4">
-            <h2 className="text-lg font-bold tracking-tight">{labels.topUp}</h2>
-            <div className="amanah-surface p-5">
+          <section id="top-up" className="scroll-mt-24 space-y-2.5">
+            <h2 className="text-sm font-semibold text-foreground">{labels.topUp}</h2>
+            <div className="amanah-surface p-4 sm:p-5">
               <TopUpForm
                 currency={primaryCurrency}
                 labels={dict.walletForms}
@@ -330,7 +326,10 @@ export default async function WalletPage({ searchParams }: Props) {
             </div>
             {focus === 'top-up' ? (
               <p className="text-sm text-muted-foreground">
-                <Link href={'/wallet?focus=withdraw#withdraw' as Route} className="font-medium text-primary">
+                <Link
+                  href={'/wallet?focus=withdraw#withdraw' as Route}
+                  className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
                   Need to withdraw instead?
                 </Link>
               </p>
@@ -339,9 +338,9 @@ export default async function WalletPage({ searchParams }: Props) {
         ) : null}
 
         {focus !== 'top-up' ? (
-          <section id="withdraw" className="scroll-mt-24 space-y-4">
-            <h2 className="text-lg font-bold tracking-tight">{labels.withdraw}</h2>
-            <div className="amanah-surface p-5">
+          <section id="withdraw" className="scroll-mt-24 space-y-2.5">
+            <h2 className="text-sm font-semibold text-foreground">{labels.withdraw}</h2>
+            <div className="amanah-surface p-4 sm:p-5">
               <WithdrawalForm
                 currency={primaryCurrency}
                 labels={dict.walletForms}
@@ -351,7 +350,10 @@ export default async function WalletPage({ searchParams }: Props) {
             </div>
             {focus === 'withdraw' ? (
               <p className="text-sm text-muted-foreground">
-                <Link href={'/wallet?focus=top-up#top-up' as Route} className="font-medium text-primary">
+                <Link
+                  href={'/wallet?focus=top-up#top-up' as Route}
+                  className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
                   Need to add money instead?
                 </Link>
               </p>
@@ -361,8 +363,8 @@ export default async function WalletPage({ searchParams }: Props) {
       </div>
 
       {pendingIntents.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">{labels.paymentsInProgress}</h2>
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold text-foreground">{labels.paymentsInProgress}</h2>
           <ul className="amanah-surface divide-y divide-border/70">
             {pendingIntents.map((intent) => {
               const canCheck =
@@ -371,16 +373,16 @@ export default async function WalletPage({ searchParams }: Props) {
                 intent.provider === 'tendepay';
               return (
                 <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold">
+                  <div className="min-w-0">
+                    <p className="amanah-money text-sm font-semibold">
                       {formatCurrency(Number(intent.amount), intent.currency)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {intent.phone ? `${intent.phone} Â· ` : ''}
+                      {intent.phone ? `${intent.phone} · ` : ''}
                       {formatDate(intent.created_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <StatusBadge status={intent.status} />
                     {canCheck ? (
                       <CheckPaystackStatusButton
@@ -400,8 +402,8 @@ export default async function WalletPage({ searchParams }: Props) {
       ) : null}
 
       {failedIntents.length > 0 ? (
-        <details className="space-y-3">
-          <summary className="cursor-pointer text-lg font-bold tracking-tight">
+        <details className="space-y-2.5">
+          <summary className="cursor-pointer text-sm font-semibold text-foreground">
             {labels.failedPayments}
             <span className="ml-2 text-sm font-normal text-muted-foreground">
               ({failedIntents.length})
@@ -411,8 +413,8 @@ export default async function WalletPage({ searchParams }: Props) {
           <ul className="amanah-surface divide-y divide-border/70">
             {failedIntents.slice(0, 5).map((intent) => (
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold">
+                <div className="min-w-0">
+                  <p className="amanah-money text-sm font-semibold">
                     {formatCurrency(Number(intent.amount), intent.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -433,20 +435,20 @@ export default async function WalletPage({ searchParams }: Props) {
       ) : null}
 
       {pendingWithdrawals.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">{labels.withdrawalsInProgress}</h2>
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold text-foreground">{labels.withdrawalsInProgress}</h2>
           <ul className="amanah-surface divide-y divide-border/70">
             {pendingWithdrawals.map((row) => (
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold">
+                <div className="min-w-0">
+                  <p className="amanah-money text-sm font-semibold">
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {row.destination_type === 'mpesa'
                       ? row.destination_phone ?? 'M-Pesa'
                       : row.destination_type}{' '}
-                    Â· {formatDate(row.created_at)}
+                    · {formatDate(row.created_at)}
                   </p>
                   {row.error_message ? (
                     <p className="mt-0.5 text-xs text-destructive">{row.error_message}</p>
@@ -459,21 +461,27 @@ export default async function WalletPage({ searchParams }: Props) {
         </section>
       ) : null}
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold tracking-tight">{labels.historyTitle}</h2>
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">{labels.historyTitle}</h2>
         {transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{labels.historyEmpty}</p>
+          <div className="amanah-surface px-4 py-6 text-center">
+            <p className="text-sm font-medium text-foreground">{labels.historyEmpty}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{labels.emptyDesc}</p>
+            <Button asChild className="mt-4 min-h-11">
+              <Link href={'/wallet?focus=top-up#top-up' as Route}>{labels.topUp}</Link>
+            </Button>
+          </div>
         ) : (
           <ul className="amanah-surface divide-y divide-border/70">
             {transactions.map((row) => {
               const inflow = row.direction === 'credit';
               return (
-                <li key={row.id} className="flex items-center gap-3 px-4 py-3.5">
+                <li key={row.id} className="flex items-center gap-3 px-4 py-3">
                   <span
                     className={
                       inflow
-                        ? 'inline-flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-primary'
-                        : 'inline-flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground'
+                        ? 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary'
+                        : 'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground'
                     }
                   >
                     {inflow ? (
@@ -483,21 +491,24 @@ export default async function WalletPage({ searchParams }: Props) {
                     )}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold capitalize">
-                      {row.type.replaceAll('_', ' ')}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold capitalize text-foreground">
+                        {row.type.replaceAll('_', ' ')}
+                      </p>
+                      <StatusBadge status={row.status} />
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {formatRelativeTime(row.created_at)}
                     </p>
                   </div>
                   <p
                     className={
                       inflow
-                        ? 'amanah-money text-sm font-bold text-primary'
-                        : 'amanah-money text-sm font-bold'
+                        ? 'amanah-money amanah-money-in shrink-0 text-sm font-semibold'
+                        : 'amanah-money amanah-money-out shrink-0 text-sm font-semibold'
                     }
                   >
-                    {inflow ? '+' : 'âˆ’'}
+                    {inflow ? '+' : '−'}
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                 </li>
@@ -508,8 +519,10 @@ export default async function WalletPage({ searchParams }: Props) {
       </section>
 
       {journalEntries.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">Ledger posts</h2>
+        <details className="space-y-2.5">
+          <summary className="cursor-pointer text-sm font-semibold text-foreground">
+            Ledger posts
+          </summary>
           <p className="text-xs text-muted-foreground">
             Append-only journal for your money movements (projection alongside wallet history).
           </p>
@@ -521,7 +534,7 @@ export default async function WalletPage({ searchParams }: Props) {
                     {row.description ?? row.source_type}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {row.domain} Â· {formatRelativeTime(row.posted_at)}
+                    {row.domain} · {formatRelativeTime(row.posted_at)}
                   </p>
                 </div>
                 <span className="shrink-0 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -530,12 +543,12 @@ export default async function WalletPage({ searchParams }: Props) {
               </li>
             ))}
           </ul>
-        </section>
+        </details>
       ) : null}
 
       <details id="more" className="scroll-mt-24">
         <OpenDetailsOnHash id="more" />
-        <summary className="cursor-pointer text-lg font-bold tracking-tight">
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">
           {labels.moreTitle}
         </summary>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -576,9 +589,9 @@ export default async function WalletPage({ searchParams }: Props) {
               <Link
                 key={item.href}
                 href={item.href as Route}
-                className="amanah-surface flex items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30"
+                className="amanah-surface flex items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <Icon className="h-4 w-4" />
                 </span>
                 <span className="text-sm font-semibold text-foreground">{item.title}</span>

@@ -31,7 +31,7 @@ type Tab = {
   href: Route;
   label: string;
   short: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
   center?: boolean;
 };
 

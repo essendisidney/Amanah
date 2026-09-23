@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Plus, CircleDollarSign } from 'lucide-react';
-import { formatCurrency, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
+import { formatCurrency, formatDate, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
@@ -32,7 +32,8 @@ export function DashboardView({
   const greeting = greetingForHour(new Date().getHours(), labels);
   const currency = data.wallet?.currency ?? 'KES';
   const available = data.wallet?.availableBalance ?? data.wallet?.balance ?? 0;
-  const nextDue = data.contributions[0];
+  const nextDue = data.contributions[0] ?? null;
+  const nextPayout = data.payouts[0] ?? null;
   const needsPhone =
     Boolean(data.profile) &&
     !isValidKeMobile(String(data.profile?.phone ?? '').trim());
@@ -52,11 +53,15 @@ export function DashboardView({
     : ('/pay' as Route);
   const circle = data.jamiyas[0] ?? null;
   const hasMultipleCircles = data.jamiyas.length > 1;
-  const recent = data.activity.slice(0, 3);
+  const recent = data.activity.slice(0, 5);
+
+  /** Only surface next due / payout when real rows exist — never invent them. */
+  const circleContribution = circle && nextDue ? nextDue : null;
+  const circlePayout = circle && nextPayout ? nextPayout : null;
 
   return (
-    <div className="grid items-start gap-8 md:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] md:gap-10">
-      <div className="space-y-6">
+    <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] md:gap-8">
+      <div className="space-y-5">
         <header className="space-y-1">
           <p className="text-sm text-muted-foreground">
             {greeting},{' '}
@@ -69,19 +74,22 @@ export function DashboardView({
                   ? '/profile?onboarding=1&next=/dashboard#personal-details'
                   : '/profile') as Route
               }
-              className="inline-block text-sm font-semibold text-primary"
+              className="inline-block text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {needsPhone ? labels.addPhone : labels.completeProfile}
             </Link>
           )}
         </header>
 
-        <section className="amanah-surface space-y-4 px-4 py-5 sm:px-5">
-          <Link href={'/wallet' as Route} className="block">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <section className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+          <Link
+            href={'/wallet' as Route}
+            className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {labels.available}
             </p>
-            <p className="amanah-money mt-1 text-4xl font-bold leading-none tracking-tight text-foreground md:text-5xl">
+            <p className="amanah-money mt-1 text-3xl font-bold leading-none tracking-tight text-foreground sm:text-4xl">
               {formatCurrency(available, currency)}
             </p>
           </Link>
@@ -102,10 +110,10 @@ export function DashboardView({
           </div>
         </section>
 
-        {needsTopUpForDue ? (
+        {needsTopUpForDue && !circle ? (
           <Link
             href={topUpForDueHref}
-            className="amanah-surface flex items-center justify-between gap-3 border-primary/30 bg-primary/8 px-4 py-3.5 transition-colors hover:bg-primary/12"
+            className="amanah-surface flex items-center justify-between gap-3 border-primary/30 bg-primary/8 px-4 py-3.5 transition-colors hover:bg-primary/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
@@ -122,34 +130,13 @@ export function DashboardView({
             </div>
             <span className="shrink-0 text-sm font-semibold text-primary">→</span>
           </Link>
-        ) : nextDue ? (
-          <Link
-            href={`/circles/${nextDue.jamiyaSlug}#pay` as Route}
-            className="amanah-surface flex items-center justify-between gap-3 border-primary/25 px-4 py-3.5 transition-colors hover:bg-muted/60"
-          >
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-                {labels.duePrefix}
-              </p>
-              <p className="amanah-money mt-1 text-lg font-bold text-foreground">
-                {formatCurrency(dueRemaining, nextDue.currency)}
-              </p>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {nextDue.jamiyaName}
-                {data.stats.pendingContributions > 1
-                  ? ` · ${data.stats.pendingContributions} due soon`
-                  : ''}
-              </p>
-            </div>
-            <span className="shrink-0 text-sm font-semibold text-primary">{labels.quickPayDue} →</span>
-          </Link>
         ) : null}
 
         <section className="space-y-2.5">
           {!circle ? (
-            <div className="amanah-surface space-y-4 border-primary/20 px-4 py-5">
+            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
               <div>
-                <h2 className="text-lg font-semibold tracking-tight text-foreground">
+                <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
                   {labels.noCirclesTitle}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">{labels.noCirclesDesc}</p>
@@ -168,14 +155,17 @@ export function DashboardView({
               <div className="flex items-baseline justify-between gap-3 px-0.5">
                 <h2 className="text-sm font-semibold text-foreground">{labels.yourCircle}</h2>
                 {hasMultipleCircles ? (
-                  <Link href={'/circles' as Route} className="text-sm font-semibold text-primary">
+                  <Link
+                    href={'/circles' as Route}
+                    className="text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
                     {labels.viewAllCircles}
                   </Link>
                 ) : null}
               </div>
               <Link
                 href={`/circles/${circle.jamiya.slug}` as Route}
-                className="amanah-surface amanah-circle-mint block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40"
+                className="amanah-surface amanah-circle-mint block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -193,36 +183,83 @@ export function DashboardView({
                     {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
                   </p>
                 </div>
+
+                {(circleContribution || circlePayout) ? (
+                  <dl className="mt-3.5 grid gap-2.5 border-t border-border/70 pt-3 sm:grid-cols-2">
+                    {circleContribution ? (
+                      <div>
+                        <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {labels.nextContribution}
+                        </dt>
+                        <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+                          {formatCurrency(
+                            Math.max(
+                              circleContribution.amount - circleContribution.amountPaid,
+                              0,
+                            ),
+                            circleContribution.currency,
+                          )}
+                        </dd>
+                        <dd className="mt-0.5 text-xs text-muted-foreground">
+                          {formatDate(circleContribution.dueDate)}
+                          {needsTopUpForDue ? ` · ${labels.addMoneyToPay}` : ''}
+                        </dd>
+                      </div>
+                    ) : null}
+                    {circlePayout ? (
+                      <div>
+                        <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {labels.nextPayout}
+                        </dt>
+                        <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+                          {formatCurrency(circlePayout.amount, circlePayout.currency)}
+                        </dd>
+                        <dd className="mt-0.5 text-xs text-muted-foreground">
+                          {formatDate(circlePayout.scheduledDate)}
+                        </dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                ) : null}
               </Link>
             </>
           )}
         </section>
 
         <section className="space-y-2.5 md:hidden">
-          <div className="flex items-baseline justify-between px-0.5">
-            <h2 className="text-sm font-semibold text-foreground">{labels.recent}</h2>
-            <Link href={'/notifications' as Route} className="text-sm font-semibold text-primary">
-              {labels.activity}
-            </Link>
-          </div>
-          <div className="amanah-surface px-3 py-1">
-            <RecentList rows={recent} emptyLabel={labels.nothingYet} />
-          </div>
+          <RecentSection labels={labels} rows={recent} />
         </section>
       </div>
 
       <aside className="hidden space-y-2.5 md:block">
-        <div className="flex items-baseline justify-between px-0.5">
-          <h2 className="text-sm font-semibold text-foreground">{labels.recent}</h2>
-          <Link href={'/notifications' as Route} className="text-sm font-semibold text-primary">
-            {labels.activity}
-          </Link>
-        </div>
-        <div className="amanah-surface px-3 py-1">
-          <RecentList rows={recent} emptyLabel={labels.nothingYet} />
-        </div>
+        <RecentSection labels={labels} rows={recent} />
       </aside>
     </div>
+  );
+}
+
+function RecentSection({
+  labels,
+  rows,
+}: {
+  labels: Dictionary['dashboard'];
+  rows: DashboardData['activity'];
+}) {
+  return (
+    <>
+      <div className="flex items-baseline justify-between px-0.5">
+        <h2 className="text-sm font-semibold text-foreground">{labels.recent}</h2>
+        <Link
+          href={'/notifications' as Route}
+          className="text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          {labels.activity}
+        </Link>
+      </div>
+      <div className="amanah-surface px-3 py-1">
+        <RecentList rows={rows} emptyLabel={labels.nothingYet} />
+      </div>
+    </>
   );
 }
 
@@ -243,17 +280,22 @@ function RecentList({
         const inflow = row.direction === 'credit';
         return (
           <li key={row.id} className="flex items-center justify-between gap-3 py-3">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium capitalize text-foreground">
-                {row.type.replaceAll('_', ' ')}
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="truncate text-sm font-medium capitalize text-foreground">
+                  {row.type.replaceAll('_', ' ')}
+                </p>
+                {row.status ? <StatusBadge status={row.status} /> : null}
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {formatRelativeTime(row.createdAt)}
               </p>
-              <p className="text-xs text-muted-foreground">{formatRelativeTime(row.createdAt)}</p>
             </div>
             <p
               className={
                 inflow
-                  ? 'amanah-money amanah-money-in text-sm font-semibold'
-                  : 'amanah-money amanah-money-out text-sm font-semibold'
+                  ? 'amanah-money amanah-money-in shrink-0 text-sm font-semibold'
+                  : 'amanah-money amanah-money-out shrink-0 text-sm font-semibold'
               }
             >
               {inflow ? '+' : '−'}

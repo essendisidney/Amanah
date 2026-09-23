@@ -3,23 +3,28 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import {
   Activity,
+  ArrowDownLeft,
+  ArrowUpRight,
   Home,
   LayoutGrid,
-  Wallet,
+  Plus,
   UserRound,
+  Wallet,
 } from 'lucide-react';
+import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { dictionaries } from '@/i18n/dictionaries';
 import { DashboardView } from '@/features/dashboard/components/dashboard-view';
 import type { DashboardData } from '@/features/dashboard/types';
-import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
-import { AdminNav } from '@/features/admin/components/admin-nav';
-import { Button } from '@jamiya/ui';
+import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
+import { TopUpForm } from '@/features/wallet/components/top-up-form';
+import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { cn } from '@/lib/utils';
 import { JameiyahLogo } from '@/components/amanah-logo';
 
 export const dynamic = 'force-dynamic';
 
-/** Local / preview-only visual QA page. Never live data; blocked in production. */
+/** Local / preview-only visual QA. Clearly labelled sample data — never production. */
 export default function UiPreviewPage() {
   if (process.env.VERCEL_ENV === 'production') {
     notFound();
@@ -29,7 +34,7 @@ export default function UiPreviewPage() {
   }
 
   const dict = dictionaries.en;
-  const sample: DashboardData = {
+  const emptyDashboard: DashboardData = {
     profile: {
       full_name: 'Amina Sample',
       email: 'sample@preview.local',
@@ -82,11 +87,103 @@ export default function UiPreviewPage() {
     },
   };
 
+  const withCircle: DashboardData = {
+    ...emptyDashboard,
+    jamiyas: [
+      {
+        membershipId: 'mem-sample',
+        role: 'member',
+        status: 'active',
+        payoutPosition: 3,
+        jamiya: {
+          id: 'jamiya-sample',
+          name: 'Sisters Circle',
+          slug: 'sisters-circle-sample',
+          status: 'active',
+          contributionAmount: 2000,
+          currency: 'KES',
+          maxMembers: 10,
+          memberCount: 8,
+          cycleCount: 8,
+          currentCycle: 2,
+          startDate: '2026-01-15',
+          challengeKind: null,
+        },
+      },
+    ],
+    contributions: [
+      {
+        id: 'due-sample',
+        cycleNumber: 2,
+        amount: 2000,
+        amountPaid: 0,
+        currency: 'KES',
+        status: 'pending',
+        dueDate: '2026-09-30',
+        jamiyaName: 'Sisters Circle',
+        jamiyaSlug: 'sisters-circle-sample',
+        jamiyaId: 'jamiya-sample',
+      },
+    ],
+    payouts: [
+      {
+        id: 'payout-sample',
+        cycleNumber: 4,
+        amount: 16000,
+        currency: 'KES',
+        status: 'scheduled',
+        scheduledDate: '2026-11-15',
+        jamiyaName: 'Sisters Circle',
+        jamiyaSlug: 'sisters-circle-sample',
+        jamiyaId: 'jamiya-sample',
+      },
+    ],
+    stats: {
+      activeCircles: 1,
+      pendingContributions: 1,
+      upcomingPayouts: 1,
+      committedAmount: 2000,
+      monthInflow: 110,
+    },
+  };
+
+  const sampleTx = [
+    {
+      id: 'tx-1',
+      type: 'wallet_top_up',
+      status: 'completed',
+      amount: 10,
+      currency: 'KES',
+      direction: 'credit',
+      created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    },
+    {
+      id: 'tx-2',
+      type: 'wallet_top_up',
+      status: 'completed',
+      amount: 100,
+      currency: 'KES',
+      direction: 'credit',
+      created_at: new Date(Date.now() - 35 * 86400000).toISOString(),
+    },
+  ];
+
   const tabs = [
     { href: '/dashboard' as Route, short: dict.nav.dashboardShort, icon: Home, active: true },
     { href: '/circles' as Route, short: dict.nav.circlesShort, icon: LayoutGrid, active: false },
-    { href: '/wallet' as Route, short: dict.nav.walletShort, icon: Wallet, active: false, center: true },
-    { href: '/notifications' as Route, short: dict.nav.activityShort, icon: Activity, active: false },
+    {
+      href: '/wallet' as Route,
+      short: dict.nav.walletShort,
+      icon: Wallet,
+      active: false,
+      center: true,
+    },
+    {
+      href: '/notifications' as Route,
+      short: dict.nav.activityShort,
+      icon: Activity,
+      active: false,
+    },
     { href: '/profile' as Route, short: dict.nav.profileShort, icon: UserRound, active: false },
   ];
 
@@ -96,51 +193,134 @@ export default function UiPreviewPage() {
         Sample preview — not live data
       </div>
 
-      <header className="sticky top-8 z-40 border-b border-border/60 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md">
+      <header className="sticky top-8 z-40 border-b border-border/60 bg-background/90 backdrop-blur-md">
         <div className="mx-auto flex h-12 w-full max-w-6xl items-center justify-between gap-3 px-4">
           <JameiyahLogo href={'/' as Route} size="md" tone="brand" />
-          <span className="text-xs font-medium text-muted-foreground">UI polish preview</span>
+          <nav className="flex gap-3 text-xs font-semibold">
+            <a href="#dashboard-empty" className="text-primary">
+              Dashboard
+            </a>
+            <a href="#dashboard-circle" className="text-primary">
+              With circle
+            </a>
+            <a href="#money" className="text-primary">
+              Money
+            </a>
+          </nav>
         </div>
       </header>
 
-      <main className="relative mx-auto w-full max-w-6xl space-y-10 px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-12">
-        <section id="dashboard" aria-label="Dashboard sample">
-          <DashboardView data={sample} email="sample@preview.local" labels={dict.dashboard} common={dict.common} />
-        </section>
-
-        <section id="circle" className="space-y-3" aria-label="Circle summary sample">
-          <h2 className="text-sm font-semibold text-foreground">Circle summary</h2>
-          <CircleDetailHero
-            slug="sisters-circle-sample"
-            name="Sisters Circle"
-            status="active"
-            roleLabel="Member"
-            kindLabel="Merry-go-round"
-            poolAmount={16000}
-            currency="KES"
-            memberSummary="8/10 members"
-            stats={[
-              { label: 'Contribution', value: 'KES 2,000' },
-              { label: 'Schedule', value: 'Every 30 days' },
-              { label: 'Cycle', value: '2 of 8' },
-              { label: 'Progress', value: '25%' },
-            ]}
-            personalDue={{ remaining: 2000, dueDate: '2026-09-30', status: 'open' }}
+      <main className="relative mx-auto w-full max-w-6xl space-y-12 px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-12">
+        <section id="dashboard-empty" className="scroll-mt-28 space-y-3" aria-label="Dashboard empty">
+          <h2 className="text-sm font-semibold text-foreground">Dashboard · no circles</h2>
+          <DashboardView
+            data={emptyDashboard}
+            email="sample@preview.local"
+            labels={dict.dashboard}
+            common={dict.common}
           />
         </section>
 
-        <section id="actions" className="space-y-3" aria-label="Button styles sample">
-          <h2 className="text-sm font-semibold text-foreground">Actions</h2>
-          <div className="amanah-surface flex flex-wrap gap-2 p-4">
-            <Button>Primary</Button>
-            <Button variant="outline">Secondary</Button>
-            <Button variant="destructive">Destructive</Button>
-          </div>
+        <section
+          id="dashboard-circle"
+          className="scroll-mt-28 space-y-3"
+          aria-label="Dashboard with circle"
+        >
+          <h2 className="text-sm font-semibold text-foreground">
+            Dashboard · circle with next contribution & payout
+          </h2>
+          <DashboardView
+            data={withCircle}
+            email="sample@preview.local"
+            labels={dict.dashboard}
+            common={dict.common}
+          />
         </section>
 
-        <section id="admin" className="space-y-3" aria-label="Admin nav sample">
-          <h2 className="text-sm font-semibold text-foreground">Admin navigation</h2>
-          <AdminNav />
+        <section id="money" className="scroll-mt-28 space-y-5" aria-label="Money sample">
+          <h2 className="text-sm font-semibold text-foreground">Money</h2>
+
+          <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {dict.wallet.availableLabel}
+              </p>
+              <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                {formatCurrency(110, 'KES')}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Button className="min-h-11 w-full px-2" disabled>
+                <Plus className="h-4 w-4" />
+                <span className="truncate">{dict.wallet.topUp}</span>
+              </Button>
+              <Button variant="outline" className="min-h-11 w-full px-2" disabled>
+                <ArrowDownLeft className="h-4 w-4" />
+                <span className="truncate">{dict.wallet.quickPay}</span>
+              </Button>
+              <Button variant="outline" className="min-h-11 w-full px-2" disabled>
+                <ArrowUpRight className="h-4 w-4" />
+                <span className="truncate">{dict.wallet.withdraw}</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.wallet.topUp}</h3>
+              <div className="amanah-surface p-4 sm:p-5">
+                <TopUpForm
+                  currency="KES"
+                  labels={dict.walletForms}
+                  provider="simulated"
+                  defaultPhone="+254712345678"
+                  defaultAmount={500}
+                />
+              </div>
+            </div>
+            <div className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.wallet.withdraw}</h3>
+              <div className="amanah-surface p-4 sm:p-5">
+                <WithdrawalForm
+                  currency="KES"
+                  labels={dict.walletForms}
+                  defaultPhone="+254712345678"
+                  availableBalance={110}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2.5">
+            <h3 className="text-sm font-semibold text-foreground">{dict.wallet.historyTitle}</h3>
+            <ul className="amanah-surface divide-y divide-border/70">
+              {sampleTx.map((row) => {
+                const inflow = row.direction === 'credit';
+                return (
+                  <li key={row.id} className="flex items-center gap-3 px-4 py-3">
+                    <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <ArrowDownLeft className="h-4 w-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="truncate text-sm font-semibold capitalize text-foreground">
+                          {row.type.replaceAll('_', ' ')}
+                        </p>
+                        <StatusBadge status={row.status} />
+                      </div>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {formatRelativeTime(row.created_at)}
+                      </p>
+                    </div>
+                    <p className="amanah-money amanah-money-in shrink-0 text-sm font-semibold">
+                      {inflow ? '+' : '−'}
+                      {formatCurrency(row.amount, row.currency)}
+                    </p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </section>
       </main>
 
@@ -181,9 +361,7 @@ export default function UiPreviewPage() {
                   href={item.href}
                   className={cn(
                     'relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-semibold',
-                    item.active
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground',
+                    item.active ? 'bg-primary/10 text-primary' : 'text-muted-foreground',
                   )}
                 >
                   <Icon className="h-5 w-5" strokeWidth={item.active ? 2.4 : 1.6} />
