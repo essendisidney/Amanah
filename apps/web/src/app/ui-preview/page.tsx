@@ -5,6 +5,7 @@ import {
   Activity,
   ArrowDownLeft,
   ArrowUpRight,
+  ChevronRight,
   Home,
   LayoutGrid,
   Plus,
@@ -223,6 +224,18 @@ export default function UiPreviewPage() {
             </a>
             <a href="#activity" className="text-primary">
               Activity
+            </a>
+            <a href="#you" className="text-primary">
+              You
+            </a>
+            <a href="#help" className="text-primary">
+              Help
+            </a>
+            <a href="#support" className="text-primary">
+              Support
+            </a>
+            <a href="#zakat" className="text-primary">
+              Zakat
             </a>
           </nav>
         </div>
@@ -596,6 +609,295 @@ export default function UiPreviewPage() {
                 </Button>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section id="you" className="scroll-mt-28 space-y-5" aria-label="You profile sample">
+          <h2 className="text-sm font-semibold text-foreground">You · setup incomplete</h2>
+          <AppPage width="medium" className="!space-y-5">
+            <PageHeader title="Amina Sample" subtitle="+254712345678" />
+            <section className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                  {dict.profile.setupTitle}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">2 steps left</p>
+              </div>
+              <ul className="divide-y divide-border/70 overflow-hidden rounded-lg border border-border/70">
+                <li>
+                  <a
+                    href="#you"
+                    className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold text-foreground"
+                  >
+                    <span>{dict.profile.mpesaLinkage}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#you"
+                    className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold text-foreground"
+                  >
+                    <span>Complete verification</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  </a>
+                </li>
+              </ul>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.profile.linkVerification}</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-foreground">Not started</p>
+                  <StatusBadge status="not_started" />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Upload ID documents so officers can trust your membership.
+                </p>
+                <p className="text-sm font-medium text-foreground">Next: Upload documents</p>
+                <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
+                  Upload documents
+                </Button>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Shortcuts</h3>
+              <ul className="amanah-surface divide-y divide-border/70">
+                {[
+                  { title: dict.profile.linkVerification, meta: 'Not started' },
+                  { title: dict.profile.linkHelp, meta: null },
+                  { title: dict.profile.linkSupportJameiyah, meta: null },
+                ].map((item) => (
+                  <li key={item.title}>
+                    <div className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 sm:px-5">
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-foreground">
+                          {item.title}
+                        </span>
+                        {item.meta ? (
+                          <span className="mt-0.5 block text-xs text-muted-foreground">
+                            {item.meta}
+                          </span>
+                        ) : null}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <Button variant="outline" className="min-h-11 w-full" disabled>
+              {dict.common.signOut}
+            </Button>
+          </AppPage>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">You · setup complete</h3>
+            <div className="amanah-surface space-y-2 px-4 py-4 sm:px-5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                {dict.profile.setupDone}
+              </p>
+              <p className="text-sm text-muted-foreground">{dict.profile.scoreHint}</p>
+              <p className="text-sm text-muted-foreground">{dict.profile.scoreNotCredit}</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="help" className="scroll-mt-28 space-y-5" aria-label="Help sample">
+          <h2 className="text-sm font-semibold text-foreground">Help · member</h2>
+          <AppPage width="medium" className="!space-y-5">
+            <PageHeader title={dict.help.title} subtitle={dict.help.subtitle} />
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.help.circleTitle}</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <p className="text-sm text-muted-foreground">{dict.help.circleBody}</p>
+                <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
+                  {dict.help.openCircles}
+                </Button>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.help.accountTitle}</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <p className="text-sm text-muted-foreground">{dict.help.accountBody}</p>
+                <ul className="divide-y divide-border/70 overflow-hidden rounded-lg border border-border/70">
+                  <li className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold">
+                    <span>{dict.help.openProfile}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  </li>
+                  <li className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold">
+                    <span>{dict.help.openMoney}</span>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                  </li>
+                </ul>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.help.ticketTitle}</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <p className="text-sm text-muted-foreground">{dict.help.ticketBody}</p>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{dict.help.ticketSubject}</p>
+                  <div className="h-11 rounded-md border border-border/70 bg-background" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{dict.help.ticketMessage}</p>
+                  <div className="h-24 rounded-md border border-border/70 bg-background" />
+                </div>
+                <Button className="min-h-11 w-full sm:w-auto" disabled>
+                  {dict.help.ticketSubmit}
+                </Button>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">{dict.help.tipTitle}</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <p className="text-sm text-muted-foreground">{dict.help.tipBody}</p>
+                <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
+                  {dict.help.openTip}
+                </Button>
+              </div>
+            </section>
+          </AppPage>
+        </section>
+
+        <section id="support" className="scroll-mt-28 space-y-5" aria-label="Support tip sample">
+          <h2 className="text-sm font-semibold text-foreground">Support · tip</h2>
+          <div className="mx-auto max-w-3xl space-y-5">
+            <header className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                {dict.support.eyebrow}
+              </p>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                {dict.support.title}
+              </h1>
+              <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                {dict.support.body}
+              </p>
+            </header>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Voluntary tip</h3>
+              <div className="amanah-surface max-w-md space-y-3.5 px-4 py-4 sm:px-5">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{dict.support.tipLabel}</p>
+                  <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
+                    100
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{dict.support.phoneOptional}</p>
+                  <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
+                    +254712345678
+                  </div>
+                </div>
+                <Button className="min-h-11 w-full" disabled>
+                  {dict.support.submit}
+                </Button>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Giving elsewhere?</h3>
+              <ul className="amanah-surface divide-y divide-border/70">
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>{dict.common.sadaka} campaigns</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>Zakat calculator</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>{dict.help.title}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+              </ul>
+            </section>
+          </div>
+        </section>
+
+        <section id="zakat" className="scroll-mt-28 space-y-5" aria-label="Zakat calculator sample">
+          <h2 className="text-sm font-semibold text-foreground">Zakat · calculator</h2>
+          <div className="mx-auto max-w-3xl space-y-5">
+            <header className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                Estimate only
+              </p>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                Zakat calculator
+              </h1>
+              <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
+                Estimate 2.5% of qualifying wealth after immediate liabilities. Consult a qualified
+                scholar for your personal situation.
+              </p>
+            </header>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Your wealth</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Cash, savings and investments (KES)
+                    </p>
+                    <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
+                      800000
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Gold and other qualifying assets (KES)
+                    </p>
+                    <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
+                      400000
+                    </div>
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <p className="text-sm font-medium text-foreground">
+                      Immediate liabilities (KES)
+                    </p>
+                    <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
+                      50000
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Estimate</h3>
+              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+                <p className="text-sm text-muted-foreground">Approximate nisab: KES 1,100,000</p>
+                <p className="text-sm text-foreground">
+                  Qualifying wealth: <span className="font-semibold">KES 1,150,000</span>
+                </p>
+                <p className="text-2xl font-semibold tracking-tight text-primary sm:text-3xl">
+                  Estimated zakat: KES 28,750
+                </p>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Button className="min-h-11 w-full sm:w-auto" disabled>
+                    Give via Sadaka
+                  </Button>
+                  <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
+                    Support Jameiyah
+                  </Button>
+                </div>
+              </div>
+            </section>
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Related</h3>
+              <ul className="amanah-surface divide-y divide-border/70">
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>{dict.common.sadaka} campaigns</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>{dict.support.title}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+                <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
+                  <span>{dict.help.title}</span>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
+                </li>
+              </ul>
+            </section>
           </div>
         </section>
       </main>

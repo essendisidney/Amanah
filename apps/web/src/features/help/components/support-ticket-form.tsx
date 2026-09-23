@@ -11,6 +11,7 @@ const initial: SupportTicketState = { success: false, message: '' };
 
 export function SupportTicketForm({
   labels,
+  hideTitle = false,
 }: {
   labels: {
     ticketTitle: string;
@@ -20,15 +21,21 @@ export function SupportTicketForm({
     submit: string;
     submitting: string;
   };
+  /** When the page already renders the section heading. */
+  hideTitle?: boolean;
 }) {
   const [state, action, pending] = useActionState(submitSupportTicketAction, initial);
 
   return (
-    <form action={action} className="space-y-3">
-      <div>
-        <h2 className="text-base font-semibold">{labels.ticketTitle}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{labels.ticketBody}</p>
-      </div>
+    <form action={action} className="space-y-3.5">
+      {!hideTitle ? (
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">{labels.ticketTitle}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{labels.ticketBody}</p>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">{labels.ticketBody}</p>
+      )}
       <div className="space-y-2">
         <Label htmlFor="support-subject">{labels.subjectLabel}</Label>
         <Input
@@ -57,7 +64,7 @@ export function SupportTicketForm({
           {state.message}
         </p>
       ) : null}
-      <Button type="submit" size="sm" className="min-h-11 rounded-full" disabled={pending}>
+      <Button type="submit" className="min-h-11 w-full sm:w-auto" disabled={pending}>
         {pending ? labels.submitting : labels.submit}
       </Button>
     </form>

@@ -4,6 +4,7 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
+import { ChevronRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { signOutAction } from '@/features/auth';
 import { resolveVerificationState } from '@/features/profile/lib/verification-state';
@@ -18,7 +19,7 @@ import {
   hasValidProfilePhone,
 } from '@/features/profile/components/profile-onboarding-banner';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { AppPage, PageCard, PageHeader } from '@/components/app-page';
+import { AppPage, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -185,115 +186,130 @@ export default async function ProfilePage({ searchParams }: Props) {
         subtitle={profile?.phone || profile?.email || user.email || '—'}
       />
 
-      <section className="amanah-forest space-y-3 rounded-[1.5rem] px-5 py-5 text-white">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-white/55">
-              {setupComplete ? labels.setupDone : labels.setupTitle}
-            </p>
-            <p className="mt-1 text-sm text-white/75">
-              {setupComplete
-                ? labels.scoreHint
-                : `${openSteps.length} step${openSteps.length === 1 ? '' : 's'} left`}
-            </p>
-          </div>
+      <section
+        className={
+          setupComplete
+            ? 'amanah-surface space-y-2 px-4 py-4 sm:px-5'
+            : 'amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5'
+        }
+      >
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            {setupComplete ? labels.setupDone : labels.setupTitle}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {setupComplete
+              ? labels.scoreHint
+              : `${openSteps.length} step${openSteps.length === 1 ? '' : 's'} left`}
+          </p>
         </div>
         {!setupComplete ? (
-          <ul className="space-y-2">
+          <ul className="divide-y divide-border/70 overflow-hidden rounded-lg border border-border/70">
             {openSteps.map((step) => (
               <li key={step.label}>
                 <Link
                   href={step.href}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-white/10 px-3.5 py-3 text-sm font-medium text-white transition-colors hover:bg-white/15"
+                  className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  <span>{step.label}</span>
-                  <span aria-hidden>→</span>
+                  <span className="min-w-0 truncate">{step.label}</span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
                 </Link>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-white/70">{labels.scoreNotCredit}</p>
+          <p className="text-sm text-muted-foreground">{labels.scoreNotCredit}</p>
         )}
       </section>
 
-      <PageCard id="verification-status" className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-semibold">{labels.linkVerification}</h2>
-          <StatusBadge status={verification.state} />
+      <section id="verification-status" className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">{labels.linkVerification}</h2>
+        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">{verification.label}</p>
+            <StatusBadge status={verification.state} />
+          </div>
+          <p className="text-sm text-muted-foreground">{verification.detail}</p>
+          <p className="text-sm font-medium text-foreground">Next: {verification.nextAction}</p>
+          {verification.state !== 'approved' ? (
+            <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+              <a href={verification.nextHref}>{verification.nextAction}</a>
+            </Button>
+          ) : null}
         </div>
-        <p className="text-sm text-muted-foreground">{verification.detail}</p>
-        <p className="text-sm font-medium text-foreground">
-          Next: {verification.nextAction}
-        </p>
-        {verification.state !== 'approved' ? (
-          <Button asChild variant="outline" size="sm" className="rounded-full">
-            <a href={verification.nextHref}>{verification.nextAction}</a>
-          </Button>
-        ) : null}
-      </PageCard>
+      </section>
 
-      <PageCard className="divide-y divide-border/50 !py-0">
-        <ul>
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">Shortcuts</h2>
+        <ul className="amanah-surface divide-y divide-border/70">
           {youLinks.map((item) => (
             <li key={item.href}>
               <Link
                 href={item.href}
-                className="flex items-center justify-between gap-3 px-4 py-4 text-[15px] font-medium sm:px-5"
+                className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
               >
-                <span>{item.title}</span>
-                <span className="text-sm font-normal capitalize text-muted-foreground">
-                  {item.meta ? String(item.meta).replaceAll('_', ' ') : '›'}
+                <span className="min-w-0">
+                  <span className="block truncate">{item.title}</span>
+                  {item.meta ? (
+                    <span className="mt-0.5 block truncate text-xs font-normal capitalize text-muted-foreground">
+                      {String(item.meta).replaceAll('_', ' ')}
+                    </span>
+                  ) : null}
                 </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
               </Link>
             </li>
           ))}
         </ul>
-      </PageCard>
+      </section>
 
-      <PageCard className="flex items-center justify-between gap-3 !py-4">
-        <p className="text-sm text-muted-foreground">{labels.appearance}</p>
+      <div className="amanah-surface flex min-h-11 items-center justify-between gap-3 px-4 py-3 sm:px-5">
+        <p className="text-sm font-semibold text-foreground">{labels.appearance}</p>
         <ThemeToggle variant="segmented" />
-      </PageCard>
+      </div>
 
-      <section className="grid gap-6 lg:grid-cols-2">
-        <PageCard id="personal-details">
-          <h2 className="mb-4 text-base font-semibold">{labels.personalDetails}</h2>
-          <ProfileForm
-            labels={labels}
-            continueHref={onboarding ? continueHref : undefined}
-            requirePhone={onboarding || !hasPhone}
-            defaultValues={{
-              fullName: profile?.full_name ?? '',
-              phone: profile?.phone ?? '',
-              bio: profile?.bio ?? '',
-              countryCode: profile?.country_code ?? '',
-            }}
-          />
-        </PageCard>
+      <section className="grid gap-5 lg:grid-cols-2">
+        <div id="personal-details" className="space-y-2.5">
+          <h2 className="text-sm font-semibold text-foreground">{labels.personalDetails}</h2>
+          <div className="amanah-surface px-4 py-4 sm:px-5">
+            <ProfileForm
+              labels={labels}
+              continueHref={onboarding ? continueHref : undefined}
+              requirePhone={onboarding || !hasPhone}
+              defaultValues={{
+                fullName: profile?.full_name ?? '',
+                phone: profile?.phone ?? '',
+                bio: profile?.bio ?? '',
+                countryCode: profile?.country_code ?? '',
+              }}
+            />
+          </div>
+        </div>
 
-        <PageCard id="mpesa">
-          <h2 className="mb-4 text-base font-semibold">{labels.mpesaLinkage}</h2>
-          <MpesaLinkForm
-            labels={labels}
-            defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
-          />
-        </PageCard>
+        <div id="mpesa" className="space-y-2.5">
+          <h2 className="text-sm font-semibold text-foreground">{labels.mpesaLinkage}</h2>
+          <div className="amanah-surface px-4 py-4 sm:px-5">
+            <MpesaLinkForm
+              labels={labels}
+              defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
+            />
+          </div>
+        </div>
       </section>
 
       <details className="amanah-surface overflow-hidden">
-        <summary className="cursor-pointer px-5 py-4 text-sm font-semibold text-foreground">
+        <summary className="cursor-pointer px-4 py-4 text-sm font-semibold text-foreground sm:px-5">
           {labels.moreAccount}
         </summary>
-        <div className="space-y-6 border-t border-border/50 px-5 py-5">
+        <div className="space-y-6 border-t border-border/70 px-4 py-5 sm:px-5">
           <ReferralPanel
             labels={labels}
             referralCode={profile?.referral_code ?? null}
             referrals={referrals}
           />
 
-          <div>
-            <h2 className="mb-4 text-base font-semibold">IPRS identity</h2>
+          <div className="space-y-2.5">
+            <h2 className="text-sm font-semibold text-foreground">IPRS identity</h2>
             <IprsVerifyForm
               defaultFirstName={(profile?.full_name ?? '').split(' ')[0] ?? ''}
               defaultLastName={(profile?.full_name ?? '').split(' ').slice(1).join(' ')}
@@ -307,22 +323,22 @@ export default async function ProfilePage({ searchParams }: Props) {
             ) : null}
           </div>
 
-          <div id="kyc-documents" className="space-y-4">
-            <h2 className="text-base font-semibold">{labels.kycDocuments}</h2>
+          <div id="kyc-documents" className="space-y-3">
+            <h2 className="text-sm font-semibold text-foreground">{labels.kycDocuments}</h2>
             <KycUploadForm labels={labels} />
-            <div className="space-y-3 border-t border-border/50 pt-4">
-              <h3 className="text-sm font-semibold">{labels.uploadedFiles}</h3>
+            <div className="space-y-2.5 border-t border-border/70 pt-4">
+              <h3 className="text-sm font-semibold text-foreground">{labels.uploadedFiles}</h3>
               {docs.length === 0 ? (
                 <p className="text-sm text-muted-foreground">{labels.noDocuments}</p>
               ) : (
-                <ul className="divide-y divide-border/40">
+                <ul className="divide-y divide-border/70">
                   {docs.map((doc) => (
                     <li key={doc.id} className="flex items-center justify-between gap-3 py-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium capitalize">
+                        <p className="text-sm font-semibold capitalize text-foreground">
                           {doc.document_type.replaceAll('_', ' ')}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {doc.file_name} · {formatDate(doc.created_at)}
                         </p>
                       </div>
@@ -337,7 +353,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       </details>
 
       <form action={signOutAction}>
-        <Button type="submit" variant="outline" className="min-h-11 w-full rounded-full">
+        <Button type="submit" variant="outline" className="min-h-11 w-full">
           {dict.common.signOut}
         </Button>
       </form>
