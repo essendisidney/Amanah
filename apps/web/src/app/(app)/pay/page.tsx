@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { getDashboardData } from '@/features/dashboard';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { AppPage, PageHeader } from '@/components/app-page';
 
 export const metadata: Metadata = {
   title: 'Pay',
@@ -40,11 +41,14 @@ export default async function PayPage() {
   });
 
   return (
-    <PaySheet
-      labels={dict.paySheet}
-      available={available}
-      currency={currency}
-      dues={dues}
-    />
+    <AppPage width="medium">
+      <PageHeader title={dict.paySheet.title} subtitle={dict.paySheet.subtitle} />
+      <PaySheet
+        labels={dict.paySheet}
+        available={available}
+        currency={currency}
+        dues={dues}
+      />
+    </AppPage>
   );
 }

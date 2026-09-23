@@ -19,8 +19,10 @@ import type { DashboardData } from '@/features/dashboard/types';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
+import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { cn } from '@/lib/utils';
 import { JameiyahLogo } from '@/components/amanah-logo';
+import { AppPage, PageHeader } from '@/components/app-page';
 
 export const dynamic = 'force-dynamic';
 
@@ -206,6 +208,9 @@ export default function UiPreviewPage() {
             <a href="#money" className="text-primary">
               Money
             </a>
+            <a href="#pay" className="text-primary">
+              Pay
+            </a>
           </nav>
         </div>
       </header>
@@ -320,6 +325,30 @@ export default function UiPreviewPage() {
                 );
               })}
             </ul>
+          </div>
+        </section>
+
+        <section id="pay" className="scroll-mt-28 space-y-3" aria-label="Pay sample">
+          <h2 className="text-sm font-semibold text-foreground">Pay</h2>
+          <AppPage width="medium" className="!space-y-5">
+            <PageHeader title={dict.paySheet.title} subtitle={dict.paySheet.subtitle} />
+            <PaySheet
+              labels={dict.paySheet}
+              available={110}
+              currency="KES"
+              dues={[
+                {
+                  href: '/circles/sisters-circle-sample#pay-due' as Route,
+                  amountLabel: formatCurrency(2000, 'KES'),
+                  circleName: 'Sisters Circle',
+                  overdue: false,
+                },
+              ]}
+            />
+          </AppPage>
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-foreground">Pay · no dues</h3>
+            <PaySheet labels={dict.paySheet} available={110} currency="KES" dues={[]} />
           </div>
         </section>
       </main>
