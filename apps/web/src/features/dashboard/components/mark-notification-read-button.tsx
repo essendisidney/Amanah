@@ -23,8 +23,8 @@ export function MarkNotificationReadButton({
   return (
     <Button
       type="button"
-      size="sm"
-      variant="ghost"
+      variant="outline"
+      className="min-h-11 shrink-0 px-3"
       disabled={pending}
       onClick={() => {
         startTransition(async () => {
@@ -47,7 +47,7 @@ export function MarkAllNotificationsReadButton({ label }: { label: string }) {
     <Button
       type="button"
       variant="outline"
-      size="sm"
+      className="min-h-11 shrink-0"
       disabled={pending}
       onClick={() => {
         startTransition(async () => {

@@ -221,6 +221,9 @@ export default function UiPreviewPage() {
             <a href="#circles" className="text-primary">
               Circles
             </a>
+            <a href="#activity" className="text-primary">
+              Activity
+            </a>
           </nav>
         </div>
       </header>
@@ -487,6 +490,109 @@ export default function UiPreviewPage() {
                 </Button>
                 <Button variant="outline" className="min-h-11 w-full" disabled>
                   {dict.dashboard.joinWithInvite}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="activity" className="scroll-mt-28 space-y-5" aria-label="Activity sample">
+          <h2 className="text-sm font-semibold text-foreground">Activity · with updates</h2>
+          <AppPage width="medium" className="!space-y-5">
+            <PageHeader
+              title={dict.notificationsPage.title}
+              subtitle={dict.notificationsPage.unreadOne.replace('{count}', '1')}
+              action={
+                <Button variant="outline" className="min-h-11 shrink-0" disabled>
+                  {dict.notificationsPage.markAllRead}
+                </Button>
+              }
+            />
+            <section className="space-y-2.5">
+              <h3 className="text-sm font-semibold text-foreground">Updates</h3>
+              <ul className="amanah-surface divide-y divide-border/70">
+                <li className="flex items-start justify-between gap-3 bg-primary/[0.04] px-4 py-3.5 sm:px-5">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-semibold text-foreground">Contribution due</p>
+                      <StatusBadge status="pending" />
+                    </div>
+                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                      Sisters Circle · Ksh 2,000 due 30 Sept 2026
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">2 days ago</p>
+                  </div>
+                  <Button variant="outline" className="min-h-11 shrink-0 px-3" disabled>
+                    {dict.notificationsPage.markRead}
+                  </Button>
+                </li>
+                <li className="flex items-start justify-between gap-3 px-4 py-3.5 sm:px-5">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground">Wallet top-up completed</p>
+                    <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
+                      Ksh 100 added to your available balance
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">last month</p>
+                  </div>
+                </li>
+              </ul>
+            </section>
+            <section className="space-y-2.5">
+              <div className="flex items-baseline justify-between gap-3 px-0.5">
+                <h3 className="text-sm font-semibold text-foreground">
+                  {dict.notificationsPage.recentMoney}
+                </h3>
+                <span className="text-sm font-semibold text-primary">
+                  {dict.notificationsPage.openMoney}
+                </span>
+              </div>
+              <ul className="amanah-surface divide-y divide-border/70">
+                {sampleTx.map((row) => {
+                  const inflow = row.direction === 'credit';
+                  return (
+                    <li
+                      key={`act-${row.id}`}
+                      className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-sm font-semibold capitalize text-foreground">
+                            {row.type.replaceAll('_', ' ')}
+                          </p>
+                          <StatusBadge status={row.status} />
+                        </div>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {formatRelativeTime(row.created_at)}
+                        </p>
+                      </div>
+                      <p className="amanah-money amanah-money-in shrink-0 text-sm font-semibold">
+                        {inflow ? '+' : '−'}
+                        {formatCurrency(row.amount, row.currency)}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          </AppPage>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">Activity · empty</h3>
+            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+              <div>
+                <p className="text-base font-semibold tracking-tight text-foreground">
+                  {dict.notificationsPage.emptyTitle}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {dict.notificationsPage.emptyDesc}
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button className="min-h-11 w-full" disabled>
+                  {dict.notificationsPage.openCircles}
+                </Button>
+                <Button variant="outline" className="min-h-11 w-full" disabled>
+                  {dict.notificationsPage.openMoney}
                 </Button>
               </div>
             </div>

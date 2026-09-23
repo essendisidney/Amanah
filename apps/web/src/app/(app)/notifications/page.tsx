@@ -2,17 +2,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatRelativeTime } from '@jamiya/shared';
+import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
   MarkAllNotificationsReadButton,
   MarkNotificationReadButton,
 } from '@/features/dashboard/components/mark-notification-read-button';
 import { notificationHref } from '@/features/dashboard/lib/notification-href';
-import { AppPage, PageCard, PageHeader } from '@/components/app-page';
+import { AppPage, PageHeader } from '@/components/app-page';
 import { enrichNotification } from '@/features/dashboard/lib/notification-enrichment';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 import type { Route } from 'next';
+import { cn } from '@/lib/utils';
 
 export const metadata: Metadata = {
   title: 'Activity',
@@ -166,10 +169,18 @@ export default async function NotificationsPage() {
     }
   }
 
+  const subtitle =
+    unreadCount > 0
+      ? unreadCount === 1
+        ? t(labels.unreadOne, { count: unreadCount })
+        : t(labels.unreadMany, { count: unreadCount })
+      : labels.upToDate;
+
   return (
     <AppPage width="medium">
       <PageHeader
         title={labels.title}
+        subtitle={subtitle}
         action={
           unreadCount > 0 ? (
             <MarkAllNotificationsReadButton label={labels.markAllRead} />
@@ -177,17 +188,28 @@ export default async function NotificationsPage() {
         }
       />
 
-      <PageCard className="!py-2">
-        <h2 className="mb-1 px-1 pt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-          Updates
-        </h2>
-        <ul className="divide-y divide-border/50">
-          {notifications.length === 0 ? (
-            <li className="py-6 text-sm text-muted-foreground">
-              {labels.emptyDesc}
-            </li>
-          ) : (
-            notifications.map((item) => {
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">Updates</h2>
+        {notifications.length === 0 ? (
+          <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+            <div>
+              <p className="text-base font-semibold tracking-tight text-foreground">
+                {labels.emptyTitle}
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">{labels.emptyDesc}</p>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button asChild className="min-h-11 w-full">
+                <Link href={'/circles' as Route}>{labels.openCircles}</Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11 w-full">
+                <Link href={'/wallet' as Route}>{labels.openMoney}</Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <ul className="amanah-surface divide-y divide-border/70">
+            {notifications.map((item) => {
               const enrichment = enrichNotification({
                 title: item.title,
                 type: item.type,
@@ -198,16 +220,27 @@ export default async function NotificationsPage() {
               const href =
                 notificationHref(item.type, item.data, slugByJamiyaId, item.title) ??
                 (enrichment.hrefHint as Route | null);
+              const unread = !item.read_at;
+
               return (
-                <li key={item.id} className="flex items-start justify-between gap-3 py-3.5">
+                <li
+                  key={item.id}
+                  className={cn(
+                    'flex items-start justify-between gap-3 px-4 py-3.5 sm:px-5',
+                    unread && 'bg-primary/[0.04]',
+                  )}
+                >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       {href ? (
-                        <Link href={href} className="text-[15px] font-medium text-foreground">
+                        <Link
+                          href={href}
+                          className="text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
                           {item.title}
                         </Link>
                       ) : (
-                        <p className="text-[15px] font-medium">{item.title}</p>
+                        <p className="text-sm font-semibold text-foreground">{item.title}</p>
                       )}
                       {enrichment.currentStatus ? (
                         <StatusBadge status={enrichment.currentStatus} />
@@ -223,7 +256,7 @@ export default async function NotificationsPage() {
                       {formatRelativeTime(item.created_at)}
                     </p>
                   </div>
-                  {!item.read_at ? (
+                  {unread ? (
                     <MarkNotificationReadButton
                       notificationId={item.id}
                       label={labels.markRead}
@@ -231,54 +264,61 @@ export default async function NotificationsPage() {
                   ) : null}
                 </li>
               );
+            })}
+          </ul>
+        )}
+      </section>
+
+      <section className="space-y-2.5">
+        <div className="flex items-baseline justify-between gap-3 px-0.5">
+          <h2 className="text-sm font-semibold text-foreground">{labels.recentMoney}</h2>
+          <Link
+            href={'/wallet' as Route}
+            className="text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            {labels.openMoney}
+          </Link>
+        </div>
+        <ul className="amanah-surface divide-y divide-border/70">
+          {recentTx.length === 0 ? (
+            <li className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
+              No money movement yet
+            </li>
+          ) : (
+            recentTx.map((tx) => {
+              const amount = typeof tx.amount === 'number' ? tx.amount : Number(tx.amount);
+              const inflow = !(tx.direction === 'debit' || tx.direction === 'out');
+              return (
+                <li
+                  key={tx.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3 sm:px-5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold capitalize text-foreground">
+                        {tx.type.replaceAll('_', ' ')}
+                      </p>
+                      <StatusBadge status={tx.status} />
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {formatRelativeTime(tx.created_at)}
+                    </p>
+                  </div>
+                  <p
+                    className={cn(
+                      'amanah-money shrink-0 text-sm font-semibold',
+                      inflow ? 'amanah-money-in' : 'amanah-money-out',
+                    )}
+                  >
+                    {inflow ? '+' : '−'}
+                    {formatCurrency(Math.abs(amount), tx.currency)}
+                  </p>
+                </li>
+              );
             })
           )}
         </ul>
-      </PageCard>
-
-      <details className="group">
-        <summary className="cursor-pointer list-none rounded-[1.35rem] border border-border/70 bg-card/40 px-4 py-3.5 text-sm font-semibold text-foreground">
-          {labels.recentMoney}
-          <span className="ml-2 font-normal text-muted-foreground">
-            ({recentTx.length})
-          </span>
-        </summary>
-        <PageCard className="mt-3 !py-2">
-          <ul className="divide-y divide-border/50">
-            {recentTx.length === 0 ? (
-              <li className="py-6 text-sm text-muted-foreground">No money movement yet</li>
-            ) : (
-              recentTx.map((tx) => {
-                const amount = typeof tx.amount === 'number' ? tx.amount : Number(tx.amount);
-                const signed =
-                  tx.direction === 'debit' || tx.direction === 'out'
-                    ? -Math.abs(amount)
-                    : amount;
-                return (
-                  <li key={tx.id} className="flex items-center justify-between gap-3 py-3.5">
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] font-medium capitalize">
-                        {tx.type.replaceAll('_', ' ')}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatRelativeTime(tx.created_at)}
-                      </p>
-                    </div>
-                    <p
-                      className={`amanah-money text-[15px] font-semibold ${
-                        signed < 0 ? 'amanah-money-out' : 'amanah-money-in'
-                      }`}
-                    >
-                      {signed < 0 ? '−' : '+'}
-                      {formatCurrency(Math.abs(signed), tx.currency)}
-                    </p>
-                  </li>
-                );
-              })
-            )}
-          </ul>
-        </PageCard>
-      </details>
+      </section>
     </AppPage>
   );
 }
