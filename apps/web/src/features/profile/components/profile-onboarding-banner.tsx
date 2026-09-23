@@ -19,19 +19,20 @@ export function ProfileOnboardingBanner({
   continueHref,
   profileCompleted,
   hasPhone,
-  hasKycDoc,
+  verificationComplete,
 }: {
   labels: Dictionary['profile'];
   continueHref?: string;
   profileCompleted: boolean;
   hasPhone: boolean;
-  hasKycDoc: boolean;
+  /** Live KYC approved only — same rule as profile setup hero. */
+  verificationComplete: boolean;
 }) {
   const dest = safeContinuePath(continueHref);
   const nameDone = profileCompleted;
   const phoneDone = hasPhone;
   const ready = nameDone && phoneDone;
-  const kycDone = hasKycDoc;
+  const kycDone = verificationComplete;
 
   return (
     <section className="amanah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">

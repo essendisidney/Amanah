@@ -73,7 +73,7 @@ export default async function LandingPage() {
                 className="min-h-12 w-full bg-[#0d5c45] text-white hover:bg-[#0a4a37] sm:w-auto"
                 asChild
               >
-                <Link href="/welcome">{dict.landing.startWithPhone}</Link>
+                <Link href="/circles/new">Create a circle</Link>
               </Button>
               <Button
                 size="lg"
@@ -81,9 +81,15 @@ export default async function LandingPage() {
                 className="min-h-12 w-full border-[#0d5c45]/40 text-[#0d5c45] sm:w-auto"
                 asChild
               >
-                <Link href="/welcome">Start a circle</Link>
+                <Link href="/circles?redeem=1">Join with a code</Link>
               </Button>
             </div>
+            <p className="mt-3 text-sm text-[#5a6f66]">
+              New here?{' '}
+              <Link href="/welcome" className="font-semibold text-[#0d5c45] hover:underline">
+                {dict.landing.startWithPhone}
+              </Link>
+            </p>
             <ul className="mt-6 flex max-w-lg flex-wrap gap-2 text-xs font-medium text-[#0b4a3c]">
               {['No interest (riba)', 'Private to your circle', 'Phone, email, or Google', 'Member statements'].map(
                 (item) => (
@@ -106,7 +112,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="order-1 flex justify-center lg:order-2 lg:justify-end">
-            <div className="relative">
+            <div className="relative w-full max-w-sm">
               <div
                 aria-hidden
                 className="absolute -inset-8 rounded-full blur-2xl"
@@ -115,15 +121,34 @@ export default async function LandingPage() {
                     'radial-gradient(circle, rgba(197, 160, 68, 0.22) 0%, transparent 68%)',
                 }}
               />
-              <Image
-                src="/brand/jameiyah-mark.png"
-                alt=""
-                width={420}
-                height={420}
-                priority
-                className="relative h-auto w-72 object-contain sm:w-[26rem] lg:w-[28rem]"
-                style={{ filter: 'drop-shadow(0 24px 48px rgba(11, 74, 60, 0.18))' }}
-              />
+              <div className="relative overflow-hidden rounded-[1.75rem] border border-[#0d5c45]/15 bg-white/90 p-5 shadow-[0_20px_50px_rgba(11,74,60,0.12)]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#c5a044]">
+                  Sample preview — not live data
+                </p>
+                <p className="mt-3 font-[family-name:var(--font-display)] text-xl font-semibold text-[#0b4a3c]">
+                  Sisters Circle
+                </p>
+                <p className="mt-1 text-sm text-[#5a6f66]">Merry-go-round · 8/10 members · cycle 2/8</p>
+                <div className="mt-4 flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-medium uppercase tracking-wide text-[#5a6f66]">
+                      This month
+                    </p>
+                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-[#0b4a3c]">KES 2,000</p>
+                  </div>
+                  <span className="rounded-full bg-[#e6f2ed] px-3 py-1 text-xs font-semibold text-[#0d5c45]">
+                    Due soon
+                  </span>
+                </div>
+                <Image
+                  src="/brand/jameiyah-mark.png"
+                  alt=""
+                  width={120}
+                  height={120}
+                  priority
+                  className="pointer-events-none absolute -bottom-4 -right-4 h-28 w-28 opacity-20"
+                />
+              </div>
             </div>
           </div>
         </div>

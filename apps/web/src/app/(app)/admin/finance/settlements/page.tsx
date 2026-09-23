@@ -11,6 +11,7 @@ import {
   backfillOneSettlementAction,
   markSettlementStatusAction,
 } from '@/features/admin/actions/settlement-actions';
+import { FINANCE_ACTION_LABELS } from '@/features/admin/lib/finance-labels';
 
 export const metadata: Metadata = { title: 'Admin · Settlements' };
 export const dynamic = 'force-dynamic';
@@ -163,8 +164,14 @@ export default async function AdminSettlementsPage({ searchParams }: Props) {
                   </Button>
                   <form action={backfillOneSettlementAction}>
                     <input type="hidden" name="intentId" value={row.id} />
-                    <Button type="submit" variant="outline" size="sm" className="min-h-9">
-                      Mirror
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      size="sm"
+                      className="min-h-9"
+                      title={FINANCE_ACTION_LABELS.mirror.title}
+                    >
+                      {FINANCE_ACTION_LABELS.mirror.button}
                     </Button>
                   </form>
                 </div>

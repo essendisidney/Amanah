@@ -11,6 +11,7 @@ import {
   backfillMissingWithdrawalJournalsAction,
 } from '@/features/admin/actions/integrity-backfill-actions';
 import { backfillMissingSettlementsAction } from '@/features/admin/actions/settlement-actions';
+import { FINANCE_ACTION_LABELS } from '@/features/admin/lib/finance-labels';
 
 export const metadata: Metadata = { title: 'Admin · Finance integrity' };
 export const dynamic = 'force-dynamic';
@@ -87,24 +88,38 @@ export default async function AdminFinanceIntegrityPage() {
           {missingCount > 0 ? (
             <form action={backfillMissingJournalsAction}>
               <input type="hidden" name="limit" value="50" />
-              <Button type="submit" className="min-h-11">
-                Backfill journals
+              <Button
+                type="submit"
+                className="min-h-11"
+                title={FINANCE_ACTION_LABELS.backfillJournal.title}
+              >
+                {FINANCE_ACTION_LABELS.backfillJournal.button}
               </Button>
             </form>
           ) : null}
           {(snap.completed_intents_missing_settlement ?? 0) > 0 ? (
             <form action={backfillMissingSettlementsAction}>
               <input type="hidden" name="limit" value="50" />
-              <Button type="submit" variant="outline" className="min-h-11">
-                Backfill settlements
+              <Button
+                type="submit"
+                variant="outline"
+                className="min-h-11"
+                title={FINANCE_ACTION_LABELS.backfillSettlement.title}
+              >
+                {FINANCE_ACTION_LABELS.backfillSettlement.button}
               </Button>
             </form>
           ) : null}
           {(snap.completed_withdrawals_missing_journal ?? 0) > 0 ? (
             <form action={backfillMissingWithdrawalJournalsAction}>
               <input type="hidden" name="limit" value="50" />
-              <Button type="submit" variant="outline" className="min-h-11">
-                Backfill withdrawal journals
+              <Button
+                type="submit"
+                variant="outline"
+                className="min-h-11"
+                title={FINANCE_ACTION_LABELS.backfillWithdrawal.title}
+              >
+                {FINANCE_ACTION_LABELS.backfillWithdrawal.button}
               </Button>
             </form>
           ) : null}

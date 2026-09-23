@@ -54,7 +54,7 @@ export function DashboardView({
     },
     nextDue
       ? {
-          href: (`/circles/${nextDue.jamiyaSlug}#pay` as Route),
+          href: (`/circles/${nextDue.jamiyaSlug}#pay-due` as Route),
           label: labels.quickPayDue,
           icon: CircleDollarSign,
           tint: 'amanah-tint-pay',

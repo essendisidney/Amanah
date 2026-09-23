@@ -29,6 +29,7 @@ type MembershipRow = {
         cycle_count: number | null;
         current_cycle: number;
         start_date: string | null;
+        challenge_kind: string | null;
       }
     | null
     | Array<{
@@ -43,6 +44,7 @@ type MembershipRow = {
         cycle_count: number | null;
         current_cycle: number;
         start_date: string | null;
+        challenge_kind: string | null;
       }>;
 };
 
@@ -101,8 +103,16 @@ function toNumber(value: number | string): number {
   return typeof value === 'number' ? value : Number(value);
 }
 
-export async function getDashboardData(userId: string): Promise<DashboardData> {
+export async function getDashboardData(
+  userId: string,
+  options?: { contributionHorizonDays?: number | null },
+): Promise<DashboardData> {
   const supabase = await createClient();
+  // Default 14-day window for Home; Pay passes null for all open dues.
+  const horizonDays =
+    options && 'contributionHorizonDays' in options
+      ? options.contributionHorizonDays
+      : 14;
 
   const [
     profileResult,
@@ -135,7 +145,8 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
           member_count,
           cycle_count,
           current_cycle,
-          start_date
+          start_date,
+          challenge_kind
         )
       `,
       )
@@ -167,10 +178,12 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     : null;
 
   const membershipRows = (membershipsResult.data ?? []) as unknown as MembershipRow[];
-  const jamiyas: DashboardJamiya[] = membershipRows
+  const jamiyas = membershipRows
     .map((row) => {
       const jamiya = asSingle(row.jamiya);
       if (!jamiya) return null;
+      // Dashboard "your circles" = active seats only. Invited/claim seats are not open circles.
+      if (row.status !== 'active') return null;
       return {
         membershipId: row.id,
         role: row.role,
@@ -188,12 +201,20 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
           cycleCount: jamiya.cycle_count,
           currentCycle: jamiya.current_cycle,
           startDate: jamiya.start_date,
+          challengeKind: jamiya.challenge_kind ?? null,
         },
       } satisfies DashboardJamiya;
     })
-    .filter((item): item is DashboardJamiya => item !== null);
+    .filter((item): item is NonNullable<typeof item> => item !== null);
 
-  const memberIds = membershipRows.map((row) => row.id);
+  const reservedSeatCount = membershipRows.filter((row) => {
+    const jamiya = asSingle(row.jamiya);
+    return row.status === 'invited' && Boolean(jamiya);
+  }).length;
+
+  const memberIds = membershipRows
+    .filter((row) => row.status === 'active')
+    .map((row) => row.id);
 
   let contributions: DashboardContribution[] = [];
   let payouts: DashboardPayout[] = [];
@@ -258,15 +279,18 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
       })
       .filter((item): item is DashboardContribution => item !== null);
 
-    // Wave 9: Home only surfaces near-term dues (overdue or due within 14 days).
-    const horizon = new Date();
-    horizon.setHours(0, 0, 0, 0);
-    horizon.setDate(horizon.getDate() + 14);
-    contributions = contributions.filter((item) => {
-      if (!item.dueDate) return true;
-      const due = new Date(item.dueDate);
-      return !Number.isNaN(due.getTime()) && due <= horizon;
-    });
+    // Home surfaces near-term dues by default (overdue or due within horizon).
+    // Pay page passes contributionHorizonDays: null to list all open dues.
+    if (horizonDays != null && horizonDays > 0) {
+      const horizon = new Date();
+      horizon.setHours(0, 0, 0, 0);
+      horizon.setDate(horizon.getDate() + horizonDays);
+      contributions = contributions.filter((item) => {
+        if (!item.dueDate) return true;
+        const due = new Date(item.dueDate);
+        return !Number.isNaN(due.getTime()) && due <= horizon;
+      });
+    }
 
     payouts = ((payoutsResult.data ?? []) as unknown as PayoutRow[])
       .map((row) => {
@@ -367,6 +391,7 @@ export async function getDashboardData(userId: string): Promise<DashboardData> {
     activity,
     wallet,
     unreadNotificationCount,
+    reservedSeatCount,
     stats: {
       activeCircles: jamiyas.filter((item) => item.status === 'active').length,
       pendingContributions: contributions.length,

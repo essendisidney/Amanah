@@ -10,6 +10,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
 import { resolveIntentExceptionAction } from '@/features/admin/actions/finance-resolve-actions';
 import { reprocessWebhookAction } from '@/features/admin/actions/webhook-reprocess-actions';
+import { FINANCE_ACTION_LABELS, financeStatusLabel } from '@/features/admin/lib/finance-labels';
 
 export const metadata: Metadata = { title: 'Admin · Finance' };
 export const dynamic = 'force-dynamic';
@@ -344,8 +345,9 @@ function IntentLine({
           {row.provider_reference ? ` · ref ${row.provider_reference.slice(0, 12)}` : ''}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          provider {row.status} · settle {row.settlement_status} · reconcile{' '}
-          {row.reconcile_status}
+          payment {financeStatusLabel(row.status)} · settlement{' '}
+          {financeStatusLabel(row.settlement_status)} · reconcile{' '}
+          {financeStatusLabel(row.reconcile_status)}
         </p>
       </div>
       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -361,22 +363,39 @@ function IntentLine({
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={row.id} />
               <input type="hidden" name="action" value="match" />
-              <Button type="submit" size="sm" className="min-h-10">
-                Match
+              <Button
+                type="submit"
+                size="sm"
+                className="min-h-10"
+                title={FINANCE_ACTION_LABELS.match.title}
+              >
+                {FINANCE_ACTION_LABELS.match.button}
               </Button>
             </form>
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={row.id} />
               <input type="hidden" name="action" value="manual" />
-              <Button type="submit" size="sm" variant="outline" className="min-h-10">
-                Manual
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="min-h-10"
+                title={FINANCE_ACTION_LABELS.manual.title}
+              >
+                {FINANCE_ACTION_LABELS.manual.button}
               </Button>
             </form>
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={row.id} />
               <input type="hidden" name="action" value="waive" />
-              <Button type="submit" size="sm" variant="outline" className="min-h-10">
-                Waive
+              <Button
+                type="submit"
+                size="sm"
+                variant="outline"
+                className="min-h-10"
+                title={FINANCE_ACTION_LABELS.waive.title}
+              >
+                {FINANCE_ACTION_LABELS.waive.button}
               </Button>
             </form>
           </div>

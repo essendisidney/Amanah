@@ -200,6 +200,9 @@ export type Dictionary = {
     sectionGive: string;
     moreTools: string;
     overdue: string;
+    noDueTitle: string;
+    noDueBody: string;
+    browseCircles: string;
     insights: string;
     insightsHint: string;
     qard: string;
@@ -406,6 +409,8 @@ export type Dictionary = {
     linkVerification: string;
     linkZakat: string;
     linkSupport: string;
+    linkHelp: string;
+    linkSupportJameiyah: string;
     onboardingEyebrow: string;
     onboardingTitle: string;
     onboardingBody: string;
@@ -472,6 +477,22 @@ export type Dictionary = {
     tipLabel: string;
     phoneOptional: string;
     submit: string;
+  };
+  help: {
+    title: string;
+    subtitle: string;
+    circleTitle: string;
+    circleBody: string;
+    openCircles: string;
+    accountTitle: string;
+    accountBody: string;
+    openProfile: string;
+    openMoney: string;
+    webTitle: string;
+    webBody: string;
+    tipTitle: string;
+    tipBody: string;
+    openTip: string;
   };
   circle: {
     meetingsChat: string;
@@ -569,7 +590,7 @@ export const en: Dictionary = {
     getStarted: 'Sign in',
     signOut: 'Sign out',
     signOutHint: 'End your session on this phone.',
-    support: 'Support',
+    support: 'Support Jameiyah',
     notifications: 'Notifications',
     admin: 'Admin',
     language: 'Language',
@@ -728,7 +749,7 @@ export const en: Dictionary = {
     notificationsDesc: 'Recent circle updates.',
     notificationsEmptyTitle: "You're all caught up",
     notificationsEmptyDesc: 'Invites and dues land here.',
-    quickAdd: 'Add',
+    quickAdd: 'Add money',
     quickPayDue: 'Pay due',
     quickCircles: 'Circles',
     quickWithdraw: 'Withdraw',
@@ -764,6 +785,9 @@ export const en: Dictionary = {
     sectionGive: 'Give',
     moreTools: 'More',
     overdue: 'Overdue',
+    noDueTitle: 'No contributions due',
+    noDueBody: 'When a circle posts dues, they appear here. Open Circles to join or check schedules.',
+    browseCircles: 'Open Circles',
     insights: 'Insights',
     insightsHint: 'This month',
     qard: 'Qard Hassan',
@@ -972,7 +996,7 @@ export const en: Dictionary = {
     scoreStepPhone: 'Kenya mobile',
     scoreStepProfile: 'Name on profile',
     scoreStepDocs: 'ID document uploaded',
-    scoreStepKyc: 'KYC approved',
+    scoreStepKyc: 'Verified',
     scoreNext: 'See savings insights',
     setupTitle: 'Finish setup',
     setupDone: 'You’re set up',
@@ -982,7 +1006,9 @@ export const en: Dictionary = {
     linkGoals: 'Goals',
     linkVerification: 'Verification',
     linkZakat: 'Zakat',
-    linkSupport: 'Support',
+    linkSupport: 'Help & support',
+    linkHelp: 'Help & support',
+    linkSupportJameiyah: 'Support Jameiyah',
     onboardingEyebrow: 'Almost ready',
     onboardingTitle: 'Welcome to Jameiyah',
     onboardingBody: 'Add your name and Kenya mobile to get started.',
@@ -1049,6 +1075,25 @@ export const en: Dictionary = {
     tipLabel: 'Tip (KES)',
     phoneOptional: 'Phone (optional)',
     submit: 'Send tip',
+  },
+  help: {
+    title: 'Help & support',
+    subtitle: 'How to get help without leaving your circles.',
+    circleTitle: 'Your circle officers',
+    circleBody:
+      'For dues, invites, and schedule questions, message your circle admin or treasurer in Circles. They manage the books for your chama.',
+    openCircles: 'Go to Circles',
+    accountTitle: 'Account & money',
+    accountBody:
+      'Update phone and verification on You. Add money or withdraw from Money. Activity shows payment updates.',
+    openProfile: 'Open You',
+    openMoney: 'Open Money',
+    webTitle: 'Company site',
+    webBody:
+      'Product and company information is published on the public site. We do not list a separate support phone or email in the app yet.',
+    tipTitle: 'Support Jameiyah',
+    tipBody: 'Want to tip the platform (not sadaka)? That is a separate voluntary gift.',
+    openTip: 'Support Jameiyah',
   },
   circle: {
     meetingsChat: 'Meetings & chat',
@@ -1149,7 +1194,7 @@ export const sw: Dictionary = {
     getStarted: 'Anza sasa',
     signOut: 'Toka',
     signOutHint: 'Maliza kikao chako kwenye simu hii.',
-    support: 'Msaada',
+    support: 'Saidia Jameiyah',
     notifications: 'Arifa',
     admin: 'Usimamizi',
     language: 'Lugha',
@@ -1308,7 +1353,7 @@ export const sw: Dictionary = {
     notificationsDesc: 'Sasisho za miduara.',
     notificationsEmptyTitle: 'Umesoma zote',
     notificationsEmptyDesc: 'Mialiko na michango huonekana hapa.',
-    quickAdd: 'Ongeza',
+    quickAdd: 'Ongeza pesa',
     quickPayDue: 'Lipa',
     quickCircles: 'Miduara',
     quickWithdraw: 'Toa',
@@ -1344,6 +1389,10 @@ export const sw: Dictionary = {
     sectionGive: 'Changia',
     moreTools: 'Zaidi',
     overdue: 'Imechelewa',
+    noDueTitle: 'Hakuna michango inayodaiwa',
+    noDueBody:
+      'Michango itaonekana hapa mduara unapochapisha deni. Fungua Miduara kujiunga au kuangalia ratiba.',
+    browseCircles: 'Fungua Miduara',
     insights: 'Ufahamu',
     insightsHint: 'Mwezi huu',
     qard: 'Qard Hassan',
@@ -1555,7 +1604,7 @@ export const sw: Dictionary = {
     scoreStepPhone: 'Simu ya Kenya',
     scoreStepProfile: 'Jina kwenye wasifu',
     scoreStepDocs: 'Hati ya kitambulisho',
-    scoreStepKyc: 'KYC imeidhinishwa',
+    scoreStepKyc: 'Imethibitishwa',
     scoreNext: 'Angalia ufahamu wa akiba',
     setupTitle: 'Maliza usanidi',
     setupDone: 'Umesanidiwa',
@@ -1566,6 +1615,8 @@ export const sw: Dictionary = {
     linkVerification: 'Uthibitisho',
     linkZakat: 'Zakat',
     linkSupport: 'Msaada',
+    linkHelp: 'Msaada',
+    linkSupportJameiyah: 'Saidia Jameiyah',
     onboardingEyebrow: 'Karibu tayari',
     onboardingTitle: 'Karibu Jameiyah',
     onboardingBody: 'Ongeza jina na simu ya Kenya kuanza.',
@@ -1632,6 +1683,25 @@ export const sw: Dictionary = {
     tipLabel: 'Tipu ya jukwaa (KES)',
     phoneOptional: 'Simu (si lazima)',
     submit: 'Saidia Jameiyah',
+  },
+  help: {
+    title: 'Msaada',
+    subtitle: 'Jinsi ya kupata msaada bila kuacha miduara yako.',
+    circleTitle: 'Maofisa wa mduara',
+    circleBody:
+      'Kwa deni, mialiko, na ratiba, wasiliana na msimamizi au mhazini wa mduara kwenye Miduara.',
+    openCircles: 'Nenda Miduara',
+    accountTitle: 'Akaunti na pesa',
+    accountBody:
+      'Sasisha simu na uthibitisho kwenye Wewe. Ongeza au toa pesa kwenye Pesa. Shughuli inaonyesha masasisho ya malipo.',
+    openProfile: 'Fungua Wewe',
+    openMoney: 'Fungua Pesa',
+    webTitle: 'Tovuti ya kampuni',
+    webBody:
+      'Maelezo ya bidhaa na kampuni yapo kwenye tovuti ya umma. Bado hatujaorodhesha simu au barua pepe ya msaada ndani ya programu.',
+    tipTitle: 'Saidia Jameiyah',
+    tipBody: 'Unataka tipu ya jukwaa (si sadaka)? Hiyo ni zawadi tofauti ya hiari.',
+    openTip: 'Saidia Jameiyah',
   },
   circle: {
     meetingsChat: 'Mikutano na gumzo',

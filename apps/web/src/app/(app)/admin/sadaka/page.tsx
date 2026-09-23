@@ -379,6 +379,10 @@ export default async function AdminSadakaPage() {
                         max={2000}
                         defaultValue={row.fee_bps}
                       />
+                      <p className="text-xs text-muted-foreground">
+                        Go-live: keep 0 until Sharia board endorses. Then use donation_addon ≤ 250
+                        bps (2.5%).
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`status-${row.id}`}>Status</Label>

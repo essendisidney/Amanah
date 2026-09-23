@@ -293,7 +293,9 @@ export async function verifyIprsAction(
   } as never);
 
   const iprsStatus = result.matched
-    ? 'matched'
+    ? result.provider === 'simulated'
+      ? 'matched_demo'
+      : 'matched'
     : result.outcome === 'not_found'
       ? 'not_found'
       : result.outcome === 'error'
@@ -305,12 +307,17 @@ export async function verifyIprsAction(
     date_of_birth: dateOfBirth,
     iprs_status: iprsStatus,
     iprs_full_name: result.fullName ?? `${firstName} ${lastName}`,
-    iprs_verified_at: result.matched ? new Date().toISOString() : null,
+    iprs_verified_at: result.matched && result.provider !== 'simulated'
+      ? new Date().toISOString()
+      : null,
   };
   if (result.matched) {
     profilePatch.full_name = result.fullName ?? `${firstName} ${lastName}`;
-    profilePatch.kyc_status = 'approved';
-    profilePatch.profile_completed = true;
+    // Demo / simulated IPRS must never grant live KYC approval.
+    if (result.provider !== 'simulated') {
+      profilePatch.kyc_status = 'approved';
+      profilePatch.profile_completed = true;
+    }
   }
 
   const { error: profileError } = await service

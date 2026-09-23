@@ -87,11 +87,24 @@ Prefer the **PWA** on Chrome — not Expo Go — for real Android phones:
 
 Expo Go remains for engineers only (SDK 53 sandbox). Play Store / EAS APK packaging is still deferred — see `apps/mobile/README.md`.
 
-## 6. Smoke test
+## 6. Fee policy (locked for launch)
+
+| Surface | Go-live rule |
+|---------|----------------|
+| Circle join fee | Default **KES 0** (opt-in at create) |
+| Per-contribution fee | Default **KES 0** (opt-in at create) |
+| Early-slot facilitation | **Off** by default; chairs enable only after Shariah brief |
+| Sadaka `fee_mode` | **`donation_addon`** only as default |
+| Sadaka `fee_bps` | **0** until board endorses; then raise via `/admin/sadaka` (cap **250 bps / 2.5%** for early campaigns) |
+| Global STK take-rate | **None** in v1 |
+
+Do not enable `donation_deduct` as default. Do not charge platform fees on circle create without chama consent.
+
+## 7. Smoke test
 
 See [SMOKE_TEST.md](./SMOKE_TEST.md).
 
-## 7. Next-layer cutover (payments + plans)
+## 8. Next-layer cutover (payments + plans)
 
 Keep **simulated** for UAT demos. Flip live only when Daraja/Paystack secrets are ready.
 

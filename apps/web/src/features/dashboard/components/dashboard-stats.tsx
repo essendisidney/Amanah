@@ -12,9 +12,17 @@ export function DashboardStats({
   labels: Dictionary['dashboard'];
 }) {
   const membershipHint =
-    data.jamiyas.length === 1
-      ? t(labels.membershipsHintOne, { count: data.jamiyas.length })
-      : t(labels.membershipsHint, { count: data.jamiyas.length });
+    data.reservedSeatCount > 0
+      ? `${
+          data.jamiyas.length === 1
+            ? t(labels.membershipsHintOne, { count: data.jamiyas.length })
+            : t(labels.membershipsHint, { count: data.jamiyas.length })
+        } · ${data.reservedSeatCount} reserved seat${
+          data.reservedSeatCount === 1 ? '' : 's'
+        }`
+      : data.jamiyas.length === 1
+        ? t(labels.membershipsHintOne, { count: data.jamiyas.length })
+        : t(labels.membershipsHint, { count: data.jamiyas.length });
 
   const items = [
     {
@@ -68,30 +76,47 @@ export function StatusBadge({
 }: {
   status: string;
 }) {
+  const normalized = status.trim().toLowerCase();
   const variant =
-    status === 'active' ||
-    status === 'paid' ||
-    status === 'approved' ||
-    status === 'vouch:approved'
+    normalized === 'active' ||
+    normalized === 'paid' ||
+    normalized === 'approved' ||
+    normalized === 'completed' ||
+    normalized === 'vouch:approved'
       ? 'success'
-      : status === 'late' ||
-          status === 'failed' ||
-          status === 'rejected' ||
-          status === 'vouch:rejected' ||
-          status === 'cancelled'
+      : normalized === 'late' ||
+          normalized === 'failed' ||
+          normalized === 'rejected' ||
+          normalized === 'vouch:rejected' ||
+          normalized === 'cancelled'
         ? 'destructive'
-        : status === 'suspended' || status === 'paused'
+        : normalized === 'suspended' ||
+            normalized === 'paused' ||
+            normalized === 'simulated' ||
+            normalized === 'demo verification'
           ? 'secondary'
-          : status === 'open' ||
-              status === 'scheduled' ||
-              status === 'pending' ||
-              status === 'vouch:pending'
+          : normalized === 'open' ||
+              normalized === 'scheduled' ||
+              normalized === 'pending' ||
+              normalized === 'pending_review' ||
+              normalized === 'under_review' ||
+              normalized === 'not_started' ||
+              normalized === 'vouch:pending'
             ? 'accent'
             : 'secondary';
 
+  const label =
+    normalized === 'not_started'
+      ? 'Not started'
+      : normalized === 'pending_review'
+        ? 'Under review'
+        : normalized === 'simulated'
+          ? 'Demo verification'
+          : status.replaceAll('_', ' ').replace('vouch:', 'vouch ');
+
   return (
     <Badge variant={variant} className="capitalize">
-      {status.replaceAll('_', ' ').replace('vouch:', 'vouch ')}
+      {label}
     </Badge>
   );
 }

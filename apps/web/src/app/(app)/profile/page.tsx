@@ -6,6 +6,7 @@ import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { signOutAction } from '@/features/auth';
+import { resolveVerificationState } from '@/features/profile/lib/verification-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { ProfileForm } from '@/features/profile/components/profile-form';
 import { KycUploadForm } from '@/features/profile/components/kyc-upload-form';
@@ -77,7 +78,8 @@ export default async function ProfilePage({ searchParams }: Props) {
   const { dict } = await getDictionary();
   const labels = dict.profile;
 
-  const [{ data: profileData }, { data: docsData }, { data: referralData }] = await Promise.all([
+  const [{ data: profileData }, { data: docsData }, { data: referralData }, { data: latestIprs }] =
+    await Promise.all([
     supabase
       .from('profiles')
       .select(
@@ -97,6 +99,13 @@ export default async function ProfilePage({ searchParams }: Props) {
       .or(`referrer_id.eq.${user.id},referee_id.eq.${user.id}`)
       .order('created_at', { ascending: false })
       .limit(20),
+    supabase
+      .from('iprs_verifications')
+      .select('provider, matched, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const profile = profileData as unknown as ProfileRow | null;
@@ -110,6 +119,15 @@ export default async function ProfilePage({ searchParams }: Props) {
     currency: string;
     created_at: string;
   }>;
+  const iprsProvider =
+    (latestIprs as { provider?: string } | null)?.provider ?? null;
+
+  const verification = resolveVerificationState({
+    kycStatus: profile?.kyc_status,
+    docs,
+    iprsProvider,
+    iprsStatus: profile?.iprs_status,
+  });
 
   const setupSteps = [
     {
@@ -128,8 +146,12 @@ export default async function ProfilePage({ searchParams }: Props) {
       href: '/profile#mpesa' as Route,
     },
     {
-      done: profile?.kyc_status === 'approved' || docs.length > 0,
-      label: labels.scoreStepKyc,
+      done: verification.setupComplete,
+      label: verification.setupComplete
+        ? labels.scoreStepKyc
+        : verification.state === 'not_started'
+          ? 'Complete verification'
+          : verification.label,
       href: '/profile#kyc-documents' as Route,
     },
   ];
@@ -140,9 +162,10 @@ export default async function ProfilePage({ searchParams }: Props) {
     {
       href: '/profile#kyc-documents' as Route,
       title: labels.linkVerification,
-      meta: profile?.kyc_status ?? null,
+      meta: verification.label,
     },
-    { href: '/support', title: labels.linkSupport, meta: null },
+    { href: '/help' as Route, title: labels.linkHelp, meta: null },
+    { href: '/support' as Route, title: labels.linkSupportJameiyah, meta: null },
   ];
 
   return (
@@ -153,7 +176,7 @@ export default async function ProfilePage({ searchParams }: Props) {
           continueHref={continueHref}
           profileCompleted={Boolean(profile?.profile_completed && profile?.full_name?.trim())}
           hasPhone={hasPhone}
-          hasKycDoc={docs.length > 0}
+          verificationComplete={verification.setupComplete}
         />
       ) : null}
 
@@ -193,6 +216,22 @@ export default async function ProfilePage({ searchParams }: Props) {
           <p className="text-sm text-white/70">{labels.scoreNotCredit}</p>
         )}
       </section>
+
+      <PageCard id="verification-status" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold">{labels.linkVerification}</h2>
+          <StatusBadge status={verification.state} />
+        </div>
+        <p className="text-sm text-muted-foreground">{verification.detail}</p>
+        <p className="text-sm font-medium text-foreground">
+          Next: {verification.nextAction}
+        </p>
+        {verification.state !== 'approved' ? (
+          <Button asChild variant="outline" size="sm" className="rounded-full">
+            <a href={verification.nextHref}>{verification.nextAction}</a>
+          </Button>
+        ) : null}
+      </PageCard>
 
       <PageCard className="divide-y divide-border/50 !py-0">
         <ul>
@@ -261,6 +300,11 @@ export default async function ProfilePage({ searchParams }: Props) {
               defaultNationalId={profile?.national_id ?? ''}
               iprsStatus={profile?.iprs_status ?? 'not_checked'}
             />
+            {verification.state === 'simulated' ? (
+              <p className="mt-3 text-xs text-amber-800 dark:text-amber-300">
+                Demo IPRS does not approve live KYC. Upload documents below for real review.
+              </p>
+            ) : null}
           </div>
 
           <div id="kyc-documents" className="space-y-4">

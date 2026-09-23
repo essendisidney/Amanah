@@ -34,6 +34,7 @@ export type DashboardJamiya = {
     cycleCount: number | null;
     currentCycle: number;
     startDate: string | null;
+    challengeKind: string | null;
   };
 };
 
@@ -99,6 +100,8 @@ export type DashboardData = {
   activity: DashboardActivity[];
   wallet: DashboardWallet | null;
   unreadNotificationCount: number;
+  /** Memberships with status invited (seat reserved, not yet an open circle). */
+  reservedSeatCount: number;
   stats: {
     activeCircles: number;
     pendingContributions: number;

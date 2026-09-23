@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useActionState, useState } from 'react';
-import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
+import { useActionState, useMemo, useState } from 'react';
+import { formatCurrency, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label } from '@jamiya/ui';
 import {
   requestWithdrawalAction,
@@ -18,16 +18,43 @@ export function WithdrawalForm({
   currency = 'KES',
   labels,
   defaultPhone = '',
+  availableBalance = 0,
 }: {
   currency?: string;
   labels: Dictionary['walletForms'];
   defaultPhone?: string;
+  availableBalance?: number;
 }) {
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
+  const [amountText, setAmountText] = useState('');
   const needsOtp = Boolean(state.needsOtp);
   const linkedPhone = defaultPhone.trim();
   const hasLinkedMpesa = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
+  const maxAmount = Math.max(0, availableBalance);
+  const amountValue = Number(amountText);
+  const amountValid =
+    amountText.trim() !== '' &&
+    Number.isFinite(amountValue) &&
+    amountValue >= 100 &&
+    amountValue <= maxAmount;
+  const amountError = useMemo(() => {
+    if (amountText.trim() === '') return null;
+    if (!Number.isFinite(amountValue) || amountValue < 100) {
+      return `Minimum withdrawal is ${formatCurrency(100, currency)}.`;
+    }
+    if (amountValue > maxAmount) {
+      return `Available to withdraw: ${formatCurrency(maxAmount, currency)}.`;
+    }
+    return null;
+  }, [amountText, amountValue, currency, maxAmount]);
+
+  const destinationLabel =
+    destinationType === 'mpesa'
+      ? hasLinkedMpesa
+        ? linkedPhone
+        : 'M-Pesa (enter phone below)'
+      : 'Bank account';
 
   return (
     <form action={action} className="space-y-4">
@@ -35,7 +62,17 @@ export function WithdrawalForm({
       <input type="hidden" name="destinationType" value={destinationType} />
 
       <div className="space-y-2">
-        <Label htmlFor="withdraw-amount">{t(labels.amount, { currency })}</Label>
+        <div className="flex items-end justify-between gap-2">
+          <Label htmlFor="withdraw-amount">{t(labels.amount, { currency })}</Label>
+          <button
+            type="button"
+            className="text-xs font-semibold text-primary"
+            onClick={() => setAmountText(maxAmount > 0 ? String(Math.floor(maxAmount)) : '')}
+            disabled={maxAmount < 100}
+          >
+            Max {formatCurrency(maxAmount, currency)}
+          </button>
+        </div>
         <Input
           id="withdraw-amount"
           name="amount"
@@ -43,10 +80,14 @@ export function WithdrawalForm({
           inputMode="decimal"
           min={100}
           step={100}
-          defaultValue={1000}
+          max={maxAmount > 0 ? maxAmount : undefined}
+          value={amountText}
+          onChange={(e) => setAmountText(e.target.value)}
+          placeholder="0"
           required
           className="h-11 text-base sm:h-10 sm:text-sm"
         />
+        {amountError ? <p className="text-sm text-destructive">{amountError}</p> : null}
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -110,6 +151,18 @@ export function WithdrawalForm({
         </>
       )}
 
+      {amountValid ? (
+        <div className="rounded-lg border border-border bg-muted/30 px-3 py-3 text-sm">
+          <p className="font-medium text-foreground">Before you confirm</p>
+          <ul className="mt-1 space-y-0.5 text-muted-foreground">
+            <li>Amount: {formatCurrency(amountValue, currency)}</li>
+            <li>Destination: {destinationLabel}</li>
+            <li>Platform fee: none shown before submit (provider rails may still apply).</li>
+            <li>Total leave wallet: {formatCurrency(amountValue, currency)}</li>
+          </ul>
+        </div>
+      ) : null}
+
       {needsOtp ? <input type="hidden" name="otp_challenge" value="1" /> : null}
 
       {state.message ? (
@@ -144,7 +197,12 @@ export function WithdrawalForm({
       ) : null}
 
       <div className="flex flex-col gap-2">
-        <Button type="submit" variant="outline" className="min-h-11 w-full" disabled={pending}>
+        <Button
+          type="submit"
+          variant="outline"
+          className="min-h-11 w-full"
+          disabled={pending || (!needsOtp && !amountValid)}
+        >
           {pending
             ? labels.submitting
             : needsOtp

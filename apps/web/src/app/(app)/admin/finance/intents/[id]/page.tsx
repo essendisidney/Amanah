@@ -14,6 +14,7 @@ import {
   backfillOneSettlementAction,
   markSettlementStatusAction,
 } from '@/features/admin/actions/settlement-actions';
+import { FINANCE_ACTION_LABELS } from '@/features/admin/lib/finance-labels';
 
 export const dynamic = 'force-dynamic';
 
@@ -251,31 +252,46 @@ export default async function AdminPaymentIntentCasePage({ params }: Props) {
         ) : null}
       </section>
 
-      <section className="flex flex-wrap gap-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3">
+      <section className="space-y-2 rounded-xl border border-dashed border-border bg-muted/20 px-4 py-3">
+        <p className="text-xs text-muted-foreground">
+          Payment status, settlement, and reconcile stay separate. Hover each action for what it
+          changes.
+        </p>
+        <div className="flex flex-wrap gap-2">
         {openReconcile ? (
           <>
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={intent.id} />
               <input type="hidden" name="action" value="match" />
               <input type="hidden" name="returnTo" value={returnTo} />
-              <Button type="submit" className="min-h-10">
-                Match
+              <Button type="submit" className="min-h-10" title={FINANCE_ACTION_LABELS.match.title}>
+                {FINANCE_ACTION_LABELS.match.button}
               </Button>
             </form>
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={intent.id} />
               <input type="hidden" name="action" value="manual" />
               <input type="hidden" name="returnTo" value={returnTo} />
-              <Button type="submit" variant="outline" className="min-h-10">
-                Manual
+              <Button
+                type="submit"
+                variant="outline"
+                className="min-h-10"
+                title={FINANCE_ACTION_LABELS.manual.title}
+              >
+                {FINANCE_ACTION_LABELS.manual.button}
               </Button>
             </form>
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={intent.id} />
               <input type="hidden" name="action" value="waive" />
               <input type="hidden" name="returnTo" value={returnTo} />
-              <Button type="submit" variant="outline" className="min-h-10">
-                Waive
+              <Button
+                type="submit"
+                variant="outline"
+                className="min-h-10"
+                title={FINANCE_ACTION_LABELS.waive.title}
+              >
+                {FINANCE_ACTION_LABELS.waive.button}
               </Button>
             </form>
           </>
@@ -284,8 +300,13 @@ export default async function AdminPaymentIntentCasePage({ params }: Props) {
           <form action={backfillIntentJournalAction}>
             <input type="hidden" name="intentId" value={intent.id} />
             <input type="hidden" name="returnTo" value={returnTo} />
-            <Button type="submit" variant="outline" className="min-h-10">
-              Backfill journal
+            <Button
+              type="submit"
+              variant="outline"
+              className="min-h-10"
+              title={FINANCE_ACTION_LABELS.backfillJournal.title}
+            >
+              {FINANCE_ACTION_LABELS.backfillJournal.button}
             </Button>
           </form>
         ) : null}
@@ -293,11 +314,17 @@ export default async function AdminPaymentIntentCasePage({ params }: Props) {
           <form action={backfillOneSettlementAction}>
             <input type="hidden" name="intentId" value={intent.id} />
             <input type="hidden" name="returnTo" value={returnTo} />
-            <Button type="submit" variant="outline" className="min-h-10">
-              Mirror settlement
+            <Button
+              type="submit"
+              variant="outline"
+              className="min-h-10"
+              title={FINANCE_ACTION_LABELS.mirror.title}
+            >
+              {FINANCE_ACTION_LABELS.mirror.button}
             </Button>
           </form>
         ) : null}
+        </div>
         <Button asChild variant="outline" className="min-h-10">
           <Link href={'/admin/finance/journal' as Route}>Journal browser</Link>
         </Button>

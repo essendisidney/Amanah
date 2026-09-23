@@ -5,9 +5,9 @@ import { formatCurrency, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import {
   createAdoptionProfileFormAction,
-  registerInstitutionFormAction,
   startSponsorshipFormAction,
 } from '@/features/charity/actions';
+import { InstitutionRegisterForm } from '@/features/charity/components/institution-register-form';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Adopt a mosque / madrasa / orphanage' };
@@ -127,41 +127,7 @@ export default async function AdoptPage() {
             <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
               Register your institution
             </h2>
-            <form
-              action={registerInstitutionFormAction}
-              className="grid max-w-xl gap-3 rounded-xl border border-border bg-card p-5"
-            >
-              <div className="space-y-1">
-                <Label htmlFor="name">Institution name</Label>
-                <Input id="name" name="name" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="type">Type</Label>
-                <select
-                  id="type"
-                  name="type"
-                  className="h-10 w-full border border-input bg-background px-3"
-                  defaultValue="mosque"
-                >
-                  <option value="mosque">Mosque</option>
-                  <option value="madrasa">Madrasa</option>
-                  <option value="orphanage">Orphanage</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="contactPerson">Contact person</Label>
-                <Input id="contactPerson" name="contactPerson" required />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="contactPhone">Phone</Label>
-                <Input id="contactPhone" name="contactPhone" type="tel" />
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="registrationDocUrl">Registration documents URL</Label>
-                <Input id="registrationDocUrl" name="registrationDocUrl" required />
-              </div>
-              <Button type="submit">Submit for verification</Button>
-            </form>
+            <InstitutionRegisterForm />
             {institutions.length ? (
               <ul className="text-sm text-muted-foreground">
                 {institutions.map((i) => (

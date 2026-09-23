@@ -23,33 +23,28 @@ export default async function PayPage() {
     redirect('/login?next=/pay');
   }
 
-  const data = await getDashboardData(user.id);
-  const nextDue = data.contributions[0] ?? null;
+  const data = await getDashboardData(user.id, { contributionHorizonDays: null });
   const currency = data.wallet?.currency ?? 'KES';
   const available = data.wallet?.availableBalance ?? data.wallet?.balance ?? 0;
-  const dueHref = nextDue
-    ? (`/circles/${nextDue.jamiyaSlug}#pay` as Route)
-    : null;
-  const remaining = nextDue
-    ? Math.max(nextDue.amount - nextDue.amountPaid, 0)
-    : 0;
-  const dueAmountLabel = nextDue
-    ? formatCurrency(remaining, nextDue.currency)
-    : null;
-  const dueOverdue =
-    nextDue != null &&
-    (nextDue.status === 'late' ||
-      new Date(nextDue.dueDate).getTime() < Date.now());
+
+  const dues = data.contributions.map((nextDue) => {
+    const remaining = Math.max(nextDue.amount - nextDue.amountPaid, 0);
+    const overdue =
+      nextDue.status === 'late' || new Date(nextDue.dueDate).getTime() < Date.now();
+    return {
+      href: `/circles/${nextDue.jamiyaSlug}#pay-due` as Route,
+      amountLabel: formatCurrency(remaining, nextDue.currency),
+      circleName: nextDue.jamiyaName,
+      overdue,
+    };
+  });
 
   return (
     <PaySheet
       labels={dict.paySheet}
       available={available}
       currency={currency}
-      dueHref={dueHref}
-      dueAmountLabel={dueAmountLabel}
-      dueCircleName={nextDue?.jamiyaName ?? null}
-      dueOverdue={dueOverdue}
+      dues={dues}
     />
   );
 }

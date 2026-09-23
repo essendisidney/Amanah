@@ -13,6 +13,10 @@ import {
   settlePayoutToMpesaAction,
 } from '../actions/ledger-actions';
 import { confirmPayoutReceiptAction } from '../actions/ops-actions';
+import {
+  emptyScheduleMessage,
+  type CircleKind,
+} from '../lib/circle-status-display';
 
 export type ScheduleContribution = {
   id: string;
@@ -79,6 +83,8 @@ export function ContributionCalendar({
   canManageOps = false,
   memberCount = 0,
   officerCashCapture = false,
+  circleStatus = 'open',
+  circleKind = 'share_dividend',
 }: {
   contributions: ScheduleContribution[];
   slug: string;
@@ -89,36 +95,28 @@ export function ContributionCalendar({
   memberCount?: number;
   /** Officers can mark any member's due as paid in cash (merry-go-round). */
   officerCashCapture?: boolean;
+  circleStatus?: string;
+  circleKind?: CircleKind;
 }) {
   if (contributions.length === 0) {
+    const empty = emptyScheduleMessage({
+      circleStatus,
+      canActivate,
+      canManageOps,
+      memberCount,
+      kind: circleKind,
+    });
     return (
       <div className="amanah-surface space-y-2 px-4 py-5 text-sm text-muted-foreground">
-        {canActivate ? (
-          <>
-            <p className="font-medium text-foreground">No schedule yet — activate to generate it.</p>
-            <p>Use Activate above to build contribution and payout rounds.</p>
-          </>
-        ) : canManageOps && memberCount < 2 ? (
-          <>
-            <p className="font-medium text-foreground">Invite at least one more person first.</p>
-            <p>
-              <a href="#invite-people" className="font-medium text-primary hover:underline">
-                Invite people
-              </a>{' '}
-              , then activate when you have two or more members.
-            </p>
-          </>
-        ) : canManageOps ? (
-          <>
-            <p className="font-medium text-foreground">Schedule appears after activation.</p>
-            <p>Activate the circle when members are ready.</p>
-          </>
-        ) : (
-          <>
-            <p className="font-medium text-foreground">Waiting on the circle officer.</p>
-            <p>Contribution dates show here after the circle is activated.</p>
-          </>
-        )}
+        <p className="font-medium text-foreground">{empty.title}</p>
+        <p>{empty.body}</p>
+        {canManageOps && memberCount < 2 && circleStatus !== 'active' ? (
+          <p>
+            <a href="#invite-people" className="font-medium text-primary hover:underline">
+              Invite people
+            </a>
+          </p>
+        ) : null}
       </div>
     );
   }

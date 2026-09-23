@@ -35,7 +35,7 @@ export function LanguageSwitcher({
         });
       }}
     >
-      {other === 'sw' ? 'SW' : 'EN'}
+      {otherLabel}
     </button>
   );
 }

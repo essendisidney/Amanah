@@ -159,6 +159,7 @@ export function AppShell({
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
                     'whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors',
                     active
@@ -202,7 +203,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(6.5rem+env(safe-area-inset-bottom))] pt-6 md:px-6 md:pb-14 md:pt-8">
+      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(7.25rem+env(safe-area-inset-bottom))] pt-5 md:px-6 md:pb-14 md:pt-8">
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.08)_0%,_rgba(91,141,239,0.05)_45%,_transparent_72%)]"
           aria-hidden
@@ -253,6 +254,7 @@ export function AppShell({
               <li key={item.href}>
                 <Link
                   href={item.href}
+                  aria-current={active ? 'page' : undefined}
                   className={cn(
                     'relative flex min-h-12 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-semibold',
                     active ? 'text-primary' : 'text-muted-foreground',

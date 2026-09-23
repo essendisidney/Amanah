@@ -45,6 +45,10 @@ import { MemberCircleLinks } from '@/features/circles/components/member-circle-l
 import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
+import {
+  memberHeroSummary,
+  type CircleKind,
+} from '@/features/circles/lib/circle-status-display';
 import { AppPage } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
@@ -528,19 +532,18 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         : null;
 
   const contributedTotal = contributions.reduce((sum, row) => sum + row.amountPaid, 0);
-  const cycleProgress =
-    jamiya.cycle_count && jamiya.cycle_count > 0
-      ? Math.min(100, Math.round((jamiya.current_cycle / jamiya.cycle_count) * 100))
-      : 0;
   const myOpenDue = contributions.find((c) => c.isMine && ['pending', 'late', 'partial'].includes(c.status));
-  const estimatedPool =
-    contributedTotal > 0
-      ? contributedTotal
-      : amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1);
 
   const isRotating = isRotatingKind(jamiya.challenge_kind);
   const isShareDividend = isShareDividendKind(jamiya.challenge_kind);
   const isSavings = isSavingsKind(jamiya.challenge_kind);
+
+  const estimatedPool =
+    contributedTotal > 0
+      ? contributedTotal
+      : isRotating
+        ? amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1)
+        : 0;
 
   const kindLabel = isShareDividend
     ? 'Share / dividend group'
@@ -553,11 +556,22 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const heroDescription =
     segmentBlurb ?? jamiya.description ?? (kindLabel ? `${kindLabel}.` : null);
 
-  const memberSummary = `${jamiya.member_count}/${jamiya.max_members} ${circleLabels.members.toLowerCase()}${
-    jamiya.cycle_count != null
-      ? ` · cycle ${jamiya.current_cycle}/${jamiya.cycle_count}`
-      : ` · cycle ${jamiya.current_cycle}`
-  }`;
+  const kindForSummary: CircleKind = isShareDividend
+    ? 'share_dividend'
+    : isSavings
+      ? 'savings'
+      : isRotating
+        ? 'rotating'
+        : 'other';
+
+  const memberSummary = memberHeroSummary({
+    kind: kindForSummary,
+    status: jamiya.status,
+    memberCount: jamiya.member_count,
+    maxMembers: jamiya.max_members,
+    currentCycle: jamiya.current_cycle,
+    cycleCount: jamiya.cycle_count,
+  });
 
   const merryGoRoundSlots: MerryGoRoundSlot[] = isRotating
     ? (() => {
@@ -598,11 +612,12 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               ? profilesById.get(slotMember.user_id)
               : null;
             const cycleContribs = contribsByCycle.get(cycleNumber) ?? [];
-            const unpaid = cycleContribs.filter((c) =>
-              ['pending', 'late', 'partial'].includes(c.status),
-            );
+            const unpaid = cycleContribs.filter((c) => {
+              const remaining = Math.max(c.amount - c.amountPaid, 0);
+              return remaining > 0 && ['pending', 'late', 'partial'].includes(c.status);
+            });
             const paid = cycleContribs.filter(
-              (c) => c.status === 'paid' || c.amountPaid > 0,
+              (c) => c.status === 'paid' || c.amountPaid >= c.amount,
             );
             const memberLabel =
               slotProfile?.full_name ||
@@ -629,6 +644,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               unpaidLabels: unpaid
                 .map((c) => c.memberLabel)
                 .filter((label): label is string => Boolean(label)),
+              hasAssignee: Boolean(slotMember),
             };
           });
       })()
@@ -734,8 +750,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         label: c.memberLabel || 'Member',
         remaining,
         currency: c.currency,
-        userId: c.memberUserId,
-        phone: c.memberPhone,
+        userId: c.memberUserId ?? null,
+        phone: c.memberPhone ?? null,
       });
     }
   }
@@ -1054,12 +1070,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   value: t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days }),
                 },
                 {
-                  label: 'Next payout',
-                  value: nextPayout?.memberLabel ?? '—',
-                },
-                {
-                  label: 'Progress',
-                  value: `${cycleProgress}%`,
+                  label: 'Status',
+                  value: jamiya.status.replaceAll('_', ' '),
                 },
               ]
         }
@@ -1133,6 +1145,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             contributionAmount={amount}
             currency={jamiya.currency}
             currentCycle={jamiya.current_cycle}
+            plannedCycles={jamiya.cycle_count}
             slots={merryGoRoundSlots}
             slug={slug}
             canManage={Boolean(canManageOps)}
@@ -1150,6 +1163,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           <ContributionCalendar
             contributions={contributions}
             slug={jamiya.slug}
+            circleStatus={jamiya.status}
+            circleKind="share_dividend"
             walletAvailable={
               walletAvailable != null && Number.isFinite(walletAvailable)
                 ? walletAvailable

@@ -252,7 +252,7 @@ export async function addOneCircleMember(args: {
       success: false,
       message:
         provisionError ??
-        'Could not create an Jameiyah account. For phone-only members, enable Phone auth in Supabase.',
+        'Could not create a Jameiyah account. For phone-only members, enable Phone auth in Supabase.',
     };
   }
 

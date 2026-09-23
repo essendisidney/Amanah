@@ -363,6 +363,8 @@ export async function acceptInvitationAction(
       UNAUTHENTICATED: 'Sign in to continue.',
       SLOT_TAKEN: 'That payout slot was just taken — pick another.',
       INVALID_SLOT: 'That payout slot is not available.',
+      WRONG_INVITEE:
+        'This invite is for another phone or email. Sign in with the invited account, or ask the admin to resend.',
     };
     return {
       success: false,

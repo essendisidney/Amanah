@@ -96,7 +96,9 @@ export default async function MyCirclesPage({
 
   const labels = dict.circles;
   const common = dict.common;
-  const rows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
+  const allRows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
+  const rows = allRows.filter((row) => row.status === 'active');
+  const invitedRows = allRows.filter((row) => row.status === 'invited');
   const memberIds = rows.map((row) => row.id);
 
   const dueByMember = new Map<string, DueSummary>();
@@ -152,6 +154,23 @@ export default async function MyCirclesPage({
         </div>
 
         <section id="redeem-invite" className="scroll-mt-24">
+          {rows.length > 0 && !focusRedeem ? (
+            <details className="amanah-surface px-4 py-4 sm:px-5">
+              <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                Have an invite code?
+              </summary>
+              <div className="mt-3">
+                <RedeemInviteCodeForm
+                  title={labels.redeemTitle}
+                  hint={labels.redeemHint}
+                  placeholder={labels.redeemPlaceholder}
+                  submitLabel={labels.redeemSubmit}
+                  workingLabel={labels.redeemWorking}
+                  invalidLabel={labels.redeemInvalid}
+                />
+              </div>
+            </details>
+          ) : (
           <div
             className={cn(
               'amanah-surface px-4 py-4 sm:px-5',
@@ -172,13 +191,45 @@ export default async function MyCirclesPage({
               invalidLabel={labels.redeemInvalid}
             />
           </div>
+          )}
         </section>
+
+        {invitedRows.length > 0 ? (
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold text-foreground">Reserved seats</h2>
+            <p className="text-sm text-muted-foreground">
+              An officer added you, but you have not fully joined as an active member yet. Open
+              your invite link or ask them to resend the code.
+            </p>
+            <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+              {invitedRows.map((row) => (
+                <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div>
+                    <p className="font-medium">{row.jamiya!.name}</p>
+                    <p className="text-xs text-muted-foreground">Status: invited</p>
+                  </div>
+                  <Button asChild size="sm" variant="outline" className="rounded-full">
+                    <a href="#redeem-invite">Enter code</a>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {rows.length === 0 ? (
           <div className="space-y-3">
             <EmptyState
-              title={labels.emptyTitle}
-              description={labels.emptyDesc}
+              title={
+                invitedRows.length > 0
+                  ? 'No active circles yet'
+                  : labels.emptyTitle
+              }
+              description={
+                invitedRows.length > 0
+                  ? 'You have a reserved seat above. Enter the invite code to become an active member. Audit “joined” events only count for the account that accepted.'
+                  : labels.emptyDesc
+              }
               actionLabel={labels.createACircle}
               actionHref={'/circles/new' as Route}
             />

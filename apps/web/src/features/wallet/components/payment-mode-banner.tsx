@@ -51,10 +51,13 @@ export function PaymentModeBanner({
   if (!copy) {
     return simulatedBlocked || requireReal ? (
       <div className={`amanah-surface px-4 py-3.5 ${toneClass}`} role="status">
-        <p className="text-xs opacity-80">
+        <p className="text-sm font-semibold tracking-tight">
+          {simulatedBlocked ? 'Demo payments off' : 'Live payments required'}
+        </p>
+        <p className="mt-1 text-sm opacity-90">
           {simulatedBlocked
-            ? 'Simulated fallbacks are blocked in this environment.'
-            : 'Live providers required.'}
+            ? 'This environment does not credit fake top-ups. Use a live payment method when it is configured.'
+            : 'Only real payment providers can complete this step.'}
         </p>
       </div>
     ) : null;
@@ -67,8 +70,8 @@ export function PaymentModeBanner({
       {requireReal || simulatedBlocked ? (
         <p className="mt-2 text-xs opacity-80">
           {simulatedBlocked
-            ? 'Simulated fallbacks are blocked in this environment.'
-            : 'Live providers required.'}
+            ? 'Demo mode cannot complete this payment.'
+            : 'A live provider is required for this action.'}
         </p>
       ) : null}
     </div>

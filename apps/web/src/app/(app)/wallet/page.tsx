@@ -9,6 +9,7 @@ import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
+import { OpenDetailsOnHash } from '@/features/wallet/components/open-details-on-hash';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { IntasendTrustBadge } from '@/features/wallet/components/intasend-trust-badge';
@@ -40,6 +41,7 @@ type Props = {
     noticeType?: string;
     next?: string;
     amount?: string;
+    focus?: string;
   }>;
 };
 
@@ -66,6 +68,8 @@ export default async function WalletPage({ searchParams }: Props) {
   const { getSafeReturnPath } = await import('@/features/auth/lib/types');
   const returnPath = getSafeReturnPath(notices.next);
   const amountPrefill = Number(notices.amount ?? '');
+  const focus =
+    notices.focus === 'top-up' || notices.focus === 'withdraw' ? notices.focus : null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -279,9 +283,9 @@ export default async function WalletPage({ searchParams }: Props) {
 
       <section className="grid grid-cols-4 gap-2 sm:gap-3">
         {[
-          { href: '#top-up', label: labels.topUp, icon: Plus },
+          { href: '/wallet?focus=top-up#top-up', label: labels.topUp, icon: Plus },
           { href: '/pay', label: labels.quickPay, icon: ArrowDownLeft },
-          { href: '#withdraw', label: labels.withdraw, icon: ArrowUpRight },
+          { href: '/wallet?focus=withdraw#withdraw', label: labels.withdraw, icon: ArrowUpRight },
           { href: '#more', label: labels.quickMore, icon: ChartNoAxesCombined },
         ].map((action) => {
           const Icon = action.icon;
@@ -300,35 +304,60 @@ export default async function WalletPage({ searchParams }: Props) {
         })}
       </section>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section id="top-up" className="space-y-4">
-          <h2 className="text-lg font-bold tracking-tight">{labels.topUp}</h2>
-          <div className="amanah-surface p-5">
-            <TopUpForm
-              currency={primaryCurrency}
-              labels={dict.walletForms}
-              provider={provider}
-              defaultPhone={withdrawPhone}
-              defaultAmount={
-                Number.isFinite(amountPrefill) && amountPrefill >= 10
-                  ? amountPrefill
-                  : undefined
-              }
-              returnPath={returnPath}
-            />
-          </div>
-        </section>
+      <div
+        className={
+          focus
+            ? 'grid gap-6'
+            : 'grid gap-6 md:grid-cols-2'
+        }
+      >
+        {focus !== 'withdraw' ? (
+          <section id="top-up" className="scroll-mt-24 space-y-4">
+            <h2 className="text-lg font-bold tracking-tight">{labels.topUp}</h2>
+            <div className="amanah-surface p-5">
+              <TopUpForm
+                currency={primaryCurrency}
+                labels={dict.walletForms}
+                provider={provider}
+                defaultPhone={withdrawPhone}
+                defaultAmount={
+                  Number.isFinite(amountPrefill) && amountPrefill >= 10
+                    ? amountPrefill
+                    : undefined
+                }
+                returnPath={returnPath}
+              />
+            </div>
+            {focus === 'top-up' ? (
+              <p className="text-sm text-muted-foreground">
+                <Link href={'/wallet?focus=withdraw#withdraw' as Route} className="font-medium text-primary">
+                  Need to withdraw instead?
+                </Link>
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
-        <section id="withdraw" className="space-y-4">
-          <h2 className="text-lg font-bold tracking-tight">{labels.withdraw}</h2>
-          <div className="amanah-surface p-5">
-            <WithdrawalForm
-              currency={primaryCurrency}
-              labels={dict.walletForms}
-              defaultPhone={withdrawPhone}
-            />
-          </div>
-        </section>
+        {focus !== 'top-up' ? (
+          <section id="withdraw" className="scroll-mt-24 space-y-4">
+            <h2 className="text-lg font-bold tracking-tight">{labels.withdraw}</h2>
+            <div className="amanah-surface p-5">
+              <WithdrawalForm
+                currency={primaryCurrency}
+                labels={dict.walletForms}
+                defaultPhone={withdrawPhone}
+                availableBalance={available}
+              />
+            </div>
+            {focus === 'withdraw' ? (
+              <p className="text-sm text-muted-foreground">
+                <Link href={'/wallet?focus=top-up#top-up' as Route} className="font-medium text-primary">
+                  Need to add money instead?
+                </Link>
+              </p>
+            ) : null}
+          </section>
+        ) : null}
       </div>
 
       {pendingIntents.length > 0 ? (
@@ -505,6 +534,7 @@ export default async function WalletPage({ searchParams }: Props) {
       ) : null}
 
       <details id="more" className="scroll-mt-24">
+        <OpenDetailsOnHash id="more" />
         <summary className="cursor-pointer text-lg font-bold tracking-tight">
           {labels.moreTitle}
         </summary>

@@ -2,6 +2,11 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { markMgrPotPaidAction } from '../actions/slot-actions';
+import {
+  contributionFillLabel,
+  merryGoRoundHeadline,
+  payoutScheduleLabel,
+} from '../lib/circle-status-display';
 
 export type MerryGoRoundSlot = {
   cycleNumber: number;
@@ -13,11 +18,10 @@ export type MerryGoRoundSlot = {
   currency: string;
   scheduledDate: string | null;
   payoutStatus: string | null;
-  /** Members who have paid this cycle's contribution */
   paidCount: number;
-  /** Members still owing this cycle */
   unpaidCount: number;
   unpaidLabels: string[];
+  hasAssignee?: boolean;
 };
 
 type Props = {
@@ -25,17 +29,11 @@ type Props = {
   contributionAmount: number;
   currency: string;
   currentCycle: number;
+  plannedCycles?: number | null;
   slots: MerryGoRoundSlot[];
   slug?: string;
   canManage?: boolean;
 };
-
-function payoutLabel(status: string | null): string {
-  if (!status) return 'No slot yet';
-  if (status === 'paid') return 'Received';
-  if (status === 'scheduled' || status === 'processing') return 'Up next';
-  return status.replaceAll('_', ' ');
-}
 
 /** Merry-go-round view: slots, who receives, who has / hasn't contributed. */
 export function MerryGoRoundBoard({
@@ -43,6 +41,7 @@ export function MerryGoRoundBoard({
   contributionAmount,
   currency,
   currentCycle,
+  plannedCycles = null,
   slots,
   slug,
   canManage = false,
@@ -59,6 +58,12 @@ export function MerryGoRoundBoard({
     );
   }
 
+  const headline = merryGoRoundHeadline({
+    currentCycle,
+    plannedCycles,
+    slotCount: slots.length,
+  });
+
   return (
     <div className="space-y-4">
       <div className="amanah-surface border-accent/20 px-5 py-4">
@@ -67,8 +72,7 @@ export function MerryGoRoundBoard({
           {circleName}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          {formatCurrency(contributionAmount, currency)} each round · Cycle {currentCycle || 1} of{' '}
-          {slots.length}
+          {formatCurrency(contributionAmount, currency)} each round · {headline.label}
         </p>
       </div>
 
@@ -77,8 +81,13 @@ export function MerryGoRoundBoard({
           const isCurrent =
             slot.payoutStatus === 'scheduled' ||
             slot.payoutStatus === 'processing' ||
-            slot.cycleNumber === currentCycle;
+            (currentCycle > 0 && slot.cycleNumber === currentCycle);
           const received = slot.payoutStatus === 'paid';
+          const scheduleLabel = payoutScheduleLabel({
+            hasAssignee: slot.hasAssignee ?? slot.memberLabel !== 'Unclaimed',
+            hasPayoutRecord: Boolean(slot.payoutId),
+            payoutStatus: slot.payoutStatus,
+          });
           const canMarkPot =
             canManage &&
             slug &&
@@ -110,24 +119,15 @@ export function MerryGoRoundBoard({
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {slot.memberCode ? `${slot.memberCode} · ` : ''}
-                  {payoutLabel(slot.payoutStatus)}
+                  {scheduleLabel}
                   {slot.scheduledDate ? ` · ${formatDate(slot.scheduledDate)}` : ''}
                   {` · Pool ${formatCurrency(slot.amount, slot.currency)}`}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   Contributions:{' '}
-                  <span className="font-medium text-foreground">{slot.paidCount} paid</span>
-                  {slot.unpaidCount > 0 ? (
-                    <>
-                      {' '}
-                      ·{' '}
-                      <span className="font-medium text-foreground">
-                        {slot.unpaidCount} not yet
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-foreground"> · All in</span>
-                  )}
+                  <span className="font-medium text-foreground">
+                    {contributionFillLabel(slot.paidCount, slot.unpaidCount)}
+                  </span>
                 </p>
                 {slot.unpaidLabels.length > 0 ? (
                   <p className="text-xs text-muted-foreground">
@@ -146,7 +146,7 @@ export function MerryGoRoundBoard({
                   </form>
                 ) : (
                   <p className="text-sm font-semibold text-foreground">
-                    {received ? 'Got pot' : payoutLabel(slot.payoutStatus)}
+                    {received ? 'Got pot' : scheduleLabel}
                   </p>
                 )}
               </div>

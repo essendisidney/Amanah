@@ -16,7 +16,9 @@ const widthClasses: Record<NonNullable<AppPageProps['width']>, string> = {
 
 export function AppPage({ children, className, width = 'default' }: AppPageProps) {
   return (
-    <div className={cn('relative space-y-8', widthClasses[width], className)}>{children}</div>
+    <div className={cn('relative space-y-6 md:space-y-8', widthClasses[width], className)}>
+      {children}
+    </div>
   );
 }
 
@@ -99,7 +101,7 @@ export function PageCard({
   id?: string;
 }) {
   return (
-    <div id={id} className={cn('amanah-surface px-4 py-4 sm:px-5 sm:py-5', className)}>
+    <div id={id} className={cn('amanah-surface scroll-mt-28 px-4 py-3.5 sm:px-5 sm:py-4', className)}>
       {children}
     </div>
   );

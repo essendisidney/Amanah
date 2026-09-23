@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useState, type ComponentType } from 'react';
+import { useEffect, useState, type ComponentType } from 'react';
 import {
   ArrowUpFromLine,
   Calculator,
@@ -22,6 +22,13 @@ import type { Dictionary } from '@/i18n/dictionaries';
 import { cn } from '@/lib/utils';
 
 type PayLabels = Dictionary['paySheet'];
+
+export type PayDueItem = {
+  href: Route;
+  amountLabel: string;
+  circleName: string;
+  overdue: boolean;
+};
 
 type PayLink = {
   href: Route;
@@ -87,25 +94,24 @@ export function PaySheet({
   labels,
   available,
   currency = 'KES',
-  dueHref,
-  dueAmountLabel,
-  dueCircleName,
-  dueOverdue = false,
+  dues = [],
 }: {
   labels: PayLabels;
   available?: number | null;
   currency?: string;
-  dueHref?: Route | null;
-  dueAmountLabel?: string | null;
-  dueCircleName?: string | null;
-  dueOverdue?: boolean;
+  dues?: PayDueItem[];
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
 
-  // Money tab covers wallet; Pay keeps withdraw + insights + tools.
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#more') {
+      setMoreOpen(true);
+    }
+  }, []);
+
   const primary: PayLink[] = [
     {
-      href: '/wallet#withdraw' as Route,
+      href: '/wallet?focus=withdraw#withdraw' as Route,
       label: labels.withdraw,
       icon: ArrowUpFromLine,
       tint: 'amanah-tint-withdraw',
@@ -204,7 +210,7 @@ export function PaySheet({
         ) : null}
 
         <Link
-          href={'/wallet#top-up' as Route}
+          href={'/wallet?focus=top-up#top-up' as Route}
           className="relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-[1.5rem] px-6 py-10 text-left text-white"
           style={{
             background:
@@ -225,44 +231,59 @@ export function PaySheet({
           </span>
         </Link>
 
-        {dueHref && dueAmountLabel ? (
-          <Link
-            href={dueHref}
-            className={cn(
-              'block overflow-hidden rounded-[1.35rem] px-4 py-4 transition-transform active:scale-[0.99]',
-              dueOverdue
-                ? 'border border-destructive/35 bg-destructive/10'
-                : 'border border-primary/25 bg-primary/10',
-            )}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p
+        {dues.length > 0 ? (
+          <ul className="space-y-2">
+            {dues.map((due) => (
+              <li key={due.href}>
+                <Link
+                  href={due.href}
                   className={cn(
-                    'text-[11px] font-semibold uppercase tracking-[0.16em]',
-                    dueOverdue ? 'text-destructive' : 'text-primary',
+                    'block overflow-hidden rounded-[1.35rem] px-4 py-4 transition-transform active:scale-[0.99]',
+                    due.overdue
+                      ? 'border border-destructive/35 bg-destructive/10'
+                      : 'border border-primary/25 bg-primary/10',
                   )}
                 >
-                  {dueOverdue ? labels.overdue : labels.payDue}
-                </p>
-                <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground">
-                  {dueAmountLabel}
-                </p>
-                {dueCircleName ? (
-                  <p className="mt-1 truncate text-xs text-muted-foreground">{dueCircleName}</p>
-                ) : null}
-              </div>
-              <ChevronRight
-                className="mt-1 h-5 w-5 shrink-0 text-muted-foreground"
-                strokeWidth={1.5}
-              />
-            </div>
-          </Link>
-        ) : null}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className={cn(
+                          'text-[11px] font-semibold uppercase tracking-[0.16em]',
+                          due.overdue ? 'text-destructive' : 'text-primary',
+                        )}
+                      >
+                        {due.overdue ? labels.overdue : labels.payDue}
+                      </p>
+                      <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground">
+                        {due.amountLabel}
+                      </p>
+                      <p className="mt-1 truncate text-xs text-muted-foreground">{due.circleName}</p>
+                    </div>
+                    <ChevronRight
+                      className="mt-1 h-5 w-5 shrink-0 text-muted-foreground"
+                      strokeWidth={1.5}
+                    />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="rounded-[1.35rem] border border-border/80 bg-white/45 px-4 py-4 dark:bg-white/[0.04]">
+            <p className="text-sm font-semibold text-foreground">{labels.noDueTitle}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{labels.noDueBody}</p>
+            <Link
+              href={'/circles' as Route}
+              className="mt-3 inline-flex text-sm font-semibold text-primary"
+            >
+              {labels.browseCircles} →
+            </Link>
+          </div>
+        )}
 
         <LinkGroup items={primary} />
 
-        <div className="space-y-2">
+        <div className="space-y-2" id="more">
           <button
             type="button"
             onClick={() => setMoreOpen((open) => !open)}
