@@ -23,6 +23,7 @@ import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
+import { CirclesListCard } from '@/features/circles/components/circles-list-card';
 import { cn } from '@/lib/utils';
 import { JameiyahLogo } from '@/components/amanah-logo';
 import { AppPage, PageHeader } from '@/components/app-page';
@@ -216,6 +217,9 @@ export default function UiPreviewPage() {
             </a>
             <a href="#circle-detail" className="text-primary">
               Circle
+            </a>
+            <a href="#circles" className="text-primary">
+              Circles
             </a>
           </nav>
         </div>
@@ -416,6 +420,77 @@ export default function UiPreviewPage() {
               },
             ]}
           />
+        </section>
+
+        <section id="circles" className="scroll-mt-28 space-y-5" aria-label="Circles list sample">
+          <h2 className="text-sm font-semibold text-foreground">Circles · with due</h2>
+          <AppPage className="!space-y-5">
+            <PageHeader
+              title={dict.circles.title}
+              subtitle={dict.circles.subtitle}
+              action={
+                <Button className="min-h-11 shrink-0" disabled>
+                  {dict.circles.createCircle}
+                </Button>
+              }
+            />
+            <details className="amanah-surface px-4 py-4 sm:px-5">
+              <summary className="cursor-pointer text-sm font-semibold text-foreground">
+                Have an invite code?
+              </summary>
+            </details>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              <li>
+                <CirclesListCard
+                  href={'/circles/sisters-circle-sample#pay-due' as Route}
+                  name="Sisters Circle"
+                  status="active"
+                  memberLabel={`8/10 ${dict.common.members}`}
+                  monthlyAmount={2000}
+                  currency="KES"
+                  due={{
+                    remaining: 2000,
+                    currency: 'KES',
+                    dueDate: '2026-09-30',
+                    status: 'pending',
+                  }}
+                  nextContributionLabel={dict.dashboard.nextContribution}
+                />
+              </li>
+              <li>
+                <CirclesListCard
+                  href={'/circles/youth-chama-sample' as Route}
+                  name="Youth Chama"
+                  status="active"
+                  memberLabel={`5/8 ${dict.common.members}`}
+                  monthlyAmount={1000}
+                  currency="KES"
+                  due={null}
+                  nextContributionLabel={dict.dashboard.nextContribution}
+                />
+              </li>
+            </ul>
+          </AppPage>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">Circles · empty</h3>
+            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+              <div>
+                <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
+                  {dict.circles.emptyTitle}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">{dict.circles.emptyDesc}</p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button className="min-h-11 w-full" disabled>
+                  {dict.circles.createACircle}
+                </Button>
+                <Button variant="outline" className="min-h-11 w-full" disabled>
+                  {dict.dashboard.joinWithInvite}
+                </Button>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
 
