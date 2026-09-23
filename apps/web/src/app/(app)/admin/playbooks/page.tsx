@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { formatDate } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Playbooks' };
@@ -66,26 +67,19 @@ export default async function AdminPlaybooksPage() {
   }>;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Collections playbooks
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Automated outreach sequences by days overdue. Run the next step from a collection case.
-        </p>
-      </div>
+    <div className="space-y-6">
+      <AdminSectionHeader
+        title="Playbooks"
+        subtitle="Outreach sequences by days overdue. Run the next step from a collection case."
+      />
 
-      <ul className="space-y-4">
+      <ul className="space-y-3">
         {rows.map((pb) => {
           const pbSteps = stepRows.filter((s) => s.playbook_id === pb.id);
           return (
-            <li
-              key={pb.id}
-              className="rounded-xl border border-border bg-card px-5 py-4 shadow-[0_1px_0_rgba(26,31,28,0.04)]"
-            >
+            <li key={pb.id} className="amanah-surface px-4 py-4 sm:px-5">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="text-lg font-medium">{pb.name}</p>
+                <p className="font-semibold text-foreground">{pb.name}</p>
                 <StatusBadge status={pb.is_active ? 'active' : 'paused'} />
                 {pb.severity ? <StatusBadge status={pb.severity} /> : null}
               </div>
@@ -94,10 +88,10 @@ export default async function AdminPlaybooksPage() {
                 {pb.max_days_overdue != null ? `–${pb.max_days_overdue}` : '+'} · priority{' '}
                 {pb.priority}
               </p>
-              <ol className="mt-4 space-y-2 border-t border-border pt-3">
+              <ol className="mt-3 space-y-2 border-t border-border/70 pt-3">
                 {pbSteps.map((step) => (
                   <li key={step.id} className="text-sm">
-                    <span className="font-medium">
+                    <span className="font-semibold text-foreground">
                       {step.step_order}. {step.channel}
                     </span>
                     {step.delay_hours > 0 ? (
@@ -118,23 +112,24 @@ export default async function AdminPlaybooksPage() {
         })}
       </ul>
 
-      <section>
-        <h3 className="mb-3 font-[family-name:var(--font-display)] text-xl font-semibold">
-          Recent playbook actions
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Recent actions</h3>
         {actions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No actions yet.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No actions yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {actions.map((row) => (
-              <li key={row.id} className="px-5 py-3 text-sm">
+              <li key={row.id} className="px-4 py-3 text-sm sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={row.action} />
                   {row.channel ? <StatusBadge status={row.channel} /> : null}
                   <span className="text-muted-foreground">{formatDate(row.created_at)}</span>
                 </div>
                 <p className="mt-1 text-muted-foreground">
-                  Case {row.case_id.slice(0, 8)}…{row.notes ? ` — ${row.notes.slice(0, 120)}` : ''}
+                  Case {row.case_id.slice(0, 8)}…
+                  {row.notes ? ` — ${row.notes.slice(0, 120)}` : ''}
                 </p>
               </li>
             ))}

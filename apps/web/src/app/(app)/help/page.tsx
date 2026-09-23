@@ -87,6 +87,27 @@ export default async function HelpPage() {
         </section>
       ) : null}
 
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">{labels.faqTitle}</h2>
+        <ul className="amanah-surface divide-y divide-border/70">
+          <li className="space-y-1 px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-foreground">{labels.faqShariahQ}</p>
+            <p className="text-sm text-muted-foreground">{labels.faqShariahA}</p>
+          </li>
+          <li className="space-y-1 px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-foreground">{labels.faqFeesQ}</p>
+            <p className="text-sm text-muted-foreground">{labels.faqFeesA}</p>
+          </li>
+          <li className="space-y-1 px-4 py-4 sm:px-5">
+            <p className="text-sm font-semibold text-foreground">{labels.faqRibaQ}</p>
+            <p className="text-sm text-muted-foreground">{labels.faqRibaA}</p>
+          </li>
+        </ul>
+        <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
+          <Link href={'/shariah' as Route}>{labels.openShariah}</Link>
+        </Button>
+      </section>
+
       <section id="ticket" className="scroll-mt-24 space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.ticketTitle}</h2>
         <div className="amanah-surface px-4 py-4 sm:px-5">

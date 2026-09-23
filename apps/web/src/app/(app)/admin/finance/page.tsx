@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
@@ -6,6 +7,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { getAdminFinanceKpis } from '@/features/admin/lib/finance-kpis';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
 import { resolveIntentExceptionAction } from '@/features/admin/actions/finance-resolve-actions';
@@ -147,60 +149,45 @@ export default async function AdminFinancePage() {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Finance command centre
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Domains stay separate (wallets, Qard, Sadaka, journals). Provider success ≠
-            settled ≠ reconciled. Balances are read-only — corrections only via reverse
-            journal posts.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <form action={runReconcileNowAction}>
-            <Button type="submit" variant="outline" className="min-h-11">
-              Run reconcile now
+    <div className="space-y-6">
+      <AdminSectionHeader
+        title="Finance"
+        subtitle="Wallets, Qard, Sadaka, and journals stay separate. Provider success ≠ settled ≠ reconciled."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <form action={runReconcileNowAction}>
+              <Button type="submit" variant="outline" className="min-h-11">
+                Run reconcile
+              </Button>
+            </form>
+            <Button asChild className="min-h-11">
+              <Link href={'/admin/finance/reconcile' as Route}>Reconcile</Link>
             </Button>
-          </form>
-          <Button asChild className="min-h-11">
-            <Link href={'/admin/finance/reconcile' as Route}>Reconcile queue</Link>
+          </div>
+        }
+      />
+
+      <nav className="flex flex-wrap gap-2" aria-label="Finance tools">
+        {(
+          [
+            ['/admin/finance/journal', 'Journal'],
+            ['/admin/finance/integrity', 'Integrity'],
+            ['/admin/finance/settlements', 'Settlements'],
+            ['/admin/finance/accounts', 'Accounts'],
+            ['/admin/finance/refunds', 'Refunds'],
+            ['/admin/finance/approvals', 'Approvals'],
+            ['/admin/observability', 'Health'],
+          ] as const
+        ).map(([href, label]) => (
+          <Button key={href} asChild variant="outline" className="min-h-11">
+            <Link href={href as Route}>{label}</Link>
           </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/journal' as Route}>Journal</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/integrity' as Route}>Integrity</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/settlements' as Route}>Settlements</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/accounts' as Route}>Accounts</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/refunds' as Route}>Refunds</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/finance/approvals' as Route}>Approvals</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/architecture' as Route}>How it is built</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/observability' as Route}>System health</Link>
-          </Button>
-        </div>
-      </div>
+        ))}
+      </nav>
 
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((c) => (
-          <div
-            key={c.label}
-            className="rounded-xl border border-border bg-card px-4 py-3"
-          >
+          <div key={c.label} className="amanah-surface px-4 py-3">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {c.label}
             </dt>
@@ -209,15 +196,6 @@ export default async function AdminFinancePage() {
           </div>
         ))}
       </dl>
-
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-        <p className="font-medium text-foreground">How money is built (today)</p>
-        <p className="mt-1">
-          Features → Payment orchestrator → adapters (IntaSend / …) →{' '}
-          <code className="text-xs">payment_intents</code> → wallet ledger RPCs → journal
-          projection + cashbook bridge. External PSPs move cash; Jameiyah records truth.
-        </p>
-      </div>
 
       <Section title="Reconcile exceptions" empty="No exceptions flagged.">
         {exRows.map((row) => (
@@ -231,14 +209,14 @@ export default async function AdminFinancePage() {
         ))}
       </Section>
 
-      <Section title="Webhook inbox (failed / stuck)" empty="Inbox is clear.">
+      <Section title="Webhook inbox" empty="Inbox is clear.">
         {whRows.map((wh) => (
           <li
             key={wh.id}
-            className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
           >
             <div className="min-w-0 flex-1">
-              <p className="font-medium">
+              <p className="font-semibold text-foreground">
                 {wh.provider} · {wh.event_type ?? 'callback'} · {wh.status}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -251,19 +229,16 @@ export default async function AdminFinancePage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {wh.payment_intent_id ? (
-                <Button asChild size="sm" variant="outline" className="min-h-10">
+                <Button asChild variant="outline" className="min-h-11">
                   <Link href={`/admin/finance/intents/${wh.payment_intent_id}` as Route}>
                     Case file
                   </Link>
                 </Button>
               ) : null}
-              <p className="font-mono text-xs text-muted-foreground">
-                {wh.fingerprint.slice(0, 12)}…
-              </p>
               {(wh.status === 'failed' || wh.status === 'received') && (
                 <form action={reprocessWebhookAction}>
                   <input type="hidden" name="eventId" value={wh.id} />
-                  <Button type="submit" size="sm" variant="outline" className="min-h-10">
+                  <Button type="submit" variant="outline" className="min-h-11">
                     Reprocess
                   </Button>
                 </form>
@@ -277,10 +252,10 @@ export default async function AdminFinancePage() {
         {jeRows.map((je) => (
           <li
             key={je.id}
-            className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+            className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
           >
             <div>
-              <p className="font-medium">
+              <p className="font-semibold text-foreground">
                 {je.domain} · {je.description ?? je.source_type}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -304,21 +279,17 @@ function Section({
 }: {
   title: string;
   empty: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const items = Array.isArray(children) ? children : children ? [children] : [];
   const has = items.filter(Boolean).length > 0;
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        {title}
-      </h3>
+    <section className="space-y-2.5">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {!has ? (
-        <p className="text-sm text-muted-foreground">{empty}</p>
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">{empty}</p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
-          {children}
-        </ul>
+        <ul className="amanah-surface divide-y divide-border/70">{children}</ul>
       )}
     </section>
   );
@@ -335,9 +306,9 @@ function IntentLine({
   const kind =
     typeof row.metadata?.kind === 'string' ? row.metadata.kind : 'wallet_top_up';
   return (
-    <li className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+    <li className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5">
       <div className="min-w-0 flex-1">
-        <p className="font-medium">
+        <p className="font-semibold text-foreground">
           {kind.replaceAll('_', ' ')} · {row.provider}
         </p>
         <p className="text-sm text-muted-foreground">
@@ -352,10 +323,10 @@ function IntentLine({
       </div>
       <div className="flex flex-wrap items-center justify-end gap-2">
         <div className="text-right">
-          <p className="font-semibold">{formatCurrency(amount, row.currency)}</p>
+          <p className="font-semibold tabular-nums">{formatCurrency(amount, row.currency)}</p>
           <StatusBadge status={row.reconcile_status} />
         </div>
-        <Button asChild size="sm" variant="outline" className="min-h-10">
+        <Button asChild variant="outline" className="min-h-11">
           <Link href={`/admin/finance/intents/${row.id}` as Route}>Case file</Link>
         </Button>
         {showResolve ? (
@@ -363,12 +334,7 @@ function IntentLine({
             <form action={resolveIntentExceptionAction}>
               <input type="hidden" name="intentId" value={row.id} />
               <input type="hidden" name="action" value="match" />
-              <Button
-                type="submit"
-                size="sm"
-                className="min-h-10"
-                title={FINANCE_ACTION_LABELS.match.title}
-              >
+              <Button type="submit" className="min-h-11" title={FINANCE_ACTION_LABELS.match.title}>
                 {FINANCE_ACTION_LABELS.match.button}
               </Button>
             </form>
@@ -377,9 +343,8 @@ function IntentLine({
               <input type="hidden" name="action" value="manual" />
               <Button
                 type="submit"
-                size="sm"
                 variant="outline"
-                className="min-h-10"
+                className="min-h-11"
                 title={FINANCE_ACTION_LABELS.manual.title}
               >
                 {FINANCE_ACTION_LABELS.manual.button}
@@ -390,9 +355,8 @@ function IntentLine({
               <input type="hidden" name="action" value="waive" />
               <Button
                 type="submit"
-                size="sm"
                 variant="outline"
-                className="min-h-10"
+                className="min-h-11"
                 title={FINANCE_ACTION_LABELS.waive.title}
               >
                 {FINANCE_ACTION_LABELS.waive.button}

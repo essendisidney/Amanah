@@ -19,15 +19,21 @@ export function DonateForm({
   currency,
   feeMode,
   feeBps,
+  defaultAmount,
+  fromZakat = false,
 }: {
   campaignId: string;
   slug: string;
   currency: string;
   feeMode: string;
   feeBps: number;
+  defaultAmount?: number;
+  fromZakat?: boolean;
 }) {
   const router = useRouter();
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState(
+    defaultAmount && defaultAmount >= 10 ? String(defaultAmount) : '',
+  );
   const [state, action, pending] = useActionState(
     async (_prev: CharityActionState, formData: FormData) => donateAction(formData),
     initial,
@@ -56,17 +62,26 @@ export function DonateForm({
   useEffect(() => {
     if (!state.success) return;
     const code = state.receiptCode ?? extractReceipt(state.message);
-    if (code) router.push(`/sadaka/receipt/${encodeURIComponent(code)}`);
-  }, [state, router]);
+    if (code) {
+      const suffix = fromZakat ? '?from=zakat' : '';
+      router.push(`/sadaka/receipt/${encodeURIComponent(code)}${suffix}`);
+    }
+  }, [state, router, fromZakat]);
 
   return (
-    <form action={action} className="space-y-4 border border-border bg-card p-6">
+    <form action={action} className="amanah-surface space-y-4 px-4 py-4 sm:px-5">
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="slug" value={slug} />
-      <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Contribute</h2>
-      <p className="text-sm text-muted-foreground">
-        Your gift helps reach the target. When the goal is met, funds go to the beneficiary M-Pesa.
-      </p>
+      <div className="space-y-1">
+        <h2 className="text-sm font-semibold text-foreground">
+          {fromZakat ? 'Give zakat estimate' : 'Contribute'}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {fromZakat
+            ? 'Amount from your calculator. You can change it before paying.'
+            : 'When the goal is met, funds go to the beneficiary M-Pesa.'}
+        </p>
+      </div>
       <div className="space-y-2">
         <Label htmlFor="amount">Amount ({currency})</Label>
         <Input
@@ -78,6 +93,7 @@ export function DonateForm({
           required
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
+          className="h-11 text-base sm:h-10 sm:text-sm"
         />
       </div>
       {preview ? (
@@ -89,15 +105,26 @@ export function DonateForm({
       ) : null}
       <div className="space-y-2">
         <Label htmlFor="donorName">Name (optional)</Label>
-        <Input id="donorName" name="donorName" />
+        <Input id="donorName" name="donorName" className="h-11 text-base sm:h-10 sm:text-sm" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="donorPhone">Phone (optional)</Label>
-        <Input id="donorPhone" name="donorPhone" type="tel" placeholder={KE_PHONE_PLACEHOLDER} />
+        <Input
+          id="donorPhone"
+          name="donorPhone"
+          type="tel"
+          placeholder={KE_PHONE_PLACEHOLDER}
+          className="h-11 text-base sm:h-10 sm:text-sm"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="donorEmail">Email (optional)</Label>
-        <Input id="donorEmail" name="donorEmail" type="email" />
+        <Input
+          id="donorEmail"
+          name="donorEmail"
+          type="email"
+          className="h-11 text-base sm:h-10 sm:text-sm"
+        />
       </div>
       <label className="flex items-center gap-2 text-sm">
         <input name="anonymous" type="checkbox" /> Give anonymously
@@ -111,8 +138,8 @@ export function DonateForm({
           {state.message}
         </p>
       ) : null}
-      <Button type="submit" disabled={pending}>
-        {pending ? 'Processing…' : 'Contribute'}
+      <Button type="submit" className="min-h-11 w-full" disabled={pending}>
+        {pending ? 'Processing…' : fromZakat ? 'Give this amount' : 'Contribute'}
       </Button>
     </form>
   );

@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { AdminCircleActions } from '@/features/admin/components/admin-circle-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Circles' };
@@ -37,19 +38,16 @@ export default async function AdminCirclesPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Circles</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Update status, suspend or cancel a chama, or delete draft/cancelled/suspended circles.
-          Live circles with members or payments must be suspended or cancelled before delete.
-        </p>
-      </div>
+      <AdminSectionHeader
+        title="Circles"
+        subtitle="Suspend or cancel live chamas before delete. Drafts can be removed directly."
+      />
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border px-5 py-8 text-sm text-muted-foreground">
+        <p className="amanah-surface border-dashed px-4 py-8 text-sm text-muted-foreground sm:px-5">
           No circles yet.
         </p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/70">
           {rows.map((item) => {
             const amount =
               typeof item.contribution_amount === 'number'
@@ -58,13 +56,13 @@ export default async function AdminCirclesPage() {
             return (
               <li
                 key={item.id}
-                className="flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between"
+                className="flex flex-col gap-3 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/circles/${item.slug}` as Route}
-                      className="font-medium hover:text-primary"
+                      className="font-semibold text-foreground hover:text-primary"
                     >
                       {item.name}
                     </Link>

@@ -504,6 +504,35 @@ export type Dictionary = {
     tipTitle: string;
     tipBody: string;
     openTip: string;
+    faqTitle: string;
+    faqShariahQ: string;
+    faqShariahA: string;
+    faqFeesQ: string;
+    faqFeesA: string;
+    faqRibaQ: string;
+    faqRibaA: string;
+    openShariah: string;
+  };
+  shariahPage: {
+    eyebrow: string;
+    title: string;
+    lead: string;
+    pillarsTitle: string;
+    allowTitle: string;
+    allowBody: string;
+    avoidTitle: string;
+    avoidBody: string;
+    feesTitle: string;
+    feesBody: string;
+    boardTitle: string;
+    boardBody: string;
+    disclaimerTitle: string;
+    disclaimerBody: string;
+    relatedTitle: string;
+    linkZakat: string;
+    linkSadaka: string;
+    linkQard: string;
+    linkHelp: string;
   };
   circle: {
     meetingsChat: string;
@@ -1106,6 +1135,40 @@ export const en: Dictionary = {
     tipTitle: 'Support Jameiyah',
     tipBody: 'Tip the platform — separate from sadaka.',
     openTip: 'Support Jameiyah',
+    faqTitle: 'Common questions',
+    faqShariahQ: 'Is Jameiyah Shariah-compliant?',
+    faqShariahA: 'Circles avoid interest between members. Guidance only — not a fatwa.',
+    faqFeesQ: 'What about fees?',
+    faqFeesA: 'Platform fees are disclosed before you pay. They are not interest on loans.',
+    faqRibaQ: 'Can circles charge interest?',
+    faqRibaA: 'No. Qard Hassan is interest-free. Ask your scholar for personal cases.',
+    openShariah: 'Read Shariah stance',
+  },
+  shariahPage: {
+    eyebrow: 'Shariah',
+    title: 'How Jameiyah stays Shariah-conscious',
+    lead: 'Built for Kenyan circles that want clear books without riba at the centre.',
+    pillarsTitle: 'What we stand for',
+    allowTitle: 'What we allow',
+    allowBody:
+      'Circle dues and payouts, interest-free Qard, welfare claims, personal goals, Sadaka, and zakat estimates.',
+    avoidTitle: 'What we avoid',
+    avoidBody:
+      'Interest between members. We do not run a retail investment fund or charge riba on Qard.',
+    feesTitle: 'Fees',
+    feesBody:
+      'Shown before you pay (wallet, Sadaka, and similar). Fees fund the platform — not a loan interest charge.',
+    boardTitle: 'Scholars',
+    boardBody:
+      'No named Shariah board is published yet. When appointed, names and rulings will appear here.',
+    disclaimerTitle: 'Honest limit',
+    disclaimerBody:
+      'This is product guidance, not a fatwa. Jameiyah is community software — not a bank. Ask a scholar you trust for personal rulings.',
+    relatedTitle: 'Related',
+    linkZakat: 'Zakat calculator',
+    linkSadaka: 'Sadaka campaigns',
+    linkQard: 'Member loan (Qard)',
+    linkHelp: 'Help & support',
   },
   circle: {
     meetingsChat: 'Meetings & chat',
@@ -1715,6 +1778,40 @@ export const sw: Dictionary = {
     tipTitle: 'Saidia Jameiyah',
     tipBody: 'Tipu ya jukwaa — tofauti na sadaka.',
     openTip: 'Saidia Jameiyah',
+    faqTitle: 'Maswali ya kawaida',
+    faqShariahQ: 'Je, Jameiyah inafuata Shariah?',
+    faqShariahA: 'Miduara huepuka riba kati ya wanachama. Mwongozo tu — si fatwa.',
+    faqFeesQ: 'Ada zinamaanisha nini?',
+    faqFeesA: 'Ada za jukwaa huonyeshwa kabla ya kulipa. Si riba ya mkopo.',
+    faqRibaQ: 'Je, miduara inaweza kuchaji riba?',
+    faqRibaA: 'Hapana. Qard Hassan haina riba. Uliza mwanachuoni kwa kesi yako.',
+    openShariah: 'Soma msimamo wa Shariah',
+  },
+  shariahPage: {
+    eyebrow: 'Shariah',
+    title: 'Jinsi Jameiyah inavyofuata Shariah',
+    lead: 'Imeundwa kwa miduara ya Kenya inayotaka vitabu wazi bila riba katikati.',
+    pillarsTitle: 'Tunachosimamia',
+    allowTitle: 'Tunachoruhusu',
+    allowBody:
+      'Michango na malipo ya mduara, Qard bila riba, madai ya ustawi, malengo, Sadaka, na makadirio ya zakat.',
+    avoidTitle: 'Tunachokwepa',
+    avoidBody:
+      'Riba kati ya wanachama. Hatutoii hazina ya uwekezaji wa rejareja wala kuchaji riba kwenye Qard.',
+    feesTitle: 'Ada',
+    feesBody:
+      'Huonyeshwa kabla ya kulipa (pochi, Sadaka, na kadhalika). Ada zinaendesha jukwaa — si riba ya mkopo.',
+    boardTitle: 'Wanachuoni',
+    boardBody:
+      'Bado hakuna bodi ya Shariah iliyochapishwa. Ikichaguliwa, majina na maamuzi yataonekana hapa.',
+    disclaimerTitle: 'Kikomo cha uaminifu',
+    disclaimerBody:
+      'Hii ni mwongozo wa bidhaa, si fatwa. Jameiyah ni programu ya jamii — si benki. Uliza mwanachuoni unayemwamini.',
+    relatedTitle: 'Zingine',
+    linkZakat: 'Kikokotoo cha Zakat',
+    linkSadaka: 'Kampeni za Sadaka',
+    linkQard: 'Mkopo wa mwanachama (Qard)',
+    linkHelp: 'Msaada',
   },
   circle: {
     meetingsChat: 'Mikutano na gumzo',

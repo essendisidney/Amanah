@@ -30,10 +30,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   institutional: 'Institutional',
 };
 
-type Props = { searchParams: Promise<{ category?: string }> };
+type Props = { searchParams: Promise<{ category?: string; amount?: string; from?: string }> };
 
 export default async function SadakaPage({ searchParams }: Props) {
-  const { category } = await searchParams;
+  const { category, amount, from } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -88,6 +88,9 @@ export default async function SadakaPage({ searchParams }: Props) {
     { href: '/sadaka/adopt' as Route, title: 'Adopt an institution', meta: 'Monthly' },
   ];
 
+  const zakatAmount = from === 'zakat' ? Number(amount) : NaN;
+  const hasZakatAmount = Number.isFinite(zakatAmount) && zakatAmount >= 10;
+
   return (
     <main className="space-y-6 py-6 sm:py-10">
       <header className="space-y-2">
@@ -101,6 +104,16 @@ export default async function SadakaPage({ searchParams }: Props) {
           Approved causes anyone can support.
         </p>
       </header>
+
+      {hasZakatAmount ? (
+        <div className="amanah-surface space-y-1 px-4 py-4 sm:px-5">
+          <p className="text-sm font-semibold text-foreground">Pay your zakat estimate</p>
+          <p className="text-sm text-muted-foreground">
+            Suggested gift: KES {Math.round(zakatAmount).toLocaleString()}. Pick a live campaign
+            below — amount carries over.
+          </p>
+        </div>
+      ) : null}
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Shortcuts</h2>
@@ -164,7 +177,11 @@ export default async function SadakaPage({ searchParams }: Props) {
               return (
                 <li key={campaign.id}>
                   <Link
-                    href={`/sadaka/${campaign.slug}` as Route}
+                    href={
+                      (hasZakatAmount
+                        ? `/sadaka/${campaign.slug}?amount=${Math.round(zakatAmount)}&from=zakat`
+                        : `/sadaka/${campaign.slug}`) as Route
+                    }
                     className="block px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">

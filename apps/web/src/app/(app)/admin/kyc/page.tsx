@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { reviewKycDocumentAction } from '@/features/admin/actions/admin-actions';
 import { reviewJamiyaKycAction } from '@/features/circles/actions/jamiya-kyc-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · KYC' };
@@ -85,36 +86,34 @@ export default async function AdminKycPage() {
   ).length;
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            KYC review
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {pendingPersonal + pendingCircle === 0
-              ? 'No documents waiting. Scroll for history and IPRS lookups.'
-              : `${pendingPersonal + pendingCircle} waiting · personal ${pendingPersonal} · circle ${pendingCircle}`}
-          </p>
-        </div>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/admin' as Route}>Back to Inbox</Link>
-        </Button>
-      </div>
+    <div className="space-y-8">
+      <AdminSectionHeader
+        title="KYC review"
+        subtitle={
+          pendingPersonal + pendingCircle === 0
+            ? 'No documents waiting.'
+            : `${pendingPersonal + pendingCircle} waiting · personal ${pendingPersonal} · circle ${pendingCircle}`
+        }
+        action={
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin' as Route}>Inbox</Link>
+          </Button>
+        }
+      />
 
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Personal KYC
-        </h2>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Personal KYC</h3>
         {docs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No personal KYC documents submitted.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No personal KYC documents submitted.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {docs.map((doc) => (
-              <li key={doc.id} className="space-y-3 px-5 py-4">
+              <li key={doc.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium capitalize">
+                    <p className="font-semibold capitalize text-foreground">
                       {doc.document_type.replace(/_/g, ' ')}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -142,7 +141,7 @@ export default async function AdminKycPage() {
                       <input
                         name="reason"
                         placeholder="Rejection reason"
-                        className="min-h-11 w-full rounded-md border border-border bg-card px-3 text-sm sm:min-w-[12rem]"
+                        className="min-h-11 w-full rounded-md border border-border/70 bg-background px-3 text-sm sm:min-w-[12rem]"
                       />
                       <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                         Reject
@@ -156,19 +155,19 @@ export default async function AdminKycPage() {
         )}
       </section>
 
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Circle / chama KYC
-        </h2>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Circle KYC</h3>
         {circleDocs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No circle registration documents yet.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No circle registration documents yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {circleDocs.map((doc) => (
-              <li key={doc.id} className="space-y-3 px-5 py-4">
+              <li key={doc.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium capitalize">
+                    <p className="font-semibold capitalize text-foreground">
                       {doc.document_type.replace(/_/g, ' ')}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -196,7 +195,7 @@ export default async function AdminKycPage() {
                       <input
                         name="notes"
                         placeholder="Rejection notes"
-                        className="min-h-11 w-full rounded-md border border-border bg-card px-3 text-sm sm:min-w-[12rem]"
+                        className="min-h-11 w-full rounded-md border border-border/70 bg-background px-3 text-sm sm:min-w-[12rem]"
                       />
                       <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                         Reject
@@ -210,21 +209,21 @@ export default async function AdminKycPage() {
         )}
       </section>
 
-      <section className="space-y-4">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          IPRS / National ID lookups
-        </h2>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">IPRS lookups</h3>
         {iprsRows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No IPRS checks yet.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No IPRS checks yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {iprsRows.map((row) => (
               <li
                 key={row.id}
-                className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
               >
                 <div>
-                  <p className="font-medium">
+                  <p className="font-semibold text-foreground">
                     {row.first_name} {row.last_name} · ID {row.national_id}
                   </p>
                   <p className="text-sm text-muted-foreground">

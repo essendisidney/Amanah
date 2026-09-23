@@ -7,7 +7,10 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ amount?: string; from?: string }>;
+};
 type Campaign = {
   id: string;
   slug: string;
@@ -39,8 +42,13 @@ type Disbursement = {
   status: string;
 };
 
-export default async function CampaignPage({ params }: Props) {
+export default async function CampaignPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const qs = (await searchParams) ?? {};
+  const presetAmount = Number(qs.amount);
+  const fromZakat = qs.from === 'zakat';
+  const defaultAmount =
+    Number.isFinite(presetAmount) && presetAmount >= 10 ? Math.round(presetAmount) : undefined;
   const supabase = await createClient();
   const {
     data: { user },
@@ -221,6 +229,8 @@ export default async function CampaignPage({ params }: Props) {
             currency={campaign.currency}
             feeMode={campaign.fee_mode}
             feeBps={campaign.fee_bps}
+            defaultAmount={defaultAmount}
+            fromZakat={fromZakat}
           />
         ) : (
           <p className="text-sm text-muted-foreground">

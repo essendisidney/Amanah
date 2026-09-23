@@ -11,6 +11,7 @@ import {
   shouldBlockSimulatedPayments,
 } from '@/lib/production-cutover';
 import { runReconcileNowAction } from '@/features/admin/actions/reconcile-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { Button } from '@jamiya/ui';
 
 export const metadata: Metadata = { title: 'Admin · Observability' };
@@ -181,20 +182,14 @@ export default async function AdminObservabilityPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Observability
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Operational snapshot including aged withdrawals, failed outbox, payment cutover, and
-          daily reconcile. Health:{' '}
-          <code className="text-xs">/api/v1/payments/orchestrator-health</code>.
-        </p>
-      </div>
+      <AdminSectionHeader
+        title="Health"
+        subtitle="Ops snapshot: reconcile, cutover, queues. Probe /api/v1/payments/orchestrator-health."
+      />
 
-      <section className="amanah-surface space-y-3 px-4 py-4">
+      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h3 className="text-lg font-semibold tracking-tight">Payment reconcile</h3>
+          <h3 className="text-sm font-semibold text-foreground">Payment reconcile</h3>
           <form action={runReconcileNowAction}>
             <Button type="submit" variant="outline" className="min-h-11">
               Run now
@@ -209,29 +204,29 @@ export default async function AdminObservabilityPage() {
               {reconcile.finished_at ? ` · finished ${formatDate(reconcile.finished_at)}` : ''}
             </p>
             <dl className="grid gap-2 sm:grid-cols-3">
-              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+              <div className="bg-secondary/50 px-3 py-2">
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Intents settled / failed / flagged
                 </dt>
-                <dd className="mt-1 font-mono text-sm font-semibold">
+                <dd className="mt-1 font-mono text-sm font-semibold tabular-nums">
                   {summary.intents_settled ?? 0} / {summary.intents_failed ?? 0} /{' '}
                   {summary.intents_flagged ?? 0}
                 </dd>
               </div>
-              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+              <div className="bg-secondary/50 px-3 py-2">
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Withdrawals settled / failed / flagged
                 </dt>
-                <dd className="mt-1 font-mono text-sm font-semibold">
+                <dd className="mt-1 font-mono text-sm font-semibold tabular-nums">
                   {summary.withdrawals_settled ?? 0} / {summary.withdrawals_failed ?? 0} /{' '}
                   {summary.withdrawals_flagged ?? 0}
                 </dd>
               </div>
-              <div className="rounded-xl bg-secondary/50 px-3 py-2">
+              <div className="bg-secondary/50 px-3 py-2">
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   Needs admin
                 </dt>
-                <dd className="mt-1 font-mono text-sm font-semibold">
+                <dd className="mt-1 font-mono text-sm font-semibold tabular-nums">
                   {summary.needs_admin?.length ?? 0}
                 </dd>
               </div>
@@ -257,13 +252,13 @@ export default async function AdminObservabilityPage() {
         )}
       </section>
 
-      <section className="amanah-surface space-y-3 px-4 py-4">
-        <h3 className="text-lg font-semibold tracking-tight">Payment cutover</h3>
+      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+        <h3 className="text-sm font-semibold text-foreground">Payment cutover</h3>
         <dl className="grid gap-2 sm:grid-cols-2">
           {cutoverRows.map((row) => (
             <div
               key={row.label}
-              className="flex items-baseline justify-between gap-3 rounded-xl bg-secondary/50 px-3 py-2"
+              className="flex items-baseline justify-between gap-3 bg-secondary/50 px-3 py-2"
             >
               <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {row.label}
@@ -273,16 +268,16 @@ export default async function AdminObservabilityPage() {
           ))}
         </dl>
         {provider === 'bank' && bank.hint ? (
-          <p className="rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+          <p className="border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
             {bank.hint}
           </p>
         ) : null}
         {mpesa.hint && provider === 'mpesa' ? (
-          <p className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {mpesa.hint}
           </p>
         ) : mpesa.hint && provider !== 'mpesa' ? (
-          <p className="rounded-xl border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
+          <p className="border border-border bg-secondary/40 px-3 py-2 text-sm text-muted-foreground">
             Edge probe: {mpesa.error ?? 'not ready'}. App is on {provider}, so wallet top-ups do not
             depend on Daraja until you switch <code className="text-xs">PAYMENT_PROVIDER=mpesa</code>
             .{mpesa.hint ? ` ${mpesa.hint}` : ''}
@@ -296,21 +291,16 @@ export default async function AdminObservabilityPage() {
         ) : null}
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-xl border border-border bg-card px-4 py-4 shadow-[0_1px_0_rgba(26,31,28,0.04)]"
-          >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <div key={card.label} className="amanah-surface px-4 py-3">
+            <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {card.label}
-            </p>
-            <p className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
-              {card.value}
-            </p>
+            </dt>
+            <dd className="mt-1 text-2xl font-semibold tabular-nums">{card.value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </div>
   );
 }

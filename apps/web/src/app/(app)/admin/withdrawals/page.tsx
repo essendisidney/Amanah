@@ -10,6 +10,7 @@ import {
   processPayoutCashoutAction,
   processWithdrawalAction,
 } from '@/features/wallet/actions/withdrawal-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Money out' };
@@ -95,29 +96,21 @@ export default async function AdminWithdrawalsPage() {
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Money out
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Maker–checker: amounts at/above the dual-approval threshold need a second compliance
-            approver. Destination is locked from the member&apos;s verified M-Pesa. You cannot
-            second-approve your own first approval.
-          </p>
-        </div>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/admin' as Route}>Back to Inbox</Link>
-        </Button>
-      </div>
+    <div className="space-y-5">
+      <AdminSectionHeader
+        title="Money out"
+        subtitle="Dual approval when above threshold. Destination stays the member’s verified M-Pesa."
+        action={
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin' as Route}>Inbox</Link>
+          </Button>
+        }
+      />
 
       {dualRows.length > 0 ? (
-        <section className="space-y-3">
-          <h3 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            Awaiting second approval
-          </h3>
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <section className="space-y-2.5">
+          <h3 className="text-sm font-semibold text-foreground">Awaiting second approval</h3>
+          <ul className="amanah-surface divide-y divide-border/70">
             {dualRows.map((row) => {
               const destPhone =
                 typeof row.payload?.destination_phone === 'string'
@@ -132,10 +125,10 @@ export default async function AdminWithdrawalsPage() {
               return (
                 <li
                   key={row.id}
-                  className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+                  className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:px-5"
                 >
                   <div>
-                    <p className="font-medium">
+                    <p className="font-semibold text-foreground">
                       {formatCurrency(Number(row.amount), row.currency)} · {destType}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -144,7 +137,7 @@ export default async function AdminWithdrawalsPage() {
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Maker {nameById.get(row.first_approver_id) ?? row.first_approver_id.slice(0, 8)}{' '}
-                      · {ageLabel(row.created_at)} · {formatDate(row.created_at)}
+                      · {ageLabel(row.created_at)}
                     </p>
                   </div>
                   <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
@@ -174,26 +167,28 @@ export default async function AdminWithdrawalsPage() {
         </section>
       ) : null}
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No withdrawal requests yet.</p>
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          No withdrawal requests yet.
+        </p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/70">
           {rows.map((row) => {
             const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
             const kind = typeof row.metadata?.kind === 'string' ? row.metadata.kind : null;
             const locked = row.metadata?.destination_locked === true;
             const isPayoutCashout = kind === 'payout_cashout';
             return (
-              <li key={row.id} className="space-y-3 px-5 py-4">
+              <li key={row.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">
+                      <p className="font-semibold text-foreground">
                         {formatCurrency(amount, row.currency)} · {row.destination_type}
                       </p>
                       <StatusBadge status={row.status} />
                       {isPayoutCashout ? <StatusBadge status="payout_cashout" /> : null}
                       {locked ? (
-                        <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span className="rounded-md bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                           Locked dest
                         </span>
                       ) : null}

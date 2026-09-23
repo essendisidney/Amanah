@@ -165,6 +165,8 @@ export default async function ProfilePage({ searchParams }: Props) {
       title: labels.linkVerification,
       meta: verification.label,
     },
+    { href: '/zakat' as Route, title: labels.linkZakat, meta: null },
+    { href: '/shariah' as Route, title: 'Shariah', meta: null },
     { href: '/help' as Route, title: labels.linkHelp, meta: null },
     { href: '/support' as Route, title: labels.linkSupportJameiyah, meta: null },
   ];

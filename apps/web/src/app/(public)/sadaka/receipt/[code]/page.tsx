@@ -7,10 +7,15 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-type Props = { params: Promise<{ code: string }> };
+type Props = {
+  params: Promise<{ code: string }>;
+  searchParams?: Promise<{ from?: string }>;
+};
 
-export default async function DonationReceiptPage({ params }: Props) {
+export default async function DonationReceiptPage({ params, searchParams }: Props) {
   const { code } = await params;
+  const qs = (await searchParams) ?? {};
+  const fromZakat = qs.from === 'zakat';
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('get_donation_receipt', {
     p_code: decodeURIComponent(code),
@@ -44,7 +49,9 @@ export default async function DonationReceiptPage({ params }: Props) {
         Thank you
       </h1>
       <p className="mt-3 text-muted-foreground">
-        Keep this receipt for your records. Share the campaign to help it grow.
+        {fromZakat
+          ? 'Receipt for your gift toward a zakat estimate. Ask a scholar for your personal ruling.'
+          : 'Keep this receipt for your records. Share the campaign to help it grow.'}
       </p>
 
       <div className="mt-8 space-y-4 border border-border bg-card p-6">
@@ -93,10 +100,15 @@ export default async function DonationReceiptPage({ params }: Props) {
       </div>
 
       <div className="mt-8 flex flex-wrap gap-3">
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" className="min-h-11">
           <Link href={`/sadaka/${result.campaign?.slug ?? ''}` as Route}>Back to campaign</Link>
         </Button>
-        <Button asChild>
+        {fromZakat ? (
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/zakat' as Route}>Back to Zakat</Link>
+          </Button>
+        ) : null}
+        <Button asChild className="min-h-11">
           <Link href={'/sadaka' as Route}>All campaigns</Link>
         </Button>
       </div>

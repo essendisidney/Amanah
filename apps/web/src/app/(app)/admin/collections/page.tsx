@@ -8,6 +8,7 @@ import {
   updateCollectionCaseAction,
 } from '@/features/admin/actions/collection-actions';
 import { runPlaybookAction } from '@/features/admin/actions/playbook-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Collections' };
@@ -41,73 +42,69 @@ export default async function AdminCollectionsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Collections
-        </h2>
-        <form action={syncCollectionsAction}>
-          <Button type="submit" variant="outline" size="sm">
-            Sync overdue cases
-          </Button>
-        </form>
-      </div>
+      <AdminSectionHeader
+        title="Collections"
+        subtitle="Overdue contributions. Sync after dues go late."
+        action={
+          <form action={syncCollectionsAction}>
+            <Button type="submit" variant="outline" className="min-h-11">
+              Sync overdue
+            </Button>
+          </form>
+        }
+      />
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No collection cases. Sync after contributions become late.
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          No collection cases yet.
         </p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/70">
           {rows.map((row) => {
             const amount =
-              typeof row.amount_due === 'number'
-                ? row.amount_due
-                : Number(row.amount_due);
+              typeof row.amount_due === 'number' ? row.amount_due : Number(row.amount_due);
             return (
-              <li key={row.id} className="space-y-3 px-5 py-4">
+              <li key={row.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium">
-                        {formatCurrency(amount, row.currency)} · {row.days_overdue}d
-                        overdue
+                      <p className="font-semibold tabular-nums text-foreground">
+                        {formatCurrency(amount, row.currency)} · {row.days_overdue}d overdue
                       </p>
                       <StatusBadge status={row.status} />
                       <StatusBadge status={row.severity} />
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}…
-                      · contacts {row.contact_attempts}
+                      {formatDate(row.created_at)} · user {row.user_id.slice(0, 8)}… · contacts{' '}
+                      {row.contact_attempts}
                     </p>
                   </div>
                 </div>
-                {['open', 'contacted', 'promised', 'partially_paid'].includes(
-                  row.status,
-                ) ? (
+                {['open', 'contacted', 'promised', 'partially_paid'].includes(row.status) ? (
                   <div className="flex flex-wrap gap-2">
                     <form action={runPlaybookAction}>
                       <input type="hidden" name="caseId" value={row.id} />
-                      <Button type="submit" size="sm">
-                        Run playbook step
+                      <Button type="submit" className="min-h-11">
+                        Run playbook
                       </Button>
                     </form>
                     <form action={updateCollectionCaseAction}>
                       <input type="hidden" name="caseId" value={row.id} />
                       <input type="hidden" name="status" value="contacted" />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Button type="submit" variant="outline" className="min-h-11">
                         Mark contacted
                       </Button>
                     </form>
                     <form action={updateCollectionCaseAction}>
                       <input type="hidden" name="caseId" value={row.id} />
                       <input type="hidden" name="status" value="resolved" />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Button type="submit" variant="outline" className="min-h-11">
                         Resolve
                       </Button>
                     </form>
                     <form action={updateCollectionCaseAction}>
                       <input type="hidden" name="caseId" value={row.id} />
                       <input type="hidden" name="status" value="written_off" />
-                      <Button type="submit" size="sm" variant="destructive">
+                      <Button type="submit" variant="destructive" className="min-h-11">
                         Write off
                       </Button>
                     </form>

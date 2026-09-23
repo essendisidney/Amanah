@@ -4,6 +4,7 @@ import type { Route } from 'next';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 
 export const metadata: Metadata = { title: 'Admin' };
 export const dynamic = 'force-dynamic';
@@ -76,40 +77,40 @@ export default async function AdminOverviewPage() {
       href: '/admin/kyc' as Route,
       title: 'KYC review',
       count: kycCount,
-      blurb: 'Personal and circle documents waiting for approve or reject.',
-      cta: 'Review KYC',
+      blurb: 'Personal and circle documents.',
+      cta: 'Review',
       priority: 1,
     },
     {
       href: '/admin/withdrawals' as Route,
       title: 'Money out',
       count: moneyOutCount,
-      blurb: 'Withdrawals and second approvals that need a different admin.',
-      cta: 'Open Money out',
+      blurb: 'Withdrawals and second approvals.',
+      cta: 'Open',
       priority: 2,
     },
     {
       href: '/admin/sadaka' as Route,
-      title: 'Sadaka & institutions',
+      title: 'Sadaka',
       count: sadakaCount,
-      blurb: 'Campaigns to go live and institutions to verify.',
-      cta: 'Review Sadaka',
+      blurb: 'Campaigns and institutions.',
+      cta: 'Review',
       priority: 3,
     },
     {
       href: '/admin/disputes' as Route,
       title: 'Disputes',
       count: openDisputes.count ?? 0,
-      blurb: 'Member disputes still open or under review.',
-      cta: 'Open disputes',
+      blurb: 'Open or under review.',
+      cta: 'Open',
       priority: 4,
     },
     {
       href: '/admin/tawarruq' as Route,
       title: 'Tawarruq',
       count: pendingTawarruq.count ?? 0,
-      blurb: 'Partner finance applications needing a status update.',
-      cta: 'Open Tawarruq',
+      blurb: 'Partner applications.',
+      cta: 'Open',
       priority: 5,
     },
   ];
@@ -121,18 +122,22 @@ export default async function AdminOverviewPage() {
   const totalWaiting = queues.reduce((sum, q) => sum + q.count, 0);
 
   return (
-    <div className="space-y-8">
-      <section className="amanah-surface space-y-3 border-primary/20 px-4 py-5 md:px-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+    <div className="space-y-6">
+      <AdminSectionHeader
+        title="Inbox"
+        subtitle={
+          totalWaiting === 0
+            ? 'Nothing waiting right now.'
+            : `${totalWaiting} item${totalWaiting === 1 ? '' : 's'} across ${actionable.length} queue${actionable.length === 1 ? '' : 's'}.`
+        }
+      />
+
+      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Today
         </p>
-        <p className="amanah-money text-4xl font-bold tracking-tight">
+        <p className="amanah-money text-3xl font-semibold tracking-tight sm:text-4xl">
           {totalWaiting === 0 ? 'All clear' : totalWaiting}
-        </p>
-        <p className="max-w-xl text-sm text-muted-foreground">
-          {totalWaiting === 0
-            ? 'Nothing needs you right now. Check Insights for activation and payment health.'
-            : `${actionable.length} queue${actionable.length === 1 ? '' : 's'} need attention. Start at the top.`}
         </p>
         <div className="flex flex-wrap gap-2">
           {actionable[0] ? (
@@ -143,23 +148,23 @@ export default async function AdminOverviewPage() {
             </Button>
           ) : null}
           <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
-            <Link href={'/admin/insights' as Route}>Open Insights</Link>
+            <Link href={'/admin/insights' as Route}>Insights</Link>
           </Button>
         </div>
       </section>
 
       {actionable.length > 0 ? (
-        <section className="space-y-3">
-          <h2 className="text-lg font-bold tracking-tight">Needs action</h2>
-          <ul className="divide-y divide-border border-y border-border">
+        <section className="space-y-2.5">
+          <h3 className="text-sm font-semibold text-foreground">Needs action</h3>
+          <ul className="amanah-surface divide-y divide-border/70">
             {actionable.map((item) => (
               <li
                 key={item.href}
-                className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-semibold">{item.title}</h3>
+                    <p className="font-semibold text-foreground">{item.title}</p>
                     <span className="inline-flex min-w-7 items-center justify-center rounded-md bg-primary px-2 py-0.5 text-xs font-bold text-primary-foreground">
                       {item.count}
                     </span>
@@ -177,16 +182,17 @@ export default async function AdminOverviewPage() {
 
       {clear.length > 0 ? (
         <section className="space-y-2">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Caught up
-          </h2>
-          <ul className="space-y-1 text-sm text-muted-foreground">
+          <h3 className="text-sm font-semibold text-muted-foreground">Caught up</h3>
+          <ul className="amanah-surface divide-y divide-border/70 text-sm">
             {clear.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="hover:text-foreground hover:underline">
-                  {item.title}
+                <Link
+                  href={item.href}
+                  className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-muted-foreground transition-colors hover:bg-muted/40 hover:text-foreground sm:px-5"
+                >
+                  <span>{item.title}</span>
+                  <span>0</span>
                 </Link>
-                {' · '}0 waiting
               </li>
             ))}
           </ul>

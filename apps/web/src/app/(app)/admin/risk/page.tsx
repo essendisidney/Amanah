@@ -4,6 +4,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { recomputeAllRiskAction } from '@/features/admin/actions/risk-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Risk' };
@@ -35,35 +36,38 @@ export default async function AdminRiskPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-          Member risk
-        </h2>
-        <form action={recomputeAllRiskAction}>
-          <Button type="submit" variant="outline" size="sm">
-            Recompute all scores
-          </Button>
-        </form>
-      </div>
+      <AdminSectionHeader
+        title="Member risk"
+        subtitle="Late dues, disputes, and failed payments."
+        action={
+          <form action={recomputeAllRiskAction}>
+            <Button type="submit" variant="outline" className="min-h-11">
+              Recompute scores
+            </Button>
+          </form>
+        }
+      />
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No scores yet. Click “Recompute all scores” after members are active.
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          No scores yet. Recompute after members are active.
         </p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/70">
           {rows.map((row) => (
             <li
               key={row.user_id}
-              className="flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">user {row.user_id.slice(0, 8)}…</p>
+                  <p className="font-semibold text-foreground">
+                    user {row.user_id.slice(0, 8)}…
+                  </p>
                   <StatusBadge status={row.band} />
                 </div>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Late {row.late_contributions} · Disputes {row.open_disputes} · Failed
-                  payments {row.failed_payments} · {formatDate(row.computed_at)}
+                  Late {row.late_contributions} · Disputes {row.open_disputes} · Failed{' '}
+                  {row.failed_payments} · {formatDate(row.computed_at)}
                 </p>
               </div>
               <p className="text-2xl font-semibold tabular-nums">{row.score}</p>

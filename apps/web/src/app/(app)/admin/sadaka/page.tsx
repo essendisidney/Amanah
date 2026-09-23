@@ -11,6 +11,7 @@ import {
   setCampaignFeePolicyFormAction,
   verifyInstitutionFormAction,
 } from '@/features/charity/admin-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Sadaka' };
@@ -118,39 +119,35 @@ export default async function AdminSadakaPage() {
   );
 
   return (
-    <div className="space-y-10">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Sadaka
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Approve campaigns to go live, verify institutions, then handle disbursements.
-          </p>
-        </div>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/admin' as Route}>Back to Inbox</Link>
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <AdminSectionHeader
+        title="Sadaka"
+        subtitle="Approve campaigns, verify institutions, then disburse."
+        action={
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin' as Route}>Inbox</Link>
+          </Button>
+        }
+      />
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Pending review
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Pending review</h3>
         {pending.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No campaigns awaiting review.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No campaigns awaiting review.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {pending.map((row) => (
-              <li key={row.id} className="space-y-3 px-5 py-4">
+              <li key={row.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{row.title}</p>
+                    <p className="font-semibold text-foreground">{row.title}</p>
                     <StatusBadge status={row.status} />
                     {row.category ? <StatusBadge status={row.category} /> : null}
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Target {formatCurrency(Number(row.goal_amount), row.currency)} · beneficiary{' '}
+                    Target {formatCurrency(Number(row.goal_amount), row.currency)} ·{' '}
                     {row.beneficiary_name ?? '—'} · {row.beneficiary_phone ?? 'no phone'}
                   </p>
                   {row.beneficiary_kyc_doc_url ? (
@@ -160,7 +157,10 @@ export default async function AdminSadakaPage() {
                   ) : null}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <form action={reviewCampaignFormAction} className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
+                  <form
+                    action={reviewCampaignFormAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end"
+                  >
                     <input type="hidden" name="campaignId" value={row.id} />
                     <input type="hidden" name="approve" value="1" />
                     <label className="text-xs text-muted-foreground">
@@ -175,10 +175,13 @@ export default async function AdminSadakaPage() {
                       </select>
                     </label>
                     <Button type="submit" className="min-h-11 w-full sm:w-auto">
-                      Approve → live
+                      Approve
                     </Button>
                   </form>
-                  <form action={reviewCampaignFormAction} className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end">
+                  <form
+                    action={reviewCampaignFormAction}
+                    className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-end"
+                  >
                     <input type="hidden" name="campaignId" value={row.id} />
                     <input type="hidden" name="approve" value="0" />
                     <Input
@@ -198,19 +201,22 @@ export default async function AdminSadakaPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Queued disbursements
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Queued disbursements</h3>
         {queued.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pending or processing payouts.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No pending or processing payouts.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {queued.map((d) => (
-              <li key={d.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+              <li
+                key={d.id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
+              >
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">
+                    <p className="font-semibold tabular-nums text-foreground">
                       {formatCurrency(Number(d.net_amount), d.currency)}
                     </p>
                     <StatusBadge status={d.status} />
@@ -228,21 +234,24 @@ export default async function AdminSadakaPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Manual disburse
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Manual disburse</h3>
         {payable.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nothing available to disburse.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            Nothing available to disburse.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {payable.map((row) => {
               const available =
                 Number(row.raised_amount) - Number(row.disbursed_amount ?? 0);
               return (
-                <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                <li
+                  key={row.id}
+                  className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-5"
+                >
                   <div>
-                    <p className="font-medium">{row.title}</p>
+                    <p className="font-semibold text-foreground">{row.title}</p>
                     <p className="text-sm text-muted-foreground">
                       Available {formatCurrency(available, row.currency)} →{' '}
                       {row.beneficiary_phone ?? 'missing phone'}
@@ -257,9 +266,9 @@ export default async function AdminSadakaPage() {
                       step="0.01"
                       max={available}
                       placeholder="Full available"
-                      className="w-36"
+                      className="min-h-11 w-36"
                     />
-                    <Button type="submit" size="sm">
+                    <Button type="submit" className="min-h-11">
                       Queue B2C
                     </Button>
                   </form>
@@ -270,18 +279,18 @@ export default async function AdminSadakaPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Institution verification
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Institution verification</h3>
         {orgs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No institutions registered.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No institutions registered.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {orgs.map((org) => (
-              <li key={org.id} className="space-y-2 px-5 py-4">
+              <li key={org.id} className="space-y-2 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-medium">{org.name}</p>
+                  <p className="font-semibold text-foreground">{org.name}</p>
                   <StatusBadge status={org.type} />
                   <StatusBadge status={org.verification_status} />
                 </div>
@@ -298,15 +307,15 @@ export default async function AdminSadakaPage() {
                     <form action={verifyInstitutionFormAction}>
                       <input type="hidden" name="institutionId" value={org.id} />
                       <input type="hidden" name="approve" value="1" />
-                      <Button type="submit" size="sm">
+                      <Button type="submit" className="min-h-11">
                         Verify
                       </Button>
                     </form>
-                    <form action={verifyInstitutionFormAction} className="flex gap-2">
+                    <form action={verifyInstitutionFormAction} className="flex flex-wrap gap-2">
                       <input type="hidden" name="institutionId" value={org.id} />
                       <input type="hidden" name="approve" value="0" />
-                      <Input name="rejectionReason" placeholder="Reason" className="w-48" />
-                      <Button type="submit" size="sm" variant="outline">
+                      <Input name="rejectionReason" placeholder="Reason" className="min-h-11 w-48" />
+                      <Button type="submit" variant="outline" className="min-h-11">
                         Reject
                       </Button>
                     </form>
@@ -318,37 +327,35 @@ export default async function AdminSadakaPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Fee policy
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Fee policy</h3>
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No campaigns yet.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No campaigns yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+          <ul className="amanah-surface divide-y divide-border/70">
             {rows.map((row) => {
               const raised = Number(row.raised_amount);
               const goal = Number(row.goal_amount);
               return (
-                <li key={row.id} className="space-y-4 px-5 py-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="font-medium">{row.title}</p>
-                        <StatusBadge status={row.status} />
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        /{row.slug} · raised {formatCurrency(raised, row.currency)} of{' '}
-                        {formatCurrency(goal, row.currency)} · fee {(row.fee_bps / 100).toFixed(2)}%
-                      </p>
+                <li key={row.id} className="space-y-4 px-4 py-4 sm:px-5">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-foreground">{row.title}</p>
+                      <StatusBadge status={row.status} />
                     </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      /{row.slug} · raised {formatCurrency(raised, row.currency)} of{' '}
+                      {formatCurrency(goal, row.currency)} · fee {(row.fee_bps / 100).toFixed(2)}%
+                    </p>
                   </div>
                   <form
                     action={setCampaignFeePolicyFormAction}
-                    className="grid gap-3 rounded-lg border border-border/70 bg-muted/30 p-3 sm:grid-cols-2 lg:grid-cols-3"
+                    className="grid gap-3 border border-border/70 bg-muted/30 p-3 sm:grid-cols-2 lg:grid-cols-3"
                   >
                     <input type="hidden" name="campaignId" value={row.id} />
-                    <div className="sm:col-span-2 lg:col-span-3 rounded-md border border-accent/30 bg-background/80 px-3 py-2 text-sm">
+                    <div className="border border-accent/30 bg-background/80 px-3 py-2 text-sm sm:col-span-2 lg:col-span-3">
                       <p className="font-medium">{dict.admin.shariaBoardPanel}</p>
                       <p className="mt-1 text-muted-foreground">{dict.admin.shariaBoardHint}</p>
                       {!row.sharia_board_endorsed ? (
@@ -363,7 +370,7 @@ export default async function AdminSadakaPage() {
                         id={`mode-${row.id}`}
                         name="feeMode"
                         defaultValue={row.fee_mode}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
                       >
                         <option value="donation_addon">donation_addon</option>
                         <option value="donation_deduct">donation_deduct</option>
@@ -378,10 +385,10 @@ export default async function AdminSadakaPage() {
                         min={0}
                         max={2000}
                         defaultValue={row.fee_bps}
+                        className="min-h-11"
                       />
                       <p className="text-xs text-muted-foreground">
-                        Go-live: keep 0 until Sharia board endorses. Then use donation_addon ≤ 250
-                        bps (2.5%).
+                        Keep 0 until Sharia endorses. Then donation_addon ≤ 250 bps.
                       </p>
                     </div>
                     <div className="space-y-1">
@@ -390,7 +397,7 @@ export default async function AdminSadakaPage() {
                         id={`status-${row.id}`}
                         name="status"
                         defaultValue={row.status}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
                       >
                         <option value="draft">draft</option>
                         <option value="pending_review">pending_review</option>
@@ -410,22 +417,22 @@ export default async function AdminSadakaPage() {
                         id={`endorsed-${row.id}`}
                         name="shariaBoardEndorsed"
                         defaultValue={row.sharia_board_endorsed ? 'true' : 'false'}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
                       >
-                        <option value="false">Pending sign-off</option>
+                        <option value="false">Pending</option>
                         <option value="true">Endorsed</option>
                       </select>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`ref-${row.id}`}>Decision reference</Label>
-                      <Input id={`ref-${row.id}`} name="decisionReference" />
+                      <Input id={`ref-${row.id}`} name="decisionReference" className="min-h-11" />
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`notes-${row.id}`}>Notes</Label>
-                      <Input id={`notes-${row.id}`} name="notes" />
+                      <Input id={`notes-${row.id}`} name="notes" className="min-h-11" />
                     </div>
                     <div className="flex items-end sm:col-span-2 lg:col-span-3">
-                      <Button type="submit" size="sm">
+                      <Button type="submit" className="min-h-11">
                         Save fee policy
                       </Button>
                     </div>
@@ -437,17 +444,17 @@ export default async function AdminSadakaPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold">
-          Recent policy decisions
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Recent policy decisions</h3>
         {history.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No policy events yet.</p>
+          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+            No policy events yet.
+          </p>
         ) : (
-          <ul className="divide-y divide-border rounded-xl border border-border bg-card text-sm">
+          <ul className="amanah-surface divide-y divide-border/70 text-sm">
             {history.map((ev) => (
-              <li key={ev.id} className="px-5 py-3">
-                <p className="font-medium">
+              <li key={ev.id} className="px-4 py-3 sm:px-5">
+                <p className="font-semibold text-foreground">
                   {ev.fee_mode} · {ev.fee_bps} bps ·{' '}
                   {ev.sharia_board_endorsed ? 'endorsed' : 'pending'}
                 </p>

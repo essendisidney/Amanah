@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Button } from '@jamiya/ui';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { FINANCE_STATUS_MAPS } from '@/lib/finance/state-machine';
 
 export const metadata: Metadata = { title: 'Admin · Architecture' };
@@ -60,8 +61,8 @@ function statusGrid(
   map: Record<string, readonly string[]>,
 ) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <h3 className="text-sm font-semibold">{title}</h3>
+    <div className="amanah-surface p-4">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
         {Object.entries(map).map(([from, tos]) => (
           <li key={from} className="font-mono">
@@ -82,38 +83,27 @@ export default async function AdminArchitecturePage() {
   await requireAdminAccess('admin');
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            System architecture
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            How Jameiyah money is built end-to-end. This is the admin backend map — not a
-            member product page. Live SoT is still wallet + payment_intents; journal is the
-            projection path toward full double-entry.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild className="min-h-11">
-            <Link href={'/admin/finance' as Route}>Finance centre</Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href={'/admin/observability' as Route}>Health</Link>
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <AdminSectionHeader
+        title="Architecture"
+        subtitle="Money stack map for ops. Wallet + payment_intents are live SoT; journal is the projection."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button asChild className="min-h-11">
+              <Link href={'/admin/finance' as Route}>Finance</Link>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={'/admin/observability' as Route}>Health</Link>
+            </Button>
+          </div>
+        }
+      />
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Stack layers
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Stack layers</h3>
         <ol className="grid gap-3 md:grid-cols-2">
           {LAYERS.map((layer) => (
-            <li
-              key={layer.title}
-              className="rounded-xl border border-border bg-card px-4 py-3"
-            >
+            <li key={layer.title} className="amanah-surface px-4 py-3">
               <p className="text-sm font-semibold text-foreground">{layer.title}</p>
               <p className="mt-1 text-sm text-muted-foreground">{layer.body}</p>
             </li>
@@ -121,10 +111,8 @@ export default async function AdminArchitecturePage() {
         </ol>
       </section>
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Controlled status transitions
-        </h3>
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Status transitions</h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {statusGrid('payment_intents.status', FINANCE_STATUS_MAPS.intent)}
           {statusGrid(
@@ -140,18 +128,19 @@ export default async function AdminArchitecturePage() {
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Admin surfaces
-        </h3>
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+      <section className="space-y-2.5">
+        <h3 className="text-sm font-semibold text-foreground">Admin surfaces</h3>
+        <ul className="amanah-surface divide-y divide-border/70">
           {ADMIN_MAP.map((item) => (
-            <li key={item.href} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+            <li
+              key={`${item.href}-${item.label}`}
+              className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+            >
               <div>
-                <p className="text-sm font-semibold">{item.label}</p>
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
                 <p className="text-xs text-muted-foreground">{item.role}</p>
               </div>
-              <Button asChild variant="outline" size="sm" className="min-h-10">
+              <Button asChild variant="outline" className="min-h-11">
                 <Link href={item.href}>Open</Link>
               </Button>
             </li>

@@ -45,7 +45,7 @@ export default async function LandingPage() {
           links={[
             { href: '/#how' as Route, label: dict.landing.joinCircle },
             { href: '/#circles' as Route, label: 'Circles' },
-            { href: '/#shariah' as Route, label: dict.landing.shariaEyebrow },
+            { href: '/shariah' as Route, label: dict.landing.shariaEyebrow },
             { href: '/pricing' as Route, label: 'Pricing' },
             { href: '/sadaka' as Route, label: dict.common.sadaka },
             { href: '/login' as Route, label: dict.common.signIn, variant: 'ghost' },
@@ -312,9 +312,12 @@ export default async function LandingPage() {
             ))}
           </div>
           <p className="mt-10 max-w-2xl text-xs leading-relaxed text-white/50">
-            {dict.landing.shariaDisclaimer} Jameiyah is community software, not a bank and not an
-            investment fund. We do not claim a regulator licence or a named Shariah board until one
-            is appointed and published here.
+            {dict.landing.shariaDisclaimer}{' '}
+            <Link href={'/shariah' as Route} className="underline underline-offset-2 hover:text-white">
+              Full Shariah stance
+            </Link>
+            . Jameiyah is community software, not a bank and not an investment fund. We do not claim
+            a regulator licence or a named Shariah board until one is appointed and published.
           </p>
         </div>
       </section>

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import { AppPage, PageHeader } from '@/components/app-page';
 import { createClient } from '@/lib/supabase/server';
 import { getUserProfile } from '@/lib/supabase/auth';
 import { isComplianceRole } from '@jamiya/auth';
 import { closeSupportTicketAction } from '@/features/help/actions/support-ticket-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Support tickets' };
@@ -49,15 +49,22 @@ export default async function AdminSupportPage() {
       phone: string | null;
     }>).map((p) => [p.id, p]),
   );
+  const openCount = tickets.filter((t) => t.status === 'open').length;
 
   return (
-    <AppPage width="wide">
-      <PageHeader
+    <div className="space-y-5">
+      <AdminSectionHeader
         title="Support tickets"
-        subtitle="Requests from Help & support. Reply to members using their profile contact."
+        subtitle={
+          openCount === 0
+            ? 'No open tickets.'
+            : `${openCount} open · reply using the member’s profile contact.`
+        }
       />
       {tickets.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No tickets yet.</p>
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          No tickets yet.
+        </p>
       ) : (
         <ul className="space-y-3">
           {tickets.map((ticket) => {
@@ -65,7 +72,7 @@ export default async function AdminSupportPage() {
             const label =
               who?.full_name || who?.email || who?.phone || ticket.user_id.slice(0, 8);
             return (
-              <li key={ticket.id} className="amanah-surface space-y-2 px-4 py-4">
+              <li key={ticket.id} className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold text-foreground">{ticket.subject}</p>
                   <StatusBadge status={ticket.status} />
@@ -77,7 +84,7 @@ export default async function AdminSupportPage() {
                 {ticket.status === 'open' ? (
                   <form action={closeSupportTicketAction}>
                     <input type="hidden" name="ticketId" value={ticket.id} />
-                    <Button type="submit" size="sm" variant="outline">
+                    <Button type="submit" variant="outline" className="min-h-11">
                       Mark closed
                     </Button>
                   </form>
@@ -87,6 +94,6 @@ export default async function AdminSupportPage() {
           })}
         </ul>
       )}
-    </AppPage>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { resolveDisputeAction } from '@/features/circles/actions/dispute-actions';
+import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Disputes' };
@@ -42,39 +43,35 @@ export default async function AdminDisputesPage() {
   const waiting = rows.filter((r) => r.status === 'open' || r.status === 'under_review').length;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Disputes
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {waiting === 0 ? 'No open disputes.' : `${waiting} need a decision.`}
-          </p>
-        </div>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={'/admin' as Route}>Back to Inbox</Link>
-        </Button>
-      </div>
+    <div className="space-y-5">
+      <AdminSectionHeader
+        title="Disputes"
+        subtitle={waiting === 0 ? 'No open disputes.' : `${waiting} need a decision.`}
+        action={
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/admin' as Route}>Inbox</Link>
+          </Button>
+        }
+      />
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No disputes yet.</p>
+        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          No disputes yet.
+        </p>
       ) : (
-        <ul className="divide-y divide-border rounded-xl border border-border bg-card">
+        <ul className="amanah-surface divide-y divide-border/70">
           {rows.map((row) => (
-            <li key={row.id} className="space-y-3 px-5 py-4">
+            <li key={row.id} className="space-y-3 px-4 py-4 sm:px-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="font-medium">{row.title}</p>
+                    <p className="font-semibold text-foreground">{row.title}</p>
                     <StatusBadge status={row.status} />
-                    <span className="text-xs text-muted-foreground">
-                      risk {row.risk_score}
-                    </span>
+                    <span className="text-xs text-muted-foreground">risk {row.risk_score}</span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {row.type.replaceAll('_', ' ')} · {formatDate(row.created_at)}
                   </p>
-                  <p className="mt-2 text-sm">{row.description}</p>
+                  <p className="mt-2 text-sm text-foreground">{row.description}</p>
                 </div>
               </div>
               {row.status === 'open' || row.status === 'under_review' ? (
@@ -95,7 +92,7 @@ export default async function AdminDisputesPage() {
                     <input
                       name="notes"
                       placeholder="Resolution notes"
-                      className="min-h-11 w-full rounded-md border border-border bg-background px-3 text-sm sm:min-w-[12rem]"
+                      className="min-h-11 w-full rounded-md border border-border/70 bg-background px-3 text-sm sm:min-w-[12rem]"
                     />
                     <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Resolve
@@ -105,7 +102,11 @@ export default async function AdminDisputesPage() {
                     <input type="hidden" name="disputeId" value={row.id} />
                     <input type="hidden" name="status" value="rejected" />
                     <input type="hidden" name="notes" value="Rejected by compliance" />
-                    <Button type="submit" variant="destructive" className="min-h-11 w-full sm:w-auto">
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      className="min-h-11 w-full sm:w-auto"
+                    >
                       Reject
                     </Button>
                   </form>

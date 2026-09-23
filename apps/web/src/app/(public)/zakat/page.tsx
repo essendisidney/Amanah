@@ -50,6 +50,15 @@ export default async function ZakatPage() {
           <ul className="amanah-surface divide-y divide-border/70">
             <li>
               <Link
+                href={'/shariah' as Route}
+                className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
+              >
+                <span>Shariah stance</span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+              </Link>
+            </li>
+            <li>
+              <Link
                 href={'/sadaka' as Route}
                 className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
               >

@@ -2,21 +2,55 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button, Input, Label } from '@jamiya/ui';
 
 const NISAB_KES = 1_100_000;
+const ESTIMATE_KEY = 'jameiyah.zakat.estimate';
 
 export function ZakatCalculator() {
   const [cash, setCash] = useState(0);
   const [gold, setGold] = useState(0);
   const [debts, setDebts] = useState(0);
+  const [savedNote, setSavedNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(ESTIMATE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        cash?: number;
+        gold?: number;
+        debts?: number;
+      };
+      if (typeof parsed.cash === 'number') setCash(parsed.cash);
+      if (typeof parsed.gold === 'number') setGold(parsed.gold);
+      if (typeof parsed.debts === 'number') setDebts(parsed.debts);
+    } catch {
+      // ignore corrupt local estimate
+    }
+  }, []);
+
   const wealth = Math.max(0, cash + gold - debts);
   const zakat = wealth >= NISAB_KES ? wealth * 0.025 : 0;
+  const rounded = Math.round(zakat);
+
   const sadakaHref = useMemo(() => {
-    if (zakat <= 0) return '/sadaka' as Route;
-    return `/sadaka?amount=${Math.round(zakat)}` as Route;
-  }, [zakat]);
+    if (rounded <= 0) return '/sadaka' as Route;
+    return `/sadaka?amount=${rounded}&from=zakat` as Route;
+  }, [rounded]);
+
+  function persistEstimate() {
+    try {
+      sessionStorage.setItem(
+        ESTIMATE_KEY,
+        JSON.stringify({ cash, gold, debts, zakat: rounded, at: Date.now() }),
+      );
+      setSavedNote('Estimate saved on this device.');
+    } catch {
+      setSavedNote('Could not save on this device.');
+    }
+  }
 
   return (
     <>
@@ -60,16 +94,28 @@ export function ZakatCalculator() {
             Estimated zakat: KES{' '}
             {zakat.toLocaleString(undefined, { maximumFractionDigits: 2 })}
           </p>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <p className="text-xs text-muted-foreground">
+            Estimate only. Giving via Sadaka is optional — ask a scholar for your case.
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <Button asChild className="min-h-11 w-full sm:w-auto">
-              <Link href={sadakaHref}>
-                {zakat > 0 ? 'Give via Sadaka' : 'Browse Sadaka campaigns'}
+              <Link href={sadakaHref} onClick={persistEstimate}>
+                {rounded > 0 ? `Give KES ${rounded.toLocaleString()} via Sadaka` : 'Browse Sadaka'}
               </Link>
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="min-h-11 w-full sm:w-auto"
+              onClick={persistEstimate}
+            >
+              Save estimate
+            </Button>
             <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
-              <Link href={'/support' as Route}>Support Jameiyah</Link>
+              <Link href={'/shariah' as Route}>Shariah stance</Link>
             </Button>
           </div>
+          {savedNote ? <p className="text-xs text-muted-foreground">{savedNote}</p> : null}
         </div>
       </section>
     </>
