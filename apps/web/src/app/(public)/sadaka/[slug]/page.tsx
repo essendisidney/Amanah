@@ -207,8 +207,7 @@ export default async function CampaignPage({ params }: Props) {
           </p>
           {!user && canDonate ? (
             <p className="mt-4 text-sm text-muted-foreground">
-              You do not need an Jameiyah account to contribute. Sign in only if you want M-Pesa STK
-              tied to your wallet profile.{' '}
+              No account needed to give.{' '}
               <Link href={`/login?next=/sadaka/${slug}` as Route} className="underline">
                 Sign in
               </Link>

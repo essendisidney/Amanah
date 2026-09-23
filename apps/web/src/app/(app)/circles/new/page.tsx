@@ -18,15 +18,15 @@ export default async function CreateCirclePage({ searchParams }: Props) {
   const defaultSegment = intent === 'business' ? 'boda_stage' : intent === 'family' ? 'womens_circle' : 'general';
   const subtitle =
     intent === 'business'
-      ? 'Set contribution rules for a stage, chama, or workplace circle. You become the circle admin automatically.'
+      ? 'Stage, chama, or workplace. You will be the circle admin.'
       : intent === 'family'
-        ? 'Set contribution rules for a trusted family circle. You become the circle admin automatically.'
-        : 'Set contribution rules for your rotating savings circle. You become the circle admin automatically.';
+        ? 'Family circle. You will be the circle admin.'
+        : 'Rotating savings. You will be the circle admin.';
   const segmentHint =
     intent === 'business'
-      ? 'Tip: Boda / tuktuk stage fits many business groups; switch to General if this is a workplace chama.'
+      ? 'Tip: Boda / tuktuk stage fits many business groups.'
       : intent === 'family'
-        ? 'Tip: Women’s circle is a common family default; switch to General if that fits better.'
+        ? 'Tip: Women’s circle is a common family default.'
         : null;
 
   return (

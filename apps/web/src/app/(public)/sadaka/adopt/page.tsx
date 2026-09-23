@@ -59,12 +59,11 @@ export default async function AdoptPage() {
     <main className="mx-auto max-w-5xl space-y-12 px-6 py-12">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Sadaka</p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
           Adopt an institution
         </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          Recurring sponsorship for mosques, madrasas, and orphanages. Stricter KYC than individual
-          campaigns. First month is recorded now; live recurring STK comes with Daraja.
+        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+          Monthly support for verified institutions.
         </p>
         <p className="mt-4 text-sm">
           <Link href={'/sadaka' as Route} className="text-accent hover:underline">

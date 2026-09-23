@@ -39,8 +39,7 @@ export default async function ZakatPage() {
             Zakat calculator
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Estimate 2.5% of qualifying wealth after immediate liabilities. Consult a qualified
-            scholar for your personal situation.
+            2.5% of qualifying wealth after liabilities. Ask a scholar for your case.
           </p>
         </header>
 

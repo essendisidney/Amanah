@@ -73,12 +73,10 @@ export default async function GoalsPage({
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
           Money
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">Goals</h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">
-          Save <strong className="font-medium text-foreground">on your own</strong>, or as a{' '}
-          <strong className="font-medium text-foreground">whole circle</strong> where each member
-          can put in a different amount toward the same challenge (school fees, Hajj, wedding…).
-        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Goals
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">Personal or shared circle targets.</p>
       </div>
 
       <div className="amanah-surface p-5">
@@ -89,7 +87,7 @@ export default async function GoalsPage({
         {goals.length === 0 ? (
           <EmptyState
             title="No goals yet"
-            description="Create your first savings goal above — Hajj, emergency, or any target you care about."
+            description="Create your first goal above."
           />
         ) : null}
         {goals.map((goal) => {
@@ -111,7 +109,7 @@ export default async function GoalsPage({
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="text-xl font-bold tracking-tight">{goal.title}</h2>
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      className={`rounded-md px-2 py-0.5 text-xs font-semibold ${
                         goal.jamiya_id
                           ? 'bg-primary/15 text-primary'
                           : 'bg-secondary text-muted-foreground'

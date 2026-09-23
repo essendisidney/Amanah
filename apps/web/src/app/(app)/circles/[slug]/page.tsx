@@ -1186,7 +1186,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         description="Everyone who has joined this chama."
         action={
           canManageOps ? (
-            <Button asChild size="sm" variant="outline" className="rounded-full">
+            <Button asChild variant="outline" className="min-h-11">
               <a href="#invite-people">Add people</a>
             </Button>
           ) : undefined
@@ -1215,26 +1215,26 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <details className="amanah-surface px-5 py-4">
           <summary className="cursor-pointer text-sm font-semibold">More</summary>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Button asChild size="sm" variant="outline" className="rounded-full">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={`/circles/${slug}/statement` as Route}>My statement</Link>
             </Button>
-            <Button asChild size="sm" variant="outline" className="rounded-full">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={`/circles/${slug}/next-of-kin` as Route}>Next of kin</Link>
             </Button>
             {isShareDividend ? (
               <>
-                <Button asChild size="sm" variant="outline" className="rounded-full">
+                <Button asChild variant="outline" className="min-h-11">
                   <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
                 </Button>
-                <Button asChild size="sm" variant="outline" className="rounded-full">
+                <Button asChild variant="outline" className="min-h-11">
                   <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
                 </Button>
-                <Button asChild size="sm" variant="outline" className="rounded-full">
+                <Button asChild variant="outline" className="min-h-11">
                   <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
                 </Button>
               </>
             ) : null}
-            <Button asChild size="sm" variant="outline" className="rounded-full">
+            <Button asChild variant="outline" className="min-h-11">
               <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
             </Button>
           </div>
@@ -1361,7 +1361,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             title="Next of kin"
             description="Name, phone, and relationship for each member."
             action={
-              <Button asChild size="sm" variant="outline" className="rounded-full">
+              <Button asChild variant="outline" className="min-h-11">
                 <Link href={`/circles/${slug}/next-of-kin` as Route}>Open full list</Link>
               </Button>
             }
@@ -1399,13 +1399,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   Qard Hassan, welfare, and partner Tawarruq for this circle.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button asChild size="sm" className="rounded-full">
+                  <Button asChild className="min-h-11">
                     <Link href={`/finance/qard?jamiyaId=${jamiya.id}` as Route}>Qard loan</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Button asChild variant="outline" className="min-h-11">
                     <Link href={`/finance/welfare?jamiyaId=${jamiya.id}` as Route}>Welfare</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Button asChild variant="outline" className="min-h-11">
                     <Link href={'/finance/tawarruq' as Route}>Tawarruq</Link>
                   </Button>
                 </div>
@@ -1418,16 +1418,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   Cashbook, journals, and member payment grids.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <Button asChild size="sm" className="rounded-full">
+                  <Button asChild className="min-h-11">
                     <Link href={`/circles/${slug}/books` as Route}>Member payments</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Button asChild variant="outline" className="min-h-11">
                     <Link href={`/circles/${slug}/treasury` as Route}>{circleLabels.treasury}</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Button asChild variant="outline" className="min-h-11">
                     <Link href={`/circles/${slug}/journal` as Route}>{circleLabels.journal}</Link>
                   </Button>
-                  <Button asChild variant="outline" size="sm" className="rounded-full">
+                  <Button asChild variant="outline" className="min-h-11">
                     <Link href={`/circles/${slug}/officer` as Route}>Full console</Link>
                   </Button>
                 </div>
@@ -1435,7 +1435,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             </section>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Button asChild variant="outline" className="rounded-full">
+              <Button asChild variant="outline" className="min-h-11">
                 <Link href={`/circles/${slug}/officer` as Route}>Full officer console</Link>
               </Button>
             </div>

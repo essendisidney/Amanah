@@ -93,13 +93,10 @@ export default async function WelfarePage({ searchParams }: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           Money
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Welfare fund
         </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Medical, funeral, and accident support alongside regular circle savings — especially for
-          boda/tuktuk stages.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">Circle emergency support.</p>
       </div>
 
       <section className="space-y-4">
@@ -109,8 +106,8 @@ export default async function WelfarePage({ searchParams }: Props) {
             title="No welfare funds yet"
             description={
               adminCircles.length > 0
-                ? 'Create a fund for one of your circles below so members can contribute and claim.'
-                : 'Ask a circle officer (chair, treasurer, or admin) to create a welfare fund first.'
+                ? 'Create a fund for one of your circles below.'
+                : 'Ask a circle officer to create a fund first.'
             }
           />
         ) : (

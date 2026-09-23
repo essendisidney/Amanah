@@ -59,26 +59,24 @@ export function InsightsView({
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
           {payLabels.insights}
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight md:text-4xl">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {payLabels.insights}
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          A quiet snapshot of how {name} is saving and contributing this month.
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">This month for {name}.</p>
       </div>
 
-      <section className="amanah-forest overflow-hidden rounded-[1.75rem] p-5 text-white md:p-7">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+      <section className="amanah-surface space-y-1 px-4 py-4 sm:px-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Inflow this month
         </p>
-        <p className="amanah-money mt-2 text-4xl font-bold tracking-tight md:text-5xl">
+        <p className="amanah-money text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {formatCurrency(monthInflow, currency)}
         </p>
-        <p className="mt-2 text-sm text-white/80">
-          Outflow {formatCurrency(monthOutflow, currency)} · Money available{' '}
+        <p className="text-sm text-muted-foreground">
+          Outflow {formatCurrency(monthOutflow, currency)} · Available{' '}
           {formatCurrency(dashboard.wallet?.availableBalance ?? 0, currency)}
         </p>
       </section>
@@ -121,12 +119,11 @@ export function InsightsView({
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">Upcoming dues</h2>
-          <p className="text-sm text-muted-foreground">Pay from wallet or top up, then settle</p>
+          <h2 className="text-sm font-semibold text-foreground">Upcoming dues</h2>
         </div>
         {dashboard.contributions.length === 0 ? (
           <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground">
-            No open contributions. You are clear for now.
+            No open contributions.
           </p>
         ) : (
           <div className="space-y-3">
@@ -154,24 +151,18 @@ export function InsightsView({
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">{payLabels.sectionSee}</h2>
-          <p className="text-sm text-muted-foreground">
-            Everything under Pay — tap any tool to continue.
-          </p>
+          <h2 className="text-sm font-semibold text-foreground">{payLabels.sectionSee}</h2>
         </div>
-        <ul className="overflow-hidden rounded-[1.35rem] border border-border/70 bg-card/40">
+        <ul className="amanah-surface divide-y divide-border/70 overflow-hidden">
           {nextStops.map((item) => {
             const Icon = item.icon;
             return (
-              <li
-                key={`${item.href}-${item.label}`}
-                className="border-b border-border/60 last:border-0"
-              >
+              <li key={`${item.href}-${item.label}`}>
                 <Link
                   href={item.href}
-                  className="flex items-center gap-3 px-4 py-3.5 transition-colors active:bg-secondary/40"
+                  className="flex min-h-11 items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/40"
                 >
-                  <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-secondary text-primary">
                     <Icon className="h-4 w-4" strokeWidth={1.75} />
                   </span>
                   <span className="min-w-0 flex-1">
@@ -194,13 +185,12 @@ export function InsightsView({
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-lg font-bold tracking-tight">Recent activity</h2>
-          <p className="text-sm text-muted-foreground">Latest wallet movements</p>
+          <h2 className="text-sm font-semibold text-foreground">Recent activity</h2>
         </div>
         {dashboard.activity.length === 0 ? (
           <EmptyState
             title="No wallet activity yet"
-            description="Top up to start tracking inflows and outflows here."
+            description="Top up to start tracking here."
             actionLabel={payLabels.addMoney}
             actionHref={'/wallet?focus=top-up#top-up' as Route}
           />

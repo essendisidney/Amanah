@@ -677,8 +677,7 @@ export function CreateCircleForm({
               </summary>
               <div className="mt-4 space-y-3">
                 <p className="text-xs text-muted-foreground">
-                  Leave at 0 for launch. Only set these if your chama agreed — members see them when
-                  they join and when they pay.
+                  Optional. Members see fees on join and pay.
                 </p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">

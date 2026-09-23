@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
+import { Button } from '@jamiya/ui';
 
 export type CircleNavItem = {
   href: Route;
@@ -14,34 +15,32 @@ type Props = {
 
 export function CircleQuickNav({ primary, secondary }: Props) {
   return (
-    <nav className="amanah-surface space-y-4 px-4 py-4 sm:px-5" aria-label="Circle shortcuts">
+    <nav className="amanah-surface space-y-3 px-4 py-4 sm:px-5" aria-label="Circle shortcuts">
       <div className="flex flex-wrap gap-2">
         {primary.map((item) => (
-          <Link
+          <Button
             key={item.label}
-            href={item.href}
-            className={
-              item.primary
-                ? 'inline-flex min-h-10 items-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm transition-transform active:scale-[0.98]'
-                : 'amanah-glass-pill inline-flex min-h-10 items-center rounded-full px-4 text-sm font-semibold text-primary'
-            }
+            asChild
+            variant={item.primary ? 'default' : 'outline'}
+            className="min-h-11"
           >
-            {item.label}
-          </Link>
+            <Link href={item.href}>{item.label}</Link>
+          </Button>
         ))}
       </div>
       {secondary.length > 0 ? (
-        <div className="flex flex-wrap gap-x-1 gap-y-2 border-t border-border/50 pt-3">
+        <ul className="divide-y divide-border/70 border-t border-border/70">
           {secondary.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="inline-flex min-h-9 items-center rounded-full px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground"
-            >
-              {item.label}
-            </Link>
+            <li key={item.label}>
+              <Link
+                href={item.href}
+                className="flex min-h-11 items-center px-1 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+              >
+                {item.label}
+              </Link>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : null}
     </nav>
   );

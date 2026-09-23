@@ -134,28 +134,27 @@ export default async function QardPage({ searchParams }: Props) {
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
           Money
         </p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Member loan
         </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          Ask. The officer approves. You repay. No interest (Qard Hassan). You can borrow up to
-          half of what you have already paid in that circle.
+        <p className="mt-2 text-sm text-muted-foreground">
+          Interest-free — up to half of what you’ve paid in.
         </p>
       </div>
 
       {memberships.length === 0 ? (
         <EmptyState
           title="Join a circle first"
-          description="Qard Hassan is available inside an active circle. Use Circles to create or join one, then return here."
-          actionLabel="Create a circle"
-          actionHref={'/circles/new' as Route}
+          description="Qard is available inside an active circle."
+          actionLabel="Circles"
+          actionHref={'/circles' as Route}
         />
       ) : null}
 
       {caps.length > 0 ? (
         <ul className="grid gap-3 sm:grid-cols-2">
           {caps.map((cap) => (
-            <li key={cap.jamiyaId} className="rounded-xl border border-border bg-card px-4 py-3">
+            <li key={cap.jamiyaId} className="amanah-surface px-4 py-3 sm:px-5">
               <p className="text-sm font-medium">{cap.name}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {cap.cap != null

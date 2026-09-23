@@ -49,9 +49,7 @@ export function CreateGoalForm({
             }`}
           >
             <p className="text-sm font-semibold text-foreground">Just me</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Personal goal — only you track how much you have set aside.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">Only you track this goal.</p>
           </button>
           <button
             type="button"
@@ -68,14 +66,12 @@ export function CreateGoalForm({
           >
             <p className="text-sm font-semibold text-foreground">Whole circle</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Shared challenge — each member can save a different amount; officers record deposits.
+              Shared challenge — officers record deposits.
             </p>
           </button>
         </div>
         {circles.length === 0 ? (
-          <p className="text-xs text-muted-foreground">
-            Join or create a circle first to start a whole-circle goal.
-          </p>
+          <p className="text-xs text-muted-foreground">Join a circle first for a shared goal.</p>
         ) : null}
       </div>
 
@@ -87,7 +83,7 @@ export function CreateGoalForm({
               key={g.value}
               type="button"
               onClick={() => setTitle(g.value)}
-              className={`rounded-full border px-3 py-1.5 text-sm transition-colors ${
+              className={`rounded-md border px-3 py-1.5 text-sm transition-colors ${
                 title === g.value
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border bg-background text-muted-foreground hover:text-foreground'

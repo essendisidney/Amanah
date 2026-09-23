@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
+import { Button } from '@jamiya/ui';
 import { CreateCampaignForm } from '@/features/charity/components/create-campaign-form';
 import { createClient } from '@/lib/supabase/server';
 
@@ -32,25 +33,25 @@ export default async function NewSadakaCampaignPage() {
 
   if (!isCircleMember) {
     return (
-      <main className="mx-auto max-w-3xl px-6 py-12">
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Sadaka</p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-          Members start campaigns
-        </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
-          You need an active circle membership to submit a Sadaka campaign. Anyone can still
-          contribute to active campaigns without joining.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href={'/circles' as Route}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-          >
-            Browse circles
-          </Link>
-          <Link href={'/sadaka' as Route} className="rounded-md border border-border px-4 py-2 text-sm">
-            View active campaigns
-          </Link>
+      <main className="space-y-6 py-6 sm:py-10">
+        <header className="space-y-2">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            Sadaka
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Members start campaigns
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Join a circle first. Anyone can still give to live campaigns.
+          </p>
+        </header>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild className="min-h-11">
+            <Link href={'/circles' as Route}>Circles</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={'/sadaka' as Route}>Active campaigns</Link>
+          </Button>
         </div>
       </main>
     );
@@ -64,26 +65,24 @@ export default async function NewSadakaCampaignPage() {
     .limit(20);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">Sadaka</p>
-      <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold">
-        Create a campaign
-      </h1>
-      <p className="mt-3 max-w-2xl text-muted-foreground">
-        Submit your story, target, beneficiary M-Pesa, and supporting documentation. An admin must
-        confirm before the campaign goes live. When the target is reached, funds are released to the
-        beneficiary.
-      </p>
-      <div className="mt-8 rounded-xl border border-border bg-card p-6">
+    <main className="space-y-6 py-6 sm:py-10">
+      <header className="space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Sadaka</p>
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Create a campaign</h1>
+        <p className="text-sm text-muted-foreground">
+          Story, target, and docs — live after admin review.
+        </p>
+      </header>
+      <div className="amanah-surface px-4 py-4 sm:px-5">
         <CreateCampaignForm kycDocs={(docs ?? []) as unknown as KycDoc[]} />
       </div>
-      <p className="mt-6 text-sm">
-        <Link href={'/sadaka' as Route} className="text-accent hover:underline">
+      <p className="text-sm text-muted-foreground">
+        <Link href={'/sadaka' as Route} className="font-semibold text-primary hover:underline">
           Back to Sadaka
         </Link>
         {' · '}
-        <Link href={'/profile' as Route} className="text-accent hover:underline">
-          Upload KYC docs in Profile
+        <Link href={'/profile' as Route} className="font-semibold text-primary hover:underline">
+          KYC on You
         </Link>
       </p>
     </main>
