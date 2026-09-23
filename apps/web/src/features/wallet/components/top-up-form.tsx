@@ -9,6 +9,7 @@ import {
 } from '../actions/wallet-actions';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
+import type { PaymentProviderId } from '@/lib/payments/types';
 
 const initial: WalletActionState = { success: false, message: '' };
 
@@ -21,7 +22,7 @@ export function TopUpForm({
   returnPath,
 }: {
   currency?: string;
-  provider?: 'simulated' | 'mpesa' | 'bank' | 'paystack' | 'intasend' | 'tendepay';
+  provider?: PaymentProviderId;
   labels: Dictionary['walletForms'];
   defaultAmount?: number;
   defaultPhone?: string;
@@ -47,8 +48,11 @@ export function TopUpForm({
   const destinationHint = useMemo(() => {
     if (needsPhone) return hasLinkedPhone ? linkedPhone : 'M-Pesa (enter phone)';
     if (provider === 'paystack') return 'Paystack checkout';
-    if (provider === 'bank') return 'Bank settlement';
-    return 'Wallet (demo credit)';
+    if (provider === 'bank' || provider === 'coop' || provider === 'kcb') {
+      return 'Bank settlement';
+    }
+    if (provider === 'simulated') return 'Wallet (demo credit)';
+    return 'Wallet';
   }, [hasLinkedPhone, linkedPhone, needsPhone, provider]);
 
   return (
@@ -93,14 +97,16 @@ export function TopUpForm({
         </div>
       ) : provider === 'paystack' ? (
         <p className="text-xs text-muted-foreground">{labels.paystackHint}</p>
-      ) : provider === 'bank' ? (
+      ) : provider === 'bank' || provider === 'coop' || provider === 'kcb' ? (
         <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
-      ) : (
+      ) : provider === 'simulated' ? (
         <p className="rounded-lg border border-accent/30 bg-accent-muted/60 px-3 py-2 text-xs leading-relaxed text-foreground">
           <span className="font-semibold text-accent">Demo credit (UAT)</span>
           {' — '}
           {labels.simulatedHint}
         </p>
+      ) : (
+        <p className="text-xs text-muted-foreground">{labels.bankHint}</p>
       )}
 
       {provider !== 'simulated' &&
@@ -187,7 +193,7 @@ export function TopUpForm({
                       provider === 'intasend' ||
                       provider === 'tendepay'
                     ? labels.payMpesa
-                    : provider === 'bank'
+                    : provider === 'bank' || provider === 'coop' || provider === 'kcb'
                       ? labels.startBank
                       : labels.sendCode}
         </Button>
