@@ -10,7 +10,7 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test src/lib/finance/state-machine.test.ts src/lib/finance/bank-rails.test.ts src/features/profile/lib/verification-state.test.ts src/features/circles/lib/circle-status-display.test.ts src/features/dashboard/lib/notification-enrichment.test.ts src/features/circles/lib/contribution-frequency.test.ts",
+    "test": "node --import tsx --test src/lib/finance/state-machine.test.ts src/lib/finance/bank-rails.test.ts src/features/profile/lib/verification-state.test.ts src/features/circles/lib/circle-status-display.test.ts src/features/dashboard/lib/notification-enrichment.test.ts src/features/circles/lib/contribution-frequency.test.ts src/features/admin/lib/admin-support-access.test.ts",
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {

@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
-import { getUserProfile } from '@/lib/supabase/auth';
-import { isComplianceRole } from '@jamiya/auth';
+import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { ADMIN_SUPPORT_PATH } from '@/features/admin/lib/admin-support-access';
 import { closeSupportTicketAction } from '@/features/help/actions/support-ticket-actions';
 import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
@@ -22,10 +21,9 @@ type TicketRow = {
 };
 
 export default async function AdminSupportPage() {
-  const profile = await getUserProfile();
-  if (!profile || !isComplianceRole(profile.platform_role)) {
-    redirect('/dashboard');
-  }
+  // Gate via requireAdminAccess (pass user id into profile lookups — bare getUserProfile
+  // returns null and falsely sends Platform Admins to /dashboard, which breaks client nav).
+  await requireAdminAccess('compliance', ADMIN_SUPPORT_PATH);
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table pending gen:types

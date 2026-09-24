@@ -17,4 +17,11 @@ test.describe('smoke', () => {
     await page.goto('/dashboard');
     await expect(page).toHaveURL(/login/);
   });
+
+  test('admin support redirects unauthenticated users (unauthorized stays blocked)', async ({
+    page,
+  }) => {
+    await page.goto('/admin/support');
+    await expect(page).toHaveURL(/login/);
+  });
 });

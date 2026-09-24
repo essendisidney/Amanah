@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { ADMIN_SUPPORT_PATH } from '@/features/admin/lib/admin-support-access';
 
 export type SupportTicketState = {
   success: boolean;
@@ -72,8 +74,11 @@ export async function submitSupportTicketAction(
 export async function closeSupportTicketAction(formData: FormData): Promise<void> {
   const ticketId = String(formData.get('ticketId') ?? '');
   if (!ticketId) return;
+
+  await requireAdminAccess('compliance', ADMIN_SUPPORT_PATH);
+
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table pending gen:types
   await (supabase as any).from('support_tickets').update({ status: 'closed' }).eq('id', ticketId);
-  revalidatePath('/admin/support');
+  revalidatePath(ADMIN_SUPPORT_PATH);
 }
