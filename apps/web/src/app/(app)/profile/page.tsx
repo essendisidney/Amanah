@@ -20,7 +20,9 @@ import {
 } from '@/features/profile/components/profile-onboarding-banner';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { AppPage, PageHeader } from '@/components/app-page';
+import { ShareAppInvite } from '@/components/share-app-invite';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'You',
@@ -187,6 +189,17 @@ export default async function ProfilePage({ searchParams }: Props) {
         title={profile?.full_name?.trim() || labels.youFallback}
         subtitle={profile?.phone || profile?.email || user.email || '—'}
       />
+
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">Invite someone to try</h2>
+        <div className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+          <p className="text-sm text-muted-foreground">
+            Send a WhatsApp message with a link to start on Jameiyah. They sign in, then create or
+            join a circle.
+          </p>
+          <ShareAppInvite siteUrl={getSiteUrl()} />
+        </div>
+      </section>
 
       <section
         className={

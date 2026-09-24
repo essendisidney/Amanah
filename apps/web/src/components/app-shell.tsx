@@ -24,6 +24,9 @@ import {
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { JameiyahLogo } from '@/components/amanah-logo';
+import { WhatsAppShareButton } from '@/components/whatsapp-share-button';
+import { composeWhatsAppMessage, JAMEIYAH_SHARE_BLURB } from '@/lib/whatsapp-share';
+import { getSiteUrl } from '@/lib/site-url';
 
 type ShellDictionary = Pick<Dictionary, 'nav' | 'common'>;
 
@@ -143,6 +146,12 @@ export function AppShell({
     desktopLinks.push({ href: '/admin' as Route, label: dict.common.admin });
   }
 
+  const tryAppShareText = composeWhatsAppMessage({
+    title: 'Try Jameiyah',
+    body: `${JAMEIYAH_SHARE_BLURB}\n\nOpen the link, sign in with phone SMS (or email/Google), then create or join a circle.`,
+    url: `${getSiteUrl()}/welcome`,
+  });
+
   return (
     <div className="amanah-ambient min-h-dvh overflow-x-hidden">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:border-transparent md:bg-transparent">
@@ -179,6 +188,13 @@ export function AppShell({
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <WhatsAppShareButton
+              text={tryAppShareText}
+              label="Share"
+              variant="ghost"
+              size="sm"
+              className="hidden min-h-10 px-2 sm:inline-flex"
+            />
             <ThemeToggle />
             <LanguageSwitcher locale={locale} label={dict.common.language} />
             {showAdmin ? (

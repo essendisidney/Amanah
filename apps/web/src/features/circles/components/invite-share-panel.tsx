@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { Button } from '@jamiya/ui';
+import { whatsappShareHref } from '@/lib/whatsapp-share';
 
 type InviteSharePanelProps = {
   inviteUrl: string;
@@ -32,6 +33,7 @@ export function InviteSharePanel({
 }: InviteSharePanelProps) {
   const [copied, setCopied] = useState<'link' | 'code' | null>(null);
   const shareText = buildShareText(inviteUrl, inviteCode, circleName);
+  const whatsappHref = whatsappShareHref(shareText);
 
   const copy = useCallback(async (value: string, kind: 'link' | 'code') => {
     try {
@@ -56,7 +58,6 @@ export function InviteSharePanel({
     }
   }, [inviteUrl, shareText]);
 
-  const whatsappHref = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
   const smsHref = `sms:?body=${encodeURIComponent(shareText)}`;
   const emailHref = `mailto:?subject=${encodeURIComponent('Jameiyah circle invitation')}&body=${encodeURIComponent(shareText)}`;
   const canNativeShare =

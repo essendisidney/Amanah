@@ -7,6 +7,8 @@ import { AppPage, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getSupportContact } from '@/lib/support-contact';
 import { SupportTicketForm } from '@/features/help/components/support-ticket-form';
+import { ShareAppInvite } from '@/components/share-app-invite';
+import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
   title: 'Help & support',
@@ -26,6 +28,16 @@ export default async function HelpPage() {
   return (
     <AppPage width="medium">
       <PageHeader title={labels.title} subtitle={labels.subtitle} />
+
+      <section className="space-y-2.5">
+        <h2 className="text-sm font-semibold text-foreground">Share the app</h2>
+        <div className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+          <p className="text-sm text-muted-foreground">
+            Send someone a WhatsApp link to try Jameiyah. Best for friends or testers who are new.
+          </p>
+          <ShareAppInvite siteUrl={getSiteUrl()} />
+        </div>
+      </section>
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.circleTitle}</h2>
