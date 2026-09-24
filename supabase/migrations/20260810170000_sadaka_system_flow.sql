@@ -80,7 +80,9 @@ DROP POLICY IF EXISTS "campaigns_public_select_live" ON public.charity_campaigns
 CREATE POLICY "campaigns_public_select_live"
   ON public.charity_campaigns FOR SELECT TO anon, authenticated
   USING (
-    status IN ('live', 'funded', 'disbursed', 'closed')
+    -- Cast to text so new enum labels added in this same migration are usable
+    -- (Postgres rejects new enum values until the transaction commits).
+    status::text IN ('live', 'funded', 'disbursed', 'closed')
     OR private.is_compliance_or_admin()
     OR created_by = auth.uid()
   );
@@ -117,7 +119,7 @@ CREATE POLICY charity_disbursements_select ON public.charity_disbursements
       SELECT 1 FROM public.charity_campaigns c
       WHERE c.id = campaign_id
         AND (
-          c.status IN ('live', 'funded', 'disbursed', 'closed')
+          c.status::text IN ('live', 'funded', 'disbursed', 'closed')
           OR private.is_compliance_or_admin()
           OR c.created_by = auth.uid()
         )

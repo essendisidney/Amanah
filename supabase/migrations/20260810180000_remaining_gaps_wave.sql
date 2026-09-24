@@ -15,7 +15,7 @@ ALTER TABLE public.notification_outbox
   DROP CONSTRAINT IF EXISTS notification_outbox_channel_delivery;
 ALTER TABLE public.notification_outbox
   ADD CONSTRAINT notification_outbox_channel_delivery
-  CHECK (channel IN ('email', 'sms', 'push', 'whatsapp'));
+  CHECK (channel::text IN ('email', 'sms', 'push', 'whatsapp'));
 
 ALTER TABLE public.charity_campaigns
   ADD COLUMN IF NOT EXISTS custody_mode TEXT NOT NULL DEFAULT 'amanah_pass_through',
@@ -352,7 +352,7 @@ BEGIN
   -- Outbox SMS + WhatsApp for members with phones (dispatch skips if provider missing)
   INSERT INTO public.notification_outbox (channel, recipient, subject, body, user_id, metadata)
   SELECT
-    ch.channel,
+    ch.channel_text::public.notification_channel,
     p.phone,
     p_title,
     p_body,
@@ -360,7 +360,7 @@ BEGIN
     jsonb_build_object('jamiya_id', p_jamiya_id, 'announcement_id', v_ann, 'kind', 'broadcast')
   FROM public.members m
   JOIN public.profiles p ON p.id = m.user_id
-  CROSS JOIN (VALUES ('sms'::public.notification_channel), ('whatsapp'::public.notification_channel)) AS ch(channel)
+  CROSS JOIN (VALUES ('sms'::text), ('whatsapp'::text)) AS ch(channel_text)
   WHERE m.jamiya_id = p_jamiya_id
     AND m.status = 'active'
     AND p.phone IS NOT NULL

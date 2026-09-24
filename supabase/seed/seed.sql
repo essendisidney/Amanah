@@ -9,7 +9,7 @@ DECLARE
   alice_id UUID := '22222222-2222-2222-2222-222222222222';
   bob_id UUID := '33333333-3333-3333-3333-333333333333';
   compliance_id UUID := '44444444-4444-4444-4444-444444444444';
-  jamiya_id UUID := '55555555-5555-5555-5555-555555555555';
+  v_jamiya_id UUID := '55555555-5555-5555-5555-555555555555';
   encrypted_pw TEXT := crypt('Password1!', gen_salt('bf'));
 BEGIN
   INSERT INTO auth.users (
@@ -224,7 +224,7 @@ BEGIN
     start_date
   )
   VALUES (
-    jamiya_id,
+    v_jamiya_id,
     'Nairobi Sisters Circle',
     'nairobi-sisters-circle',
     'A Shariah-compliant rotating savings circle for community members in Nairobi.',
@@ -248,7 +248,7 @@ BEGIN
     joined_at
   )
   VALUES (
-    jamiya_id,
+    v_jamiya_id,
     bob_id,
     'member',
     'active',
@@ -270,7 +270,7 @@ BEGIN
       'in_app',
       'Welcome to Amanah',
       'Your demo circle is ready. Invite members and set the payout order.',
-      jsonb_build_object('jamiya_id', jamiya_id)
+      jsonb_build_object('jamiya_id', v_jamiya_id)
     );
   END IF;
 END $$;
