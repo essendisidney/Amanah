@@ -64,7 +64,18 @@ export default async function CircleGoalDetailPage({ params, searchParams }: Pro
       <AppPage width="medium">
         <p className="text-sm text-muted-foreground">
           {payload?.error === 'GOAL_NOT_LINKED_TO_CIRCLE'
-            ? 'This goal is not linked to a circle. Edit it under Finance → Goals and choose a circle.'
+            ? (
+                <>
+                  This goal is not linked to a circle. Edit it under{' '}
+                  <Link
+                    href={'/finance/goals' as Route}
+                    className="font-medium text-primary underline-offset-2 hover:underline"
+                  >
+                    Goals
+                  </Link>{' '}
+                  (Money → More → Goals) and choose a circle.
+                </>
+              )
             : payload?.error ?? 'Could not load goal.'}
         </p>
         <Button asChild variant="outline" className="mt-4 rounded-full">
@@ -97,7 +108,14 @@ export default async function CircleGoalDetailPage({ params, searchParams }: Pro
       <p className="text-sm text-muted-foreground">
         This is a <strong className="font-medium text-foreground">whole-circle</strong> goal.
         Members save at their own pace; officers record each deposit below. Personal goals (just you)
-        live under Finance → Goals.
+        live under{' '}
+        <Link
+          href={'/finance/goals' as Route}
+          className="font-medium text-primary underline-offset-2 hover:underline"
+        >
+          Goals
+        </Link>{' '}
+        (Money → More → Goals).
       </p>
 
       <div className="h-2 overflow-hidden rounded-full bg-muted">

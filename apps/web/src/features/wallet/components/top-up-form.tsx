@@ -136,9 +136,14 @@ export function TopUpForm({
               </dd>
             </div>
             <div className="flex items-baseline justify-between gap-3">
-              <dt className="text-muted-foreground">Destination</dt>
+              <dt className="text-muted-foreground">Paying from</dt>
               <dd className="text-right font-medium text-foreground">{destinationHint}</dd>
             </div>
+            {needsPhone ? (
+              <p className="pt-1 text-xs text-muted-foreground">
+                The payment prompt is sent to this number.
+              </p>
+            ) : null}
             <div className="flex items-baseline justify-between gap-3">
               <dt className="text-muted-foreground">Jameiyah fee</dt>
               <dd className="font-medium text-foreground">None</dd>

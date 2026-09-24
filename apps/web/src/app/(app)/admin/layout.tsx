@@ -8,10 +8,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { profile, role } = await requireAdminAccess('compliance');
 
   return (
-    <AppPage className="space-y-6">
-      <header className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div>
+    <AppPage className="space-y-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+        <AdminNav />
+        <div className="min-w-0 flex-1 space-y-4">
+          <header className="amanah-surface px-4 py-3 sm:px-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
               Admin
             </p>
@@ -19,14 +20,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {profile?.full_name ?? profile?.email ?? 'Admin'} ·{' '}
               <span className="capitalize">{role.replaceAll('_', ' ')}</span>
             </p>
-          </div>
+          </header>
+          <Suspense fallback={null}>
+            <AdminNoticeFromQuery />
+          </Suspense>
+          {children}
         </div>
-        <AdminNav />
-      </header>
-      <Suspense fallback={null}>
-        <AdminNoticeFromQuery />
-      </Suspense>
-      {children}
+      </div>
     </AppPage>
   );
 }

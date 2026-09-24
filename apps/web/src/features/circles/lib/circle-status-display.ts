@@ -29,8 +29,9 @@ export function memberHeroSummary(input: {
   currentCycle: number;
   cycleCount: number | null;
 }): string {
+  // Status is shown once via StatusBadge in the hero — do not repeat it here.
+  void input.status;
   const members = `${input.memberCount}/${input.maxMembers} members`;
-  const status = input.status.replaceAll('_', ' ');
 
   if (input.kind === 'rotating') {
     const total =
@@ -38,13 +39,13 @@ export function memberHeroSummary(input: {
         ? input.cycleCount
         : null;
     if (total != null) {
-      return `${status} · ${members} · ${cycleProgressPhrase(input.currentCycle, total)}`;
+      return `${members} · ${cycleProgressPhrase(input.currentCycle, total)}`;
     }
-    return `${status} · ${members}`;
+    return members;
   }
 
   // Savings / table banking: cycle_count is optional planning, not a pot turn index.
-  return `${status} · ${members}`;
+  return members;
 }
 
 export function merryGoRoundHeadline(input: {

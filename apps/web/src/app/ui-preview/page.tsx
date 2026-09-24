@@ -22,6 +22,7 @@ import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
+import { AdminNav } from '@/features/admin/components/admin-nav';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
 import { CirclesListCard } from '@/features/circles/components/circles-list-card';
@@ -219,6 +220,9 @@ export default function UiPreviewPage() {
             <a href="#circle-detail" className="text-primary">
               Circle
             </a>
+            <a href="#admin-nav" className="text-primary">
+              Admin
+            </a>
             <a href="#circles" className="text-primary">
               Circles
             </a>
@@ -303,7 +307,7 @@ export default function UiPreviewPage() {
                 <TopUpForm
                   currency="KES"
                   labels={dict.walletForms}
-                  provider="simulated"
+                  provider="mpesa"
                   defaultPhone="+254712345678"
                   defaultAmount={500}
                 />
@@ -436,6 +440,33 @@ export default function UiPreviewPage() {
               },
             ]}
           />
+        </section>
+
+        <section
+          id="admin-nav"
+          className="scroll-mt-28 space-y-4"
+          aria-label="Admin navigation sample"
+        >
+          <h2 className="text-sm font-semibold text-foreground">Admin · sidebar / drawer</h2>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
+            <AdminNav />
+            <div className="min-w-0 flex-1 space-y-4">
+              <header className="amanah-surface px-4 py-3 sm:px-5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+                  Admin
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Sample officer · compliance</p>
+              </header>
+              <div className="amanah-surface space-y-2 px-4 py-5 sm:px-5">
+                <p className="font-semibold text-foreground">Inbox content starts here</p>
+                <p className="text-sm text-muted-foreground">
+                  On mobile, open Admin menu. On desktop, sections stay in the left sidebar — page
+                  body is visible without scrolling past navigation.
+                </p>
+                <Button className="min-h-11">Primary action</Button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="circles" className="scroll-mt-28 space-y-5" aria-label="Circles list sample">

@@ -38,7 +38,11 @@ export async function CircleLinkedGoals({
           <h2 className="text-lg font-semibold">Circle goals</h2>
           <p className="text-sm text-muted-foreground">
             Shared challenges for the whole chama. Each person can save a different amount — tap a
-            goal anytime to see who has put in what. Personal goals stay under Finance → Goals.
+            goal anytime to see who has put in what. Personal goals live under{' '}
+            <Link href={'/finance/goals' as Route} className="font-medium text-primary underline-offset-2 hover:underline">
+              Goals
+            </Link>{' '}
+            (Money → More → Goals).
           </p>
         </div>
         <Button asChild size="sm" variant="outline" className="min-h-10 rounded-full">
@@ -47,8 +51,13 @@ export async function CircleLinkedGoals({
       </div>
       {goals.length === 0 ? (
         <p className="mt-3 text-sm text-muted-foreground">
-          No shared circle goals yet. Add one and choose <strong className="font-medium text-foreground">Whole circle</strong>{' '}
-          (e.g. school fees). For your own private target, use Finance → Goals → Just me.
+          No shared circle goals yet. Add one and choose{' '}
+          <strong className="font-medium text-foreground">Whole circle</strong> (e.g. school fees).
+          For your own private target, open{' '}
+          <Link href={'/finance/goals' as Route} className="font-medium text-primary underline-offset-2 hover:underline">
+            Goals
+          </Link>{' '}
+          via Money → More (Just me).
         </p>
       ) : (
         <ul className="mt-4 divide-y divide-border/60 overflow-hidden rounded-xl border border-border/70">

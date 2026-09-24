@@ -1069,10 +1069,6 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   label: circleLabels.frequency,
                   value: t(circleLabels.everyDays, { days: jamiya.contribution_frequency_days }),
                 },
-                {
-                  label: 'Status',
-                  value: jamiya.status.replaceAll('_', ' '),
-                },
               ]
         }
       />

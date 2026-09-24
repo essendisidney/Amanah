@@ -845,7 +845,7 @@ export const en: Dictionary = {
     zakat: 'Zakat',
     zakatHint: 'Estimate',
     allFinance: 'All money tools',
-    allFinanceHint: 'Finance hub',
+    allFinanceHint: 'Money · More',
   },
   contributionCard: {
     nextTitle: 'Your next contribution',

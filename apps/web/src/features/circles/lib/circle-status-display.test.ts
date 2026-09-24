@@ -38,6 +38,7 @@ describe('memberHeroSummary', () => {
   it('12 Stars Rafiki shape: open, current_cycle 0, cycle_count 9, 12 seats', () => {
     // Mirrors prod: contributions for cycles 1–9 exist; 12 payout_positions;
     // circle never activated → current_cycle stays 0. Do not invent progress from seats.
+    // Status is shown via StatusBadge — summary is members + cycle only.
     const summary = memberHeroSummary({
       kind: 'rotating',
       status: 'open',
@@ -46,7 +47,7 @@ describe('memberHeroSummary', () => {
       currentCycle: 0,
       cycleCount: 9,
     });
-    assert.match(summary, /open/);
+    assert.doesNotMatch(summary, /\bopen\b/);
     assert.match(summary, /12\/12 members/);
     assert.match(summary, /not started · 9 rounds planned/);
     assert.doesNotMatch(summary, /cycle 0\/9/);

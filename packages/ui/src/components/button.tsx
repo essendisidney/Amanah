@@ -8,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'amanah-btn-primary hover:brightness-[1.03]',
+        default: 'amanah-btn-primary hover:brightness-[1.02]',
         secondary:
           'border border-border bg-secondary text-secondary-foreground hover:bg-muted',
         outline:

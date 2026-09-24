@@ -59,10 +59,8 @@ export function CircleDetailHero({
             <h1 className="truncate font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight sm:text-2xl">
               {name}
             </h1>
-            <p className="mt-1 text-xs capitalize text-muted-foreground sm:text-sm">
-              {status.replaceAll('_', ' ')}
-              {meta ? ` · ${meta}` : ''}
-              {memberSummary ? ` · ${memberSummary}` : ''}
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+              {[meta, memberSummary].filter(Boolean).join(' · ')}
             </p>
           </div>
           <StatusBadge status={status} />
