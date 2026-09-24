@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
@@ -55,102 +54,59 @@ export default async function LandingPage() {
       </div>
 
       <section className="relative z-10 mx-auto flex min-h-[88dvh] w-full max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 lg:pt-6">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-8">
-          <div className="order-1 lg:order-1">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
-              {dict.brand.tagline}
-            </p>
-            <h1 className="max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-[#0b4a3c] sm:text-5xl md:text-6xl">
-              Save together. See every shilling. Stay riba-free.
-            </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-[#3d524a] sm:text-lg">
-              Jameiyah is the digital home for Kenyan circles — merry-go-round, table banking, and
-              savings. Officers replace the spreadsheet. Members see what they paid.
-            </p>
-            <div className="mt-9 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
-              <Button
-                size="lg"
-                className="min-h-12 w-full bg-[#0d5c45] text-white hover:bg-[#0a4a37] sm:w-auto"
-                asChild
-              >
-                <Link href="/circles/new">Create a circle</Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="min-h-12 w-full border-[#0d5c45]/40 text-[#0d5c45] sm:w-auto"
-                asChild
-              >
-                <Link href="/circles?redeem=1">Join with a code</Link>
-              </Button>
-            </div>
-            <p className="mt-3 text-sm text-[#5a6f66]">
-              New here?{' '}
-              <Link href="/welcome" className="font-semibold text-[#0d5c45] hover:underline">
-                {dict.landing.startWithPhone}
-              </Link>
-            </p>
-            <ul className="mt-6 flex max-w-lg flex-wrap gap-2 text-xs font-medium text-[#0b4a3c]">
-              {['No interest (riba)', 'Private to your circle', 'Phone, email, or Google', 'Member statements'].map(
-                (item) => (
-                  <li key={item} className="rounded-full border border-[#0d5c45]/20 bg-white/80 px-3 py-1.5">
-                    {item}
-                  </li>
-                ),
-              )}
-            </ul>
-            <p className="mt-5 text-sm text-[#5a6f66]">
-              {dict.landing.preferEmail}{' '}
-              <Link href="/login" className="font-semibold text-[#0d5c45] hover:underline">
-                {dict.common.signIn}
-              </Link>
-              {' · '}
-              <Link href="/register" className="font-semibold text-[#0d5c45] hover:underline">
-                {dict.landing.createAccount}
-              </Link>
-            </p>
+        <div className="max-w-2xl">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
+            {dict.brand.tagline}
+          </p>
+          <h1 className="max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-[#0b4a3c] sm:text-5xl md:text-6xl">
+            Save together. See every shilling. Stay riba-free.
+          </h1>
+          <p className="mt-5 max-w-md text-base leading-relaxed text-[#3d524a] sm:text-lg">
+            Jameiyah is the digital home for Kenyan circles — merry-go-round, table banking, and
+            savings. Officers replace the spreadsheet. Members see what they paid.
+          </p>
+          <div className="mt-9 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
+            <Button
+              size="lg"
+              className="min-h-12 w-full bg-[#0d5c45] text-white hover:bg-[#0a4a37] sm:w-auto"
+              asChild
+            >
+              <Link href="/circles/new">Create a circle</Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="min-h-12 w-full border-[#0d5c45]/40 text-[#0d5c45] sm:w-auto"
+              asChild
+            >
+              <Link href="/circles?redeem=1">Join with a code</Link>
+            </Button>
           </div>
-
-          <div className="order-2 flex justify-center lg:order-2 lg:justify-end">
-            <div className="relative w-full max-w-sm">
-              <div
-                aria-hidden
-                className="absolute -inset-8 rounded-full blur-2xl"
-                style={{
-                  background:
-                    'radial-gradient(circle, rgba(197, 160, 68, 0.22) 0%, transparent 68%)',
-                }}
-              />
-              <div className="relative overflow-hidden rounded-2xl border border-[#0d5c45]/20 bg-white p-5 shadow-[0_8px_28px_rgba(11,74,60,0.08)]">
-                <p className="inline-flex rounded-md bg-[#f7f0de] px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8a6d1f]">
-                  Sample preview — not live data
-                </p>
-                <p className="mt-3 font-[family-name:var(--font-display)] text-xl font-semibold text-[#0b4a3c]">
-                  Sisters Circle
-                </p>
-                <p className="mt-1 text-sm text-[#5a6f66]">Merry-go-round · 8/10 members · cycle 2/8</p>
-                <div className="mt-4 flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-medium uppercase tracking-wide text-[#5a6f66]">
-                      This month
-                    </p>
-                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-[#0b4a3c]">KES 2,000</p>
-                  </div>
-                  <span className="rounded-full bg-[#e6f2ed] px-3 py-1 text-xs font-semibold text-[#0d5c45]">
-                    Due soon
-                  </span>
-                </div>
-                <Image
-                  src="/brand/jameiyah-mark.png"
-                  alt=""
-                  width={120}
-                  height={120}
-                  priority
-                  className="pointer-events-none absolute -bottom-4 -right-4 h-28 w-28 opacity-20"
-                />
-              </div>
-            </div>
-          </div>
+          <p className="mt-3 text-sm text-[#5a6f66]">
+            New here?{' '}
+            <Link href="/welcome" className="font-semibold text-[#0d5c45] hover:underline">
+              {dict.landing.startWithPhone}
+            </Link>
+          </p>
+          <ul className="mt-6 flex max-w-lg flex-wrap gap-2 text-xs font-medium text-[#0b4a3c]">
+            {['No interest (riba)', 'Private to your circle', 'Phone, email, or Google', 'Member statements'].map(
+              (item) => (
+                <li key={item} className="rounded-full border border-[#0d5c45]/20 bg-white/80 px-3 py-1.5">
+                  {item}
+                </li>
+              ),
+            )}
+          </ul>
+          <p className="mt-5 text-sm text-[#5a6f66]">
+            {dict.landing.preferEmail}{' '}
+            <Link href="/login" className="font-semibold text-[#0d5c45] hover:underline">
+              {dict.common.signIn}
+            </Link>
+            {' · '}
+            <Link href="/register" className="font-semibold text-[#0d5c45] hover:underline">
+              {dict.landing.createAccount}
+            </Link>
+          </p>
         </div>
       </section>
 
