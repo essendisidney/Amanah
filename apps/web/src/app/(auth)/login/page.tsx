@@ -11,12 +11,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const params = await searchParams;
   const next = params.next ?? '/dashboard';
   const joining =
-    next.includes('/invitations/') ||
-    next.includes('/circles/new') ||
-    next.includes('redeem') ||
-    next.includes('/welcome') ||
-    next.includes('/finance/goals') ||
-    next.includes('/wallet');
+    next.includes('/invitations/') || next.includes('/welcome') || next.includes('redeem');
 
   return (
     <AuthCard
