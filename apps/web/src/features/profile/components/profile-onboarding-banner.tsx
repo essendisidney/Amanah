@@ -55,22 +55,8 @@ export function ProfileOnboardingBanner({
           >
             {nameDone ? '✓' : '1'}
           </span>
-          <span className={nameDone ? 'text-muted-foreground line-through' : 'font-medium'}>
+          <span className={nameDone ? 'text-muted-foreground' : 'font-medium'}>
             {labels.onboardingStepName}
-          </span>
-        </li>
-        <li className="flex items-center gap-2">
-          <span
-            className={
-              phoneDone
-                ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'
-                : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold text-muted-foreground'
-            }
-          >
-            {phoneDone ? '✓' : '2'}
-          </span>
-          <span className={phoneDone ? 'text-muted-foreground line-through' : 'font-medium'}>
-            {labels.onboardingStepPhone}
           </span>
         </li>
         <li className="flex items-center gap-2">
@@ -81,9 +67,9 @@ export function ProfileOnboardingBanner({
                 : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold text-muted-foreground'
             }
           >
-            {kycDone ? '✓' : '3'}
+            {kycDone ? '✓' : '2'}
           </span>
-          <span className={kycDone ? 'text-muted-foreground line-through' : 'font-medium'}>
+          <span className={kycDone ? 'text-muted-foreground' : 'font-medium'}>
             {labels.onboardingStepKyc}
           </span>
         </li>

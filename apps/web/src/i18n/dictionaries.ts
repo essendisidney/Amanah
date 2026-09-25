@@ -499,6 +499,10 @@ export type Dictionary = {
     ticketMessage: string;
     ticketSubmit: string;
     ticketSubmitting: string;
+    myTickets: string;
+    ticketEmpty: string;
+    ticketReply: string;
+    ticketWaiting: string;
     webTitle: string;
     webBody: string;
     tipTitle: string;
@@ -1046,7 +1050,7 @@ export const en: Dictionary = {
     linkSupportJameiyah: 'Support Jameiyah',
     onboardingEyebrow: 'Almost ready',
     onboardingTitle: 'Welcome to Jameiyah',
-    onboardingBody: 'Add your name and Kenya mobile to get started.',
+    onboardingBody: 'Add your name to get started.',
     onboardingStepName: 'Save your full name',
     onboardingStepPhone: 'Add a Kenya mobile (+254…)',
     onboardingStepKyc: 'Upload a verification document (optional)',
@@ -1130,6 +1134,10 @@ export const en: Dictionary = {
     ticketMessage: 'What happened?',
     ticketSubmit: 'Send request',
     ticketSubmitting: 'Sending…',
+    myTickets: 'Your requests',
+    ticketEmpty: 'No requests yet.',
+    ticketReply: 'Reply',
+    ticketWaiting: 'Waiting for a reply.',
     webTitle: 'Company site',
     webBody: 'Product and company on the public site.',
     tipTitle: 'Support Jameiyah',
@@ -1689,7 +1697,7 @@ export const sw: Dictionary = {
     linkSupportJameiyah: 'Saidia Jameiyah',
     onboardingEyebrow: 'Karibu tayari',
     onboardingTitle: 'Karibu Jameiyah',
-    onboardingBody: 'Ongeza jina na simu ya Kenya kuanza.',
+    onboardingBody: 'Ongeza jina lako kuanza.',
     onboardingStepName: 'Hifadhi jina lako kamili',
     onboardingStepPhone: 'Ongeza simu ya Kenya (+254…)',
     onboardingStepKyc: 'Pakia hati ya uthibitisho (si lazima)',
@@ -1773,6 +1781,10 @@ export const sw: Dictionary = {
     ticketMessage: 'Nini kilitokea?',
     ticketSubmit: 'Tuma ombi',
     ticketSubmitting: 'Inatuma…',
+    myTickets: 'Maombi yako',
+    ticketEmpty: 'Hakuna maombi bado.',
+    ticketReply: 'Jibu',
+    ticketWaiting: 'Inasubiri jibu.',
     webTitle: 'Tovuti ya kampuni',
     webBody: 'Maelezo ya bidhaa na kampuni kwenye tovuti.',
     tipTitle: 'Saidia Jameiyah',
