@@ -15,12 +15,10 @@ import {
 function NavGroups({
   pathname,
   activeGroupId,
-  onNavigate,
   idPrefix,
 }: {
   pathname: string;
   activeGroupId: string;
-  onNavigate?: () => void;
   idPrefix: string;
 }) {
   return (
@@ -46,7 +44,6 @@ function NavGroups({
                     <Link
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
-                      onClick={onNavigate}
                       className={cn(
                         'flex min-h-10 items-center rounded-lg border border-transparent px-2.5 text-sm font-medium transition-colors',
                         active
@@ -197,7 +194,6 @@ export function AdminNav() {
               <NavGroups
                 pathname={pathname}
                 activeGroupId={activeGroupId}
-                onNavigate={close}
                 idPrefix="mobile"
               />
             </nav>

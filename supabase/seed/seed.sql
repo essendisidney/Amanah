@@ -23,7 +23,15 @@ BEGIN
     raw_app_meta_data,
     raw_user_meta_data,
     created_at,
-    updated_at
+    updated_at,
+    confirmation_token,
+    recovery_token,
+    email_change_token_new,
+    email_change,
+    email_change_token_current,
+    phone_change,
+    phone_change_token,
+    reauthentication_token
   )
   VALUES
     (
@@ -37,7 +45,15 @@ BEGIN
       '{"provider":"email","providers":["email"],"platform_role":"super_admin"}'::jsonb,
       '{"full_name":"Super Admin"}'::jsonb,
       NOW(),
-      NOW()
+      NOW(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
     ),
     (
       '00000000-0000-0000-0000-000000000000',
@@ -50,7 +66,15 @@ BEGIN
       '{"provider":"email","providers":["email"],"platform_role":"member"}'::jsonb,
       '{"full_name":"Alice Wanjiku"}'::jsonb,
       NOW(),
-      NOW()
+      NOW(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
     ),
     (
       '00000000-0000-0000-0000-000000000000',
@@ -63,7 +87,15 @@ BEGIN
       '{"provider":"email","providers":["email"],"platform_role":"member"}'::jsonb,
       '{"full_name":"Bob Otieno"}'::jsonb,
       NOW(),
-      NOW()
+      NOW(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
     ),
     (
       '00000000-0000-0000-0000-000000000000',
@@ -76,7 +108,15 @@ BEGIN
       '{"provider":"email","providers":["email"],"platform_role":"compliance_officer"}'::jsonb,
       '{"full_name":"Compliance Officer"}'::jsonb,
       NOW(),
-      NOW()
+      NOW(),
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      ''
     )
   ON CONFLICT (id) DO NOTHING;
 
@@ -182,7 +222,9 @@ BEGIN
     platform_role = 'super_admin',
     profile_completed = TRUE,
     full_name = COALESCE(full_name, 'Super Admin'),
-    email = 'admin@jamiya.local'
+    email = 'admin@jamiya.local',
+    phone = '+254700000001',
+    country_code = 'KE'
   WHERE id = admin_id;
 
   UPDATE public.profiles
@@ -190,7 +232,9 @@ BEGIN
     platform_role = 'compliance_officer',
     profile_completed = TRUE,
     full_name = COALESCE(full_name, 'Compliance Officer'),
-    email = 'compliance@jamiya.local'
+    email = 'compliance@jamiya.local',
+    phone = '+254700000004',
+    country_code = 'KE'
   WHERE id = compliance_id;
 
   UPDATE public.profiles
@@ -198,6 +242,7 @@ BEGIN
     profile_completed = TRUE,
     full_name = COALESCE(full_name, 'Alice Wanjiku'),
     email = 'alice@jamiya.local',
+    phone = '+254700000002',
     country_code = 'KE'
   WHERE id = alice_id;
 
@@ -206,6 +251,7 @@ BEGIN
     profile_completed = TRUE,
     full_name = COALESCE(full_name, 'Bob Otieno'),
     email = 'bob@jamiya.local',
+    phone = '+254700000003',
     country_code = 'KE'
   WHERE id = bob_id;
 

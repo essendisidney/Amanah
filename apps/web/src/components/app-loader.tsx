@@ -66,11 +66,19 @@ export function AppLoader({
 
 /**
  * First-paint splash — plain <img> so the mark shows before Next/Image hydrates.
- * Removed by inline script + BootSplash (failsafe ≤2s).
+ * Return visits hide it with html[data-booted] before hydration.
+ * Never remove this node with DOM APIs — React still owns it.
  */
 export function BootSplashMarkup() {
   return (
-    <div id="boot-splash" className="amanah-boot-splash" role="status" aria-live="polite" aria-busy="true">
+    <div
+      id="boot-splash"
+      className="amanah-boot-splash"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      suppressHydrationWarning
+    >
       <div className="amanah-loader amanah-loader--fullscreen">
         <div className="amanah-loader__mesh" aria-hidden />
         <div className="amanah-loader__pattern" aria-hidden />

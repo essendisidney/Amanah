@@ -74,5 +74,20 @@ describe('Admin Support page authorization wiring (regression)', () => {
       /redirect\(\s*['"]\/dashboard['"]\s*\)/,
       'Page must not redirect on its own; requireAdminAccess owns the deny path',
     );
+    assert.match(source, /replySupportTicketAction/);
+  });
+
+  it('help lists only the signed-in member tickets and reply stays admin-gated', () => {
+    const help = readFileSync(join(here, '../../../app/(app)/help/page.tsx'), 'utf8');
+    const actions = readFileSync(
+      join(here, '../../help/actions/support-ticket-actions.ts'),
+      'utf8',
+    );
+    assert.match(help, /\.eq\(\s*['"]user_id['"]\s*,\s*user\.id\s*\)/);
+    assert.match(actions, /export async function replySupportTicketAction/);
+    assert.match(
+      actions,
+      /async function replySupportTicketAction[\s\S]*?requireAdminAccess\(\s*['"]compliance['"]/,
+    );
   });
 });

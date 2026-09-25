@@ -67,8 +67,51 @@ export async function submitSupportTicketAction(
   }
 
   revalidatePath('/help');
-  revalidatePath('/admin/support');
+  revalidatePath(ADMIN_SUPPORT_PATH);
   return { success: true, message: 'Request sent. We will follow up from the team.' };
+}
+
+export async function replySupportTicketAction(formData: FormData): Promise<void> {
+  const ticketId = String(formData.get('ticketId') ?? '');
+  const reply = String(formData.get('reply') ?? '').trim();
+  if (!ticketId || reply.length < 1 || reply.length > 4000) return;
+
+  const { userId } = await requireAdminAccess('compliance', ADMIN_SUPPORT_PATH);
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table pending gen:types
+  const { data: ticket } = await (supabase as any)
+    .from('support_tickets')
+    .select('user_id, subject')
+    .eq('id', ticketId)
+    .maybeSingle();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table pending gen:types
+  const { error } = await (supabase as any)
+    .from('support_tickets')
+    .update({
+      admin_reply: reply,
+      replied_at: new Date().toISOString(),
+      replied_by: userId,
+    })
+    .eq('id', ticketId);
+
+  if (error || !ticket?.user_id) {
+    revalidatePath(ADMIN_SUPPORT_PATH);
+    return;
+  }
+
+  await supabase.from('notifications').insert({
+    user_id: ticket.user_id,
+    type: 'system' as const,
+    channel: 'in_app' as const,
+    title: 'Support reply',
+    body: reply.slice(0, 180),
+    data: { kind: 'support_ticket_reply', ticket_id: ticketId },
+  });
+
+  revalidatePath(ADMIN_SUPPORT_PATH);
+  revalidatePath('/help');
 }
 
 export async function closeSupportTicketAction(formData: FormData): Promise<void> {
@@ -81,4 +124,5 @@ export async function closeSupportTicketAction(formData: FormData): Promise<void
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- table pending gen:types
   await (supabase as any).from('support_tickets').update({ status: 'closed' }).eq('id', ticketId);
   revalidatePath(ADMIN_SUPPORT_PATH);
+  revalidatePath('/help');
 }

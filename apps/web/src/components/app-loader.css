@@ -137,7 +137,8 @@
     visibility 0.7s;
 }
 
-.amanah-boot-splash--out {
+.amanah-boot-splash--out,
+html[data-booted='1'] #boot-splash {
   opacity: 0;
   transform: translateZ(0) scale(1.02);
   visibility: hidden;

@@ -53,7 +53,9 @@ test.describe('Journey 8 — Platform admin Support (seeded)', () => {
   });
 });
 
-test.describe('Journey 7 — Support ticket (seeded, product gaps marked)', () => {
+test.describe.configure({ mode: 'serial' });
+
+test.describe('Journey 7 — Support ticket (seeded)', () => {
   test('member can submit a labelled test ticket', async ({ page }) => {
     await signInEmail(page, 'alice@jamiya.local');
     await page.goto('/help#ticket');
@@ -65,12 +67,26 @@ test.describe('Journey 7 — Support ticket (seeded, product gaps marked)', () =
     await expect(page.getByText(/request sent|sent/i)).toBeVisible({ timeout: 20_000 });
   });
 
-  test('admin sees open ticket and can close (no in-app reply)', async ({ page }) => {
+  test('admin replies in-app and member sees status', async ({ page }) => {
     await signInEmail(page, 'admin@jamiya.local');
     await page.goto('/admin/support');
     await expect(page.getByText(/E2E audit ticket/i)).toBeVisible({ timeout: 20_000 });
-    await page.getByRole('button', { name: /mark closed/i }).first().click();
-    await expect(page.getByText(/closed/i).first()).toBeVisible({ timeout: 20_000 });
+    const replyBox = page.getByLabel('Reply').first();
+    await replyBox.fill('Local seed reply — safe to ignore.');
+    await page.getByRole('button', { name: /send reply/i }).first().click();
+    await expect(page.getByText(/Local seed reply/i).first()).toBeVisible({ timeout: 20_000 });
+
+    await page.goto('/login');
+    await signInEmail(page, 'alice@jamiya.local');
+    await page.goto('/help');
+    await expect(page.getByText(/E2E audit ticket/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Local seed reply/i)).toBeVisible();
+  });
+
+  test('bob cannot see alice ticket', async ({ page }) => {
+    await signInEmail(page, 'bob@jamiya.local');
+    await page.goto('/help');
+    await expect(page.getByText(/E2E audit ticket/i)).toHaveCount(0);
   });
 });
 

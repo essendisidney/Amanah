@@ -7,8 +7,10 @@ import { AppPage, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getSupportContact } from '@/lib/support-contact';
 import { SupportTicketForm } from '@/features/help/components/support-ticket-form';
+import { MemberSupportTickets } from '@/features/help/components/member-support-tickets';
 import { ShareAppInvite } from '@/components/share-app-invite';
 import { getSiteUrl } from '@/lib/site-url';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = {
   title: 'Help & support',
@@ -24,6 +26,26 @@ export default async function HelpPage() {
   const { dict } = await getDictionary();
   const labels = dict.help;
   const contact = getSupportContact();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  // Own rows only — RLS also blocks other members' tickets.
+  const ticketQuery = user
+    ? await supabase
+        .from('support_tickets')
+        .select('id, subject, status, created_at, admin_reply')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+    : { data: [] as Array<{
+        id: string;
+        subject: string;
+        status: string;
+        created_at: string;
+        admin_reply: string | null;
+      }> };
+  const ticketRows = ticketQuery.data;
 
   return (
     <AppPage width="medium">
@@ -119,6 +141,20 @@ export default async function HelpPage() {
           <Link href={'/shariah' as Route}>{labels.openShariah}</Link>
         </Button>
       </section>
+
+      <MemberSupportTickets
+        title={labels.myTickets}
+        empty={labels.ticketEmpty}
+        replyLabel={labels.ticketReply}
+        waiting={labels.ticketWaiting}
+        tickets={(ticketRows ?? []) as Array<{
+          id: string;
+          subject: string;
+          status: string;
+          created_at: string;
+          admin_reply: string | null;
+        }>}
+      />
 
       <section id="ticket" className="scroll-mt-24 space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.ticketTitle}</h2>
