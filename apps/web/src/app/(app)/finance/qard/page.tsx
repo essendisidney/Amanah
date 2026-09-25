@@ -115,6 +115,8 @@ export default async function QardPage({ searchParams }: Props) {
     }),
   );
 
+  const canRequestLoan = caps.some((cap) => (cap.cap ?? 0) >= 100);
+
   const pendingGuarantees = (
     (pendingGuaranteeData ?? []) as unknown as Array<{
       id: string;
@@ -158,7 +160,9 @@ export default async function QardPage({ searchParams }: Props) {
               <p className="text-sm font-medium">{cap.name}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {cap.cap != null
-                  ? `Your cap: ${formatCurrency(cap.cap, 'KES')} (paid ${formatCurrency(cap.paid ?? 0, 'KES')})`
+                  ? cap.cap >= 100
+                    ? `You can borrow up to ${formatCurrency(cap.cap, 'KES')} (half of ${formatCurrency(cap.paid ?? 0, 'KES')} paid).`
+                    : `Paid ${formatCurrency(cap.paid ?? 0, 'KES')}. Pay into the circle before you can ask for a loan.`
                   : 'Cap unavailable'}
               </p>
             </li>
@@ -209,7 +213,19 @@ export default async function QardPage({ searchParams }: Props) {
         </section>
       ) : null}
 
-      {memberships.length > 0 ? (
+      {memberships.length > 0 && !canRequestLoan ? (
+        <section className="max-w-xl space-y-2 rounded-xl border border-border bg-card p-6">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Ask for a loan
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            A loan can be up to half of what you have already paid into the circle. There is
+            nothing to borrow yet.
+          </p>
+        </section>
+      ) : null}
+
+      {memberships.length > 0 && canRequestLoan ? (
         <form
           action={requestQardFormAction}
           className="max-w-xl space-y-4 rounded-xl border border-border bg-card p-6"
@@ -387,7 +403,11 @@ export default async function QardPage({ searchParams }: Props) {
         ) : (
           <EmptyState
             title="No loans yet"
-            description="Ask for an interest-free loan from this circle. The treasurer approves, then you repay."
+            description={
+              canRequestLoan
+                ? 'Ask for an interest-free loan from this circle. The treasurer approves, then you repay.'
+                : 'After you pay into a circle, you can ask for up to half of that amount.'
+            }
           />
         )}
       </section>
