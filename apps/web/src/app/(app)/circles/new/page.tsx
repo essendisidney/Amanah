@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { AppPage } from '@/components/app-page';
+import { AppPage, PageHeader } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { CreateCircleForm } from '@/features/circles';
@@ -21,7 +21,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
       ? 'Stage, chama, or workplace. You will be the circle admin.'
       : intent === 'family'
         ? 'Family circle. You will be the circle admin.'
-        : 'Rotating savings. You will be the circle admin.';
+        : 'You will be the circle admin.';
   const segmentHint =
     intent === 'business'
       ? 'Tip: Boda / tuktuk stage fits many business groups.'
@@ -31,25 +31,18 @@ export default async function CreateCirclePage({ searchParams }: Props) {
 
   return (
     <AppPage>
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">New circle</p>
-        <h1 className="mt-2 font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight text-foreground">
-          Create a circle
-        </h1>
-        <p className="mt-3 max-w-xl text-muted-foreground">{subtitle}</p>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Have an invite?{' '}
-          <Link
-            href={'/circles?redeem=1' as Route}
-            className="text-accent underline-offset-4 hover:underline"
-          >
-            Enter your code instead
-          </Link>
-          .
-        </p>
-      </div>
+      <PageHeader eyebrow="New circle" title="Create a circle" subtitle={subtitle} />
+      <p className="text-sm text-muted-foreground">
+        Have an invite?{' '}
+        <Link
+          href={'/circles?redeem=1' as Route}
+          className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          Enter your code instead.
+        </Link>
+      </p>
 
-      <div className="rounded-xl border border-border bg-card p-6 shadow-[0_1px_0_rgba(26,31,28,0.04)] md:p-8">
+      <div className="amanah-surface px-4 py-4 sm:px-5 md:p-8">
         <CreateCircleForm defaultSegment={defaultSegment} segmentHint={segmentHint} />
       </div>
     

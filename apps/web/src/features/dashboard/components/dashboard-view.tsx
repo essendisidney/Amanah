@@ -14,6 +14,24 @@ function greetingForHour(hour: number, labels: Dictionary['dashboard']) {
   return labels.greetingEvening;
 }
 
+/** Phone sign-in stores a digit-only email. Don't greet people with that. */
+function displayFirstName(
+  fullName: string | null | undefined,
+  email: string | null | undefined,
+  fallback: string,
+) {
+  const fromName = fullName?.trim().split(/\s+/)[0];
+  if (fromName && !isPhoneHandle(fromName)) return fromName;
+  const local = email?.split('@')[0]?.trim();
+  if (local && !isPhoneHandle(local)) return local;
+  return fallback;
+}
+
+function isPhoneHandle(value: string) {
+  const compact = value.replace(/[\s+-]/g, '');
+  return /^\d{9,15}$/.test(compact);
+}
+
 export function DashboardView({
   data,
   email,
@@ -25,10 +43,11 @@ export function DashboardView({
   labels: Dictionary['dashboard'];
   common: Dictionary['common'];
 }) {
-  const firstName =
-    data.profile?.full_name?.split(/\s+/)[0] ||
-    email?.split('@')[0] ||
-    labels.nameFallback;
+  const firstName = displayFirstName(
+    data.profile?.full_name,
+    email,
+    labels.nameFallback,
+  );
   const greeting = greetingForHour(new Date().getHours(), labels);
   const currency = data.wallet?.currency ?? 'KES';
   const available = data.wallet?.availableBalance ?? data.wallet?.balance ?? 0;
