@@ -132,14 +132,10 @@ export default async function ProfilePage({ searchParams }: Props) {
     iprsStatus: profile?.iprs_status,
   });
 
+  const nameDone = Boolean(profile?.profile_completed && profile?.full_name?.trim());
   const setupSteps = [
     {
-      done: hasPhone,
-      label: labels.scoreStepPhone,
-      href: '/profile#personal-details' as Route,
-    },
-    {
-      done: Boolean(profile?.profile_completed && profile?.full_name?.trim()),
+      done: nameDone,
       label: labels.scoreStepProfile,
       href: '/profile#personal-details' as Route,
     },
@@ -179,9 +175,8 @@ export default async function ProfilePage({ searchParams }: Props) {
         <ProfileOnboardingBanner
           labels={labels}
           continueHref={continueHref}
-          profileCompleted={Boolean(profile?.profile_completed && profile?.full_name?.trim())}
+          profileCompleted={nameDone}
           hasPhone={hasPhone}
-          verificationComplete={verification.setupComplete}
         />
       ) : null}
 
@@ -190,6 +185,8 @@ export default async function ProfilePage({ searchParams }: Props) {
         subtitle={profile?.phone || profile?.email || user.email || '—'}
       />
 
+      {onboarding && !nameDone ? null : (
+      <>
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Invite someone to try</h2>
         <div className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
@@ -236,6 +233,8 @@ export default async function ProfilePage({ searchParams }: Props) {
           <p className="text-sm text-muted-foreground">{labels.scoreNotCredit}</p>
         )}
       </section>
+      </>
+      )}
 
       <section id="verification-status" className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.linkVerification}</h2>

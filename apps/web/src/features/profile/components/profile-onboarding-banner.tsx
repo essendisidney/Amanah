@@ -19,20 +19,16 @@ export function ProfileOnboardingBanner({
   continueHref,
   profileCompleted,
   hasPhone,
-  verificationComplete,
 }: {
   labels: Dictionary['profile'];
   continueHref?: string;
   profileCompleted: boolean;
   hasPhone: boolean;
-  /** Live KYC approved only — same rule as profile setup hero. */
-  verificationComplete: boolean;
 }) {
   const dest = safeContinuePath(continueHref);
   const nameDone = profileCompleted;
   const phoneDone = hasPhone;
   const ready = nameDone && phoneDone;
-  const kycDone = verificationComplete;
 
   return (
     <section className="amanah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">
@@ -43,37 +39,6 @@ export function ProfileOnboardingBanner({
         <h2 className="mt-1 text-xl font-bold tracking-tight">{labels.onboardingTitle}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{labels.onboardingBody}</p>
       </div>
-
-      <ol className="space-y-2 text-sm">
-        <li className="flex items-center gap-2">
-          <span
-            className={
-              nameDone
-                ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'
-                : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold text-muted-foreground'
-            }
-          >
-            {nameDone ? '✓' : '1'}
-          </span>
-          <span className={nameDone ? 'text-muted-foreground' : 'font-medium'}>
-            {labels.onboardingStepName}
-          </span>
-        </li>
-        <li className="flex items-center gap-2">
-          <span
-            className={
-              kycDone
-                ? 'inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'
-                : 'inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold text-muted-foreground'
-            }
-          >
-            {kycDone ? '✓' : '2'}
-          </span>
-          <span className={kycDone ? 'text-muted-foreground' : 'font-medium'}>
-            {labels.onboardingStepKyc}
-          </span>
-        </li>
-      </ol>
 
       <div className="flex flex-col gap-2 sm:flex-row">
         {ready ? (
@@ -87,11 +52,6 @@ export function ProfileOnboardingBanner({
             </a>
           </Button>
         )}
-        {!kycDone ? (
-          <Button asChild variant="ghost" className="min-h-11">
-            <a href="#kyc-documents">{labels.onboardingVerification}</a>
-          </Button>
-        ) : null}
       </div>
     </section>
   );
