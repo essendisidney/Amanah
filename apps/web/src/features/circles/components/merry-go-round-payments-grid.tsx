@@ -285,7 +285,7 @@ export function MerryGoRoundPaymentsGrid({
       ) : null}
       <p className="text-sm text-muted-foreground">
         Tap an empty cell to fill {fillAmount || defaultAmount || 'the amount'}, or use{' '}
-        <strong className="font-medium text-foreground">Mark month paid</strong> for everyone at
+        <strong className="font-medium text-foreground">Mark round paid</strong> for everyone at
         once. Then Save.
       </p>
 

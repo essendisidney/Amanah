@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+  addFrequencyDays,
   contributionFrequencyHint,
   contributionFrequencyLabel,
+  formatCycleDueLabel,
+  parseUtcDateOnly,
 } from './contribution-frequency.ts';
 import { walletTopUpHref, walletWithdrawHref } from '../../wallet/lib/wallet-focus-href.ts';
 
@@ -13,6 +16,17 @@ describe('contributionFrequencyLabel', () => {
     assert.equal(contributionFrequencyLabel(14), 'Every 14 days');
     assert.doesNotMatch(contributionFrequencyLabel(30), /month/i);
     assert.match(contributionFrequencyHint(), /not the same as calendar months/i);
+  });
+});
+
+describe('formatCycleDueLabel', () => {
+  it('keeps two rounds in the same calendar month distinct', () => {
+    const start = parseUtcDateOnly('2026-10-02');
+    const labels = [0, 1, 2, 3, 4, 5].map((index) =>
+      formatCycleDueLabel(addFrequencyDays(start, index, 30)),
+    );
+    assert.deepEqual(labels, ['2 Oct 26', '1 Nov 26', '1 Dec 26', '31 Dec 26', '30 Jan 27', '1 Mar 27']);
+    assert.notEqual(labels[2], labels[3]);
   });
 });
 

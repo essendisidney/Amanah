@@ -46,6 +46,11 @@ import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-ent
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
 import {
+  addFrequencyDays,
+  formatCycleDueLabel,
+  parseUtcDateOnly,
+} from '@/features/circles/lib/contribution-frequency';
+import {
   memberHeroSummary,
   type CircleKind,
 } from '@/features/circles/lib/circle-status-display';
@@ -670,15 +675,15 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     due_date: string;
   }>;
   for (const row of rawContribs) {
-    const due = new Date(row.due_date);
-    const year = due.getFullYear();
-    const month = due.getMonth() + 1;
+    const due = parseUtcDateOnly(row.due_date);
+    const year = due.getUTCFullYear();
+    const month = due.getUTCMonth() + 1;
     if (!mgrMonthMap.has(row.cycle_number)) {
       mgrMonthMap.set(row.cycle_number, {
         cycleNumber: row.cycle_number,
         year,
         month,
-        label: due.toLocaleString('en-GB', { month: 'short', year: '2-digit' }),
+        label: formatCycleDueLabel(due),
       });
     }
     const paid =
@@ -691,20 +696,19 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
   // If no contributions yet but cycles are planned, seed month columns from start_date.
   if ((isRotating || isSavings) && mgrMonthMap.size === 0 && (jamiya.cycle_count ?? 0) >= 1) {
-    const start = jamiya.start_date ? new Date(jamiya.start_date) : new Date();
+    const start = jamiya.start_date ? parseUtcDateOnly(jamiya.start_date) : parseUtcDateOnly(new Date());
     const freq = Math.max(jamiya.contribution_frequency_days || 30, 1);
     const cycles = Math.min(jamiya.cycle_count ?? 12, 24);
     for (let i = 0; i < cycles; i++) {
-      const due = new Date(start);
-      due.setDate(due.getDate() + i * freq);
-      const year = due.getFullYear();
-      const month = due.getMonth() + 1;
+      const due = addFrequencyDays(start, i, freq);
+      const year = due.getUTCFullYear();
+      const month = due.getUTCMonth() + 1;
       const cycleNumber = i + 1;
       mgrMonthMap.set(cycleNumber, {
         cycleNumber,
         year,
         month,
-        label: due.toLocaleString('en-GB', { month: 'short', year: '2-digit' }),
+        label: formatCycleDueLabel(due),
       });
     }
   }
@@ -797,8 +801,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                 ? [
                     {
                       href: `/circles/${slug}#monthly-payments` as Route,
-                      label: 'Monthly contributions',
-                      hint: 'Enter or fix any month (past or present)',
+                      label: 'Round contributions',
+                      hint: 'Enter what each member paid for a round',
                       primary: true as const,
                     },
                   ]
@@ -1291,8 +1295,12 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           {isRotating || isSavings ? (
             <CircleSection
               id="monthly-payments"
-              title={isRotating ? 'Monthly contributions' : 'Monthly savings grid'}
-              description="Record what each member paid for any month — past or present."
+              title={isRotating ? 'Round contributions' : 'Monthly savings grid'}
+              description={
+                isRotating
+                  ? 'Each round is a fixed number of days from the start date, so two rounds can fall in the same calendar month. Record what each member paid.'
+                  : 'Record what each member paid for any month — past or present.'
+              }
               padded={false}
             >
               <div className="amanah-surface px-4 py-4 sm:px-5">
