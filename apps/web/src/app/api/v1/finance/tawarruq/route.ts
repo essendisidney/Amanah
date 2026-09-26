@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const { data, error } = await supabase
     .from('tawarruq_applications')
     .select(
-      'id, amount, currency, purpose, status, partner_status, partner_reference, jamiya_id, created_at',
+      'id, amount, currency, purpose, status, partner_status, partner_reference, jamiya_id, created_at, deferred_amount, platform_fee_amount, circle_profit_amount, tenor_months',
     )
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
@@ -39,16 +39,22 @@ export async function POST(request: Request) {
     amount?: number;
     purpose?: string;
     jamiyaId?: string;
+    profitRateBps?: number;
+    tenorMonths?: number;
+    wakalah?: boolean;
   } | null;
 
-  if (!body?.amount || !body.purpose || body.purpose.trim().length < 5) {
+  if (!body?.amount || !body.purpose || body.purpose.trim().length < 5 || !body.wakalah) {
     return NextResponse.json({ ok: false, error: 'INVALID_PAYLOAD' }, { status: 400 });
   }
 
-  const { data, error } = await supabase.rpc('submit_tawarruq_application', {
+  const { data, error } = await supabase.rpc('submit_jameiyah_tawarruq', {
     p_amount: body.amount,
     p_purpose: body.purpose.trim(),
     p_jamiya_id: body.jamiyaId ?? null,
+    p_profit_rate_bps: body.profitRateBps ?? 1000,
+    p_tenor_months: body.tenorMonths ?? 12,
+    p_wakalah: true,
   });
 
   if (error) {

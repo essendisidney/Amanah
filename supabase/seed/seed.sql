@@ -9,6 +9,7 @@ DECLARE
   alice_id UUID := '22222222-2222-2222-2222-222222222222';
   bob_id UUID := '33333333-3333-3333-3333-333333333333';
   compliance_id UUID := '44444444-4444-4444-4444-444444444444';
+  ira_id UUID := '66666666-6666-6666-6666-666666666666';
   v_jamiya_id UUID := '55555555-5555-5555-5555-555555555555';
   encrypted_pw TEXT := crypt('Password1!', gen_salt('bf'));
 BEGIN
@@ -254,6 +255,54 @@ BEGIN
     phone = '+254700000003',
     country_code = 'KE'
   WHERE id = bob_id;
+
+  IF NOT EXISTS (SELECT 1 FROM auth.users WHERE id = ira_id) THEN
+    INSERT INTO auth.users (
+      instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+      raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+      confirmation_token, recovery_token, email_change_token_new, email_change,
+      email_change_token_current, phone_change, phone_change_token, reauthentication_token
+    ) VALUES (
+      '00000000-0000-0000-0000-000000000000',
+      ira_id,
+      'authenticated',
+      'authenticated',
+      'ira@jamiya.local',
+      encrypted_pw,
+      NOW(),
+      '{"provider":"email","providers":["email"],"platform_role":"member"}'::jsonb,
+      '{"full_name":"Ira Achieng"}'::jsonb,
+      NOW(),
+      NOW(),
+      '', '', '', '', '', '', '', ''
+    );
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM auth.identities WHERE user_id = ira_id AND provider = 'email'
+  ) THEN
+    INSERT INTO auth.identities (
+      id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at
+    ) VALUES (
+      gen_random_uuid(),
+      ira_id,
+      format('{"sub":"%s","email":"ira@jamiya.local"}', ira_id)::jsonb,
+      'email',
+      ira_id::text,
+      NOW(),
+      NOW(),
+      NOW()
+    );
+  END IF;
+
+  UPDATE public.profiles
+  SET
+    profile_completed = TRUE,
+    full_name = COALESCE(full_name, 'Ira Achieng'),
+    email = 'ira@jamiya.local',
+    phone = '+254700000005',
+    country_code = 'KE'
+  WHERE id = ira_id;
 
   INSERT INTO public.jamiyas (
     id,

@@ -80,22 +80,45 @@ export async function repayQardAction(formData: FormData): Promise<FinanceAction
   return state;
 }
 
+const TAWARRUQ_ERRORS: Record<string, string> = {
+  WAKALAH_REQUIRED: 'Tick the agency agreement before you submit.',
+  NOT_A_MEMBER: 'Choose a circle you belong to, or leave the circle blank.',
+  INVALID: 'Check the amount, profit, months, and purpose.',
+  UNAUTHENTICATED: 'Sign in to submit a request.',
+};
+
 export async function submitTawarruqAction(formData: FormData): Promise<FinanceActionState> {
   const amount = Number(formData.get('amount'));
   const purpose = String(formData.get('purpose') ?? '').trim();
-  if (!Number.isFinite(amount) || purpose.length < 5) {
-    return { success: false, message: 'Enter a valid amount and purpose.' };
+  const jamiyaId = String(formData.get('jamiyaId') ?? '').trim();
+  const profitRateBps = Number(formData.get('profitRateBps'));
+  const tenorMonths = Number(formData.get('tenorMonths'));
+  const wakalah = String(formData.get('wakalah') ?? '') === '1';
+  if (!Number.isFinite(amount) || purpose.length < 5 || !wakalah) {
+    return {
+      success: false,
+      message: wakalah
+        ? 'Enter a valid amount and purpose.'
+        : 'Tick the agency agreement before you submit.',
+    };
   }
-  const { data, error } = await callRpc('submit_tawarruq_application', {
+  const { data, error } = await callRpc('submit_jameiyah_tawarruq', {
     p_amount: amount,
     p_purpose: purpose,
-    p_jamiya_id: String(formData.get('jamiyaId') ?? '') || null,
+    p_jamiya_id: jamiyaId || null,
+    p_profit_rate_bps: profitRateBps,
+    p_tenor_months: tenorMonths,
+    p_wakalah: wakalah,
   });
   if (error) return { success: false, message: error.message };
   const state = rpcState(data, 'Could not submit application.');
+  if (!state.success && TAWARRUQ_ERRORS[state.message]) {
+    state.message = TAWARRUQ_ERRORS[state.message] ?? state.message;
+  }
   if (state.success) {
-    state.message = 'Application submitted.';
+    state.message = 'Request submitted. Jameiyah’s broker still has to buy and sell the commodity.';
     revalidatePath('/finance/tawarruq');
+    revalidatePath('/admin/tawarruq');
   }
   return state;
 }

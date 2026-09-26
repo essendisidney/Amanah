@@ -24,6 +24,7 @@ import {
   Landmark,
   Calculator,
   Plus,
+  Scale,
   TrendingUp,
 } from 'lucide-react';
 import { AppPage, PageHeader } from '@/components/app-page';
@@ -562,6 +563,11 @@ export default async function WalletPage({ searchParams }: Props) {
               href: '/finance/qard',
               title: labels.moreQard,
               icon: Landmark,
+            },
+            {
+              href: '/finance/tawarruq',
+              title: dict.finance.tawarruqTitle,
+              icon: Scale,
             },
             {
               href: '/finance/insights',

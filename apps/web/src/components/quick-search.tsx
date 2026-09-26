@@ -65,6 +65,7 @@ export function QuickSearch({
       { title: 'You', href: '/profile' as Route, kind: 'page', keywords: 'profile you account jina' },
       { title: 'Goals', href: '/finance/goals' as Route, kind: 'page', keywords: 'goals savings hajj' },
       { title: 'Qard', href: '/finance/qard' as Route, kind: 'page', keywords: 'qard loan mkopo' },
+      { title: 'Tawarruq', href: '/finance/tawarruq' as Route, kind: 'page', keywords: 'tawarruq finance commodity murabaha' },
       { title: 'Sadaka', href: '/sadaka' as Route, kind: 'page', keywords: 'sadaka donate charity' },
       { title: 'Zakat', href: '/zakat' as Route, kind: 'page', keywords: 'zakat' },
     ];

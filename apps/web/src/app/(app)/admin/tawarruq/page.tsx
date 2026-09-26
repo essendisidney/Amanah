@@ -24,6 +24,10 @@ type AppRow = {
   partner_reference: string | null;
   metadata: Record<string, unknown> | null;
   created_at: string;
+  deferred_amount: number | string | null;
+  platform_fee_amount: number | string | null;
+  circle_profit_amount: number | string | null;
+  tenor_months: number | null;
 };
 
 export default async function AdminTawarruqPage() {
@@ -32,7 +36,7 @@ export default async function AdminTawarruqPage() {
   const { data } = await supabase
     .from('tawarruq_applications')
     .select(
-      'id, user_id, amount, currency, purpose, status, partner_status, partner_reference, metadata, created_at',
+      'id, user_id, amount, currency, purpose, status, partner_status, partner_reference, metadata, created_at, deferred_amount, platform_fee_amount, circle_profit_amount, tenor_months',
     )
     .order('created_at', { ascending: false })
     .limit(100);
@@ -43,7 +47,7 @@ export default async function AdminTawarruqPage() {
     <div className="space-y-4">
       <AdminSectionHeader
         title="Tawarruq"
-        subtitle="Handoff applications to the partner queue. Simulated when partner API is unset."
+        subtitle="Jameiyah offers the facility. The member repays Jameiyah. Cash moves only after a partner confirms the commodity sale."
       />
       {rows.length === 0 ? (
         <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
@@ -63,9 +67,16 @@ export default async function AdminTawarruqPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     {formatCurrency(amount, row.currency)} · {formatDate(row.created_at)} · user{' '}
                     {row.user_id.slice(0, 8)}…
+                    {row.tenor_months ? ` · ${row.tenor_months} months` : ''}
                     {row.partner_reference ? ` · ref ${row.partner_reference}` : ''}
                     {row.partner_status ? ` · partner ${row.partner_status}` : ''}
                   </p>
+                  {row.deferred_amount != null && row.platform_fee_amount != null ? (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Repay {formatCurrency(Number(row.deferred_amount), row.currency)} to Jameiyah · Jameiyah
+                      earns {formatCurrency(Number(row.platform_fee_amount), row.currency)}
+                    </p>
+                  ) : null}
                   {typeof row.metadata?.last_error === 'string' ? (
                     <p className="mt-1 text-xs text-destructive">
                       Last API error: {row.metadata.last_error}

@@ -157,6 +157,7 @@ export type Dictionary = {
     createACircle: string;
     yourCircle: string;
     joinWithInvite: string;
+    requestTawarruq: string;
     viewAllCircles: string;
     position: string;
     payoutsTitle: string;
@@ -787,10 +788,11 @@ export const en: Dictionary = {
     myCirclesTitle: 'My circles',
     myCirclesDesc: 'Circles you belong to.',
     noCirclesTitle: 'No circles yet',
-    noCirclesDesc: 'Create a circle or accept an invite.',
+    noCirclesDesc: 'Join a circle, or request Tawarruq from Jameiyah on your own.',
     createACircle: 'Create a circle',
     yourCircle: 'Your circle',
     joinWithInvite: 'Join with invite',
+    requestTawarruq: 'Request Tawarruq',
     viewAllCircles: 'All circles',
     position: 'Position #{n}',
     payoutsTitle: 'Payout schedule',
@@ -999,7 +1001,7 @@ export const en: Dictionary = {
     qardTitle: 'Qard Hassan',
     qardDesc: 'Interest-free loans from your circle.',
     tawarruqTitle: 'Tawarruq',
-    tawarruqDesc: 'Partner Sharia finance.',
+    tawarruqDesc: 'Jameiyah buys a commodity and sells it to you. You repay Jameiyah the cost plus a disclosed profit.',
     goalsTitle: 'Savings goals',
     goalsDesc: 'Hajj, Umra, Udhiyah, or any target.',
     investTitle: 'Investments',
@@ -1012,8 +1014,8 @@ export const en: Dictionary = {
     investTreasuryBody: 'Land, stock, or equipment on the circle books.',
     investTreasuryCta: 'Projects',
     investTreasuryBrowseCta: 'Circles',
-    investTawarruqTitle: 'Partner Tawarruq',
-    investTawarruqBody: 'Larger finance outside the circle pool.',
+    investTawarruqTitle: 'Jameiyah Tawarruq',
+    investTawarruqBody: 'Jameiyah buys a commodity and sells it to you. The profit is Jameiyah’s.',
     investTawarruqCta: 'Tawarruq',
     investYourCircles: 'Your circles',
     investMultiHint: 'Each circle keeps its own books.',
@@ -1026,7 +1028,7 @@ export const en: Dictionary = {
     backToFinance: 'Finance',
     shariaTitle: 'Shariah on Jameiyah',
     shariaLead:
-      'Circles avoid riba between members. Qard is interest-free. Partner Tawarruq is separate — not a fatwa.',
+      'Circles avoid riba between members. Qard is interest-free. Tawarruq is Jameiyah’s commodity sale, with the profit shown before you accept — not a fatwa.',
     welfareOverview: 'Welfare overview',
     circleFallback: 'Circle',
     noWelfare: 'Your circles have no welfare funds yet.',
@@ -1435,10 +1437,11 @@ export const sw: Dictionary = {
     myCirclesTitle: 'Miduara yangu',
     myCirclesDesc: 'Miduara uliyojiunga.',
     noCirclesTitle: 'Bado hakuna miduara',
-    noCirclesDesc: 'Unda mduara au kubali mwaliko.',
+    noCirclesDesc: 'Jiunge na mduara, au omba Tawarruq kutoka Jameiyah peke yako.',
     createACircle: 'Unda mduara',
     yourCircle: 'Mduara wako',
     joinWithInvite: 'Jiunge kwa mwaliko',
+    requestTawarruq: 'Omba Tawarruq',
     viewAllCircles: 'Miduara yote',
     position: 'Nafasi #{n}',
     payoutsTitle: 'Ratiba ya malipo',
@@ -1651,7 +1654,7 @@ export const sw: Dictionary = {
     qardTitle: 'Qard Hassan',
     qardDesc: 'Omba na lipa mikopo ya mduara bila riba.',
     tawarruqTitle: 'Tawarruq',
-    tawarruqDesc: 'Omba fedha zinazofuata Sharia kupitia washirika.',
+    tawarruqDesc: 'Jameiyah inanunua bidhaa na kukuuzia. Unalipa Jameiyah gharama pamoja na faida iliyowazi.',
     goalsTitle: 'Malengo ya akiba',
     goalsDesc: 'Okoa kwa Hajj, Umra, Udhiyah, au lengo lolote la kibinafsi.',
     investTitle: 'Uwekezaji',
@@ -1664,8 +1667,8 @@ export const sw: Dictionary = {
     investTreasuryBody: 'Ardhi, hisa, au vifaa kwenye vitabu vya mduara.',
     investTreasuryCta: 'Miradi',
     investTreasuryBrowseCta: 'Miduara',
-    investTawarruqTitle: 'Tawarruq ya washirika',
-    investTawarruqBody: 'Fedha kubwa nje ya hazina ya mduara.',
+    investTawarruqTitle: 'Tawarruq ya Jameiyah',
+    investTawarruqBody: 'Jameiyah inanunua bidhaa na kukuuzia. Faida ni ya Jameiyah.',
     investTawarruqCta: 'Tawarruq',
     investYourCircles: 'Miduara yako',
     investMultiHint: 'Kila mduara una vitabu vyake.',
@@ -1678,7 +1681,7 @@ export const sw: Dictionary = {
     backToFinance: 'Fedha',
     shariaTitle: 'Shariah kwenye Jameiyah',
     shariaLead:
-      'Miduara huepuka riba kati ya wanachama. Qard haina riba. Tawarruq ya washirika ni tofauti — si fatwa.',
+      'Miduara huepuka riba kati ya wanachama. Qard haina riba. Tawarruq ni mauzo ya bidhaa ya Jameiyah, na faida inaonyeshwa kabla ya kukubali — si fatwa.',
     welfareOverview: 'Muhtasari wa ustawi',
     circleFallback: 'Mduara',
     noWelfare: 'Miduara yako bado haina hazina za ustawi.',

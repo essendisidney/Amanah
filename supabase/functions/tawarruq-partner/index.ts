@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
 
     const { data: rows, error } = await supabase
       .from("tawarruq_applications")
-      .select("id, amount, currency, purpose, partner_reference, user_id, jamiya_id, metadata")
+      .select("id, amount, currency, purpose, partner_reference, user_id, jamiya_id, metadata, profit_rate_bps, tenor_months, profit_amount, deferred_amount, platform_fee_amount, circle_profit_amount, commodity")
       .eq("status", "submitted_to_partner")
       .eq("partner_status", "queued")
       .limit(25);
@@ -164,6 +164,13 @@ Deno.serve(async (req) => {
         amount: row.amount,
         currency: row.currency,
         purpose: row.purpose,
+        profit_rate_bps: row.profit_rate_bps,
+        tenor_months: row.tenor_months,
+        profit_amount: row.profit_amount,
+        deferred_amount: row.deferred_amount,
+        platform_fee_amount: row.platform_fee_amount,
+        circle_profit_amount: row.circle_profit_amount,
+        commodity: row.commodity,
       };
 
       let partner: PartnerResult;

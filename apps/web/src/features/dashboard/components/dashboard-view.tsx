@@ -167,6 +167,9 @@ export function DashboardView({
                 <Button asChild variant="outline" className="min-h-11 w-full">
                   <Link href={'/circles?redeem=1' as Route}>{labels.joinWithInvite}</Link>
                 </Button>
+                <Button asChild variant="outline" className="min-h-11 w-full sm:col-span-2">
+                  <Link href={'/finance/tawarruq' as Route}>{labels.requestTawarruq}</Link>
+                </Button>
               </div>
             </div>
           ) : (

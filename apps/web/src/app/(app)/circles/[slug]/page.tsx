@@ -1400,7 +1400,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   Loans & welfare
                 </h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Qard Hassan, welfare, and partner Tawarruq for this circle.
+                  Qard Hassan, welfare, and Jameiyah Tawarruq.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button asChild className="min-h-11">
