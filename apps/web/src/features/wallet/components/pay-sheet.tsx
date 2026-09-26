@@ -77,11 +77,13 @@ export function PaySheet({
   available,
   currency = 'KES',
   dues = [],
+  hideDueList = false,
 }: {
   labels: PayLabels;
   available?: number | null;
   currency?: string;
   dues?: PayDueItem[];
+  hideDueList?: boolean;
 }) {
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -194,6 +196,7 @@ export function PaySheet({
         </div>
       </section>
 
+      {hideDueList ? null : (
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.sectionPay}</h2>
         {dues.length > 0 ? (
@@ -241,6 +244,7 @@ export function PaySheet({
           </div>
         )}
       </section>
+      )}
 
       <LinkGroup items={primary} />
 

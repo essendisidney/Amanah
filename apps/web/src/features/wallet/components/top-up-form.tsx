@@ -32,11 +32,9 @@ export function TopUpForm({
   const needsOtp = Boolean(state.needsOtp);
   const amountDefault =
     defaultAmount && Number.isFinite(defaultAmount) && defaultAmount >= 10
-      ? Math.ceil(defaultAmount)
-      : provider === 'simulated'
-        ? 50000
-        : 10;
-  const [amountText, setAmountText] = useState(String(amountDefault));
+      ? String(Math.ceil(defaultAmount))
+      : '';
+  const [amountText, setAmountText] = useState(amountDefault);
   const needsPhone =
     provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay';
   const linkedPhone = defaultPhone.trim();

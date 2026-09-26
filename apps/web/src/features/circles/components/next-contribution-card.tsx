@@ -25,6 +25,8 @@ type Props = {
   defaultPhone?: string | null;
   /** When false, omit id="pay" (use for stacked lists). Default true. */
   showAnchor?: boolean;
+  /** Circle pages have a calendar anchor. Pay does not. */
+  showCalendar?: boolean;
   labels: Dictionary['contributionCard'];
 };
 
@@ -67,6 +69,7 @@ export function NextContributionCard({
   circleName,
   defaultPhone = '',
   showAnchor = true,
+  showCalendar = true,
   labels,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
@@ -84,6 +87,9 @@ export function NextContributionCard({
       ? Math.min(remaining, walletAvailable)
       : remaining;
   const linkedPhone = (defaultPhone ?? '').trim();
+  const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
+  const topUpHref =
+    `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route;
   const payLabel = ahead
     ? t(labels.payAmountAhead, { amount: formatCurrency(remaining, currency) })
     : t(labels.payAmount, { amount: formatCurrency(remaining, currency) });
@@ -137,19 +143,40 @@ export function NextContributionCard({
             {labels.paysFromBalanceShort}
           </p>
         </form>
-      ) : (
-        <form action={payContributionStkAction} className="space-y-3">
-          <input type="hidden" name="contributionId" value={contributionId} />
-          <input type="hidden" name="slug" value={slug} />
-          <input type="hidden" name="amount" value={String(remaining)} />
-          <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
-          <Button type="submit" className="min-h-11 w-full">
-            {payLabel}
+      ) : hasLinkedPhone ? (
+        <div className="space-y-3">
+          <form action={payContributionStkAction} className="space-y-2">
+            <input type="hidden" name="contributionId" value={contributionId} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="amount" value={String(remaining)} />
+            <input type="hidden" name="phone" value={linkedPhone} />
+            <Button type="submit" className="min-h-11 w-full">
+              {payLabel}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              {t(labels.stkToLinked, { phone: linkedPhone })}
+            </p>
+          </form>
+          <Button asChild variant="outline" className="min-h-11 w-full">
+            <Link href={topUpHref}>{labels.addMoney}</Link>
           </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            {labels.stkAnyNumberHint}
-          </p>
-        </form>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <form action={payContributionStkAction} className="space-y-3">
+            <input type="hidden" name="contributionId" value={contributionId} />
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="amount" value={String(remaining)} />
+            <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
+            <Button type="submit" className="min-h-11 w-full">
+              {payLabel}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">{labels.stkAnyNumberHint}</p>
+          </form>
+          <Button asChild variant="outline" className="min-h-11 w-full">
+            <Link href={topUpHref}>{labels.addMoney}</Link>
+          </Button>
+        </div>
       )}
 
       <details className="text-sm">
@@ -220,23 +247,28 @@ export function NextContributionCard({
                   </Button>
                 </form>
               ) : null}
-              <Button asChild variant="outline" className="min-h-11 w-full">
-                <Link
-                  href={
-                    `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route
-                  }
-                >
-                  {walletAvailable == null ? labels.addMoney : labels.addMoneyToPay}
-                </Link>
-              </Button>
+              {hasLinkedPhone ? (
+                <form action={payContributionStkAction} className="space-y-2">
+                  <input type="hidden" name="contributionId" value={contributionId} />
+                  <input type="hidden" name="slug" value={slug} />
+                  <input type="hidden" name="amount" value={String(remaining)} />
+                  <StkPhoneField defaultPhone="" label={labels.mpesaPhone} />
+                  <Button type="submit" variant="outline" className="min-h-11 w-full">
+                    {labels.payPhoneInstead}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{labels.stkAnyNumberHint}</p>
+                </form>
+              ) : null}
             </>
           )}
 
           <p className="text-xs text-muted-foreground">{labels.paidTreasurerHint}</p>
 
-          <Button asChild variant="ghost" size="sm" className="min-h-11 w-full justify-start px-0">
-            <Link href={`#calendar` as Route}>{labels.calendar}</Link>
-          </Button>
+          {showCalendar ? (
+            <Button asChild variant="ghost" size="sm" className="min-h-11 w-full justify-start px-0">
+              <Link href={`/circles/${slug}#calendar` as Route}>{labels.calendar}</Link>
+            </Button>
+          ) : null}
         </div>
       </details>
     </section>

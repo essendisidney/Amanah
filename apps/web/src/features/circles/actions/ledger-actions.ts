@@ -11,6 +11,7 @@ import type { GridSaveResult } from '../lib/action-state';
 function revalidateCircle(slug?: string) {
   revalidatePath('/dashboard');
   revalidatePath('/wallet');
+  revalidatePath('/pay');
   revalidatePath('/circles');
   revalidatePath('/notifications');
   if (slug) revalidatePath(`/circles/${slug}`);
