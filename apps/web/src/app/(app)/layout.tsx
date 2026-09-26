@@ -8,6 +8,7 @@ import { dictionaries } from '@/i18n/dictionaries';
 import { getDictionary } from '@/i18n/get-dictionary';
 import {
   getAuthUser,
+  getSearchCircles,
   getUnreadNotificationCount,
   getUserProfile,
 } from '@/lib/supabase/auth';
@@ -30,13 +31,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   let unread = 0;
   let showAdmin = false;
+  let circles: Awaited<ReturnType<typeof getSearchCircles>> = [];
 
   if (user) {
-    const [count, profile] = await Promise.all([
+    const [count, profile, searchCircles] = await Promise.all([
       getUnreadNotificationCount(user.id).catch(() => 0),
       getUserProfile(user.id).catch(() => null),
+      getSearchCircles(user.id).catch(() => []),
     ]);
     unread = count;
+    circles = searchCircles;
     const role = (profile?.platform_role ?? 'member') as PlatformRole;
     showAdmin = isComplianceRole(role);
   }
@@ -49,6 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         signOutAction={signOutAction}
         locale={locale}
         dict={{ nav: dict.nav, common: dict.common }}
+        circles={circles}
       >
         {children}
       </AppShell>

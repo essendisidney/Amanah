@@ -24,6 +24,7 @@ import {
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { JameiyahLogo } from '@/components/amanah-logo';
+import { QuickSearch, type QuickSearchCircle } from '@/components/quick-search';
 import { WhatsAppShareButton } from '@/components/whatsapp-share-button';
 import { composeWhatsAppMessage, JAMEIYAH_SHARE_BLURB } from '@/lib/whatsapp-share';
 import { getSiteUrl } from '@/lib/site-url';
@@ -68,6 +69,7 @@ export function AppShell({
   signOutAction,
   locale,
   dict,
+  circles = [],
 }: {
   children: ReactNode;
   unread: number;
@@ -75,6 +77,7 @@ export function AppShell({
   signOutAction: () => Promise<void>;
   locale: Locale;
   dict: ShellDictionary;
+  circles?: QuickSearchCircle[];
 }) {
   const pathname = usePathname() || '';
   const [liveUnread, setLiveUnread] = useState(unread);
@@ -188,6 +191,7 @@ export function AppShell({
           </nav>
 
           <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+            <QuickSearch circles={circles} showAdmin={showAdmin} labels={dict.common} />
             <WhatsAppShareButton
               text={tryAppShareText}
               label="Share"

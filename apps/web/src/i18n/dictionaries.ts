@@ -24,6 +24,11 @@ export type Dictionary = {
     perCycle: string;
     pay: string;
     left: string;
+    search: string;
+    searchPlaceholder: string;
+    searchEmpty: string;
+    searchCircle: string;
+    searchPage: string;
   };
   nav: {
     dashboard: string;
@@ -648,6 +653,11 @@ export const en: Dictionary = {
     perCycle: 'per cycle',
     pay: 'Pay',
     left: 'left',
+    search: 'Search',
+    searchPlaceholder: 'Pay, a circle, Help…',
+    searchEmpty: 'Nothing matches.',
+    searchCircle: 'Circle',
+    searchPage: 'Page',
   },
   nav: {
     dashboard: 'Home',
@@ -1291,6 +1301,11 @@ export const sw: Dictionary = {
     perCycle: 'kwa mzunguko',
     pay: 'Lipa',
     left: 'imebaki',
+    search: 'Tafuta',
+    searchPlaceholder: 'Lipa, mduara, Msaada…',
+    searchEmpty: 'Hakuna kinacholingana.',
+    searchCircle: 'Mduara',
+    searchPage: 'Ukurasa',
   },
   nav: {
     dashboard: 'Nyumbani',
