@@ -34,8 +34,6 @@ type WizardStep = 'type' | 'details' | 'rules' | 'review';
 const STEPS: { id: WizardStep; label: string; number: number }[] = [
   { id: 'type', label: 'Type', number: 1 },
   { id: 'details', label: 'Details', number: 2 },
-  { id: 'rules', label: 'Rules', number: 3 },
-  { id: 'review', label: 'Review', number: 4 },
 ];
 
 type FrequencyPreset = 'weekly' | 'monthly' | 'custom';
@@ -114,8 +112,6 @@ export function CreateCircleForm({
   const slotPricingEnabled = watch('slotPricingEnabled');
   const contributionFrequencyDays = watch('contributionFrequencyDays');
   const values = watch();
-
-  const stepIndex = STEPS.findIndex((s) => s.id === step);
 
   const setChallengeKind = (kind: 'rotating' | 'savings' | 'share_dividend') => {
     setValue('challengeKind', kind, { shouldDirty: true, shouldValidate: true });
@@ -272,8 +268,18 @@ export function CreateCircleForm({
   }, [challengeKind, slotPricingEnabled]);
 
   const goBack = () => {
-    const prev = STEPS[stepIndex - 1];
-    if (prev) setStep(prev.id);
+    if (step === 'review') setStep('rules');
+    else if (step === 'rules') setStep('details');
+    else if (step === 'details') setStep('type');
+  };
+
+  const createFromHere = async () => {
+    const ok = await trigger([...detailsFields, ...rulesFields]);
+    if (!ok) {
+      setStep('details');
+      return;
+    }
+    await handleSubmit(onValid)();
   };
 
   const goContinue = async () => {
@@ -310,11 +316,10 @@ export function CreateCircleForm({
         </Alert>
       ) : null}
 
-      <nav aria-label="Create circle steps" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <nav aria-label="Create circle steps" className="grid grid-cols-2 gap-2">
         {STEPS.map((s) => {
-          const active = s.id === step;
-          const currentStep = STEPS[Math.max(0, stepIndex)] ?? STEPS[0]!;
-          const done = s.number < currentStep.number;
+          const active = s.id === step || (s.id === 'details' && (step === 'rules' || step === 'review'));
+          const done = s.id === 'type' && step !== 'type';
           return (
             <div
               key={s.id}
@@ -834,7 +839,7 @@ export function CreateCircleForm({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="sticky bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-30 flex flex-wrap gap-3 border-t border-border bg-background/95 py-3 md:static md:bottom-auto md:border-0 md:bg-transparent md:py-0 md:pt-2">
           {step !== 'type' ? (
             <Button type="button" variant="outline" onClick={goBack}>
               Back
@@ -844,12 +849,17 @@ export function CreateCircleForm({
               <Link href={'/circles' as Route}>Cancel</Link>
             </Button>
           )}
-          {step !== 'review' ? (
+          {step === 'details' ? (
+            <Button type="button" variant="outline" onClick={() => setStep('rules')}>
+              Rules
+            </Button>
+          ) : null}
+          {step === 'type' ? (
             <Button type="button" onClick={goContinue}>
               Continue
             </Button>
           ) : (
-            <Button type="submit" disabled={pending}>
+            <Button type="button" onClick={createFromHere} disabled={pending}>
               {pending ? 'Creating…' : 'Create circle'}
             </Button>
           )}
