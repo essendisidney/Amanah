@@ -28,6 +28,12 @@ type Props = {
   memberSummary: string;
   stats: Stat[];
   personalDue?: PersonalDue | null;
+  /** Share groups keep these three totals apart. */
+  moneyBooks?: {
+    shares: number;
+    bookContributions: number;
+    schedulePaid: number;
+  } | null;
 };
 
 export function CircleDetailHero({
@@ -43,12 +49,13 @@ export function CircleDetailHero({
   memberSummary,
   stats,
   personalDue = null,
+  moneyBooks = null,
 }: Props) {
   const accent = circleAccentClass(slug);
   const meta = [kindLabel, roleLabel].filter(Boolean).join(' · ');
   const dueRemaining = personalDue && personalDue.remaining > 0 ? personalDue.remaining : null;
   const heroAmount = dueRemaining ?? poolAmount;
-  const heroLabel = dueRemaining != null ? 'You owe' : 'Pool so far';
+  const heroLabel = dueRemaining != null ? 'You owe' : moneyBooks ? 'Group money' : 'Pool so far';
   const overdue = personalDue?.status === 'late';
 
   return (
@@ -72,14 +79,38 @@ export function CircleDetailHero({
               {heroLabel}
               {dueRemaining != null && overdue ? ' · overdue' : ''}
             </p>
-            <p className="amanah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
-              {formatCurrency(heroAmount, currency)}
-            </p>
+            {dueRemaining != null || !moneyBooks ? (
+              <p className="amanah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
+                {formatCurrency(heroAmount, currency)}
+              </p>
+            ) : null}
+            {moneyBooks ? (
+              <dl className="mt-3 max-w-md space-y-1.5 text-sm">
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Shares</dt>
+                  <dd className="font-semibold">{formatCurrency(moneyBooks.shares, currency)}</dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Contributions in the books</dt>
+                  <dd className="font-semibold">
+                    {formatCurrency(moneyBooks.bookContributions, currency)}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted-foreground">Paid on the schedule</dt>
+                  <dd className="font-semibold">
+                    {formatCurrency(moneyBooks.schedulePaid, currency)}
+                  </dd>
+                </div>
+                <p className="pt-1 text-xs text-muted-foreground">
+                  Three separate records. The schedule line is only payments marked paid.
+                </p>
+              </dl>
+            ) : null}
             {dueRemaining != null ? (
               <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
-                Pool {formatCurrency(poolAmount, currency)}
-                {personalDue?.dueDate ? ` · due ${formatDate(personalDue.dueDate)}` : ''}
-                {' · '}
+                {moneyBooks ? null : <>Pool {formatCurrency(poolAmount, currency)} · </>}
+                {personalDue?.dueDate ? `due ${formatDate(personalDue.dueDate)} · ` : ''}
                 <Link
                   href={`#pay-due` as Route}
                   className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

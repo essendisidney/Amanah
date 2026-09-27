@@ -417,6 +417,22 @@ export default function UiPreviewPage() {
               { label: 'Next payout', value: 'Asha' },
             ]}
           />
+          <h3 className="pt-2 text-sm font-semibold text-foreground">Share group</h3>
+          <CircleDetailHero
+            slug="rafa-chama"
+            name="RAFA Chama"
+            status="active"
+            roleLabel="Member"
+            kindLabel="Share / dividend group"
+            poolAmount={200}
+            currency="KES"
+            memberSummary="4/50 members"
+            moneyBooks={{ shares: 1_015_000, bookContributions: 2600, schedulePaid: 200 }}
+            stats={[
+              { label: 'Every 30 days', value: 'KES 100' },
+              { label: 'Contribution', value: 'KES 100' },
+            ]}
+          />
           <div id="pay-due" className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Your next contribution

@@ -159,6 +159,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     { data: nextOfKinData },
     { data: myProfileData },
     { data: pendingIntentData },
+    { data: shareLotData },
+    { data: bookContributionData },
   ] = await Promise.all([
     supabase
       .from('members')
@@ -227,6 +229,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .in('status', ['pending', 'processing'])
       .order('created_at', { ascending: false })
       .limit(8),
+    isShareDividendKind(jamiya.challenge_kind)
+      ? supabase.from('circle_share_lots').select('amount').eq('jamiya_id', jamiya.id)
+      : Promise.resolve({ data: [] as Array<{ amount: number | string }> }),
+    isShareDividendKind(jamiya.challenge_kind)
+      ? supabase
+          .from('book_entries')
+          .select('amount')
+          .eq('jamiya_id', jamiya.id)
+          .eq('entry_type', 'contribution')
+      : Promise.resolve({ data: [] as Array<{ amount: number | string }> }),
   ]);
 
   await reconcileUserPaymentIntents(user.id);
@@ -556,6 +568,22 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       : isRotating
         ? amount * Math.max(jamiya.current_cycle, 1) * Math.max(jamiya.member_count, 1)
         : 0;
+
+  const sumRows = (rows: Array<{ amount?: number | string | null }> | null) =>
+    (rows ?? []).reduce((sum, row) => {
+      const value = typeof row.amount === 'number' ? row.amount : Number(row.amount ?? 0);
+      return sum + (Number.isFinite(value) ? value : 0);
+    }, 0);
+
+  const moneyBooks = isShareDividend
+    ? {
+        shares: sumRows((shareLotData ?? []) as Array<{ amount?: number | string | null }>),
+        bookContributions: sumRows(
+          (bookContributionData ?? []) as Array<{ amount?: number | string | null }>,
+        ),
+        schedulePaid: contributedTotal,
+      }
+    : null;
 
   const kindLabel = isShareDividend
     ? 'Share / dividend group'
@@ -1058,6 +1086,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         poolAmount={estimatedPool}
         currency={jamiya.currency}
         memberSummary={memberSummary}
+        moneyBooks={moneyBooks}
         personalDue={
           myOpenDue
             ? {
