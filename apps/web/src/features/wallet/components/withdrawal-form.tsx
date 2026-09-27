@@ -19,11 +19,13 @@ export function WithdrawalForm({
   labels,
   defaultPhone = '',
   availableBalance = 0,
+  reservedAmount = 0,
 }: {
   currency?: string;
   labels: Dictionary['walletForms'];
   defaultPhone?: string;
   availableBalance?: number;
+  reservedAmount?: number;
 }) {
   const [state, action, pending] = useActionState(requestWithdrawalAction, initial);
   const [destinationType, setDestinationType] = useState<'mpesa' | 'bank'>('mpesa');
@@ -88,6 +90,12 @@ export function WithdrawalForm({
           className="h-12 text-lg font-semibold tabular-nums sm:h-11 sm:text-base"
         />
         {amountError ? <p className="text-sm text-destructive">{amountError}</p> : null}
+        {reservedAmount > 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Pending requests of {formatCurrency(reservedAmount, currency)} are already left out of
+            Max.
+          </p>
+        ) : null}
       </div>
 
       <div className="space-y-1.5">

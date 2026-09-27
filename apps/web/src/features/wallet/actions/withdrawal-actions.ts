@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { toE164Kenya } from '@jamiya/shared';
+import { formatCurrency, toE164Kenya } from '@jamiya/shared';
 import { callRpc } from '@/lib/supabase/rpc';
 import { logger } from '@/lib/observability';
 import { paymentProvider } from '@/lib/payments/provider';
@@ -95,9 +95,19 @@ export async function requestWithdrawalAction(
     error?: string;
     destination_phone?: string | null;
     status?: string;
+    available?: number;
   } | null;
   if (!result?.ok) {
     const code = result?.error ?? 'FAILED';
+    if (code === 'INSUFFICIENT_FUNDS') {
+      const left = Number(result?.available);
+      return {
+        success: false,
+        message: Number.isFinite(left)
+          ? `You can request up to ${formatCurrency(Math.max(0, left), currency)} after pending withdrawals.`
+          : 'That amount is more than what is left after pending withdrawals.',
+      };
+    }
     const messages: Record<string, string> = {
       KYC_REQUIRED: 'KYC approval required for withdrawals of 20,000+.',
       RISK_BLOCKED: 'Withdrawal blocked by risk controls. Contact support.',
@@ -123,7 +133,7 @@ export async function requestWithdrawalAction(
     success: true,
     message:
       destinationType === 'mpesa'
-        ? `Withdrawal requested${destBit}. Waiting for admin approval.`
+        ? `Withdrawal requested${destBit}. A Jameiyah admin sends this to your M-Pesa.`
         : 'Withdrawal requested. Pending admin processing.',
   };
 }

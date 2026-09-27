@@ -47,6 +47,13 @@ type WalletRow = {
   updated_at: string;
 };
 
+type TxMeta = {
+  kind?: string;
+  label?: string;
+  dividend_id?: string;
+  declared_total?: number | string;
+};
+
 type TxRow = {
   id: string;
   type: string;
@@ -56,7 +63,32 @@ type TxRow = {
   direction: string;
   reference: string | null;
   created_at: string;
+  metadata?: TxMeta | null;
 };
+
+function moneyHistoryLine(
+  row: TxRow,
+  declaredTotals: Map<string, number>,
+): { title: string; detail: string | null } {
+  const meta = row.metadata ?? {};
+  if (meta.kind === 'circle_dividend') {
+    const label = meta.label?.trim() || 'the declared dividend';
+    const fromMeta = Number(meta.declared_total);
+    const total = Number.isFinite(fromMeta)
+      ? fromMeta
+      : meta.dividend_id
+        ? declaredTotals.get(meta.dividend_id)
+        : undefined;
+    return {
+      title: 'Dividend share',
+      detail:
+        total != null && Number.isFinite(total)
+          ? `Your part of ${label}. Declared total ${formatCurrency(total, row.currency)}. No fee was taken.`
+          : `Your part of ${label}. No fee was taken.`,
+    };
+  }
+  return { title: row.type.replaceAll('_', ' '), detail: null };
+}
 
 export default async function WalletPage({ searchParams }: Props) {
   const notices = (await searchParams) ?? {};
@@ -96,7 +128,7 @@ export default async function WalletPage({ searchParams }: Props) {
         .order('currency', { ascending: true }),
       supabase
         .from('transactions')
-        .select('id, type, status, amount, currency, direction, reference, created_at')
+        .select('id, type, status, amount, currency, direction, reference, metadata, created_at')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(12),
@@ -127,7 +159,7 @@ export default async function WalletPage({ searchParams }: Props) {
         .eq('user_id', user.id)
         .in('status', ['pending', 'processing'])
         .order('created_at', { ascending: false })
-        .limit(10),
+        .limit(100),
       supabase
         .from('journal_entries')
         .select('id, domain, description, currency, source_type, posted_at')
@@ -162,7 +194,8 @@ export default async function WalletPage({ searchParams }: Props) {
   const transactions = (txResult.data ?? []) as unknown as TxRow[];
   let failedIntents = (intentResult.data ?? []) as unknown as IntentRow[];
   let pendingIntents = (pendingResult.data ?? []) as unknown as IntentRow[];
-  const pendingWithdrawals = (withdrawalResult.data ?? []) as unknown as WithdrawalRow[];
+  const openWithdrawals = (withdrawalResult.data ?? []) as unknown as WithdrawalRow[];
+  const pendingWithdrawals = openWithdrawals.slice(0, 10);
   const journalEntries = (journalResult.data ?? []) as unknown as Array<{
     id: string;
     domain: string;
@@ -216,6 +249,32 @@ export default async function WalletPage({ searchParams }: Props) {
       ? primary.available_balance
       : Number(primary.available_balance)
     : 0;
+  const reserved = openWithdrawals
+    .filter((row) => row.currency === primaryCurrency)
+    .reduce((sum, row) => sum + Number(row.amount), 0);
+  const withdrawable = Math.max(0, available - reserved);
+  const dividendIds = [
+    ...new Set(
+      transactions
+        .map((row) => {
+          const meta = row.metadata;
+          if (meta?.kind !== 'circle_dividend' || !meta.dividend_id) return null;
+          const fromMeta = Number(meta.declared_total);
+          return Number.isFinite(fromMeta) ? null : meta.dividend_id;
+        })
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const declaredTotals = new Map<string, number>();
+  if (dividendIds.length > 0) {
+    const { data: dividendRows } = await supabase
+      .from('circle_dividends')
+      .select('id, total_amount')
+      .in('id', dividendIds);
+    for (const row of (dividendRows ?? []) as Array<{ id: string; total_amount: number | string }>) {
+      declaredTotals.set(row.id, Number(row.total_amount));
+    }
+  }
   const provider = paymentProvider();
 
   return (
@@ -341,7 +400,8 @@ export default async function WalletPage({ searchParams }: Props) {
                 currency={primaryCurrency}
                 labels={dict.walletForms}
                 defaultPhone={withdrawPhone}
-                availableBalance={available}
+                availableBalance={withdrawable}
+                reservedAmount={reserved}
               />
             </div>
             {focus === 'withdraw' ? (
@@ -433,6 +493,7 @@ export default async function WalletPage({ searchParams }: Props) {
       {pendingWithdrawals.length > 0 ? (
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.withdrawalsInProgress}</h2>
+          <p className="text-xs text-muted-foreground">{labels.pendingWithdrawalsHint}</p>
           <ul className="amanah-surface divide-y divide-border/70">
             {pendingWithdrawals.map((row) => (
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
@@ -471,6 +532,7 @@ export default async function WalletPage({ searchParams }: Props) {
           <ul className="amanah-surface divide-y divide-border/70">
             {transactions.map((row) => {
               const inflow = row.direction === 'credit';
+              const line = moneyHistoryLine(row, declaredTotals);
               return (
                 <li key={row.id} className="flex items-center gap-3 px-4 py-3">
                   <span
@@ -489,11 +551,12 @@ export default async function WalletPage({ searchParams }: Props) {
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-semibold capitalize text-foreground">
-                        {row.type.replaceAll('_', ' ')}
+                        {line.title}
                       </p>
                       <StatusBadge status={row.status} />
                     </div>
                     <p className="mt-0.5 text-xs text-muted-foreground">
+                      {line.detail ? `${line.detail} · ` : ''}
                       {formatRelativeTime(row.created_at)}
                     </p>
                   </div>

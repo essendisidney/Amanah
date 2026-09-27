@@ -414,6 +414,10 @@ export default async function QardPage({ searchParams }: Props) {
                       className="flex flex-wrap items-center gap-2"
                     >
                       <input type="hidden" name="loanId" value={loan.id} />
+                      <p className="w-full text-xs text-muted-foreground">
+                        This comes from your Money balance. Add money with M-Pesa first if it is
+                        short.
+                      </p>
                       <Input
                         name="amount"
                         type="number"
@@ -438,7 +442,7 @@ export default async function QardPage({ searchParams }: Props) {
             description={
               canRequestLoan
                 ? 'Ask for an interest-free loan from this circle. The treasurer approves, then you repay.'
-                : 'After you pay into a circle, you can ask for up to half of that amount.'
+                : 'Pay into the circle before you can ask for a loan.'
             }
           />
         )}

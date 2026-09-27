@@ -61,7 +61,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
   if (!membership) notFound();
   const canManage = OFFICER_ROLES.has(membership.role);
 
-  const [{ data: glRaw }, { data: lotsData }, { data: divData }, { data: membersData }, { data: accountsData }] =
+  const [{ data: glRaw }, { data: lotsData }, { data: divData }, { data: membersData }, { data: accountsData }, { data: allocData }] =
     await Promise.all([
       callRpc('circle_gl_pack', { p_jamiya_id: jamiya.id }),
       supabase
@@ -88,6 +88,12 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
         .eq('jamiya_id', jamiya.id)
         .eq('is_active', true)
         .order('name'),
+      supabase
+        .from('circle_dividend_allocations')
+        .select('id, dividend_id, member_id, amount, currency, status')
+        .eq('jamiya_id', jamiya.id)
+        .order('amount', { ascending: false })
+        .limit(200),
     ]);
 
   const gl = glRaw as {
@@ -118,6 +124,21 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
       m.member_code ? ` (${m.member_code})` : ''
     }`;
   };
+
+  const allocations = (allocData ?? []) as Array<{
+    id: string;
+    dividend_id: string;
+    member_id: string;
+    amount: number | string;
+    currency: string;
+    status: string;
+  }>;
+  const allocationsByDividend = new Map<string, typeof allocations>();
+  for (const row of allocations) {
+    const list = allocationsByDividend.get(row.dividend_id) ?? [];
+    list.push(row);
+    allocationsByDividend.set(row.dividend_id, list);
+  }
 
   const today = new Date().toISOString().slice(0, 10);
   const shareCapital = Number(gl?.balance_sheet?.equity_liabilities?.share_capital ?? 0);
@@ -426,6 +447,25 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                     {formatCurrency(Number(d.total_amount), String(d.currency))}
                   </p>
                 </div>
+                {(allocationsByDividend.get(String(d.id)) ?? []).length > 0 ? (
+                  <>
+                    <ul className="space-y-1.5">
+                      {(allocationsByDividend.get(String(d.id)) ?? []).map((row) => (
+                        <li key={row.id} className="flex items-baseline justify-between gap-3 text-sm">
+                          <span className="min-w-0 truncate text-muted-foreground">
+                            {labelFor(row.member_id)}
+                          </span>
+                          <span className="shrink-0 font-medium text-foreground">
+                            {formatCurrency(Number(row.amount), row.currency)} · {row.status}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground">
+                      Each line is one share of the declared total. No fee is taken.
+                    </p>
+                  </>
+                ) : null}
                 {canManage && String(d.status) === 'allocated' ? (
                   bankAccounts.length > 0 ? (
                     <form action={payDividendAction} className="flex flex-wrap items-end gap-2">
