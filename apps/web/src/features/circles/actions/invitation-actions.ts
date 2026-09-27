@@ -113,11 +113,11 @@ export async function createInvitationAction(
   const member = membership as unknown as { role: string; status: string } | null;
   const canInvite =
     member?.status === 'active' &&
-    ['circle_admin', 'chair', 'treasurer'].includes(member.role);
+    ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(member.role);
   if (!canInvite) {
     return {
       success: false,
-      message: 'Only circle admins, chairs, or treasurers can invite members.',
+      message: 'Only a group leader can invite members.',
     };
   }
 

@@ -13,7 +13,7 @@ import { ensureTreasuryAction } from '@/features/circles/actions/treasury-action
 export const metadata: Metadata = { title: 'Circle treasury' };
 export const dynamic = 'force-dynamic';
 
-const OFFICER_ROLES = new Set(['circle_admin', 'chair', 'treasurer']);
+const OFFICER_ROLES = new Set(['circle_admin', 'chair', 'treasurer', 'secretary']);
 
 type Props = {
   params: Promise<{ slug: string }>;

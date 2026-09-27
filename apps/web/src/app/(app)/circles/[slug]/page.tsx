@@ -45,7 +45,8 @@ import { MemberCircleLinks } from '@/features/circles/components/member-circle-l
 import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
 import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
 import { CircleSection } from '@/features/circles/components/circle-section';
-import { isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
+import { isCircleLeader, isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
+import { GroupLeaderDesk } from '@/features/circles/components/group-leader-desk';
 import {
   addFrequencyDays,
   formatCycleDueLabel,
@@ -306,7 +307,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const membership = memberRows.find((row) => row.user_id === user.id) ?? null;
   const canManageMembers =
     membership?.status === 'active' &&
-    ['circle_admin', 'chair', 'treasurer'].includes(membership?.role ?? '');
+    isCircleLeader(membership?.role);
   /** Chair/treasurer share ops: invites, penalties, books, announcements. */
   const canManageOps = canManageMembers;
   const canActivate =
@@ -1275,17 +1276,19 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
       {canManageOps ? (
         <section id="officer-desk" className="scroll-mt-24 space-y-6 border-t border-border/60 pt-8">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-              Officer desk
-            </p>
-            <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight">
-              Run this circle
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Payments, people, and ops — kept off the member view above.
-            </p>
-          </div>
+          <GroupLeaderDesk
+            jamiyaId={jamiya.id}
+            slug={slug}
+            name={jamiya.name}
+            contributionAmount={amount}
+            frequencyDays={Math.max(jamiya.contribution_frequency_days || 30, 1)}
+            maxMembers={jamiya.max_members}
+            memberCount={jamiya.member_count}
+            description={jamiya.description}
+            kind={
+              isShareDividend ? 'share_dividend' : isRotating ? 'rotating' : isSavings ? 'savings' : 'other'
+            }
+          />
 
           {paymentProvider() === 'simulated' ? (
             <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />

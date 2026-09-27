@@ -67,7 +67,7 @@ export default async function CircleElectionsPage({ params }: Props) {
   const myMembership = membership as { id: string; role: string; status: string } | null;
   const canManage =
     myMembership?.status === 'active' &&
-    ['circle_admin', 'chair', 'secretary'].includes(myMembership.role);
+    ['circle_admin', 'chair', 'treasurer', 'secretary'].includes(myMembership.role);
 
   type MemberRow = {
     id: string;
