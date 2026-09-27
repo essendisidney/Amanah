@@ -41,19 +41,19 @@ export function CircleBooksGlance({
       href: `/circles/${slug}/statement` as Route,
     },
     {
-      label: 'Share capital',
+      label: 'Shares',
       value: formatCurrency(n(data.share_capital), currency),
-      hint: 'Buy-ins',
+      hint: 'Share register',
       href: `/circles/${slug}/books?view=grid` as Route,
     },
     {
-      label: 'Books contributions',
+      label: 'Contributions in the books',
       value: formatCurrency(n(data.book_contributions), currency),
-      hint: 'Monthly books',
+      hint: 'Written in the books',
       href: `/circles/${slug}/books?view=grid` as Route,
     },
     {
-      label: 'Schedule paid',
+      label: 'Paid on the schedule',
       value: formatCurrency(n(data.schedule_contributions_paid), currency),
       hint:
         n(data.schedule_contributions_outstanding) > 0

@@ -433,6 +433,32 @@ export default function UiPreviewPage() {
               { label: 'Contribution', value: 'KES 100' },
             ]}
           />
+          <h3 className="pt-2 text-sm font-semibold text-foreground">Member statement · share group</h3>
+          <section className="space-y-3">
+            <div>
+              <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
+                Your 360
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Three separate records. The schedule line is only payments marked paid.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                { label: 'Shares', value: formatCurrency(1_015_000, 'KES'), hint: '10,150 shares on the register' },
+                { label: 'Contributions in the books', value: formatCurrency(2600, 'KES'), hint: 'Written in the books' },
+                { label: 'Paid on the schedule', value: formatCurrency(200, 'KES'), hint: 'Payments marked paid' },
+              ].map((card) => (
+                <div key={card.label} className="amanah-surface px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {card.label}
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold tabular-nums">{card.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{card.hint}</p>
+                </div>
+              ))}
+            </div>
+          </section>
           <div id="pay-due" className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Your next contribution

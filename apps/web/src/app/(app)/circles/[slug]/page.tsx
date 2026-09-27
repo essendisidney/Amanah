@@ -904,7 +904,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           hint: isRotating
             ? 'Cycles · pot slot · penalties · loans'
             : isShareDividend
-              ? 'Share capital · contributions · penalties · loans'
+              ? 'Shares, book contributions, and schedule payments'
               : 'Contributions so far',
         },
       ],

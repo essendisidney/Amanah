@@ -54,8 +54,8 @@ function modeMeta(kind: StatementChallengeKind): {
 } {
   if (kind === 'share_dividend') {
     return {
-      label: 'Table banking statement',
-      tagline: 'Share capital · monthly books · loans',
+      label: 'Share group statement',
+      tagline: 'Shares, book contributions, and schedule payments stay separate.',
     };
   }
   if (kind === 'savings') {
@@ -86,15 +86,16 @@ function buildGlanceLines(
 
   if (isTb) {
     return [
-      `Share capital: ${money(summary.share_capital, currency)}${
+      `Shares: ${money(summary.share_capital, currency)}${
         Number(summary.share_units ?? 0) > 0
-          ? ` (${Number(summary.share_units).toLocaleString()} units)`
+          ? ` (${Number(summary.share_units).toLocaleString()} shares)`
           : ''
       }`,
-      `Monthly books contributions: ${money(summary.book_contributions, currency)}`,
-      `Contributions so far: ${money(summary.contributions_so_far, currency)}`,
+      `Contributions in the books: ${money(summary.book_contributions, currency)}`,
+      `Paid on the schedule: ${money(summary.schedule_contributions_paid, currency)}`,
+      'These stay separate. The schedule line is only payments marked paid.',
       `Penalties: ${money(summary.penalties_total, currency)} · open ${money(summary.penalties_open, currency)}`,
-      `Loan outstanding: ${money(summary.loan_outstanding, currency)}`,
+      `Circle loan outstanding: ${money(summary.loan_outstanding, currency)}`,
       ...(projectsLine ? [projectsLine] : []),
     ];
   }
@@ -136,7 +137,7 @@ function buildSections(
   const isMgr = !isTb && !isSavings;
 
   const share: PdfSection = {
-    title: 'Share capital',
+    title: isTb ? 'Shares' : 'Share capital',
     rows: stmt.share_lots ?? [],
     omitIfEmpty: isMgr || isSavings,
     format: (row) =>
@@ -144,7 +145,7 @@ function buildSections(
   };
 
   const schedule: PdfSection = {
-    title: isMgr ? 'Merry-go-round cycles' : 'Schedule contributions',
+    title: isMgr ? 'Merry-go-round cycles' : isTb ? 'On the schedule' : 'Schedule contributions',
     rows: stmt.contributions ?? [],
     omitIfEmpty: isTb,
     format: (row) =>
@@ -152,7 +153,7 @@ function buildSections(
   };
 
   const monthlyBooks: PdfSection = {
-    title: isTb ? 'Monthly contributions (books)' : 'Monthly books contributions',
+    title: isTb ? 'Contributions in the books' : 'Monthly books contributions',
     rows: bookContrib,
     omitIfEmpty: isMgr,
     format: (row) =>
@@ -269,7 +270,7 @@ export async function buildStatementPdf(opts: {
   ensureSpace(40);
   const footer =
     kind === 'share_dividend'
-      ? 'Shariah-compliant table banking · Jameiyah'
+      ? 'Shares, book contributions, and schedule payments stay separate. · Jameiyah'
       : kind === 'savings'
         ? 'Shariah-compliant savings circle · Jameiyah'
         : 'Shariah-compliant merry-go-round · Jameiyah';

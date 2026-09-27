@@ -269,17 +269,22 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
   const snapshotCards = isShareDividend
     ? [
         {
-          label: 'Share capital',
+          label: 'Shares',
           value: money(summary.share_capital, jamiya.currency),
           hint:
             Number(summary.share_units ?? 0) > 0
-              ? `${Number(summary.share_units).toLocaleString()} share units`
-              : 'Buy-in / shares held',
+              ? `${Number(summary.share_units).toLocaleString()} shares on the register`
+              : 'Share register',
         },
         {
-          label: 'Books contributions',
-          value: money(summary.book_contributions ?? summary.contributions_so_far, jamiya.currency),
-          hint: 'Monthly member books',
+          label: 'Contributions in the books',
+          value: money(summary.book_contributions, jamiya.currency),
+          hint: 'Written in the books',
+        },
+        {
+          label: 'Paid on the schedule',
+          value: money(summary.schedule_contributions_paid, jamiya.currency),
+          hint: 'Payments marked paid',
         },
         {
           label: 'Fines',
@@ -292,12 +297,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                 : 'No fines recorded',
         },
         {
-          label: 'Facility outstanding',
+          label: 'Circle loan',
           value: money(summary.loan_outstanding, jamiya.currency),
           hint:
             Number(summary.loan_principal ?? 0) > 0
               ? `Repaid ${money(summary.loan_repaid, jamiya.currency)} of ${money(summary.loan_principal, jamiya.currency)}`
-              : 'No open facility',
+              : 'No open circle loan',
         },
       ]
     : isRotating
@@ -427,7 +432,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
           Jameiyah ·{' '}
           {isShareDividend
-            ? 'Table banking statement'
+            ? 'Share group statement'
             : isRotating
               ? 'Merry-go-round statement'
               : 'Savings circle statement'}
@@ -476,7 +481,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             {viewingOther ? `${viewedName}'s 360` : 'Your 360'}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Shares, savings, facility, and fines for this member.
+            {isShareDividend
+              ? 'Three separate records. The schedule line is only payments marked paid.'
+              : 'Shares, savings, circle loans, and fines for this member.'}
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -490,9 +497,10 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
             </div>
           ))}
         </div>
-        {(Number(summary.schedule_contributions_outstanding ?? 0) > 0 ||
+        {!isShareDividend &&
+        (Number(summary.schedule_contributions_outstanding ?? 0) > 0 ||
           Number(summary.book_contributions ?? 0) > 0 ||
-          Number(summary.savings_total ?? 0) > 0) && (
+          Number(summary.savings_total ?? 0) > 0) ? (
           <dl className="amanah-surface grid gap-3 px-4 py-4 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -523,13 +531,21 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
               </dd>
             </div>
           </dl>
-        )}
+        ) : null}
       </section>
 
       <StatementSection
-        title="Share capital"
-        description="Member buy-in / share lots held in this circle."
-        empty="No share capital recorded for this member."
+        title={isShareDividend ? 'Shares' : 'Share capital'}
+        description={
+          isShareDividend
+            ? 'Purchases on the share register. Not added into contributions.'
+            : 'Member buy-in / share lots held in this circle.'
+        }
+        empty={
+          isShareDividend
+            ? 'No shares recorded for this member.'
+            : 'No share capital recorded for this member.'
+        }
         emptyHref={
           isOfficer && isShareDividend
             ? (`/circles/${slug}/books?view=grid` as Route)
@@ -552,17 +568,21 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         }))}
         footer={
           shareLots.length > 0
-            ? `Total share capital: ${money(summary.share_capital, jamiya.currency)}`
+            ? isShareDividend
+              ? `Shares ${money(summary.share_capital, jamiya.currency)}`
+              : `Total share capital: ${money(summary.share_capital, jamiya.currency)}`
             : undefined
         }
       />
 
       <StatementSection
-        title="Schedule contributions"
+        title={isShareDividend ? 'On the schedule' : 'Schedule contributions'}
         description={
-          isRotating
-            ? 'Round dues by cycle — paid vs still owing.'
-            : 'Contribution calendar dues for this member.'
+          isShareDividend
+            ? 'Each schedule contribution. The total above is only what has been marked paid.'
+            : isRotating
+              ? 'Round dues by cycle — paid vs still owing.'
+              : 'Contribution calendar dues for this member.'
         }
         empty="No schedule contributions yet."
         emptyHref={`/circles/${slug}#calendar` as Route}
@@ -590,8 +610,12 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
       />
 
       <StatementSection
-        title="Monthly contributions (books)"
-        description="Savings recorded in member books / payment grid (table banking style)."
+        title={isShareDividend ? 'Contributions in the books' : 'Monthly contributions (books)'}
+        description={
+          isShareDividend
+            ? 'Written in the books. Kept apart from shares and from the schedule.'
+            : 'Savings recorded in member books / payment grid (table banking style).'
+        }
         empty="No monthly book contributions recorded."
         emptyHref={
           isOfficer && isShareDividend
@@ -607,7 +631,9 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         }))}
         footer={
           bookContributions.length > 0
-            ? `Total from books: ${money(summary.book_contributions, jamiya.currency)}`
+            ? isShareDividend
+              ? `Contributions in the books ${money(summary.book_contributions, jamiya.currency)}`
+              : `Total from books: ${money(summary.book_contributions, jamiya.currency)}`
             : undefined
         }
       />
