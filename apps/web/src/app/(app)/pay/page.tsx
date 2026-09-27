@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
+import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
 import { getDashboardData } from '@/features/dashboard';
 import { getDictionary } from '@/i18n/get-dictionary';
@@ -15,7 +16,12 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
-export default async function PayPage() {
+type Props = {
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+};
+
+export default async function PayPage({ searchParams }: Props) {
+  const notices = (await searchParams) ?? {};
   const [{ dict }, supabase] = await Promise.all([getDictionary(), createClient()]);
   const {
     data: { user },
@@ -45,6 +51,7 @@ export default async function PayPage() {
   return (
     <AppPage width="medium">
       <PageHeader title={dict.paySheet.title} subtitle={dict.paySheet.subtitle} />
+      <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
       {data.contributions.length > 0 ? (
         <div className="mb-5 space-y-3">
           {data.contributions.map((due) => (
@@ -63,6 +70,7 @@ export default async function PayPage() {
               defaultPhone={payPhone}
               showAnchor={false}
               showCalendar={false}
+              returnTo="/pay"
               labels={dict.contributionCard}
             />
           ))}

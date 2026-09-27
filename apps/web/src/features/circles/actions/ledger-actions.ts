@@ -1,11 +1,14 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
+import { withNoticeQuery } from '@/features/auth/lib/types';
 import {
   mapMoneyError,
   redirectWithCircleNotice,
 } from '../lib/circle-notice';
+import { payReturnPath } from '../lib/pay-return';
 import type { GridSaveResult } from '../lib/action-state';
 
 function revalidateCircle(slug?: string) {
@@ -15,6 +18,19 @@ function revalidateCircle(slug?: string) {
   revalidatePath('/circles');
   revalidatePath('/notifications');
   if (slug) revalidatePath(`/circles/${slug}`);
+}
+
+/** Pay started on /pay stays there. A circle payment still returns to that circle. */
+function payBack(
+  formData: FormData,
+  slug: string,
+  message: string,
+  type: 'success' | 'error' | 'info' = 'error',
+): void {
+  if (payReturnPath(String(formData.get('returnTo') ?? ''))) {
+    redirect(withNoticeQuery('/pay', message, type));
+  }
+  if (slug) redirectWithCircleNotice(slug, message, type);
 }
 
 export async function activateCircleAction(formData: FormData): Promise<void> {
@@ -65,13 +81,13 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   });
 
   if (error) {
-    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message));
+    payBack(formData, slug, mapMoneyError(error.message));
     return;
   }
 
   const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
-    if (slug) redirectWithCircleNotice(slug, mapMoneyError(result?.error));
+    payBack(formData, slug, mapMoneyError(result?.error));
     return;
   }
 
@@ -82,7 +98,7 @@ export async function payContributionAction(formData: FormData): Promise<void> {
   }
 
   revalidateCircle(slug || undefined);
-  if (slug) redirectWithCircleNotice(slug, 'Contribution paid from your wallet.', 'success');
+  payBack(formData, slug, 'Contribution paid from your wallet.', 'success');
 }
 
 /**
@@ -109,7 +125,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    redirectWithCircleNotice(slug, 'Sign in again, then retry.');
+    payBack(formData, slug, 'Sign in again, then retry.');
+    return;
   }
 
   const { data: row, error: loadError } = await supabase
@@ -119,7 +136,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
     .maybeSingle();
 
   if (loadError || !row) {
-    redirectWithCircleNotice(slug, 'That contribution was not found.');
+    payBack(formData, slug, 'That contribution was not found.');
+    return;
   }
 
   const contrib = row as {
@@ -135,21 +153,25 @@ export async function payContributionStkAction(formData: FormData): Promise<void
     ? contrib.members[0]?.user_id
     : contrib.members?.user_id;
   if (memberUserId !== user.id) {
-    redirectWithCircleNotice(slug, 'You can only pay your own contribution.');
+    payBack(formData, slug, 'You can only pay your own contribution.');
+    return;
   }
 
   if (!['pending', 'late', 'partial'].includes(contrib.status)) {
-    redirectWithCircleNotice(slug, 'That contribution is not open for payment.');
+    payBack(formData, slug, 'That contribution is not open for payment.');
+    return;
   }
 
   const remaining = Math.max(Number(contrib.amount) - Number(contrib.amount_paid ?? 0), 0);
   if (remaining <= 0) {
-    redirectWithCircleNotice(slug, 'That contribution is already paid.');
+    payBack(formData, slug, 'That contribution is already paid.');
+    return;
   }
 
   let amount = amountRaw ? Number(amountRaw) : remaining;
   if (!Number.isFinite(amount) || amount <= 0) {
-    redirectWithCircleNotice(slug, 'Enter a valid amount.');
+    payBack(formData, slug, 'Enter a valid amount.');
+    return;
   }
   amount = Math.min(amount, remaining);
 
@@ -173,10 +195,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
     (provider === 'mpesa' || provider === 'intasend' || provider === 'tendepay') &&
     !resolvedPhone
   ) {
-    redirectWithCircleNotice(
-      slug,
-      'Enter a Kenya mobile for M-Pesa, e.g. 07… or +254….',
-    );
+    payBack(formData, slug, 'Enter a Kenya mobile for M-Pesa, e.g. 07… or +254….');
+    return;
   }
 
   try {
@@ -184,14 +204,17 @@ export async function payContributionStkAction(formData: FormData): Promise<void
       '@/lib/production-cutover'
     );
     if (provider === 'simulated' && shouldBlockSimulatedPayments()) {
-      redirectWithCircleNotice(slug, 'Simulated payments disabled in this environment.');
+      payBack(formData, slug, 'Simulated payments disabled in this environment.');
+      return;
     }
     assertProviderConfigured(provider);
   } catch (err) {
-    redirectWithCircleNotice(
+    payBack(
+      formData,
       slug,
       err instanceof Error ? err.message : 'Payment provider misconfigured.',
     );
+    return;
   }
 
   const { data, error } = await callRpc('create_payment_intent', {
@@ -209,7 +232,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
   });
 
   if (error) {
-    redirectWithCircleNotice(slug, mapMoneyError(error.message) || error.message);
+    payBack(formData, slug, mapMoneyError(error.message) || error.message);
+    return;
   }
 
   const created = data as {
@@ -219,10 +243,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
   } | null;
 
   if (!created?.ok || !created.intent_id) {
-    redirectWithCircleNotice(
-      slug,
-      mapMoneyError(created?.error) || 'Could not start payment.',
-    );
+    payBack(formData, slug, mapMoneyError(created?.error) || 'Could not start payment.');
+    return;
   }
 
   const { collectPayment } = await import('@/lib/payments/orchestrator');
@@ -241,7 +263,8 @@ export async function payContributionStkAction(formData: FormData): Promise<void
   });
 
   if (!collected.ok) {
-    redirectWithCircleNotice(slug, collected.error);
+    payBack(formData, slug, collected.error);
+    return;
   }
 
   if (collected.redirectUrl) {
@@ -250,16 +273,19 @@ export async function payContributionStkAction(formData: FormData): Promise<void
 
   revalidateCircle(slug);
   if (collected.status === 'completed') {
-    redirectWithCircleNotice(
+    payBack(
+      formData,
       slug,
       collected.fallback === 'simulated'
         ? 'Contribution paid (simulated).'
         : (collected.customerMessage ?? 'Contribution paid.'),
       'success',
     );
+    return;
   }
 
-  redirectWithCircleNotice(
+  payBack(
+    formData,
     slug,
     collected.customerMessage ??
       'Approve the M-Pesa prompt. This due marks paid automatically when confirmed.',
@@ -285,13 +311,13 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
   });
 
   if (error) {
-    if (slug) redirectWithCircleNotice(slug, mapMoneyError(error.message));
+    payBack(formData, slug, mapMoneyError(error.message));
     return;
   }
 
   const result = data as { ok?: boolean; error?: string; status?: string } | null;
   if (!result?.ok) {
-    if (slug) redirectWithCircleNotice(slug, mapMoneyError(result?.error));
+    payBack(formData, slug, mapMoneyError(result?.error));
     return;
   }
 
@@ -302,7 +328,7 @@ export async function payContributionAheadAction(formData: FormData): Promise<vo
   }
 
   revalidateCircle(slug || undefined);
-  if (slug) redirectWithCircleNotice(slug, 'Contribution paid ahead from your wallet.', 'success');
+  payBack(formData, slug, 'Contribution paid ahead from your wallet.', 'success');
 }
 
 /** Officer records a merry-go-round monthly contribution paid in cash (no wallet debit). */

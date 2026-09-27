@@ -27,6 +27,8 @@ type Props = {
   showAnchor?: boolean;
   /** Circle pages have a calendar anchor. Pay does not. */
   showCalendar?: boolean;
+  /** When this card is on Pay, success and errors stay on Pay. */
+  returnTo?: '/pay';
   labels: Dictionary['contributionCard'];
 };
 
@@ -70,6 +72,7 @@ export function NextContributionCard({
   defaultPhone = '',
   showAnchor = true,
   showCalendar = true,
+  returnTo,
   labels,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
@@ -88,8 +91,9 @@ export function NextContributionCard({
       : remaining;
   const linkedPhone = (defaultPhone ?? '').trim();
   const hasLinkedPhone = /^\+[1-9]\d{7,14}$/.test(linkedPhone);
+  const afterTopUp = returnTo === '/pay' ? '/pay' : `/circles/${slug}#pay-due`;
   const topUpHref =
-    `/wallet?focus=top-up&next=${encodeURIComponent(`/circles/${slug}#pay-due`)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route;
+    `/wallet?focus=top-up&next=${encodeURIComponent(afterTopUp)}&amount=${Math.max(Math.ceil(shortfall), 10)}#top-up` as Route;
   const payLabel = ahead
     ? t(labels.payAmountAhead, { amount: formatCurrency(remaining, currency) })
     : t(labels.payAmount, { amount: formatCurrency(remaining, currency) });
@@ -136,6 +140,7 @@ export function NextContributionCard({
         <form action={ahead ? payContributionAheadAction : payContributionAction}>
           <input type="hidden" name="contributionId" value={contributionId} />
           <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
           <Button type="submit" className="min-h-11 w-full">
             {payLabel}
           </Button>
@@ -148,6 +153,7 @@ export function NextContributionCard({
           <form action={payContributionStkAction} className="space-y-2">
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
             <input type="hidden" name="amount" value={String(remaining)} />
             <input type="hidden" name="phone" value={linkedPhone} />
             <Button type="submit" className="min-h-11 w-full">
@@ -166,6 +172,7 @@ export function NextContributionCard({
           <form action={payContributionStkAction} className="space-y-3">
             <input type="hidden" name="contributionId" value={contributionId} />
             <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
             <input type="hidden" name="amount" value={String(remaining)} />
             <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
             <Button type="submit" className="min-h-11 w-full">
@@ -192,6 +199,7 @@ export function NextContributionCard({
               >
                 <input type="hidden" name="contributionId" value={contributionId} />
                 <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
                 <label className="block flex-1 text-xs text-muted-foreground">
                   {labels.amountOptional}
                   <input
@@ -212,6 +220,7 @@ export function NextContributionCard({
               <form action={payContributionStkAction} className="space-y-2">
                 <input type="hidden" name="contributionId" value={contributionId} />
                 <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
                 <input type="hidden" name="amount" value={String(remaining)} />
                 <StkPhoneField defaultPhone={linkedPhone} label={labels.mpesaPhone} />
                 <Button type="submit" variant="outline" className="min-h-11 w-full">
@@ -229,6 +238,7 @@ export function NextContributionCard({
                 >
                   <input type="hidden" name="contributionId" value={contributionId} />
                   <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
                   <label className="block flex-1 text-xs text-muted-foreground">
                     {labels.partialAmount}
                     <input
@@ -251,6 +261,7 @@ export function NextContributionCard({
                 <form action={payContributionStkAction} className="space-y-2">
                   <input type="hidden" name="contributionId" value={contributionId} />
                   <input type="hidden" name="slug" value={slug} />
+          {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
                   <input type="hidden" name="amount" value={String(remaining)} />
                   <StkPhoneField defaultPhone="" label={labels.mpesaPhone} />
                   <Button type="submit" variant="outline" className="min-h-11 w-full">
