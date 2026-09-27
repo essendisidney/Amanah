@@ -205,6 +205,7 @@ export default async function InvitationPage({ params }: Props) {
           token={token}
           slotContext={slotContext}
           acceptLabel={openLink ? 'Join this chama' : 'Accept invitation'}
+          allowDecline={!openLink}
         />
       ) : (
         <Alert>

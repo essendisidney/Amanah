@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { availablePayoutSlots, describePayoutSlot, formatCurrency } from '@jamiya/shared';
@@ -26,11 +27,14 @@ export function InvitationDecisionButtons({
   disabled,
   slotContext,
   acceptLabel = 'Accept invitation',
+  allowDecline = true,
 }: {
   token: string;
   disabled?: boolean;
   slotContext?: InviteSlotContext | null;
   acceptLabel?: string;
+  /** Personal invites can be declined. A shared chama link cannot. */
+  allowDecline?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -127,26 +131,32 @@ export function InvitationDecisionButtons({
         >
           {pending ? 'Working…' : acceptLabel}
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled || pending}
-          onClick={() => {
-            setError(null);
-            startTransition(async () => {
-              const result = await declineInvitationAction(token);
-              if (!result.success) {
-                setError(result.message ?? 'Decline failed');
-                return;
-              }
-              setMessage(result.message ?? 'Declined');
-              router.push('/dashboard' as Route);
-              router.refresh();
-            });
-          }}
-        >
-          Decline
-        </Button>
+        {allowDecline ? (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={disabled || pending}
+            onClick={() => {
+              setError(null);
+              startTransition(async () => {
+                const result = await declineInvitationAction(token);
+                if (!result.success) {
+                  setError(result.message ?? 'Decline failed');
+                  return;
+                }
+                setMessage(result.message ?? 'Declined');
+                router.push('/dashboard' as Route);
+                router.refresh();
+              });
+            }}
+          >
+            Decline
+          </Button>
+        ) : (
+          <Button type="button" variant="outline" asChild>
+            <Link href={'/dashboard' as Route}>Not now</Link>
+          </Button>
+        )}
       </div>
     </div>
   );

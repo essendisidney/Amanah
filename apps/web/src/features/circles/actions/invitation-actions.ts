@@ -381,9 +381,8 @@ export async function acceptInvitationAction(
       if (result.slug) revalidatePath(`/circles/${result.slug}`);
       return {
         success: true,
-        message:
-          'Joined — top up your wallet, then pay your first due on the circle page.',
-        inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1#pay-due` : '/circles',
+        message: 'You joined the chama. Top up your wallet if a fee is still due.',
+        inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1` : '/circles',
       };
     }
   }
@@ -395,8 +394,8 @@ export async function acceptInvitationAction(
 
   return {
     success: true,
-    message: 'Welcome — pay your first due to get started.',
-    inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1#pay-due` : '/circles',
+    message: 'You joined the chama.',
+    inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1` : '/circles',
   };
 }
 
