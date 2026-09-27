@@ -9,6 +9,7 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { OpenDetailsOnHash } from '@/features/wallet/components/open-details-on-hash';
+import { MoneyMoreLinks } from '@/features/wallet/components/money-more-links';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { IntasendTrustBadge } from '@/features/wallet/components/intasend-trust-badge';
@@ -19,13 +20,7 @@ import { reconcileUserPaymentIntents } from '@/lib/payments/reconcile-user-inten
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  ChartNoAxesCombined,
-  HandHeart,
-  Landmark,
-  Calculator,
   Plus,
-  Scale,
-  TrendingUp,
 } from 'lucide-react';
 import { AppPage, PageHeader } from '@/components/app-page';
 
@@ -522,10 +517,10 @@ export default async function WalletPage({ searchParams }: Props) {
       {journalEntries.length > 0 ? (
         <details className="space-y-2.5">
           <summary className="cursor-pointer text-sm font-semibold text-foreground">
-            Ledger posts
+            Records
           </summary>
           <p className="text-xs text-muted-foreground">
-            Append-only journal for your money movements (projection alongside wallet history).
+            A permanent note of money in and out.
           </p>
           <ul className="amanah-surface divide-y divide-border/70">
             {journalEntries.map((row) => (
@@ -552,58 +547,8 @@ export default async function WalletPage({ searchParams }: Props) {
         <summary className="cursor-pointer text-sm font-semibold text-foreground">
           {labels.moreTitle}
         </summary>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {[
-            {
-              href: '/finance/goals',
-              title: labels.moreGoals,
-              icon: TrendingUp,
-            },
-            {
-              href: '/finance/qard',
-              title: labels.moreQard,
-              icon: Landmark,
-            },
-            {
-              href: '/finance/tawarruq',
-              title: dict.finance.tawarruqTitle,
-              icon: Scale,
-            },
-            {
-              href: '/finance/insights',
-              title: labels.quickInsights,
-              icon: ChartNoAxesCombined,
-            },
-            {
-              href: '/finance/welfare',
-              title: dict.finance.welfareTitle,
-              icon: HandHeart,
-            },
-            {
-              href: '/sadaka',
-              title: dict.common.sadaka,
-              icon: HandHeart,
-            },
-            {
-              href: '/zakat',
-              title: labels.moreZakat,
-              icon: Calculator,
-            },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href as Route}
-                className="amanah-surface flex items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              >
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span className="text-sm font-semibold text-foreground">{item.title}</span>
-              </Link>
-            );
-          })}
+        <div className="mt-3">
+          <MoneyMoreLinks labels={labels} />
         </div>
       </details>
 

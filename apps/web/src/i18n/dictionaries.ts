@@ -303,6 +303,12 @@ export type Dictionary = {
     moreGoalsDesc: string;
     moreQard: string;
     moreQardDesc: string;
+    moreTawarruq: string;
+    moreTawarruqDesc: string;
+    moreWelfare: string;
+    moreWelfareDesc: string;
+    moreInsightsDesc: string;
+    moreSadaka: string;
     moreSadakaDesc: string;
     moreZakat: string;
     moreZakatDesc: string;
@@ -792,7 +798,7 @@ export const en: Dictionary = {
     createACircle: 'Create a circle',
     yourCircle: 'Your circle',
     joinWithInvite: 'Join with invite',
-    requestTawarruq: 'Request Tawarruq',
+    requestTawarruq: 'Request financing',
     viewAllCircles: 'All circles',
     position: 'Position #{n}',
     payoutsTitle: 'Payout schedule',
@@ -937,9 +943,15 @@ export const en: Dictionary = {
     moreDesc: 'Goals, loans, giving.',
     moreGoals: 'Goals',
     moreGoalsDesc: 'Personal saves',
-    moreQard: 'Qard Hassan',
-    moreQardDesc: 'Interest-free loans',
-    moreSadakaDesc: 'Give',
+    moreQard: 'Circle loan',
+    moreQardDesc: 'From money you already paid in',
+    moreTawarruq: 'Financing',
+    moreTawarruqDesc: 'You repay Jameiyah',
+    moreWelfare: 'Welfare',
+    moreWelfareDesc: 'Help inside a group',
+    moreInsightsDesc: 'How your money moved',
+    moreSadaka: 'Giving',
+    moreSadakaDesc: 'Send to someone',
     moreZakat: 'Zakat',
     moreZakatDesc: 'Estimate',
     phoneBannerTitle: 'Add your phone',
@@ -1441,7 +1453,7 @@ export const sw: Dictionary = {
     createACircle: 'Unda mduara',
     yourCircle: 'Mduara wako',
     joinWithInvite: 'Jiunge kwa mwaliko',
-    requestTawarruq: 'Omba Tawarruq',
+    requestTawarruq: 'Omba ufadhili',
     viewAllCircles: 'Miduara yote',
     position: 'Nafasi #{n}',
     payoutsTitle: 'Ratiba ya malipo',
@@ -1587,9 +1599,15 @@ export const sw: Dictionary = {
     moreDesc: 'Malengo, mikopo, kuchangia.',
     moreGoals: 'Malengo',
     moreGoalsDesc: 'Akiba binafsi',
-    moreQard: 'Qard Hassan',
-    moreQardDesc: 'Mikopo bila riba',
-    moreSadakaDesc: 'Changia',
+    moreQard: 'Mkopo wa mduara',
+    moreQardDesc: 'Kutoka pesa ulizolipa',
+    moreTawarruq: 'Ufadhili',
+    moreTawarruqDesc: 'Unalipa Jameiyah',
+    moreWelfare: 'Ustawi',
+    moreWelfareDesc: 'Msaada ndani ya mduara',
+    moreInsightsDesc: 'Pesa yako iliendaje',
+    moreSadaka: 'Kuchangia',
+    moreSadakaDesc: 'Tuma kwa mtu',
     moreZakat: 'Zakat',
     moreZakatDesc: 'Kadiria',
     phoneBannerTitle: 'Ongeza simu',

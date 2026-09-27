@@ -138,7 +138,7 @@ export function CreateCircleForm({
       setValue('lateSlotRebatePct', 0);
       setValue(
         'description',
-        'Women’s rotating chama — pick your payout month, contribute monthly, books stay transparent.',
+        'Women’s rotating chama — pick your payout round, contribute every set number of days, books stay transparent.',
       );
     } else if (key === 'school') {
       setValue('name', 'School Fees Chama');
