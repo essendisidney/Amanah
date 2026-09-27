@@ -34,7 +34,7 @@ export function CirclesListCard({
   currency,
   due,
   nextContributionLabel = 'Next contribution',
-  eachMonthLabel = 'Each month',
+  eachMonthLabel = 'Every 30 days',
   clearLabel = 'Clear for now',
 }: Props) {
   const overdue = due?.status === 'late';

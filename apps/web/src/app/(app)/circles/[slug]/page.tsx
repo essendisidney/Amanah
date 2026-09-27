@@ -1056,11 +1056,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           isRotating
             ? [
                 {
-                  label: 'Each month',
+                  label: t(circleLabels.everyDays, {
+                    days: Math.max(jamiya.contribution_frequency_days || 30, 1),
+                  }),
                   value: formatCurrency(amount, jamiya.currency),
                 },
                 {
-                  label: 'This month’s pot',
+                  label: dict.dashboard.nextPayout,
                   value: nextPayout?.memberLabel ?? '—',
                 },
               ]

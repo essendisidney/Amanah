@@ -400,8 +400,8 @@ export default function UiPreviewPage() {
             memberSummary="8/10 members"
             personalDue={{ remaining: 2000, dueDate: '2026-09-30', status: 'pending' }}
             stats={[
-              { label: 'Each month', value: 'KES 2,000' },
-              { label: 'This month’s pot', value: 'Asha' },
+              { label: 'Every 30 days', value: 'KES 2,000' },
+              { label: 'Next payout', value: 'Asha' },
             ]}
           />
           <div id="pay-due" className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
