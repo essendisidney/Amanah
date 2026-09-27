@@ -48,6 +48,13 @@ export function mapMoneyError(code: string | undefined | null): string {
     AGREEMENT_REQUIRED: 'Borrower must accept the facility agreement first.',
     GUARANTEES_PENDING: 'Wait until nominated guarantors accept or decline.',
     GUARANTEE_REQUIRED: 'At least one accepted guarantor is required for this request.',
+    ABOVE_CAP: 'That amount is above what you qualify for in this circle.',
+    ABOVE_ROOM: 'That amount is above what your records qualify you for.',
+    ABOVE_COMPANY_LIMIT: 'Jameiyah cannot take on more financing right now.',
+    OVERDUE: 'Clear the overdue loan before asking for more.',
+    PHONE_REQUIRED: 'Add a Kenya mobile on your profile first.',
+    KYC_REQUIRED: 'This amount needs an approved identity check.',
+    GUARANTOR_REQUIRED: 'This amount needs one guarantor who shares a circle with you.',
   };
   if (!code) return 'Something went wrong. Please try again.';
   const mapped = messages[code];

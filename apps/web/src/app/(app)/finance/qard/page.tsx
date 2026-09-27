@@ -105,12 +105,32 @@ export default async function QardPage({ searchParams }: Props) {
       const { data } = await supabase.rpc('qard_cap_for_jamiya', {
         p_jamiya_id: m.jamiya_id,
       });
-      const result = data as { ok?: boolean; cap?: number; paid_total?: number } | null;
+      const result = data as {
+        ok?: boolean;
+        cap?: number;
+        paid_total?: number;
+        is_share?: boolean;
+        schedule_paid?: number;
+        book_contributions?: number;
+        shares?: number;
+        qard_owed?: number;
+        circle_room?: number;
+        personal_room?: number;
+        overdue?: boolean;
+      } | null;
       return {
         jamiyaId: m.jamiya_id,
         name: m.jamiya?.name ?? 'Circle',
         cap: result?.ok ? Number(result.cap ?? 0) : null,
         paid: result?.ok ? Number(result.paid_total ?? 0) : null,
+        isShare: Boolean(result?.is_share),
+        schedulePaid: Number(result?.schedule_paid ?? 0),
+        bookContributions: Number(result?.book_contributions ?? 0),
+        shares: Number(result?.shares ?? 0),
+        owed: Number(result?.qard_owed ?? 0),
+        circleRoom: Number(result?.circle_room ?? 0),
+        personalRoom: Number(result?.personal_room ?? 0),
+        overdue: Boolean(result?.overdue),
       };
     }),
   );
@@ -140,7 +160,8 @@ export default async function QardPage({ searchParams }: Props) {
           Member loan
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Interest-free — up to half of what you’ve paid in.
+          Interest-free. The amount you can ask for depends on what you have already paid in, minus
+          what you still owe.
         </p>
       </div>
 
@@ -160,11 +181,22 @@ export default async function QardPage({ searchParams }: Props) {
               <p className="text-sm font-medium">{cap.name}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {cap.cap != null
-                  ? cap.cap >= 100
-                    ? `You can borrow up to ${formatCurrency(cap.cap, 'KES')} (half of ${formatCurrency(cap.paid ?? 0, 'KES')} paid).`
-                    : `Paid ${formatCurrency(cap.paid ?? 0, 'KES')}. Pay into the circle before you can ask for a loan.`
+                  ? cap.overdue
+                    ? 'Clear the overdue loan before asking for more.'
+                    : cap.cap >= 100
+                      ? `You can borrow up to ${formatCurrency(cap.cap, 'KES')}.`
+                      : 'Pay into the circle before you can ask for a loan.'
                   : 'Cap unavailable'}
               </p>
+              {cap.cap != null ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {cap.isShare
+                    ? `Schedule paid ${formatCurrency(cap.schedulePaid, 'KES')} · book contributions ${formatCurrency(cap.bookContributions, 'KES')} · shares ${formatCurrency(cap.shares, 'KES')}. `
+                    : `Schedule paid ${formatCurrency(cap.schedulePaid, 'KES')}. `}
+                  Still owing {formatCurrency(cap.owed, 'KES')}. The circle can still lend{' '}
+                  {formatCurrency(cap.circleRoom, 'KES')}.
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>
@@ -219,8 +251,8 @@ export default async function QardPage({ searchParams }: Props) {
             Ask for a loan
           </h2>
           <p className="text-sm text-muted-foreground">
-            A loan can be up to half of what you have already paid into the circle. There is
-            nothing to borrow yet.
+            Pay into the circle before you can ask for a loan. What you still owe is already
+            counted.
           </p>
         </section>
       ) : null}

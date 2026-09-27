@@ -50,6 +50,17 @@ export async function requestQardAction(formData: FormData): Promise<FinanceActi
     p_guarantor_user_ids: guarantorUserIds.length ? guarantorUserIds : null,
   });
   if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string; cap?: number } | null;
+  if (result && result.ok === false && result.error === 'ABOVE_CAP') {
+    const cap = Number(result.cap ?? 0);
+    return {
+      success: false,
+      message: `You qualify for up to KES ${cap.toLocaleString('en-KE')} in this circle.`,
+    };
+  }
+  if (result && result.ok === false && result.error === 'OVERDUE') {
+    return { success: false, message: 'Clear the overdue loan before asking for more.' };
+  }
   const state = rpcState(data, 'Could not submit Qard request.');
   if (state.success) {
     const nominated = Number(
@@ -85,6 +96,12 @@ const TAWARRUQ_ERRORS: Record<string, string> = {
   NOT_A_MEMBER: 'Choose a circle you belong to, or leave the circle blank.',
   INVALID: 'Check the amount, profit, months, and purpose.',
   UNAUTHENTICATED: 'Sign in to submit a request.',
+  PHONE_REQUIRED: 'Add a Kenya mobile on your profile first.',
+  OVERDUE: 'Clear the overdue loan before asking for more.',
+  ABOVE_ROOM: 'That amount is above what your records qualify you for.',
+  ABOVE_COMPANY_LIMIT: 'Jameiyah cannot take on more financing right now.',
+  KYC_REQUIRED: 'This amount needs an approved identity check.',
+  GUARANTOR_REQUIRED: 'This amount needs one guarantor who shares a circle with you.',
 };
 
 export async function submitTawarruqAction(formData: FormData): Promise<FinanceActionState> {
@@ -93,6 +110,7 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
   const profitRateBps = Number(formData.get('profitRateBps'));
   const tenorMonths = Number(formData.get('tenorMonths'));
   const wakalah = String(formData.get('wakalah') ?? '') === '1';
+  const guarantorUserId = String(formData.get('guarantorUserId') ?? '').trim();
   if (!Number.isFinite(amount) || purpose.length < 5 || !wakalah) {
     return {
       success: false,
@@ -108,16 +126,47 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
     p_profit_rate_bps: profitRateBps,
     p_tenor_months: tenorMonths,
     p_wakalah: wakalah,
+    p_guarantor_user_id: guarantorUserId || null,
   });
   if (error) return { success: false, message: error.message };
+  const result = data as { ok?: boolean; error?: string; room?: number } | null;
+  if (result && result.ok === false && result.error === 'ABOVE_ROOM') {
+    const room = Number(result.room ?? 0);
+    return {
+      success: false,
+      message: `You qualify for up to KES ${room.toLocaleString('en-KE')} from Jameiyah.`,
+    };
+  }
   const state = rpcState(data, 'Could not submit application.');
   if (!state.success && TAWARRUQ_ERRORS[state.message]) {
     state.message = TAWARRUQ_ERRORS[state.message] ?? state.message;
   }
   if (state.success) {
-    state.message = 'Request submitted. Jameiyah’s broker still has to buy and sell the commodity.';
+    state.message = guarantorUserId
+      ? 'Request submitted. Your guarantor must accept before Jameiyah can send it on. Cash is not sent on this screen.'
+      : 'Request submitted. Jameiyah’s broker still has to buy and sell the commodity.';
     revalidatePath('/finance/tawarruq');
     revalidatePath('/admin/tawarruq');
+  }
+  return state;
+}
+
+export async function respondTawarruqGuaranteeAction(
+  _prev: FinanceActionState,
+  formData: FormData,
+): Promise<FinanceActionState> {
+  const guaranteeId = String(formData.get('guaranteeId') ?? '');
+  const accept = String(formData.get('accept') ?? '') === '1';
+  if (!guaranteeId) return { success: false, message: 'Missing guarantee request.' };
+  const { data, error } = await callRpc('respond_tawarruq_guarantee', {
+    p_guarantee_id: guaranteeId,
+    p_accept: accept,
+  });
+  if (error) return { success: false, message: error.message };
+  const state = rpcState(data, 'Could not respond to the guarantee.');
+  if (state.success) {
+    state.message = accept ? 'You accepted the guarantee.' : 'You declined the guarantee.';
+    revalidatePath('/finance/tawarruq');
   }
   return state;
 }
@@ -450,9 +499,41 @@ export async function submitTawarruqFormAction(formData: FormData): Promise<void
 export async function submitTawarruqToPartnerAction(formData: FormData): Promise<void> {
   const applicationId = String(formData.get('applicationId') ?? '');
   if (!applicationId) return;
-  await callRpc('submit_tawarruq_to_partner', { p_application_id: applicationId });
+  const { data, error } = await callRpc('submit_tawarruq_to_partner', {
+    p_application_id: applicationId,
+  });
   revalidatePath('/admin/tawarruq');
   revalidatePath('/finance/tawarruq');
+  const { redirect } = await import('next/navigation');
+  const { withNoticeQuery } = await import('@/features/auth/lib/types');
+  if (error) {
+    redirect(withNoticeQuery('/admin/tawarruq', error.message, 'error'));
+  }
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    pending_second_admin?: boolean;
+  } | null;
+  if (result?.pending_second_admin) {
+    redirect(
+      withNoticeQuery(
+        '/admin/tawarruq',
+        'First approval recorded. A different Jameiyah admin must approve before this goes to the partner.',
+        'info',
+      ),
+    );
+  }
+  if (!result?.ok) {
+    const code = result?.error ?? 'FAILED';
+    const message =
+      code === 'GUARANTEE_REQUIRED'
+        ? 'The guarantor must accept before this can go to the partner.'
+        : code === 'SECOND_APPROVER_MUST_DIFFER'
+          ? 'A different Jameiyah admin must give the second approval.'
+          : `Could not send this to the partner (${code}).`;
+    redirect(withNoticeQuery('/admin/tawarruq', message, 'error'));
+  }
+  redirect(withNoticeQuery('/admin/tawarruq', 'Queued for the commodity partner.', 'success'));
 }
 
 export async function updateTawarruqPartnerStatusAction(formData: FormData): Promise<void> {

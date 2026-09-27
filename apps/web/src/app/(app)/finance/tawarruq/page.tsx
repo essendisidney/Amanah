@@ -5,7 +5,10 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
-import { TawarruqRequestForm } from '@/features/finance/components/tawarruq-request-form';
+import {
+  TawarruqGuaranteeButtons,
+  TawarruqRequestForm,
+} from '@/features/finance/components/tawarruq-request-form';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const dynamic = 'force-dynamic';
@@ -39,15 +42,62 @@ export default async function TawarruqPage() {
   const { dict } = await getDictionary();
   const labels = dict.finance;
 
-  const { data } = await supabase
-    .from('tawarruq_applications')
-    .select(
-      'id, amount, currency, purpose, status, partner_status, created_at, deferred_amount, profit_amount, tenor_months',
-    )
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const [{ data }, { data: qualRaw }, { data: memberships }, { data: guaranteeRows }] =
+    await Promise.all([
+      supabase
+        .from('tawarruq_applications')
+        .select(
+          'id, amount, currency, purpose, status, partner_status, created_at, deferred_amount, profit_amount, tenor_months',
+        )
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false }),
+      supabase.rpc('my_facility_qualification'),
+      supabase.from('members').select('jamiya_id').eq('user_id', user.id).eq('status', 'active'),
+      supabase
+        .from('tawarruq_guarantees')
+        .select('id, status, application:tawarruq_applications(amount, currency, purpose, status)')
+        .eq('guarantor_user_id', user.id)
+        .eq('status', 'pending'),
+    ]);
 
   const applications = (data ?? []) as unknown as Application[];
+  const qual = qualRaw as {
+    ok?: boolean;
+    tawarruq_room?: number;
+    tawarruq_owed?: number;
+    phone_ok?: boolean;
+    kyc_status?: string;
+    company_left?: number;
+    overdue?: boolean;
+  } | null;
+  const circleIds = ((memberships ?? []) as Array<{ jamiya_id: string }>).map((row) => row.jamiya_id);
+  const { data: peers } = circleIds.length
+    ? await supabase
+        .from('members')
+        .select('user_id')
+        .in('jamiya_id', circleIds)
+        .eq('status', 'active')
+        .neq('user_id', user.id)
+    : { data: [] };
+  const peerIds = [
+    ...new Set(((peers ?? []) as Array<{ user_id: string }>).map((row) => row.user_id)),
+  ];
+  const { data: peerProfiles } = peerIds.length
+    ? await supabase.from('profiles').select('id, full_name').in('id', peerIds)
+    : { data: [] };
+  const guarantors = (
+    (peerProfiles ?? []) as Array<{ id: string; full_name: string | null }>
+  ).map((profile) => ({
+    id: profile.id,
+    name: profile.full_name?.trim() || 'Circle member',
+  }));
+  const pendingGuarantees = (guaranteeRows ?? []) as unknown as Array<{
+    id: string;
+    application:
+      | { amount: number | string; currency: string; purpose: string; status: string }
+      | Array<{ amount: number | string; currency: string; purpose: string; status: string }>
+      | null;
+  }>;
 
   return (
     <div className="space-y-10">
@@ -67,7 +117,39 @@ export default async function TawarruqPage() {
         </p>
       </div>
 
-      <TawarruqRequestForm />
+      {pendingGuarantees.length > 0 ? (
+        <section className="space-y-3">
+          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+            Guarantee requests
+          </h2>
+          <ul className="space-y-3">
+            {pendingGuarantees.map((row) => {
+              const application = Array.isArray(row.application) ? row.application[0] : row.application;
+              if (!application || application.status !== 'requested') return null;
+              return (
+                <li key={row.id} className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+                  <p className="text-sm text-foreground">
+                    {application.purpose} · {formatCurrency(Number(application.amount), application.currency)}
+                  </p>
+                  <TawarruqGuaranteeButtons guaranteeId={row.id} />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
+      <TawarruqRequestForm
+        qualification={{
+          room: Number(qual?.tawarruq_room ?? 0),
+          owed: Number(qual?.tawarruq_owed ?? 0),
+          phoneOk: Boolean(qual?.phone_ok),
+          kycApproved: qual?.kyc_status === 'approved',
+          companyLeft: Number(qual?.company_left ?? 0),
+          overdue: Boolean(qual?.overdue),
+        }}
+        guarantors={guarantors}
+      />
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">

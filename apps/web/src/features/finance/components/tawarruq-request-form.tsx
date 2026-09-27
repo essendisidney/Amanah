@@ -1,10 +1,14 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useActionState, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
-import { submitTawarruqAction } from '@/features/finance/actions';
+import {
+  respondTawarruqGuaranteeAction,
+  submitTawarruqAction,
+  type FinanceActionState,
+} from '@/features/finance/actions';
 import {
   TAWARRUQ_DEFAULT_PROFIT_BPS,
   TAWARRUQ_DEFAULT_TENOR,
@@ -13,7 +17,46 @@ import {
   quoteTawarruq,
 } from '@/features/finance/lib/tawarruq-quote';
 
-export function TawarruqRequestForm() {
+export type TawarruqQualification = {
+  room: number;
+  owed: number;
+  phoneOk: boolean;
+  kycApproved: boolean;
+  companyLeft: number;
+  overdue: boolean;
+};
+
+export type TawarruqGuarantor = { id: string; name: string };
+
+const guaranteeInitial: FinanceActionState = { success: false, message: '' };
+
+export function TawarruqGuaranteeButtons({ guaranteeId }: { guaranteeId: string }) {
+  const [state, action, pending] = useActionState(respondTawarruqGuaranteeAction, guaranteeInitial);
+  return (
+    <form action={action} className="flex flex-wrap items-center gap-2">
+      <input type="hidden" name="guaranteeId" value={guaranteeId} />
+      <Button type="submit" name="accept" value="1" className="min-h-11" disabled={pending}>
+        Accept guarantee
+      </Button>
+      <Button type="submit" name="accept" value="0" variant="outline" className="min-h-11" disabled={pending}>
+        Decline
+      </Button>
+      {state.message ? (
+        <p className={state.success ? 'text-sm text-foreground' : 'text-sm text-destructive'}>
+          {state.message}
+        </p>
+      ) : null}
+    </form>
+  );
+}
+
+export function TawarruqRequestForm({
+  qualification,
+  guarantors,
+}: {
+  qualification: TawarruqQualification;
+  guarantors: TawarruqGuarantor[];
+}) {
   const router = useRouter();
   const [cash, setCash] = useState('');
   const [profitBps, setProfitBps] = useState(String(TAWARRUQ_DEFAULT_PROFIT_BPS));
@@ -23,6 +66,9 @@ export function TawarruqRequestForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
 
+  const amountValue = Number(cash);
+  const needsGuarantor = Number.isFinite(amountValue) && amountValue > 20000;
+  const aboveRoom = Number.isFinite(amountValue) && amountValue > qualification.room;
   const quote = useMemo(
     () =>
       quoteTawarruq({
@@ -57,6 +103,21 @@ export function TawarruqRequestForm() {
         Jameiyah. A broker then sells that commodity so the cash reaches you. Nothing is bought or
         paid on this screen. Your group is not told.
       </p>
+      <div className="rounded-lg border border-border bg-muted/40 px-3.5 py-3 text-sm">
+        <p className="font-medium text-foreground">
+          You qualify for up to {formatCurrency(qualification.room, 'KES')}
+        </p>
+        <p className="mt-1 text-muted-foreground">
+          Open financing already counted: {formatCurrency(qualification.owed, 'KES')}. Jameiyah can
+          still offer {formatCurrency(qualification.companyLeft, 'KES')} in total.
+        </p>
+        {qualification.overdue ? (
+          <p className="mt-1 text-destructive">Clear the overdue loan before asking for more.</p>
+        ) : null}
+        {!qualification.phoneOk ? (
+          <p className="mt-1 text-destructive">Add a Kenya mobile on your profile first.</p>
+        ) : null}
+      </div>
 
       <div className="space-y-2">
         <Label htmlFor="amount">Cash you want (KES)</Label>
@@ -150,6 +211,43 @@ export function TawarruqRequestForm() {
         </p>
       )}
 
+      {needsGuarantor ? (
+        <div className="space-y-2">
+          <Label htmlFor="guarantorUserId">Guarantor</Label>
+          <select
+            id="guarantorUserId"
+            name="guarantorUserId"
+            required
+            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            defaultValue=""
+          >
+            <option value="" disabled>
+              Choose a member you share a circle with
+            </option>
+            {guarantors.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Above KES 20,000 one guarantor must accept. Above KES 100,000 two Jameiyah admins must
+            also approve. Above KES 5,000 an approved identity check is required.
+          </p>
+          {guarantors.length === 0 ? (
+            <p className="text-xs text-destructive">
+              No other active member shares a circle with you yet.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {aboveRoom ? (
+        <p className="text-sm text-destructive">
+          That amount is above the {formatCurrency(qualification.room, 'KES')} your records support.
+        </p>
+      ) : null}
+
       <label className="flex min-h-11 items-start gap-3 text-sm">
         <input
           type="checkbox"
@@ -170,7 +268,11 @@ export function TawarruqRequestForm() {
         <p className={ok ? 'text-sm text-foreground' : 'text-sm text-destructive'}>{message}</p>
       ) : null}
 
-      <Button type="submit" className="min-h-11" disabled={pending || !quote || !wakalah}>
+      <Button
+        type="submit"
+        className="min-h-11"
+        disabled={pending || !quote || !wakalah || aboveRoom || qualification.overdue || !qualification.phoneOk}
+      >
         {pending ? 'Submitting…' : 'Submit request'}
       </Button>
     </form>

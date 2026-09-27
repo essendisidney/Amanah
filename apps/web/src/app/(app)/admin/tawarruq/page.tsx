@@ -30,18 +30,32 @@ type AppRow = {
   tenor_months: number | null;
 };
 
-export default async function AdminTawarruqPage() {
+export default async function AdminTawarruqPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ notice?: string; noticeType?: string }>;
+}) {
   await requireAdminAccess('compliance');
+  const notices = (await searchParams) ?? {};
   const supabase = await createClient();
-  const { data } = await supabase
+  const [{ data }, { data: exposureRaw }] = await Promise.all([
+    supabase
     .from('tawarruq_applications')
     .select(
       'id, user_id, amount, currency, purpose, status, partner_status, partner_reference, metadata, created_at, deferred_amount, platform_fee_amount, circle_profit_amount, tenor_months',
     )
     .order('created_at', { ascending: false })
-    .limit(100);
+    .limit(100),
+    supabase.rpc('tawarruq_exposure'),
+  ]);
 
   const rows = (data ?? []) as unknown as AppRow[];
+  const exposure = exposureRaw as {
+    ok?: boolean;
+    company_owed?: number;
+    company_ceiling?: number;
+    company_left?: number;
+  } | null;
 
   return (
     <div className="space-y-4">
@@ -49,6 +63,24 @@ export default async function AdminTawarruqPage() {
         title="Tawarruq"
         subtitle="Jameiyah offers the facility. The member repays Jameiyah. Cash moves only after a partner confirms the commodity sale."
       />
+      {notices.notice ? (
+        <p
+          className={
+            notices.noticeType === 'error'
+              ? 'text-sm text-destructive'
+              : 'text-sm text-foreground'
+          }
+        >
+          {notices.notice}
+        </p>
+      ) : null}
+      {exposure?.ok ? (
+        <p className="text-sm text-muted-foreground">
+          Open financing {formatCurrency(Number(exposure.company_owed ?? 0), 'KES')} of a{' '}
+          {formatCurrency(Number(exposure.company_ceiling ?? 0), 'KES')} ceiling. Still available{' '}
+          {formatCurrency(Number(exposure.company_left ?? 0), 'KES')}.
+        </p>
+      ) : null}
       {rows.length === 0 ? (
         <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
           No applications yet.
