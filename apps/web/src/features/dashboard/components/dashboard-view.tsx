@@ -64,12 +64,10 @@ export function DashboardView({
   const topUpForDueHref = nextDue
     ? (walletTopUpHref({
         amount: Math.ceil(dueRemaining),
-        next: `/circles/${nextDue.jamiyaSlug}#pay`,
+        next: '/pay',
       }) as Route)
     : (walletTopUpHref() as Route);
-  const payHref = nextDue
-    ? (`/circles/${nextDue.jamiyaSlug}#pay-due` as Route)
-    : ('/pay' as Route);
+  const payHref = '/pay' as Route;
   const circle = data.jamiyas[0] ?? null;
   const hasMultipleCircles = data.jamiyas.length > 1;
   const recent = data.activity.slice(0, 5);

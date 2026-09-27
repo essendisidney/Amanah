@@ -142,6 +142,7 @@ export function InsightsView({
                 circleName={item.jamiyaName}
                 defaultPhone={payDefaultPhone}
                 showAnchor={index === 0}
+                returnTo="/pay"
                 labels={contributionLabels}
               />
             ))}
