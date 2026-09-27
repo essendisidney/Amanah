@@ -26,6 +26,7 @@ import { AdminNav } from '@/features/admin/components/admin-nav';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
 import { GroupLeaderDesk } from '@/features/circles/components/group-leader-desk';
+import { TawarruqRequestForm } from '@/features/finance/components/tawarruq-request-form';
 import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
 import { CirclesListCard } from '@/features/circles/components/circles-list-card';
 import { cn } from '@/lib/utils';
@@ -441,6 +442,8 @@ export default function UiPreviewPage() {
             memberCount={4}
             kind="share_dividend"
           />
+          <h2 className="pt-6 text-sm font-semibold text-foreground">Tawarruq · Jameiyah finance</h2>
+          <TawarruqRequestForm />
           <CircleActionHub
             groups={[
               {

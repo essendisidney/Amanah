@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.rpc('submit_jameiyah_tawarruq', {
     p_amount: body.amount,
     p_purpose: body.purpose.trim(),
-    p_jamiya_id: body.jamiyaId ?? null,
+    p_jamiya_id: null,
     p_profit_rate_bps: body.profitRateBps ?? 1000,
     p_tenor_months: body.tenorMonths ?? 12,
     p_wakalah: true,

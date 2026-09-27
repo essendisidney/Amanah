@@ -3,7 +3,7 @@ import { describe, it } from 'node:test';
 import { quoteTawarruq } from './tawarruq-quote.ts';
 
 describe('quoteTawarruq', () => {
-  it('gives the murabaha profit to Jameiyah', () => {
+  it('adds the percent once for the whole facility, then splits equal months', () => {
     const quote = quoteTawarruq({ cashAmount: 200_000, profitRateBps: 1000, tenorMonths: 12 });
     assert.ok(quote);
     assert.equal(quote.cashAmount, 200_000);
@@ -15,6 +15,10 @@ describe('quoteTawarruq', () => {
       Math.round((quote.installmentAmount * 11 + quote.lastInstallmentAmount) * 100) / 100,
       220_000,
     );
+    const short = quoteTawarruq({ cashAmount: 100_000, profitRateBps: 1000, tenorMonths: 3 });
+    const long = quoteTawarruq({ cashAmount: 100_000, profitRateBps: 1000, tenorMonths: 24 });
+    assert.equal(short?.profitAmount, 10_000);
+    assert.equal(long?.profitAmount, 10_000);
   });
 
   it('rejects a quote that is not a real facility', () => {

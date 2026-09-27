@@ -13,14 +13,7 @@ import {
   quoteTawarruq,
 } from '@/features/finance/lib/tawarruq-quote';
 
-type CircleOption = { id: string; name: string };
-
-type Props = {
-  circles: CircleOption[];
-  defaultCircleId: string;
-};
-
-export function TawarruqRequestForm({ circles, defaultCircleId }: Props) {
+export function TawarruqRequestForm() {
   const router = useRouter();
   const [cash, setCash] = useState('');
   const [profitBps, setProfitBps] = useState(String(TAWARRUQ_DEFAULT_PROFIT_BPS));
@@ -62,27 +55,8 @@ export function TawarruqRequestForm({ circles, defaultCircleId }: Props) {
       <p className="text-sm text-muted-foreground">
         Jameiyah buys a commodity and sells it to you at cost plus the profit below. You repay
         Jameiyah. A broker then sells that commodity so the cash reaches you. Nothing is bought or
-        paid on this screen.
+        paid on this screen. Your group is not told.
       </p>
-
-      {circles.length ? (
-        <div className="space-y-2">
-          <Label htmlFor="jamiyaId">Circle (optional)</Label>
-          <select
-            id="jamiyaId"
-            name="jamiyaId"
-            defaultValue={defaultCircleId}
-            className="flex h-11 w-full border border-input bg-background px-3 text-sm"
-          >
-            <option value="">No circle</option>
-            {circles.map((circle) => (
-              <option key={circle.id} value={circle.id}>
-                {circle.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : null}
 
       <div className="space-y-2">
         <Label htmlFor="amount">Cash you want (KES)</Label>
@@ -112,10 +86,13 @@ export function TawarruqRequestForm({ circles, defaultCircleId }: Props) {
           >
             {TAWARRUQ_PROFIT_RATES_BPS.map((bps) => (
               <option key={bps} value={bps}>
-                {bps / 100}%
+                {bps / 100}% once
               </option>
             ))}
           </select>
+          <p className="text-xs text-muted-foreground">
+            Added once to the cash, for the whole facility. Not per year, per month, or per day.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="tenorMonths">Months</Label>
@@ -163,6 +140,9 @@ export function TawarruqRequestForm({ circles, defaultCircleId }: Props) {
             <dt>Jameiyah earns</dt>
             <dd className="font-medium">{formatCurrency(quote.profitAmount, 'KES')}</dd>
           </div>
+          <p className="pt-1 text-xs text-muted-foreground">
+            The total is split into equal months. The profit does not fall as you repay.
+          </p>
         </dl>
       ) : (
         <p className="text-sm text-muted-foreground">

@@ -90,7 +90,6 @@ const TAWARRUQ_ERRORS: Record<string, string> = {
 export async function submitTawarruqAction(formData: FormData): Promise<FinanceActionState> {
   const amount = Number(formData.get('amount'));
   const purpose = String(formData.get('purpose') ?? '').trim();
-  const jamiyaId = String(formData.get('jamiyaId') ?? '').trim();
   const profitRateBps = Number(formData.get('profitRateBps'));
   const tenorMonths = Number(formData.get('tenorMonths'));
   const wakalah = String(formData.get('wakalah') ?? '') === '1';
@@ -105,7 +104,7 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
   const { data, error } = await callRpc('submit_jameiyah_tawarruq', {
     p_amount: amount,
     p_purpose: purpose,
-    p_jamiya_id: jamiyaId || null,
+    p_jamiya_id: null,
     p_profit_rate_bps: profitRateBps,
     p_tenor_months: tenorMonths,
     p_wakalah: wakalah,

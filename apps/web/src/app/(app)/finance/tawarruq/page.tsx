@@ -23,61 +23,31 @@ type Application = {
   tenor_months: number | null;
 };
 
-type Membership = {
-  jamiya_id: string;
-  jamiya: { name: string } | { name: string }[] | null;
-};
-
-type Props = {
-  searchParams?: Promise<{ jamiyaId?: string }>;
-};
-
-function circleName(jamiya: Membership['jamiya']): string {
-  if (!jamiya) return 'Circle';
-  if (Array.isArray(jamiya)) return jamiya[0]?.name ?? 'Circle';
-  return jamiya.name;
-}
-
 function asNumber(value: number | string | null | undefined): number | null {
   if (value == null || value === '') return null;
   const amount = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(amount) ? amount : null;
 }
 
-export default async function TawarruqPage({ searchParams }: Props) {
+export default async function TawarruqPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect('/login?next=/finance/tawarruq');
 
-  const params = (await searchParams) ?? {};
   const { dict } = await getDictionary();
   const labels = dict.finance;
 
-  const [{ data }, { data: membershipsData }] = await Promise.all([
-    supabase
-      .from('tawarruq_applications')
-      .select(
-        'id, amount, currency, purpose, status, partner_status, created_at, deferred_amount, profit_amount, tenor_months',
-      )
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('members')
-      .select('jamiya_id, jamiya:jamiyas(name)')
-      .eq('user_id', user.id)
-      .eq('status', 'active'),
-  ]);
+  const { data } = await supabase
+    .from('tawarruq_applications')
+    .select(
+      'id, amount, currency, purpose, status, partner_status, created_at, deferred_amount, profit_amount, tenor_months',
+    )
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
   const applications = (data ?? []) as unknown as Application[];
-  const memberships = (membershipsData ?? []) as unknown as Membership[];
-  const circles = memberships.map((membership) => ({
-    id: membership.jamiya_id,
-    name: circleName(membership.jamiya),
-  }));
-  const preferred = params.jamiyaId?.trim() || '';
-  const defaultCircleId = circles.some((circle) => circle.id === preferred) ? preferred : '';
 
   return (
     <div className="space-y-10">
@@ -97,7 +67,7 @@ export default async function TawarruqPage({ searchParams }: Props) {
         </p>
       </div>
 
-      <TawarruqRequestForm circles={circles} defaultCircleId={defaultCircleId} />
+      <TawarruqRequestForm />
 
       <section className="space-y-4">
         <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
