@@ -16,6 +16,8 @@ type MemberTodayProps = {
     status: string;
   } | null;
   walletAvailable?: number | null;
+  /** Share group with no posted due — pay the contribution on this page. */
+  selfPay?: boolean;
 };
 
 /**
@@ -29,6 +31,7 @@ export function MemberTodayStrip({
   currency,
   due,
   walletAvailable,
+  selfPay = false,
 }: MemberTodayProps) {
   if (!welcome) return null;
 
@@ -54,7 +57,9 @@ export function MemberTodayStrip({
             ? `Pay your first contribution (${formatCurrency(remaining, currency)}${
                 due.dueDate ? ` · due ${formatDate(due.dueDate)}` : ''
               }) to stay current.`
-            : 'You’re a member. When a due is posted, pay it from this circle page.'}
+            : selfPay
+              ? 'Make your contribution into this group from this page.'
+              : 'You’re a member. When a due is posted, pay it from this circle page.'}
         </p>
       </div>
 
@@ -80,7 +85,9 @@ export function MemberTodayStrip({
           </>
         ) : (
           <Button asChild variant="outline" className="min-h-11">
-            <a href="#members">See members</a>
+            <a href={selfPay ? '#pay-into' : '#members'}>
+              {selfPay ? 'Make a contribution' : 'See members'}
+            </a>
           </Button>
         )}
         <Button asChild variant="outline" className="min-h-11">

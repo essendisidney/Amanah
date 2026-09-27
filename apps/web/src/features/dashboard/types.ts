@@ -28,6 +28,7 @@ export type DashboardJamiya = {
     slug: string;
     status: JamiyaStatusEnum;
     contributionAmount: number;
+    contributionFrequencyDays: number;
     currency: string;
     maxMembers: number;
     memberCount: number;
@@ -46,6 +47,7 @@ export type DashboardContribution = {
   currency: string;
   status: ContributionStatusEnum;
   dueDate: string;
+  notes: string | null;
   jamiyaName: string;
   jamiyaSlug: string;
   jamiyaId: string;

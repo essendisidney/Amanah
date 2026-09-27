@@ -25,6 +25,7 @@ export default async function DashboardPage() {
       email={user.email}
       labels={dict.dashboard}
       common={dict.common}
+      frequencyTemplate={dict.circle.everyDays}
     />
   );
 }

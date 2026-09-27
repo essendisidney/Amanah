@@ -7,10 +7,12 @@ type Props = {
   slug: string;
   hasDue: boolean;
   showGoals?: boolean;
+  /** Share group with no posted due — member pays into the group here. */
+  showPayIn?: boolean;
 };
 
 /** Member shortcuts — primary pay anchors to #pay-due. */
-export function MemberCircleLinks({ slug, hasDue, showGoals }: Props) {
+export function MemberCircleLinks({ slug, hasDue, showGoals, showPayIn }: Props) {
   type Item = {
     href: string;
     label: string;
@@ -20,7 +22,18 @@ export function MemberCircleLinks({ slug, hasDue, showGoals }: Props) {
   };
 
   const items: Item[] = [
-    ...(hasDue
+    ...(showPayIn
+      ? [
+          {
+            href: '#pay-into',
+            label: 'Make a contribution',
+            hash: true as const,
+            icon: CircleDollarSign,
+            primary: true as const,
+          },
+        ]
+      : []),
+    ...(hasDue && !showPayIn
       ? [
           {
             href: '#pay-due',

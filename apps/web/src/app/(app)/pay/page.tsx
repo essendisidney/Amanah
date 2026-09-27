@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
+import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
+import { isShareDividendKind } from '@/features/circles/lib/circle-mode';
 import { getDashboardData } from '@/features/dashboard';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { AppPage, PageHeader } from '@/components/app-page';
@@ -47,11 +49,35 @@ export default async function PayPage({ searchParams }: Props) {
     };
   });
   const payPhone = data.profile?.mpesa_phone || data.profile?.phone || '';
+  const openDueCircleIds = new Set(data.contributions.map((due) => due.jamiyaId));
+  const shareCircles = data.jamiyas.filter(
+    (circle) =>
+      circle.jamiya.status === 'active' &&
+      isShareDividendKind(circle.jamiya.challengeKind) &&
+      !openDueCircleIds.has(circle.jamiya.id),
+  );
 
   return (
     <AppPage width="medium">
       <PageHeader title={dict.paySheet.title} subtitle={dict.paySheet.subtitle} />
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+      {shareCircles.length > 0 ? (
+        <div className="mb-5 space-y-3">
+          {shareCircles.map((circle) => (
+            <PayIntoCircleForm
+              key={circle.jamiya.id}
+              jamiyaId={circle.jamiya.id}
+              slug={circle.jamiya.slug}
+              circleName={circle.jamiya.name}
+              defaultAmount={circle.jamiya.contributionAmount}
+              currency={circle.jamiya.currency}
+              defaultPhone={payPhone}
+              returnTo="/pay"
+              anchorId={`pay-into-${circle.jamiya.slug}`}
+            />
+          ))}
+        </div>
+      ) : null}
       {data.contributions.length > 0 ? (
         <div className="mb-5 space-y-3">
           {data.contributions.map((due) => (
@@ -66,7 +92,8 @@ export default async function PayPage({ searchParams }: Props) {
               status={due.status}
               walletAvailable={available}
               walletCurrency={currency}
-              circleName={due.jamiyaName}
+              circleName={due.notes ? `${due.jamiyaName} · ${due.notes}` : due.jamiyaName}
+              heading={due.notes}
               defaultPhone={payPhone}
               showAnchor={false}
               showCalendar={false}

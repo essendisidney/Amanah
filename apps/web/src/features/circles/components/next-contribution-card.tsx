@@ -29,6 +29,8 @@ type Props = {
   showCalendar?: boolean;
   /** When this card is on Pay, success and errors stay on Pay. */
   returnTo?: '/pay';
+  /** Replaces the default title when the due has its own label. */
+  heading?: string | null;
   labels: Dictionary['contributionCard'];
 };
 
@@ -73,6 +75,7 @@ export function NextContributionCard({
   showAnchor = true,
   showCalendar = true,
   returnTo,
+  heading,
   labels,
 }: Props) {
   const remaining = Math.max(amount - amountPaid, 0);
@@ -117,7 +120,7 @@ export function NextContributionCard({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            {labels.nextTitle}
+            {heading?.trim() || labels.nextTitle}
           </p>
           <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {formatCurrency(remaining, currency)}

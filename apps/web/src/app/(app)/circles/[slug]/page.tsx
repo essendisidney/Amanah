@@ -42,6 +42,7 @@ import { MerryGoRoundPaymentsGrid } from '@/features/circles/components/merry-go
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
 import { CircleActionHub, type CircleHubGroup } from '@/features/circles/components/circle-action-hub';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
+import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
 import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
@@ -172,7 +173,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
     supabase
       .from('contributions')
       .select(
-        'id, cycle_number, amount, amount_paid, currency, status, due_date, member_id, paid_at',
+        'id, cycle_number, amount, amount_paid, currency, status, due_date, member_id, paid_at, notes',
       )
       .eq('jamiya_id', jamiya.id)
       .order('due_date', { ascending: true })
@@ -396,6 +397,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       due_date: string;
       member_id: string;
       paid_at?: string | null;
+      notes?: string | null;
     }>
   ).map((row) => {
     const member = membersById.get(row.member_id);
@@ -420,6 +422,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           : undefined,
       memberPhone: canManageOps ? (profile?.phone ?? null) : null,
       paidAt: row.paid_at ?? null,
+      notes: row.notes ?? null,
     };
   });
 
@@ -537,7 +540,10 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         : null;
 
   const contributedTotal = contributions.reduce((sum, row) => sum + row.amountPaid, 0);
-  const myOpenDue = contributions.find((c) => c.isMine && ['pending', 'late', 'partial'].includes(c.status));
+  const myOpenDues = contributions.filter(
+    (c) => c.isMine && ['pending', 'late', 'partial'].includes(c.status),
+  );
+  const myOpenDue = myOpenDues[0];
 
   const isRotating = isRotatingKind(jamiya.challenge_kind);
   const isShareDividend = isShareDividendKind(jamiya.challenge_kind);
@@ -817,13 +823,20 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             ]
           : isShareDividend
             ? [
+                {
+                  href: (myOpenDue
+                    ? `/circles/${slug}#pay-due`
+                    : `/circles/${slug}#pay-into`) as Route,
+                  label: myOpenDue ? 'Pay my due' : 'Make a contribution',
+                  hint: 'From your wallet or M-Pesa',
+                  primary: true as const,
+                },
                 ...(canManageOps
                   ? [
                       {
                         href: `/circles/${slug}/books` as Route,
                         label: 'Member payments',
                         hint: 'Shares, monthly savings, loans grid',
-                        primary: true as const,
                       },
                     ]
                   : []),
@@ -1015,6 +1028,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                 }
               : null
           }
+          selfPay={isShareDividend && !myOpenDue}
           walletAvailable={
             walletAvailable != null && Number.isFinite(walletAvailable)
               ? walletAvailable
@@ -1079,26 +1093,41 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         }
       />
 
-      {myOpenDue ? (
-        <div id="pay-due">
-          <NextContributionCard
-            contributionId={myOpenDue.id}
-            slug={slug}
-            amount={myOpenDue.amount}
-            amountPaid={myOpenDue.amountPaid}
-            currency={myOpenDue.currency}
-            dueDate={myOpenDue.dueDate}
-            status={myOpenDue.status}
-            walletAvailable={
-              walletAvailable != null && Number.isFinite(walletAvailable)
-                ? walletAvailable
-                : null
-            }
-            walletCurrency={walletCurrency}
-            defaultPhone={payDefaultPhone}
-            labels={dict.contributionCard}
-            showAnchor={false}
-          />
+      {membership?.status === 'active' && isShareDividend && !myOpenDue ? (
+        <PayIntoCircleForm
+          jamiyaId={jamiya.id}
+          slug={slug}
+          circleName={jamiya.name}
+          defaultAmount={amount}
+          currency={jamiya.currency}
+          defaultPhone={payDefaultPhone}
+        />
+      ) : null}
+
+      {myOpenDues.length > 0 ? (
+        <div id="pay-due" className="space-y-3">
+          {myOpenDues.map((due) => (
+            <NextContributionCard
+              key={due.id}
+              contributionId={due.id}
+              slug={slug}
+              amount={due.amount}
+              amountPaid={due.amountPaid}
+              currency={due.currency}
+              dueDate={due.dueDate}
+              status={due.status}
+              heading={due.notes}
+              walletAvailable={
+                walletAvailable != null && Number.isFinite(walletAvailable)
+                  ? walletAvailable
+                  : null
+              }
+              walletCurrency={walletCurrency}
+              defaultPhone={payDefaultPhone}
+              labels={dict.contributionCard}
+              showAnchor={false}
+            />
+          ))}
         </div>
       ) : null}
 
@@ -1107,6 +1136,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           slug={slug}
           hasDue={Boolean(myOpenDue)}
           showGoals={isShareDividend}
+          showPayIn={isShareDividend && !myOpenDue}
         />
       ) : null}
 

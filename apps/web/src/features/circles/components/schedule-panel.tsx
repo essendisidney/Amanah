@@ -32,6 +32,7 @@ export type ScheduleContribution = {
   memberLabel?: string;
   memberPhone?: string | null;
   paidAt?: string | null;
+  notes?: string | null;
 };
 
 export type SchedulePayout = {

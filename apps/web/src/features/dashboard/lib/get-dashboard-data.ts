@@ -24,6 +24,7 @@ type MembershipRow = {
         slug: string;
         status: DashboardJamiya['jamiya']['status'];
         contribution_amount: number | string;
+        contribution_frequency_days: number | null;
         currency: string;
         max_members: number;
         member_count: number;
@@ -39,6 +40,7 @@ type MembershipRow = {
         slug: string;
         status: DashboardJamiya['jamiya']['status'];
         contribution_amount: number | string;
+        contribution_frequency_days: number | null;
         currency: string;
         max_members: number;
         member_count: number;
@@ -57,6 +59,7 @@ type ContributionRow = {
   currency: string;
   status: DashboardContribution['status'];
   due_date: string;
+  notes?: string | null;
   jamiya_id: string;
   jamiya:
     | { name: string; slug: string }
@@ -141,6 +144,7 @@ export async function getDashboardData(
           slug,
           status,
           contribution_amount,
+          contribution_frequency_days,
           currency,
           max_members,
           member_count,
@@ -196,6 +200,7 @@ export async function getDashboardData(
           slug: jamiya.slug,
           status: jamiya.status,
           contributionAmount: toNumber(jamiya.contribution_amount),
+          contributionFrequencyDays: Math.max(jamiya.contribution_frequency_days || 30, 1),
           currency: jamiya.currency,
           maxMembers: jamiya.max_members,
           memberCount: jamiya.member_count,
@@ -271,6 +276,7 @@ export async function getDashboardData(
           currency,
           status,
           due_date,
+          notes,
           jamiya_id,
           jamiya:jamiyas ( name, slug )
         `,
@@ -311,6 +317,7 @@ export async function getDashboardData(
           currency: row.currency,
           status: row.status,
           dueDate: row.due_date,
+          notes: row.notes?.trim() || null,
           jamiyaName: jamiya.name,
           jamiyaSlug: jamiya.slug,
           jamiyaId: row.jamiya_id,

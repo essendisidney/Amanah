@@ -561,7 +561,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         title="Schedule contributions"
         description={
           isRotating
-            ? 'Merry-go-round monthly dues by cycle — paid vs still owing.'
+            ? 'Round dues by cycle — paid vs still owing.'
             : 'Contribution calendar dues for this member.'
         }
         empty="No schedule contributions yet."
@@ -569,7 +569,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         emptyLabel="Open calendar"
         rows={contributions.map((c) => ({
           key: String(c.id),
-          title: `Cycle ${c.cycle}`,
+          title: c.notes ? String(c.notes) : `Cycle ${c.cycle}`,
           meta: [
             c.due_date ? `Due ${formatDate(String(c.due_date))}` : null,
             Number(c.amount_paid ?? 0) > 0

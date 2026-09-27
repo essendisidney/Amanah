@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import { Plus, CircleDollarSign } from 'lucide-react';
 import { formatCurrency, formatDate, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import type { Dictionary } from '@/i18n/dictionaries';
+import { t, type Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
 import { walletTopUpHref } from '@/features/wallet/lib/wallet-focus-href';
 import { StatusBadge } from './dashboard-stats';
@@ -37,11 +37,13 @@ export function DashboardView({
   email,
   labels,
   common,
+  frequencyTemplate = 'Every {days} days',
 }: {
   data: DashboardData;
   email?: string | null;
   labels: Dictionary['dashboard'];
   common: Dictionary['common'];
+  frequencyTemplate?: string;
 }) {
   const firstName = displayFirstName(
     data.profile?.full_name,
@@ -231,9 +233,14 @@ export function DashboardView({
                       {circle.jamiya.memberCount}/{circle.jamiya.maxMembers} {common.members}
                     </p>
                   </div>
-                  <p className="amanah-money shrink-0 text-base font-semibold text-foreground">
-                    {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
-                  </p>
+                  <div className="shrink-0 text-right">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t(frequencyTemplate, { days: circle.jamiya.contributionFrequencyDays })}
+                    </p>
+                    <p className="amanah-money text-base font-semibold text-foreground">
+                      {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
+                    </p>
+                  </div>
                 </div>
 
                 {(circleContribution || circlePayout) ? (

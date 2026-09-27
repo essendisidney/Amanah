@@ -63,6 +63,67 @@ export async function activateCircleAction(formData: FormData): Promise<void> {
   );
 }
 
+const OPEN_PAY_ERRORS: Record<string, string> = {
+  UNKNOWN_PURPOSE: 'Could not start that payment.',
+  NOT_SHARE_DIVIDEND: 'This group uses the contribution on the group page.',
+  CIRCLE_NOT_ACTIVE: 'This group is not open for payments yet.',
+  FORBIDDEN: 'Only an active member can pay into this group.',
+  INVALID_AMOUNT: 'Enter an amount greater than zero.',
+  NOT_FOUND: 'That circle was not found.',
+  UNAUTHENTICATED: 'Sign in again, then retry.',
+};
+
+/** Opens the member's own group contribution, then uses the existing pay path. */
+async function payIntoCircle(formData: FormData, method: 'wallet' | 'mpesa'): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  const amountRaw = String(formData.get('amount') ?? '').trim();
+  const amount = Number(amountRaw);
+
+  if (!jamiyaId || !slug) return;
+  if (!Number.isFinite(amount) || amount <= 0) {
+    payBack(formData, slug, OPEN_PAY_ERRORS.INVALID_AMOUNT);
+    return;
+  }
+
+  const { data, error } = await callRpc('open_member_circle_payment', {
+    p_jamiya_id: jamiyaId,
+    p_purpose: 'contribution',
+    p_amount: amount,
+  });
+
+  if (error) {
+    payBack(formData, slug, mapMoneyError(error.message) || error.message);
+    return;
+  }
+
+  const opened = data as { ok?: boolean; error?: string; contribution_id?: string } | null;
+  if (!opened?.ok || !opened.contribution_id) {
+    payBack(
+      formData,
+      slug,
+      OPEN_PAY_ERRORS[opened?.error ?? ''] || 'Could not start that payment.',
+    );
+    return;
+  }
+
+  formData.set('contributionId', opened.contribution_id);
+  formData.set('amount', String(amount));
+  if (method === 'mpesa') {
+    await payContributionStkAction(formData);
+    return;
+  }
+  await payContributionAction(formData);
+}
+
+export async function payIntoCircleWalletAction(formData: FormData): Promise<void> {
+  await payIntoCircle(formData, 'wallet');
+}
+
+export async function payIntoCircleMpesaAction(formData: FormData): Promise<void> {
+  await payIntoCircle(formData, 'mpesa');
+}
+
 export async function payContributionAction(formData: FormData): Promise<void> {
   const contributionId = String(formData.get('contributionId') ?? '');
   const slug = String(formData.get('slug') ?? '');

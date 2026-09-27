@@ -24,6 +24,7 @@ import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
 import { AdminNav } from '@/features/admin/components/admin-nav';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
+import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
 import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
 import { CirclesListCard } from '@/features/circles/components/circles-list-card';
 import { cn } from '@/lib/utils';
@@ -110,6 +111,7 @@ export default function UiPreviewPage() {
           slug: 'sisters-circle-sample',
           status: 'active',
           contributionAmount: 2000,
+          contributionFrequencyDays: 30,
           currency: 'KES',
           maxMembers: 10,
           memberCount: 8,
@@ -129,6 +131,7 @@ export default function UiPreviewPage() {
         currency: 'KES',
         status: 'pending',
         dueDate: '2026-09-30',
+        notes: null,
         jamiyaName: 'Sisters Circle',
         jamiyaSlug: 'sisters-circle-sample',
         jamiyaId: 'jamiya-sample',
@@ -254,6 +257,7 @@ export default function UiPreviewPage() {
             email="sample@preview.local"
             labels={dict.dashboard}
             common={dict.common}
+            frequencyTemplate={dict.circle.everyDays}
           />
         </section>
 
@@ -270,6 +274,7 @@ export default function UiPreviewPage() {
             email="sample@preview.local"
             labels={dict.dashboard}
             common={dict.common}
+            frequencyTemplate={dict.circle.everyDays}
           />
         </section>
 
@@ -415,6 +420,15 @@ export default function UiPreviewPage() {
             </Button>
           </div>
           <MemberCircleLinks slug="sisters-circle-sample" hasDue showGoals={false} />
+          <PayIntoCircleForm
+            jamiyaId="jamiya-sample"
+            slug="rafa-chama"
+            circleName="RAFA Chama"
+            defaultAmount={100}
+            currency="KES"
+            anchorId="pay-into-preview"
+          />
+          <MemberCircleLinks slug="rafa-chama" hasDue={false} showPayIn />
           <CircleActionHub
             groups={[
               {
