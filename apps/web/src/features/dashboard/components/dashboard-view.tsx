@@ -149,6 +149,38 @@ export function DashboardView({
           </Link>
         ) : null}
 
+        {data.reservedSeats.length > 0 ? (
+          <section className="space-y-2.5">
+            <h2 className="text-sm font-semibold text-foreground">Reserved seat</h2>
+            <ul className="space-y-2.5">
+              {data.reservedSeats.map((seat) => (
+                <li
+                  key={seat.jamiyaId}
+                  className="amanah-surface flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-[15px] font-semibold text-foreground">{seat.name}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {seat.joinHref
+                        ? 'Open the invite, check the circle, then join.'
+                        : 'Enter the invite code to finish joining.'}
+                    </p>
+                  </div>
+                  <Button asChild className="min-h-11 shrink-0">
+                    <Link
+                      href={
+                        (seat.joinHref ?? '/circles?redeem=1') as Route
+                      }
+                    >
+                      {seat.joinHref ? 'Join' : 'Enter code'}
+                    </Link>
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+
         <section className="space-y-2.5">
           {!circle ? (
             <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">

@@ -86,6 +86,7 @@ export default function UiPreviewPage() {
     },
     unreadNotificationCount: 0,
     reservedSeatCount: 0,
+    reservedSeats: [],
     stats: {
       activeCircles: 0,
       pendingContributions: 0,

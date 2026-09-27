@@ -10,6 +10,7 @@ import { CirclesListCard } from '@/features/circles/components/circles-list-card
 import { AppPage, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { cn } from '@/lib/utils';
+import { invitationJoinHref, ownInviteCode } from '@/features/circles/lib/invitation-join';
 
 export const metadata: Metadata = {
   title: 'Circles',
@@ -98,6 +99,31 @@ export default async function MyCirclesPage({
   const allRows = ((data ?? []) as unknown as MembershipRow[]).filter((row) => row.jamiya);
   const rows = allRows.filter((row) => row.status === 'active');
   const invitedRows = allRows.filter((row) => row.status === 'invited');
+  const joinHrefByJamiya = new Map<string, string>();
+  if (invitedRows.length > 0) {
+    const { data: inviteRows } = await supabase
+      .from('invitations')
+      .select('jamiya_id, invite_code, invitee_user_id, email')
+      .in(
+        'jamiya_id',
+        invitedRows.map((row) => row.jamiya!.id),
+      )
+      .eq('status', 'pending');
+    const invitations = (inviteRows ?? []) as Array<{
+      jamiya_id: string;
+      invite_code: string | null;
+      invitee_user_id: string | null;
+      email: string | null;
+    }>;
+    for (const row of invitedRows) {
+      const code = ownInviteCode(invitations, row.jamiya!.id, {
+        id: user.id,
+        email: user.email,
+      });
+      const href = invitationJoinHref(code);
+      if (href) joinHrefByJamiya.set(row.jamiya!.id, href);
+    }
+  }
   const memberIds = rows.map((row) => row.id);
 
   const dueByMember = new Map<string, DueSummary>();
@@ -196,8 +222,7 @@ export default async function MyCirclesPage({
           <div>
             <h2 className="text-sm font-semibold text-foreground">Reserved seats</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              An officer added you, but you have not fully joined yet. Enter the invite code to
-              become an active member.
+              An officer added you. Join opens the circle so you can check it before you accept.
             </p>
           </div>
           <ul className="amanah-surface divide-y divide-border/70">
@@ -208,10 +233,18 @@ export default async function MyCirclesPage({
               >
                 <div className="min-w-0">
                   <p className="truncate font-semibold text-foreground">{row.jamiya!.name}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Invited · enter code to join</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {joinHrefByJamiya.has(row.jamiya!.id)
+                      ? 'Invited · ready to join'
+                      : 'Invited · enter code to join'}
+                  </p>
                 </div>
-                <Button asChild variant="outline" className="min-h-11 shrink-0">
-                  <a href="#redeem-invite">Enter code</a>
+                <Button asChild className="min-h-11 shrink-0">
+                  {joinHrefByJamiya.has(row.jamiya!.id) ? (
+                    <Link href={joinHrefByJamiya.get(row.jamiya!.id) as Route}>Join</Link>
+                  ) : (
+                    <a href="#redeem-invite">Enter code</a>
+                  )}
                 </Button>
               </li>
             ))}

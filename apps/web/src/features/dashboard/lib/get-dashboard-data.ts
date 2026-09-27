@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { invitationJoinHref, ownInviteCode } from '@/features/circles/lib/invitation-join';
 import { getUnreadNotificationCount } from '@/lib/supabase/auth';
 import type {
   DashboardContribution,
@@ -207,10 +208,48 @@ export async function getDashboardData(
     })
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
-  const reservedSeatCount = membershipRows.filter((row) => {
+  const invitedMemberships = membershipRows.flatMap((row) => {
     const jamiya = asSingle(row.jamiya);
-    return row.status === 'invited' && Boolean(jamiya);
-  }).length;
+    if (row.status !== 'invited' || !jamiya) return [];
+    return [{ jamiyaId: jamiya.id, name: jamiya.name }];
+  });
+  const reservedSeatCount = invitedMemberships.length;
+  let reservedSeats: DashboardData['reservedSeats'] = invitedMemberships.map((seat) => ({
+    jamiyaId: seat.jamiyaId,
+    name: seat.name,
+    joinHref: null,
+  }));
+  if (invitedMemberships.length > 0) {
+    const { data: inviteRows } = await supabase
+      .from('invitations')
+      .select('jamiya_id, invite_code, invitee_user_id, email')
+      .in(
+        'jamiya_id',
+        invitedMemberships.map((seat) => seat.jamiyaId),
+      )
+      .eq('status', 'pending');
+    const invitations = (inviteRows ?? []) as Array<{
+      jamiya_id: string;
+      invite_code: string | null;
+      invitee_user_id: string | null;
+      email: string | null;
+    }>;
+    const { data: authData } = await supabase.auth.getUser();
+    const authUser = authData.user;
+    reservedSeats = invitedMemberships.map((seat) => {
+      const code = authUser
+        ? ownInviteCode(invitations, seat.jamiyaId, {
+            id: authUser.id,
+            email: authUser.email,
+          })
+        : null;
+      return {
+        jamiyaId: seat.jamiyaId,
+        name: seat.name,
+        joinHref: invitationJoinHref(code),
+      };
+    });
+  }
 
   const memberIds = membershipRows
     .filter((row) => row.status === 'active')
@@ -392,6 +431,7 @@ export async function getDashboardData(
     wallet,
     unreadNotificationCount,
     reservedSeatCount,
+    reservedSeats,
     stats: {
       activeCircles: jamiyas.filter((item) => item.status === 'active').length,
       pendingContributions: contributions.length,

@@ -102,6 +102,12 @@ export type DashboardData = {
   unreadNotificationCount: number;
   /** Memberships with status invited (seat reserved, not yet an open circle). */
   reservedSeatCount: number;
+  /** Pending invites already tied to this person. Join opens the preview. */
+  reservedSeats: {
+    jamiyaId: string;
+    name: string;
+    joinHref: string | null;
+  }[];
   stats: {
     activeCircles: number;
     pendingContributions: number;
