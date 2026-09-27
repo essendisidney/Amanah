@@ -496,6 +496,7 @@ export default function UiPreviewPage() {
                   memberLabel={`8/10 ${dict.common.members}`}
                   monthlyAmount={2000}
                   currency="KES"
+                  eachMonthLabel="Every 30 days"
                   due={{
                     remaining: 2000,
                     currency: 'KES',
@@ -513,6 +514,7 @@ export default function UiPreviewPage() {
                   memberLabel={`5/8 ${dict.common.members}`}
                   monthlyAmount={1000}
                   currency="KES"
+                  eachMonthLabel="Every 30 days"
                   due={null}
                   nextContributionLabel={dict.dashboard.nextContribution}
                 />

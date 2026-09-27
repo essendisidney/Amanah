@@ -9,6 +9,7 @@ import { FocusRedeemInvite } from '@/features/circles/components/focus-redeem-in
 import { CirclesListCard } from '@/features/circles/components/circles-list-card';
 import { AppPage, PageHeader } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { t } from '@/i18n/dictionaries';
 import { cn } from '@/lib/utils';
 import { invitationJoinHref, ownInviteCode } from '@/features/circles/lib/invitation-join';
 
@@ -30,6 +31,7 @@ type MembershipRow = {
     status: string;
     segment: string;
     contribution_amount: number | string;
+    contribution_frequency_days: number | null;
     currency: string;
     member_count: number;
     max_members: number;
@@ -79,6 +81,7 @@ export default async function MyCirclesPage({
         status,
         segment,
         contribution_amount,
+        contribution_frequency_days,
         currency,
         member_count,
         max_members,
@@ -260,7 +263,7 @@ export default async function MyCirclesPage({
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {invitedRows.length > 0
-                ? 'You have a reserved seat above. Enter the invite code to become an active member.'
+                ? 'You have a reserved seat above. Open it, check the circle, then join.'
                 : labels.emptyDesc}
             </p>
           </div>
@@ -281,6 +284,7 @@ export default async function MyCirclesPage({
               typeof jamiya.contribution_amount === 'number'
                 ? jamiya.contribution_amount
                 : Number(jamiya.contribution_amount);
+            const frequencyDays = Math.max(jamiya.contribution_frequency_days || 30, 1);
             const due = dueByMember.get(row.id);
             const dueHref = due
               ? (`/circles/${jamiya.slug}#pay-due` as Route)
@@ -295,6 +299,7 @@ export default async function MyCirclesPage({
                   memberLabel={`${jamiya.member_count}/${jamiya.max_members} ${common.members}`}
                   monthlyAmount={amount}
                   currency={jamiya.currency}
+                  eachMonthLabel={t(dict.circle.everyDays, { days: frequencyDays })}
                   due={due}
                   nextContributionLabel={dash.nextContribution}
                 />
