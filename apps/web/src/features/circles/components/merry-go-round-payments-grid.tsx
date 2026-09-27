@@ -29,6 +29,8 @@ type Props = {
   contributionIds?: Record<string, Record<number, string>>;
   canManage?: boolean;
   defaultAmount: number;
+  /** Rotating circles already have one column per round. Savings still add calendar months. */
+  columnMode?: 'round' | 'month';
 };
 
 function cellKey(memberId: string, cycleNumber: number) {
@@ -47,7 +49,8 @@ function shiftMonth(year: number, month: number, delta: number) {
   return { year: d.getFullYear(), month: d.getMonth() + 1 };
 }
 
-function sortMonths(cols: MgrMonthColumn[]) {
+function sortColumns(cols: MgrMonthColumn[], mode: 'round' | 'month') {
+  if (mode === 'round') return [...cols].sort((a, b) => a.cycleNumber - b.cycleNumber);
   return [...cols].sort((a, b) => a.year - b.year || a.month - b.month);
 }
 
@@ -67,6 +70,7 @@ export function MerryGoRoundPaymentsGrid({
   contributionIds = {},
   canManage = false,
   defaultAmount,
+  columnMode = 'month',
 }: Props) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -74,7 +78,7 @@ export function MerryGoRoundPaymentsGrid({
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-  const [months, setMonths] = useState(() => sortMonths(initialMonths));
+  const [months, setMonths] = useState(() => sortColumns(initialMonths, columnMode));
   const [fillAmount, setFillAmount] = useState(String(defaultAmount || 0));
   const [mobileMemberId, setMobileMemberId] = useState(members[0]?.id ?? '');
   const [draft, setDraft] = useState<Record<string, string>>(() => {
@@ -144,7 +148,7 @@ export function MerryGoRoundPaymentsGrid({
         label: monthLabel(year, month),
       };
       seedDraft([col]);
-      return sortMonths([col, ...prev]);
+      return sortColumns([col, ...prev], columnMode);
     });
   }
 
@@ -166,7 +170,7 @@ export function MerryGoRoundPaymentsGrid({
         label: monthLabel(year, month),
       };
       seedDraft([col]);
-      return sortMonths([...prev, col]);
+      return sortColumns([...prev, col], columnMode);
     });
   }
 
@@ -271,7 +275,9 @@ export function MerryGoRoundPaymentsGrid({
   if (members.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Add members first, then enter monthly contributions here — including past months.
+        {columnMode === 'round'
+          ? 'Add members first, then record each round.'
+          : 'Add members first, then enter monthly contributions here — including past months.'}
       </p>
     );
   }
@@ -285,8 +291,10 @@ export function MerryGoRoundPaymentsGrid({
       ) : null}
       <p className="text-sm text-muted-foreground">
         Tap an empty cell to fill {fillAmount || defaultAmount || 'the amount'}, or use{' '}
-        <strong className="font-medium text-foreground">Mark round paid</strong> for everyone at
-        once. Then Save.
+        <strong className="font-medium text-foreground">
+          Mark {columnMode === 'round' ? 'the round' : 'the month'} paid
+        </strong>{' '}
+        for everyone at once. Then Save.
       </p>
 
       {quickMonth ? (
@@ -325,27 +333,39 @@ export function MerryGoRoundPaymentsGrid({
             </Button>
           </div>
         </div>
-        <Button type="button" variant="outline" className="min-h-11" onClick={addPastMonth}>
-          Add past month
-        </Button>
-        <Button type="button" variant="outline" className="min-h-11" onClick={addNextMonth}>
-          Add month
-        </Button>
+        {columnMode === 'month' ? (
+          <>
+            <Button type="button" variant="outline" className="min-h-11" onClick={addPastMonth}>
+              Add past month
+            </Button>
+            <Button type="button" variant="outline" className="min-h-11" onClick={addNextMonth}>
+              Add month
+            </Button>
+          </>
+        ) : null}
         <Button type="button" className="min-h-11" disabled={pending || !canSave} onClick={onSave}>
           {pending
             ? 'Saving…'
             : dirtyKeys.size
               ? `Save ${dirtyKeys.size} change${dirtyKeys.size === 1 ? '' : 's'}`
               : newMonthKeys.length
-                ? 'Save months'
+                ? columnMode === 'round'
+                  ? 'Save rounds'
+                  : 'Save months'
                 : 'Save'}
         </Button>
       </div>
 
       {months.length === 0 ? (
         <p className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
-          No months yet. Tap <strong className="text-foreground">Add past month</strong> or{' '}
-          <strong className="text-foreground">Add month</strong> to start recording.
+          {columnMode === 'round' ? (
+            <>No rounds yet. They appear from the circle start date.</>
+          ) : (
+            <>
+              No months yet. Tap <strong className="text-foreground">Add past month</strong> or{' '}
+              <strong className="text-foreground">Add month</strong> to start recording.
+            </>
+          )}
         </p>
       ) : (
         <>

@@ -1313,6 +1313,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   contributionIds={mgrContributionIds}
                   canManage
                   defaultAmount={amount}
+                  columnMode={isRotating ? 'round' : 'month'}
                 />
               </div>
             </CircleSection>
