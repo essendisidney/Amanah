@@ -1171,7 +1171,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <CircleSection
           id="merry-go-round"
           title="Who gets the pot"
-          description="Each person's round."
+          description="The round each person collects."
           padded={false}
         >
           <MerryGoRoundBoard

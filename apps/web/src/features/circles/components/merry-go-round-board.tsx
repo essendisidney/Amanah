@@ -51,7 +51,7 @@ export function MerryGoRoundBoard({
       <div className="amanah-surface space-y-2 px-5 py-5 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">No merry-go-round slots yet</p>
         <p>
-          Assign each person's round under Members, then activate. Each round shows who
+          Assign a round for each person under Members, then activate. Each round shows who
           collects, and who still owes.
         </p>
       </div>
