@@ -23,6 +23,7 @@ import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
 import { MoneyMoreLinks } from '@/features/wallet/components/money-more-links';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
+import { ShareChamaCard } from '@/features/circles/components/share-chama-card';
 import { AdminNav } from '@/features/admin/components/admin-nav';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
@@ -432,6 +433,11 @@ export default function UiPreviewPage() {
               { label: 'Every 30 days', value: 'KES 100' },
               { label: 'Contribution', value: 'KES 100' },
             ]}
+          />
+          <h3 className="pt-2 text-sm font-semibold text-foreground">Share this chama</h3>
+          <ShareChamaCard
+            circleName="RAFA Chama"
+            inviteUrl="https://jameiyah.com/invitations/SAMPLE"
           />
           <h3 className="pt-2 text-sm font-semibold text-foreground">Member statement · share group</h3>
           <section className="space-y-3">

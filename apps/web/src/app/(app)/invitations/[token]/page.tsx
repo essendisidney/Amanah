@@ -133,6 +133,7 @@ export default async function InvitationPage({ params }: Props) {
 
   const isPending = preview.status === 'pending';
   const isExpired = new Date(preview.expires_at).getTime() < Date.now();
+  const openLink = !preview.email && !preview.phone;
 
   return (
     <AppPage>
@@ -144,8 +145,9 @@ export default async function InvitationPage({ params }: Props) {
           Join {preview.jamiya_name}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Invited by {preview.invited_by_name ?? 'a circle admin'}
-          {preview.email ? ` · ${preview.email}` : ''}
+          {openLink
+            ? 'Anyone with this link can join. Sign in, then tap Join.'
+            : `Invited by ${preview.invited_by_name ?? 'a circle admin'}${preview.email ? ` · ${preview.email}` : ''}`}
         </p>
       </div>
 
@@ -182,12 +184,14 @@ export default async function InvitationPage({ params }: Props) {
                 {circle.member_count}/{circle.max_members}
               </dd>
             </div>
-            <div>
-              <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Expires
-              </dt>
-              <dd className="mt-1 font-semibold">{formatDate(preview.expires_at)}</dd>
-            </div>
+            {openLink ? null : (
+              <div>
+                <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Expires
+                </dt>
+                <dd className="mt-1 font-semibold">{formatDate(preview.expires_at)}</dd>
+              </div>
+            )}
           </dl>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -197,7 +201,11 @@ export default async function InvitationPage({ params }: Props) {
       </div>
 
       {isPending && !isExpired ? (
-        <InvitationDecisionButtons token={token} slotContext={slotContext} />
+        <InvitationDecisionButtons
+          token={token}
+          slotContext={slotContext}
+          acceptLabel={openLink ? 'Join this chama' : 'Accept invitation'}
+        />
       ) : (
         <Alert>
           <AlertDescription>

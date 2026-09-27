@@ -25,10 +25,12 @@ export function InvitationDecisionButtons({
   token,
   disabled,
   slotContext,
+  acceptLabel = 'Accept invitation',
 }: {
   token: string;
   disabled?: boolean;
   slotContext?: InviteSlotContext | null;
+  acceptLabel?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -123,7 +125,7 @@ export function InvitationDecisionButtons({
             });
           }}
         >
-          {pending ? 'Working…' : 'Accept invitation'}
+          {pending ? 'Working…' : acceptLabel}
         </Button>
         <Button
           type="button"

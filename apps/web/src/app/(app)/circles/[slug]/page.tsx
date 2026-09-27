@@ -60,6 +60,8 @@ import { AppPage } from '@/components/app-page';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { t } from '@/i18n/dictionaries';
 import { getSiteUrl } from '@/lib/site-url';
+import { callRpc } from '@/lib/supabase/rpc';
+import { ShareChamaCard } from '@/features/circles/components/share-chama-card';
 
 export const metadata: Metadata = {
   title: 'Circle details',
@@ -169,7 +171,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       .order('joined_at', { ascending: true }),
     supabase
       .from('invitations')
-      .select('id, email, phone, status, expires_at, created_at, invite_code')
+      .select('id, email, phone, status, expires_at, created_at, invite_code, is_share_link')
       .eq('jamiya_id', jamiya.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false }),
@@ -317,6 +319,17 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   }>;
 
   const membership = memberRows.find((row) => row.user_id === user.id) ?? null;
+
+  let shareUrl: string | null = null;
+  if (membership?.status === 'active') {
+    const { data: shareData } = await callRpc('ensure_circle_share_link', {
+      p_jamiya_id: jamiya.id,
+    });
+    const shareResult = shareData as { ok?: boolean; invite_code?: string } | null;
+    if (shareResult?.ok && shareResult.invite_code) {
+      shareUrl = `${getSiteUrl().replace(/\/$/, '')}/invitations/${shareResult.invite_code}`;
+    }
+  }
   const canManageMembers =
     membership?.status === 'active' &&
     isCircleLeader(membership?.role);
@@ -388,8 +401,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       expires_at: string;
       created_at: string;
       invite_code: string | null;
+      is_share_link?: boolean | null;
     }>
-  ).map((row) => ({
+  )
+    .filter((row) => !row.is_share_link)
+    .map((row) => ({
     id: row.id,
     email: row.email,
     phone: row.phone,
@@ -1122,6 +1138,14 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               ]
         }
       />
+
+      {shareUrl ? (
+        <ShareChamaCard
+          circleName={jamiya.name}
+          inviteUrl={shareUrl}
+          full={jamiya.member_count >= jamiya.max_members}
+        />
+      ) : null}
 
       {membership?.status === 'active' && isShareDividend && !myOpenDue ? (
         <PayIntoCircleForm
