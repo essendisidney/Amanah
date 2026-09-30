@@ -6,6 +6,7 @@ import { Button } from '@jamiya/ui';
 import { PublicSiteHeader } from '@/components/public-site-header';
 import { PesaraCredit } from '@/components/pesara-credit';
 import { PayoutBoardMockup } from '@/features/landing/payout-board-mockup';
+import { landingCopy } from '@/features/landing/landing-copy';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -25,9 +26,10 @@ export const metadata: Metadata = {
 
 export default async function LandingPage() {
   const { locale, dict } = await getDictionary();
+  const c = landingCopy(locale);
 
   return (
-    <div className="relative min-h-dvh overflow-x-hidden bg-[#f6f8f7] text-foreground">
+    <div className="jameiyah-light relative min-h-dvh overflow-x-hidden bg-[#f6f8f7] text-foreground">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -44,9 +46,9 @@ export default async function LandingPage() {
           homeHref={'/' as Route}
           links={[
             { href: '/#how' as Route, label: dict.landing.joinCircle },
-            { href: '/#circles' as Route, label: 'Circles' },
+            { href: '/#circles' as Route, label: c.navCircles },
             { href: '/shariah' as Route, label: dict.landing.shariaEyebrow },
-            { href: '/pricing' as Route, label: 'Pricing' },
+            { href: '/pricing' as Route, label: c.navPricing },
             { href: '/sadaka' as Route, label: dict.common.sadaka },
             { href: '/login' as Route, label: dict.common.signIn, variant: 'ghost' },
           ]}
@@ -56,18 +58,17 @@ export default async function LandingPage() {
 
       <section className="relative z-10 mx-auto grid min-h-[88dvh] w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:pt-6">
         <div className="hidden lg:order-2 lg:block">
-          <PayoutBoardMockup />
+          <PayoutBoardMockup copy={c.mock} />
         </div>
         <div className="max-w-2xl lg:order-1">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
             {dict.brand.tagline}
           </p>
           <h1 className="max-w-xl text-4xl font-bold leading-[1.05] tracking-tight text-[#0b4a3c] sm:text-5xl md:text-6xl">
-            Save together. See every shilling. Stay riba-free.
+            {c.heroTitle}
           </h1>
           <p className="mt-5 max-w-md text-base leading-relaxed text-[#3d524a] sm:text-lg">
-            Jameiyah is the digital home for Kenyan circles — merry-go-round, table banking, and
-            savings. Officers replace the spreadsheet. Members see what they paid.
+            {c.heroLead}
           </p>
           <div className="mt-9 flex w-full max-w-md flex-col gap-3 sm:flex-row sm:items-center">
             <Button
@@ -75,7 +76,7 @@ export default async function LandingPage() {
               className="min-h-12 w-full bg-[#0d5c45] text-white hover:bg-[#0a4a37] sm:w-auto"
               asChild
             >
-              <Link href="/circles/new">Create a circle</Link>
+              <Link href="/circles/new">{c.createCircle}</Link>
             </Button>
             <Button
               size="lg"
@@ -83,17 +84,17 @@ export default async function LandingPage() {
               className="min-h-12 w-full border-[#0d5c45]/40 text-[#0d5c45] sm:w-auto"
               asChild
             >
-              <Link href="/circles?redeem=1">Join with a code</Link>
+              <Link href="/circles?redeem=1">{c.joinWithCode}</Link>
             </Button>
           </div>
           <p className="mt-3 text-sm text-[#5a6f66]">
-            New here?{' '}
+            {c.newHere}{' '}
             <Link href="/welcome" className="-my-2.5 inline-block py-2.5 font-semibold text-[#0d5c45] hover:underline">
               {dict.landing.startWithPhone}
             </Link>
           </p>
           <ul className="mt-6 flex max-w-lg flex-wrap gap-2 text-xs font-medium text-[#0b4a3c]">
-            {['No interest (riba)', 'Private to your circle', 'Phone, email, or Google', 'Member statements'].map(
+            {c.chips.map(
               (item) => (
                 <li key={item} className="rounded-full border border-[#0d5c45]/20 bg-white/80 px-3 py-1.5">
                   {item}
@@ -117,38 +118,18 @@ export default async function LandingPage() {
       <section id="circles" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/70">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
-            Built for how circles already work
+            {c.circlesEyebrow}
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
-            One practice. Many names. Your chama, recorded.
+            {c.circlesTitle}
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#5a6f66]">
-            Merry-go-round, chama, jam&apos;iyah, susu, esusu, tontine — communities have pooled money
-            this way for generations. Jameiyah keeps that trust, and replaces the notebook.
+            {c.circlesLead}
           </p>
           <ul className="mt-12 grid gap-6 md:grid-cols-2">
-            {[
-              {
-                title: 'Merry-go-round',
-                body: 'Monthly contributions, payout turns, and a board that shows who has received the pot.',
-                href: null as Route | null,
-              },
-              {
-                title: 'Table banking',
-                body: 'Share buy-in, monthly savings, and loans. Paste past Excel records once names match, or enter one member at a time.',
-                href: null as Route | null,
-              },
-              {
-                title: 'Savings',
-                body: 'A contribution calendar and shared goals — school fees, a trip, a wedding — without a rotating pot.',
-                href: null as Route | null,
-              },
-              {
-                title: 'Sadaka & zakat',
-                body: 'Give in the open. Campaigns with receipts, and a zakat calculator that explains the nisab.',
-                href: '/sadaka' as Route,
-              },
-            ].map((item) => (
+            {c.circleTypes
+              .map((item, i) => ({ ...item, href: i === 3 ? ('/sadaka' as Route) : (null as Route | null) }))
+              .map((item) => (
               <li key={item.title} className="rounded-2xl border border-[#0d5c45]/10 bg-white p-6">
                 <h3 className="text-xl font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.body}</p>
@@ -157,7 +138,7 @@ export default async function LandingPage() {
                     href={item.href}
                     className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#0d5c45] hover:underline"
                   >
-                    Open giving →
+                    {c.openGiving}
                   </Link>
                 ) : null}
               </li>
@@ -168,25 +149,12 @@ export default async function LandingPage() {
 
       <section className="relative z-10 border-t border-[#0d5c45]/10">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">Who it is for</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">{c.whoEyebrow}</p>
           <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
-            Officers run the books. Members see their own.
+            {c.whoTitle}
           </h2>
           <div className="mt-12 grid gap-10 md:grid-cols-3">
-            {[
-              {
-                title: 'Circle officers',
-                body: 'Invite by phone, record shares and monthly savings, import a past sheet, and export statements. The Excel file stays a backup, not the only book.',
-              },
-              {
-                title: 'Members',
-                body: 'Join with a code from WhatsApp, pay from Money, and open your statement. You see your circle — not everyone else\u2019s private groups.',
-              },
-              {
-                title: 'Mosques & campaigns',
-                body: 'Publish a sadaka page, share a link, and give donors a receipt. Zakat stays a calculator, not a hidden fee.',
-              },
-            ].map((item) => (
+            {c.who.map((item) => (
               <div key={item.title}>
                 <h3 className="text-lg font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.body}</p>
@@ -199,33 +167,18 @@ export default async function LandingPage() {
       <section id="how" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
-            How it works
+            {c.howEyebrow}
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
-            Circles, wallet, and trust - in one place
+            {c.howTitle}
           </h2>
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-[#5a6f66]">
-            Create or join a savings circle, contribute on schedule, and keep every shilling
-            visible to the people who share it.
+            {c.howLead}
           </p>
           <ol className="mt-12 grid gap-10 md:grid-cols-3">
-            {[
-              {
-                step: '01',
-                title: 'Start or join a circle',
-                body: 'Merry-go-round, savings, or table banking - invite members with a link or code.',
-              },
-              {
-                step: '02',
-                title: 'Contribute on time',
-                body: 'Pay dues from your wallet, get reminders, and see who is current.',
-              },
-              {
-                step: '03',
-                title: 'Grow with trust',
-                body: 'Statements, officer tools, KYC, and audit trails keep community money clear.',
-              },
-            ].map((item) => (
+            {c.steps
+              .map((item, i) => ({ ...item, step: `0${i + 1}` }))
+              .map((item) => (
               <li key={item.step}>
                 <p className="text-sm font-semibold tracking-wide text-[#c5a044]">{item.step}</p>
                 <h3 className="mt-2 text-xl font-bold tracking-tight text-[#0b4a3c]">{item.title}</h3>
@@ -274,10 +227,9 @@ export default async function LandingPage() {
           <p className="mt-10 max-w-2xl text-xs leading-relaxed text-white/50">
             {dict.landing.shariaDisclaimer}{' '}
             <Link href={'/shariah' as Route} className="-my-2.5 inline-block py-2.5 underline underline-offset-2 hover:text-white">
-              Full Shariah stance
+              {c.shariahLink}
             </Link>
-            . Jameiyah is community software, not a bank and not an investment fund. We do not claim
-            a regulator licence or a named Shariah board until one is appointed and published.
+            {c.shariahTail}
           </p>
         </div>
       </section>
@@ -285,30 +237,13 @@ export default async function LandingPage() {
       <section id="trust" className="relative z-10 scroll-mt-24 border-t border-[#0d5c45]/10 bg-white/60">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#c5a044]">
-            What serious platforms show — stated plainly
+            {c.trustEyebrow}
           </p>
           <h2 className="mt-3 max-w-2xl text-3xl font-bold tracking-tight text-[#0b4a3c] sm:text-4xl">
-            Trust you can check, not a slogan.
+            {c.trustTitle}
           </h2>
           <dl className="mt-12 grid gap-8 md:grid-cols-2">
-            {[
-              {
-                q: 'Where does the money sit?',
-                a: 'Circle records live in Jameiyah. Wallet top-ups use the payment providers configured for your account (such as M-Pesa or card). Officers still reconcile the circle bank account.',
-              },
-              {
-                q: 'Who can see a payment?',
-                a: 'Officers of that circle, and the member it belongs to. Other circles on the platform cannot open your books.',
-              },
-              {
-                q: 'Can we bring last year’s Excel?',
-                a: 'Yes for table banking. Paste the sheet, preview every name, and import only when each row matches a member. Nothing is skipped quietly.',
-              },
-              {
-                q: 'What does it cost?',
-                a: 'Group plans are listed in Kenyan shillings. A small circle can start free. Officers change the plan from the circle console.',
-              },
-            ].map((item) => (
+            {c.trust.map((item) => (
               <div key={item.q}>
                 <dt className="text-lg font-bold tracking-tight text-[#0b4a3c]">{item.q}</dt>
                 <dd className="mt-2 text-sm leading-relaxed text-[#5a6f66]">{item.a}</dd>
@@ -322,7 +257,7 @@ export default async function LandingPage() {
               className="min-h-12 border-[#0d5c45]/40 text-[#0d5c45]"
               asChild
             >
-              <Link href="/pricing">See pricing</Link>
+              <Link href="/pricing">{c.seePricing}</Link>
             </Button>
           </div>
         </div>
@@ -332,10 +267,10 @@ export default async function LandingPage() {
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-16 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight text-[#0b4a3c]">
-              Ready for your circle?
+              {c.readyTitle}
             </h2>
             <p className="mt-2 max-w-lg text-base text-[#5a6f66]">
-              Sign in with phone SMS, email, or Google — and start in minutes.
+              {c.readyLead}
             </p>
           </div>
           <Button
@@ -358,7 +293,7 @@ export default async function LandingPage() {
           </div>
           <nav className="flex flex-wrap gap-4 text-sm font-medium text-[#0d5c45]">
             <Link href="/pricing" className="inline-flex min-h-11 items-center hover:underline">
-              Pricing
+              {c.footerPricing}
             </Link>
             <Link href="/sadaka" className="inline-flex min-h-11 items-center hover:underline">
               {dict.common.sadaka}
@@ -370,10 +305,10 @@ export default async function LandingPage() {
               {dict.common.signIn}
             </Link>
             <Link href="/privacy" className="inline-flex min-h-11 items-center hover:underline">
-              Privacy
+              {c.footerPrivacy}
             </Link>
             <Link href="/terms" className="inline-flex min-h-11 items-center hover:underline">
-              Terms
+              {c.footerTerms}
             </Link>
           </nav>
         </div>

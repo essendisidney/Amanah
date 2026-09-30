@@ -7,35 +7,28 @@ import { Button } from '@jamiya/ui';
 import { cn } from '@/lib/utils';
 
 const INTENTS = [
-  {
-    id: 'family',
-    title: 'Save with my family',
-    next: '/circles/new?intent=family',
-  },
-  {
-    id: 'join',
-    title: 'Join a savings circle',
-    next: '/circles?redeem=1',
-  },
-  {
-    id: 'build',
-    title: 'Build my savings',
-    next: '/finance/goals',
-  },
-  {
-    id: 'manage',
-    title: 'Manage my money',
-    next: '/wallet',
-  },
-  {
-    id: 'business',
-    title: 'Create a business circle',
-    next: '/circles/new?intent=business',
-  },
+  { id: 'family', next: '/circles/new?intent=family' },
+  { id: 'join', next: '/circles?redeem=1' },
+  { id: 'build', next: '/finance/goals' },
+  { id: 'manage', next: '/wallet' },
+  { id: 'business', next: '/circles/new?intent=business' },
 ] as const;
 
-export function WelcomeIntentForm() {
-  const [intentId, setIntentId] = useState<(typeof INTENTS)[number]['id']>('family');
+type IntentId = (typeof INTENTS)[number]['id'];
+
+export type WelcomeIntentLabels = Record<IntentId, string> & { continue: string };
+
+const DEFAULT_LABELS: WelcomeIntentLabels = {
+  family: 'Save with my family',
+  join: 'Join a savings circle',
+  build: 'Build my savings',
+  manage: 'Manage my money',
+  business: 'Create a business circle',
+  continue: 'Continue',
+};
+
+export function WelcomeIntentForm({ labels = DEFAULT_LABELS }: { labels?: WelcomeIntentLabels }) {
+  const [intentId, setIntentId] = useState<IntentId>('family');
   const intent = INTENTS.find((item) => item.id === intentId) ?? INTENTS[0];
   const href = `/login?next=${encodeURIComponent(intent.next)}` as Route;
 
@@ -49,19 +42,20 @@ export function WelcomeIntentForm() {
               <button
                 type="button"
                 onClick={() => setIntentId(item.id)}
+                aria-pressed={active}
                 className={cn(
                   'jameiyah-surface flex w-full items-center px-4 py-3.5 text-left text-sm font-semibold text-foreground transition-colors',
                   active ? 'border-primary/40 bg-secondary/60' : 'hover:border-primary/20',
                 )}
               >
-                {item.title}
+                {labels[item.id]}
               </button>
             </li>
           );
         })}
       </ul>
       <Button asChild className="min-h-12 w-full">
-        <Link href={href}>Continue</Link>
+        <Link href={href}>{labels.continue}</Link>
       </Button>
     </div>
   );

@@ -63,7 +63,8 @@
   --radius-xl: 1.25rem;
 }
 
-:root {
+:root,
+.jameiyah-light {
   /* ——— Canvas (mostly white, soft atmosphere) ——— */
   --background: #f8fafc;
   --foreground: #111827;
@@ -178,7 +179,7 @@
 
   --brand: #2d9b72;
   --primary: #2d9b72;
-  --primary-foreground: #062a1f;
+  --primary-foreground: #f4fbf8;
   --primary-hover: #3daf84;
   --primary-soft: #0d5c45;
   --primary-muted: rgba(13, 92, 69, 0.22);
@@ -273,7 +274,11 @@
     background: color-mix(in oklab, var(--primary) 22%, white);
   }
 
-  .dark ::selection {
+  .jameiyah-light {
+  color-scheme: light;
+}
+
+.dark ::selection {
     background: color-mix(in oklab, var(--primary) 35%, black);
   }
 }

@@ -235,7 +235,7 @@ export default async function NotificationsPage() {
                       {href ? (
                         <Link
                           href={href}
-                          className="text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          className="-my-2.5 inline-block py-2.5 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                           {item.title}
                         </Link>
@@ -274,7 +274,7 @@ export default async function NotificationsPage() {
           <h2 className="text-sm font-semibold text-foreground">{labels.recentMoney}</h2>
           <Link
             href={'/wallet' as Route}
-            className="text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {labels.openMoney}
           </Link>

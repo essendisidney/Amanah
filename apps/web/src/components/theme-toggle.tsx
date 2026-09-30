@@ -12,9 +12,13 @@ export type ThemeAppearance = 'light' | 'dark';
 const STORAGE_KEY = 'jameiyah-theme';
 const THEME_EVENT = 'jameiyah-theme-change';
 
-/** Auto stays light — liquid glass is light-first; only explicit Dark enables dark. */
+/** Auto follows the phone or computer setting. */
 export function themeFromSystem(): ThemeAppearance {
-  return 'light';
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
 }
 
 export function getStoredPreference(): ThemePreference | null {
@@ -28,6 +32,7 @@ export function getStoredPreference(): ThemePreference | null {
 }
 
 export function resolveAppearance(preference: ThemePreference): ThemeAppearance {
+  if (preference === 'auto') return themeFromSystem();
   return preference === 'dark' ? 'dark' : 'light';
 }
 
@@ -101,9 +106,9 @@ export function ThemeToggle({
     };
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const onSystem = () => {
-      // Auto no longer tracks OS dark — liquid glass stays light unless Dark is chosen.
+      // Only Auto follows the device; explicit Light/Dark stay put.
       const pref = getStoredPreference() ?? 'light';
-      setAppearance(applyPreference(pref));
+      if (pref === 'auto') setAppearance(applyPreference(pref));
     };
 
     window.addEventListener(THEME_EVENT, onTheme);
@@ -173,7 +178,7 @@ export function ThemeToggle({
 
   const label =
     preference === 'auto'
-      ? 'Auto · light (tap to change)'
+      ? `Auto · follows your device (${appearance}) · tap for Dark`
       : preference === 'dark'
         ? 'Dark mode (tap for Auto)'
         : 'Light mode (tap for Auto)';

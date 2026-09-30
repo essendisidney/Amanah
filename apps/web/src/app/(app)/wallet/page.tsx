@@ -342,19 +342,19 @@ export default async function WalletPage({ searchParams }: Props) {
         <div className="grid grid-cols-3 gap-2">
           <Button asChild className="min-h-11 w-full px-2">
             <Link href={'/wallet?focus=top-up#top-up' as Route}>
-              <Plus className="h-4 w-4" />
+              <Plus className="hidden h-4 w-4 sm:block" />
               <span className="truncate">{labels.topUp}</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11 w-full px-2">
             <Link href={'/pay' as Route}>
-              <ArrowDownLeft className="h-4 w-4" />
+              <ArrowDownLeft className="hidden h-4 w-4 sm:block" />
               <span className="truncate">{labels.quickPay}</span>
             </Link>
           </Button>
           <Button asChild variant="outline" className="min-h-11 w-full px-2">
             <Link href={'/wallet?focus=withdraw#withdraw' as Route}>
-              <ArrowUpRight className="h-4 w-4" />
+              <ArrowUpRight className="hidden h-4 w-4 sm:block" />
               <span className="truncate">{labels.withdraw}</span>
             </Link>
           </Button>
