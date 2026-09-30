@@ -189,7 +189,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       <>
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Invite someone to try</h2>
-        <div className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">
             Send a WhatsApp message with a link to start on Jameiyah. They sign in, then create or
             join a circle.
@@ -201,8 +201,8 @@ export default async function ProfilePage({ searchParams }: Props) {
       <section
         className={
           setupComplete
-            ? 'amanah-surface space-y-2 px-4 py-4 sm:px-5'
-            : 'amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5'
+            ? 'jameiyah-surface space-y-2 px-4 py-4 sm:px-5'
+            : 'jameiyah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5'
         }
       >
         <div>
@@ -238,7 +238,7 @@ export default async function ProfilePage({ searchParams }: Props) {
 
       <section id="verification-status" className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.linkVerification}</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-foreground">{verification.label}</p>
             <StatusBadge status={verification.state} />
@@ -255,7 +255,7 @@ export default async function ProfilePage({ searchParams }: Props) {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Shortcuts</h2>
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {youLinks.map((item) => (
             <li key={item.href}>
               <Link
@@ -277,7 +277,7 @@ export default async function ProfilePage({ searchParams }: Props) {
         </ul>
       </section>
 
-      <div className="amanah-surface flex min-h-11 items-center justify-between gap-3 px-4 py-3 sm:px-5">
+      <div className="jameiyah-surface flex min-h-11 items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <p className="text-sm font-semibold text-foreground">{labels.appearance}</p>
         <ThemeToggle variant="segmented" />
       </div>
@@ -285,7 +285,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       <section className="grid gap-5 lg:grid-cols-2">
         <div id="personal-details" className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.personalDetails}</h2>
-          <div className="amanah-surface px-4 py-4 sm:px-5">
+          <div className="jameiyah-surface px-4 py-4 sm:px-5">
             <ProfileForm
               labels={labels}
               continueHref={onboarding ? continueHref : undefined}
@@ -302,7 +302,7 @@ export default async function ProfilePage({ searchParams }: Props) {
 
         <div id="mpesa" className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.mpesaLinkage}</h2>
-          <div className="amanah-surface px-4 py-4 sm:px-5">
+          <div className="jameiyah-surface px-4 py-4 sm:px-5">
             <MpesaLinkForm
               labels={labels}
               defaultPhone={profile?.mpesa_phone ?? profile?.phone ?? ''}
@@ -311,7 +311,7 @@ export default async function ProfilePage({ searchParams }: Props) {
         </div>
       </section>
 
-      <details className="amanah-surface overflow-hidden">
+      <details className="jameiyah-surface overflow-hidden">
         <summary className="cursor-pointer px-4 py-4 text-sm font-semibold text-foreground sm:px-5">
           {labels.moreAccount}
         </summary>

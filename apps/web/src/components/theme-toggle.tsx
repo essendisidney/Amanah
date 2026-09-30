@@ -9,8 +9,8 @@ export type ThemePreference = 'light' | 'dark' | 'auto';
 /** Resolved appearance applied to the document. */
 export type ThemeAppearance = 'light' | 'dark';
 
-const STORAGE_KEY = 'amanah-theme';
-const THEME_EVENT = 'amanah-theme-change';
+const STORAGE_KEY = 'jameiyah-theme';
+const THEME_EVENT = 'jameiyah-theme-change';
 
 /** Auto stays light — liquid glass is light-first; only explicit Dark enables dark. */
 export function themeFromSystem(): ThemeAppearance {

@@ -1,6 +1,6 @@
 # Domains — jameiyah.com & jameiyah.co.ke
 
-Production app: **https://jameiyah.com** (also `jameiyah.co.ke`, `amanah-liart.vercel.app`). Vercel project **amanah**.
+Production app: **https://jameiyah.com** (also `jameiyah.co.ke`, `jameiyah.com`). Vercel project **jameiyah**.
 
 Domains verified on Vercel (2026-09-21). See [PHASE_0.md](./PHASE_0.md) for ops checklist.
 
@@ -26,7 +26,7 @@ npx vercel domains add jameiyah.co.ke
 npx vercel domains add www.jameiyah.co.ke
 ```
 
-Or: Vercel Dashboard → Project **amanah** → Settings → Domains → Add.
+Or: Vercel Dashboard → Project **jameiyah** → Settings → Domains → Add.
 
 Assign each domain to **Production**.
 
@@ -59,7 +59,7 @@ Redeploy after DNS A records point to `76.76.21.21` so SSL can issue.
 
 ### Supabase Auth (dashboard — MCP has no auth-URL API)
 
-Project **Amanah** (`vzpnixfqkvovbniaoudx`) → Authentication → URL Configuration:
+Project **Jameiyah** (`vzpnixfqkvovbniaoudx`) → Authentication → URL Configuration:
 
 - **Site URL:** `https://jameiyah.com`
 - **Redirect URLs** (add all):
@@ -67,8 +67,8 @@ Project **Amanah** (`vzpnixfqkvovbniaoudx`) → Authentication → URL Configura
   - `https://www.jameiyah.com/**`
   - `https://jameiyah.co.ke/**`
   - `https://www.jameiyah.co.ke/**`
-  - `https://amanah-liart.vercel.app/**`
-  - `https://amanah-liart.vercel.app/auth/callback`
+  - `https://jameiyah.com/**`
+  - `https://jameiyah.com/auth/callback`
   - `https://jameiyah.com/auth/callback`
   - `https://jameiyah.co.ke/auth/callback`
 
@@ -78,7 +78,7 @@ Or via Management API (needs `SUPABASE_ACCESS_TOKEN`):
 curl -X PATCH "https://api.supabase.com/v1/projects/vzpnixfqkvovbniaoudx/config/auth" \
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"site_url":"https://jameiyah.com","uri_allow_list":"https://jameiyah.com/**,https://www.jameiyah.com/**,https://jameiyah.co.ke/**,https://www.jameiyah.co.ke/**,https://amanah-liart.vercel.app/**"}'
+  -d '{"site_url":"https://jameiyah.com","uri_allow_list":"https://jameiyah.com/**,https://www.jameiyah.com/**,https://jameiyah.co.ke/**,https://www.jameiyah.co.ke/**,https://jameiyah.com/**"}'
 ```
 
 ## 4. SSL

@@ -127,7 +127,7 @@ export default async function TawarruqPage() {
               const application = Array.isArray(row.application) ? row.application[0] : row.application;
               if (!application || application.status !== 'requested') return null;
               return (
-                <li key={row.id} className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+                <li key={row.id} className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
                   <p className="text-sm text-foreground">
                     {application.purpose} · {formatCurrency(Number(application.amount), application.currency)}
                   </p>

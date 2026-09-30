@@ -61,7 +61,7 @@ function statusGrid(
   map: Record<string, readonly string[]>,
 ) {
   return (
-    <div className="amanah-surface p-4">
+    <div className="jameiyah-surface p-4">
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground">
         {Object.entries(map).map(([from, tos]) => (
@@ -103,7 +103,7 @@ export default async function AdminArchitecturePage() {
         <h3 className="text-sm font-semibold text-foreground">Stack layers</h3>
         <ol className="grid gap-3 md:grid-cols-2">
           {LAYERS.map((layer) => (
-            <li key={layer.title} className="amanah-surface px-4 py-3">
+            <li key={layer.title} className="jameiyah-surface px-4 py-3">
               <p className="text-sm font-semibold text-foreground">{layer.title}</p>
               <p className="mt-1 text-sm text-muted-foreground">{layer.body}</p>
             </li>
@@ -130,7 +130,7 @@ export default async function AdminArchitecturePage() {
 
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Admin surfaces</h3>
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {ADMIN_MAP.map((item) => (
             <li
               key={`${item.href}-${item.label}`}

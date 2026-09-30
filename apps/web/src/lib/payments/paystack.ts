@@ -33,13 +33,13 @@ export function isPaystackConfigured(): boolean {
 }
 
 export function paystackReferenceForIntent(intentId: string): string {
-  return `amanah_${intentId.replace(/-/g, '')}`;
+  return `jameiyah_${intentId.replace(/-/g, '')}`;
 }
 
 export function intentIdFromPaystackReference(reference: string): string | null {
   const raw = reference.trim();
-  if (!raw.startsWith('amanah_') || raw.length !== 'amanah_'.length + 32) return null;
-  const hex = raw.slice('amanah_'.length);
+  if (!raw.startsWith('jameiyah_') || raw.length !== 'jameiyah_'.length + 32) return null;
+  const hex = raw.slice('jameiyah_'.length);
   if (!/^[0-9a-f]{32}$/i.test(hex)) return null;
   return [
     hex.slice(0, 8),
@@ -56,7 +56,7 @@ export function toPaystackAmount(amount: number): number {
 }
 
 /**
- * Paystack rejects phone-OTP synthetic emails (`*@amanah.internal`) and `.local`.
+ * Paystack rejects phone-OTP synthetic emails (`*@jameiyah.internal`) and `.local`.
  * Map those to a valid customer email while keeping phone in metadata.
  */
 export function resolvePaystackCustomerEmail(input: {
@@ -71,17 +71,17 @@ export function resolvePaystackCustomerEmail(input: {
 
   const phoneDigits = (input.phone ?? '').replace(/\D/g, '');
   if (phoneDigits.length >= 9) {
-    return `${phoneDigits}@customers.amanah.app`;
+    return `${phoneDigits}@customers.jameiyah.com`;
   }
 
-  const internalMatch = candidate.match(/^(\d{9,15})@amanah\.internal$/);
+  const internalMatch = candidate.match(/^(\d{9,15})@jameiyah\.internal$/);
   if (internalMatch) {
-    return `${internalMatch[1]}@customers.amanah.app`;
+    return `${internalMatch[1]}@customers.jameiyah.com`;
   }
 
   const userId = (input.userId ?? '').replace(/-/g, '');
   if (userId.length >= 8) {
-    return `user-${userId.slice(0, 16)}@customers.amanah.app`;
+    return `user-${userId.slice(0, 16)}@customers.jameiyah.com`;
   }
 
   return null;
@@ -90,8 +90,8 @@ export function resolvePaystackCustomerEmail(input: {
 function isPaystackAcceptableEmail(email: string): boolean {
   if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) return false;
   if (email.endsWith('.internal') || email.endsWith('.local')) return false;
-  if (email.includes('@amanah.internal')) return false;
-  if (email.includes('@amanah.paystack.local')) return false;
+  if (email.includes('@jameiyah.internal')) return false;
+  if (email.includes('@jameiyah.paystack.local')) return false;
   return true;
 }
 

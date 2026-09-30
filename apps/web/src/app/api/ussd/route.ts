@@ -220,7 +220,7 @@ async function menu(text: string, phone: string): Promise<string> {
       return `END Grace:\n${grace}`;
     }
     case '6':
-      return 'END Support: in-app chat or amanah-liart.vercel.app. Dial again for menu.';
+      return 'END Support: in-app chat or jameiyah.com. Dial again for menu.';
     default:
       return 'END Invalid choice. Please dial again.';
   }

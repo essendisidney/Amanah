@@ -118,7 +118,7 @@ export function CircleBooksGlance({
           <Link
             key={card.label}
             href={card.href}
-            className="amanah-surface block px-4 py-4 transition-colors hover:border-primary/30"
+            className="jameiyah-surface block px-4 py-4 transition-colors hover:border-primary/30"
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {card.label}

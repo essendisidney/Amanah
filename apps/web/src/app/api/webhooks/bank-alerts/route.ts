@@ -14,7 +14,7 @@ function serviceClient() {
 function authorized(req: Request): boolean {
   const expected = process.env.BANK_ALERT_WEBHOOK_SECRET;
   if (!expected) return false;
-  const header = req.headers.get('x-amanah-webhook-secret')
+  const header = req.headers.get('x-jameiyah-webhook-secret')
     ?? req.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
   return Boolean(header && header === expected);
 }
@@ -22,7 +22,7 @@ function authorized(req: Request): boolean {
 /**
  * Ingest bank / M-Pesa SMS-style alerts for a circle.
  * POST JSON: { jamiyaId, text, provider?, bankAccountId?, amount?, direction?, externalRef? }
- * Auth: header `x-amanah-webhook-secret` (or Bearer) matching BANK_ALERT_WEBHOOK_SECRET.
+ * Auth: header `x-jameiyah-webhook-secret` (or Bearer) matching BANK_ALERT_WEBHOOK_SECRET.
  */
 export async function POST(req: Request) {
   if (!authorized(req)) {

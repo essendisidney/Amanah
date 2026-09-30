@@ -64,7 +64,7 @@ export function CircleGoalMemberBoard({
                   {m.entry_count} {m.entry_count === 1 ? 'entry' : 'entries'}
                 </p>
               </div>
-              <p className="amanah-money text-lg font-semibold">
+              <p className="jameiyah-money text-lg font-semibold">
                 {formatCurrency(Number(m.total_saved), currency)}
               </p>
             </li>
@@ -73,7 +73,7 @@ export function CircleGoalMemberBoard({
       </section>
 
       {canRecord ? (
-        <section className="amanah-surface space-y-4 px-5 py-5">
+        <section className="jameiyah-surface space-y-4 px-5 py-5">
           <div>
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
               Record a member&apos;s savings
@@ -165,7 +165,7 @@ export function CircleGoalMemberBoard({
                     {e.notes ? ` · ${e.notes}` : ''}
                   </p>
                 </div>
-                <p className="amanah-money font-semibold text-primary">
+                <p className="jameiyah-money font-semibold text-primary">
                   +{formatCurrency(Number(e.amount), currency)}
                 </p>
               </li>

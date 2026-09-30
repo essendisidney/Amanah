@@ -7,7 +7,7 @@ import { ChevronRight } from 'lucide-react';
 import { tipFormAction } from '@/features/charity/actions';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 
 export const metadata: Metadata = {
   title: 'Support Jameiyah',
@@ -20,7 +20,7 @@ export default async function SupportPage() {
   const labels = dict.support;
 
   return (
-    <main className="amanah-ambient min-h-dvh bg-background">
+    <main className="jameiyah-ambient min-h-dvh bg-background">
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <JameiyahLogo href={'/' as Route} size="md" tone="brand" />
@@ -47,7 +47,7 @@ export default async function SupportPage() {
 
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">Voluntary tip</h2>
-          <form action={tipFormAction} className="amanah-surface max-w-md space-y-3.5 px-4 py-4 sm:px-5">
+          <form action={tipFormAction} className="jameiyah-surface max-w-md space-y-3.5 px-4 py-4 sm:px-5">
             <div className="space-y-2">
               <Label htmlFor="amount">{labels.tipLabel}</Label>
               <Input
@@ -78,7 +78,7 @@ export default async function SupportPage() {
 
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">Giving elsewhere?</h2>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             <li>
               <Link
                 href={'/sadaka' as Route}

@@ -356,14 +356,14 @@ BEGIN
     SELECT 1
     FROM public.notifications
     WHERE user_id = alice_id
-      AND title = 'Welcome to Amanah'
+      AND title = 'Welcome to Jameiyah'
   ) THEN
     INSERT INTO public.notifications (user_id, type, channel, title, body, data)
     VALUES (
       alice_id,
       'system',
       'in_app',
-      'Welcome to Amanah',
+      'Welcome to Jameiyah',
       'Your demo circle is ready. Invite members and set the payout order.',
       jsonb_build_object('jamiya_id', v_jamiya_id)
     );

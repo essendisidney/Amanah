@@ -44,7 +44,7 @@ export function MemberTodayStrip({
     walletAvailable < remaining;
 
   return (
-    <section className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+    <section className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
           Welcome

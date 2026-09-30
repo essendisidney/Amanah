@@ -49,7 +49,7 @@ export function LoginForm({
                 type="button"
                 onClick={() => setMethod(item.id)}
                 className={cn(
-                  'amanah-surface flex w-full flex-col items-start gap-0.5 px-4 py-3.5 text-left transition-colors',
+                  'jameiyah-surface flex w-full flex-col items-start gap-0.5 px-4 py-3.5 text-left transition-colors',
                   'hover:border-primary/30 hover:bg-secondary/40',
                 )}
               >

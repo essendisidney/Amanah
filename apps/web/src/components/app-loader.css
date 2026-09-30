@@ -1,18 +1,18 @@
-/* Amanah loading — smooth flowing trust ring */
+/* Jameiyah loading — smooth flowing trust ring */
 
-@keyframes amanah-spin {
+@keyframes jameiyah-spin {
   to {
     transform: rotate(360deg);
   }
 }
 
-@keyframes amanah-spin-reverse {
+@keyframes jameiyah-spin-reverse {
   to {
     transform: rotate(-360deg);
   }
 }
 
-@keyframes amanah-breathe {
+@keyframes jameiyah-breathe {
   0%,
   100% {
     transform: scale(1);
@@ -24,7 +24,7 @@
   }
 }
 
-@keyframes amanah-glow {
+@keyframes jameiyah-glow {
   0%,
   100% {
     opacity: 0.35;
@@ -36,7 +36,7 @@
   }
 }
 
-@keyframes amanah-shimmer {
+@keyframes jameiyah-shimmer {
   0% {
     transform: translateX(-100%);
   }
@@ -45,7 +45,7 @@
   }
 }
 
-@keyframes amanah-progress-fill {
+@keyframes jameiyah-progress-fill {
   0% {
     width: 8%;
     opacity: 0.7;
@@ -64,7 +64,7 @@
   }
 }
 
-@keyframes amanah-fade-up {
+@keyframes jameiyah-fade-up {
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -75,7 +75,7 @@
   }
 }
 
-@keyframes amanah-mesh {
+@keyframes jameiyah-mesh {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -88,13 +88,13 @@
   }
 }
 
-@keyframes amanah-dash {
+@keyframes jameiyah-dash {
   to {
     stroke-dashoffset: 0;
   }
 }
 
-@keyframes amanah-orbit-pulse {
+@keyframes jameiyah-orbit-pulse {
   0%,
   100% {
     opacity: 0.55;
@@ -106,7 +106,7 @@
   }
 }
 
-@keyframes amanah-route-in {
+@keyframes jameiyah-route-in {
   from {
     opacity: 0;
   }
@@ -115,7 +115,7 @@
   }
 }
 
-@keyframes amanah-route-out {
+@keyframes jameiyah-route-out {
   from {
     opacity: 1;
   }
@@ -124,7 +124,7 @@
   }
 }
 
-.amanah-boot-splash {
+.jameiyah-boot-splash {
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -137,7 +137,7 @@
     visibility 0.7s;
 }
 
-.amanah-boot-splash--out,
+.jameiyah-boot-splash--out,
 html[data-booted='1'] #boot-splash {
   opacity: 0;
   transform: translateZ(0) scale(1.02);
@@ -146,14 +146,14 @@ html[data-booted='1'] #boot-splash {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .amanah-boot-splash,
-  .amanah-boot-splash--out {
+  .jameiyah-boot-splash,
+  .jameiyah-boot-splash--out {
     transition-duration: 0.01ms;
     transform: none;
   }
 }
 
-.amanah-loader {
+.jameiyah-loader {
   position: relative;
   display: flex;
   min-height: min(72dvh, 640px);
@@ -165,22 +165,22 @@ html[data-booted='1'] #boot-splash {
   text-align: center;
 }
 
-.amanah-loader--fullscreen {
+.jameiyah-loader--fullscreen {
   min-height: 100dvh;
   background: #fbfcfa;
 }
 
-.amanah-loader--compact {
+.jameiyah-loader--compact {
   min-height: 220px;
   padding: 1.75rem 1rem;
 }
 
-.amanah-loader--inline {
+.jameiyah-loader--inline {
   min-height: 0;
   padding: 2.5rem 1rem;
 }
 
-.amanah-loader__mesh {
+.jameiyah-loader__mesh {
   pointer-events: none;
   position: absolute;
   inset: -20%;
@@ -188,10 +188,10 @@ html[data-booted='1'] #boot-splash {
     radial-gradient(circle at 28% 18%, rgb(25 184 121 / 0.2), transparent 42%),
     radial-gradient(circle at 72% 78%, rgb(201 162 39 / 0.16), transparent 40%),
     linear-gradient(165deg, #fbfcfa 0%, #eef5f0 48%, #f5ecd0 100%);
-  animation: amanah-mesh 12s ease-in-out infinite;
+  animation: jameiyah-mesh 12s ease-in-out infinite;
 }
 
-.amanah-loader__pattern {
+.jameiyah-loader__pattern {
   pointer-events: none;
   position: absolute;
   inset: 0;
@@ -199,7 +199,7 @@ html[data-booted='1'] #boot-splash {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%2319b879'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
 }
 
-.amanah-loader__glow {
+.jameiyah-loader__glow {
   pointer-events: none;
   position: absolute;
   top: 50%;
@@ -209,10 +209,10 @@ html[data-booted='1'] #boot-splash {
   margin: -6rem;
   border-radius: 9999px;
   background: radial-gradient(circle, rgb(25 184 121 / 0.26) 0%, transparent 70%);
-  animation: amanah-glow 3.6s ease-in-out infinite;
+  animation: jameiyah-glow 3.6s ease-in-out infinite;
 }
 
-.amanah-loader__stage {
+.jameiyah-loader__stage {
   position: relative;
   z-index: 1;
   display: flex;
@@ -221,37 +221,37 @@ html[data-booted='1'] #boot-splash {
   gap: 1.15rem;
 }
 
-.amanah-loader__emblem {
+.jameiyah-loader__emblem {
   position: relative;
   height: 7.75rem;
   width: 7.75rem;
 }
 
-.amanah-loader--compact .amanah-loader__emblem,
-.amanah-loader--inline .amanah-loader__emblem {
+.jameiyah-loader--compact .jameiyah-loader__emblem,
+.jameiyah-loader--inline .jameiyah-loader__emblem {
   height: 5.75rem;
   width: 5.75rem;
 }
 
-.amanah-loader__ring-outer {
+.jameiyah-loader__ring-outer {
   position: absolute;
   inset: 0;
-  animation: amanah-spin 18s linear infinite;
+  animation: jameiyah-spin 18s linear infinite;
 }
 
-.amanah-loader__ring-inner {
+.jameiyah-loader__ring-inner {
   position: absolute;
   inset: 0.85rem;
-  animation: amanah-spin-reverse 12s linear infinite;
+  animation: jameiyah-spin-reverse 12s linear infinite;
 }
 
-.amanah-loader__orbit {
+.jameiyah-loader__orbit {
   position: absolute;
   inset: 0;
-  animation: amanah-spin 7.5s linear infinite;
+  animation: jameiyah-spin 7.5s linear infinite;
 }
 
-.amanah-loader__orbit-dot {
+.jameiyah-loader__orbit-dot {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -263,43 +263,43 @@ html[data-booted='1'] #boot-splash {
   box-shadow: 0 0 10px rgb(25 184 121 / 0.45);
 }
 
-.amanah-loader__orbit-dot--1 {
+.jameiyah-loader__orbit-dot--1 {
   transform: rotate(0deg) translateY(-2.4rem);
-  animation: amanah-orbit-pulse 2.4s ease-in-out infinite;
+  animation: jameiyah-orbit-pulse 2.4s ease-in-out infinite;
 }
 
-.amanah-loader__orbit-dot--2 {
+.jameiyah-loader__orbit-dot--2 {
   background: #38c98a;
   transform: rotate(120deg) translateY(-2.4rem);
-  animation: amanah-orbit-pulse 2.4s ease-in-out infinite 0.35s;
+  animation: jameiyah-orbit-pulse 2.4s ease-in-out infinite 0.35s;
 }
 
-.amanah-loader__orbit-dot--3 {
+.jameiyah-loader__orbit-dot--3 {
   background: #f3c94a;
   transform: rotate(240deg) translateY(-2.4rem);
-  animation: amanah-orbit-pulse 2.4s ease-in-out infinite 0.7s;
+  animation: jameiyah-orbit-pulse 2.4s ease-in-out infinite 0.7s;
 }
 
-.amanah-loader--compact .amanah-loader__orbit-dot--1,
-.amanah-loader--inline .amanah-loader__orbit-dot--1,
-.amanah-loader--compact .amanah-loader__orbit-dot--2,
-.amanah-loader--inline .amanah-loader__orbit-dot--2,
-.amanah-loader--compact .amanah-loader__orbit-dot--3,
-.amanah-loader--inline .amanah-loader__orbit-dot--3 {
+.jameiyah-loader--compact .jameiyah-loader__orbit-dot--1,
+.jameiyah-loader--inline .jameiyah-loader__orbit-dot--1,
+.jameiyah-loader--compact .jameiyah-loader__orbit-dot--2,
+.jameiyah-loader--inline .jameiyah-loader__orbit-dot--2,
+.jameiyah-loader--compact .jameiyah-loader__orbit-dot--3,
+.jameiyah-loader--inline .jameiyah-loader__orbit-dot--3 {
   transform: rotate(0deg) translateY(-1.85rem);
 }
 
-.amanah-loader--compact .amanah-loader__orbit-dot--2,
-.amanah-loader--inline .amanah-loader__orbit-dot--2 {
+.jameiyah-loader--compact .jameiyah-loader__orbit-dot--2,
+.jameiyah-loader--inline .jameiyah-loader__orbit-dot--2 {
   transform: rotate(120deg) translateY(-1.85rem);
 }
 
-.amanah-loader--compact .amanah-loader__orbit-dot--3,
-.amanah-loader--inline .amanah-loader__orbit-dot--3 {
+.jameiyah-loader--compact .jameiyah-loader__orbit-dot--3,
+.jameiyah-loader--inline .jameiyah-loader__orbit-dot--3 {
   transform: rotate(240deg) translateY(-1.85rem);
 }
 
-.amanah-loader__core {
+.jameiyah-loader__core {
   position: absolute;
   inset: 1.7rem;
   display: flex;
@@ -310,15 +310,15 @@ html[data-booted='1'] #boot-splash {
   box-shadow:
     0 14px 34px rgb(4 120 87 / 0.32),
     inset 0 1px 0 rgb(255 255 255 / 0.22);
-  animation: amanah-breathe 3.2s ease-in-out infinite;
+  animation: jameiyah-breathe 3.2s ease-in-out infinite;
 }
 
-.amanah-loader--compact .amanah-loader__core,
-.amanah-loader--inline .amanah-loader__core {
+.jameiyah-loader--compact .jameiyah-loader__core,
+.jameiyah-loader--inline .jameiyah-loader__core {
   inset: 1.25rem;
 }
 
-.amanah-loader__core-mark {
+.jameiyah-loader__core-mark {
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-size: 1.75rem;
   font-weight: 600;
@@ -326,40 +326,40 @@ html[data-booted='1'] #boot-splash {
   color: #f7faf8;
 }
 
-.amanah-loader--compact .amanah-loader__core-mark,
-.amanah-loader--inline .amanah-loader__core-mark {
+.jameiyah-loader--compact .jameiyah-loader__core-mark,
+.jameiyah-loader--inline .jameiyah-loader__core-mark {
   font-size: 1.35rem;
 }
 
-.amanah-loader__svg-ring {
+.jameiyah-loader__svg-ring {
   fill: none;
   stroke-width: 2.25;
   stroke-linecap: round;
 }
 
-.amanah-loader__svg-ring--a {
+.jameiyah-loader__svg-ring--a {
   stroke: rgb(4 120 87 / 0.5);
   stroke-dasharray: 140 40;
-  animation: amanah-spin 14s linear infinite;
+  animation: jameiyah-spin 14s linear infinite;
   transform-origin: 60px 60px;
 }
 
-.amanah-loader__svg-ring--b {
+.jameiyah-loader__svg-ring--b {
   stroke: rgb(201 162 39 / 0.6);
   stroke-dasharray: 100 50;
-  animation: amanah-spin-reverse 11s linear infinite;
+  animation: jameiyah-spin-reverse 11s linear infinite;
   transform-origin: 60px 60px;
 }
 
-.amanah-loader__svg-ring--c {
+.jameiyah-loader__svg-ring--c {
   stroke: rgb(25 184 121 / 0.4);
   stroke-dasharray: 70 40;
-  animation: amanah-spin 9s linear infinite;
+  animation: jameiyah-spin 9s linear infinite;
   transform-origin: 60px 60px;
 }
 
-.amanah-loader__title {
-  animation: amanah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+.jameiyah-loader__title {
+  animation: jameiyah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
   font-family: var(--font-display), ui-serif, Georgia, serif;
   font-size: clamp(1.85rem, 5vw, 2.4rem);
   font-weight: 600;
@@ -367,8 +367,8 @@ html[data-booted='1'] #boot-splash {
   color: #19b879;
 }
 
-.amanah-loader__tagline {
-  animation: amanah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
+.jameiyah-loader__tagline {
+  animation: jameiyah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.16em;
@@ -376,16 +376,16 @@ html[data-booted='1'] #boot-splash {
   color: #5c6b62;
 }
 
-.amanah-loader__message {
-  animation: amanah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
+.jameiyah-loader__message {
+  animation: jameiyah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
   max-width: 17rem;
   font-size: 0.9375rem;
   line-height: 1.45;
   color: #5c6b62;
 }
 
-.amanah-loader__bar {
-  animation: amanah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+.jameiyah-loader__bar {
+  animation: jameiyah-fade-up 1s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
   position: relative;
   margin-top: 0.35rem;
   height: 3px;
@@ -395,16 +395,16 @@ html[data-booted='1'] #boot-splash {
   background: rgb(4 120 87 / 0.1);
 }
 
-.amanah-loader__bar-shine {
+.jameiyah-loader__bar-shine {
   position: absolute;
   inset: 0 auto 0 0;
   height: 100%;
   border-radius: 9999px;
   background: linear-gradient(90deg, #19b879, #38c98a, #f3c94a);
-  animation: amanah-progress-fill 2.4s cubic-bezier(0.45, 0.05, 0.25, 1) infinite;
+  animation: jameiyah-progress-fill 2.4s cubic-bezier(0.45, 0.05, 0.25, 1) infinite;
 }
 
-.amanah-route-overlay {
+.jameiyah-route-overlay {
   position: absolute;
   inset: 0;
   z-index: 20;
@@ -413,14 +413,14 @@ html[data-booted='1'] #boot-splash {
   justify-content: center;
   background: rgb(251 252 250 / 0.78);
   backdrop-filter: blur(4px);
-  animation: amanah-route-in 0.35s ease-out both;
+  animation: jameiyah-route-in 0.35s ease-out both;
 }
 
-.amanah-route-overlay--leaving {
-  animation: amanah-route-out 0.55s cubic-bezier(0.33, 1, 0.68, 1) both;
+.jameiyah-route-overlay--leaving {
+  animation: jameiyah-route-out 0.55s cubic-bezier(0.33, 1, 0.68, 1) both;
 }
 
-.amanah-top-progress {
+.jameiyah-top-progress {
   position: fixed;
   top: 0;
   left: 0;
@@ -432,7 +432,7 @@ html[data-booted='1'] #boot-splash {
   background: transparent;
 }
 
-.amanah-top-progress__bar {
+.jameiyah-top-progress__bar {
   height: 100%;
   width: 0;
   border-radius: 0 2px 2px 0;
@@ -441,24 +441,24 @@ html[data-booted='1'] #boot-splash {
   transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.amanah-top-progress__bar--active {
+.jameiyah-top-progress__bar--active {
   width: 78%;
   transition: width 1.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.amanah-top-progress__bar--done {
+.jameiyah-top-progress__bar--done {
   width: 100%;
   transition: width 0.35s ease-out;
 }
 
-.amanah-skeleton-flow {
+.jameiyah-skeleton-flow {
   position: relative;
   overflow: hidden;
   border-radius: 0.75rem;
   background: #eef2ef;
 }
 
-.amanah-skeleton-flow::after {
+.jameiyah-skeleton-flow::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -468,32 +468,32 @@ html[data-booted='1'] #boot-splash {
     rgb(255 255 255 / 0.55) 50%,
     transparent 80%
   );
-  animation: amanah-shimmer 2.1s ease-in-out infinite;
+  animation: jameiyah-shimmer 2.1s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .amanah-loader__mesh,
-  .amanah-loader__glow,
-  .amanah-loader__ring-outer,
-  .amanah-loader__ring-inner,
-  .amanah-loader__orbit,
-  .amanah-loader__core,
-  .amanah-loader__orbit-dot,
-  .amanah-loader__bar-shine,
-  .amanah-loader__svg-ring--a,
-  .amanah-loader__svg-ring--b,
-  .amanah-loader__svg-ring--c,
-  .amanah-skeleton-flow::after,
-  .amanah-route-overlay,
-  .amanah-route-overlay--leaving {
+  .jameiyah-loader__mesh,
+  .jameiyah-loader__glow,
+  .jameiyah-loader__ring-outer,
+  .jameiyah-loader__ring-inner,
+  .jameiyah-loader__orbit,
+  .jameiyah-loader__core,
+  .jameiyah-loader__orbit-dot,
+  .jameiyah-loader__bar-shine,
+  .jameiyah-loader__svg-ring--a,
+  .jameiyah-loader__svg-ring--b,
+  .jameiyah-loader__svg-ring--c,
+  .jameiyah-skeleton-flow::after,
+  .jameiyah-route-overlay,
+  .jameiyah-route-overlay--leaving {
     animation: none !important;
   }
 
-  .amanah-loader__svg-ring {
+  .jameiyah-loader__svg-ring {
     stroke-dasharray: none;
   }
 
-  .amanah-boot-splash {
+  .jameiyah-boot-splash {
     transition-duration: 0.2s;
   }
 }

@@ -79,7 +79,7 @@ export default async function GoalsPage({
         <p className="mt-2 text-sm text-muted-foreground">Personal or shared circle targets.</p>
       </div>
 
-      <div className="amanah-surface p-5">
+      <div className="jameiyah-surface p-5">
         <CreateGoalForm circles={circles} defaultJamiyaId={defaultJamiya} />
       </div>
 
@@ -103,7 +103,7 @@ export default async function GoalsPage({
           const reached = remaining === 0;
 
           return (
-            <article key={goal.id} className="amanah-surface p-5">
+            <article key={goal.id} className="jameiyah-surface p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">

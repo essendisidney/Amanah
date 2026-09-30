@@ -12,7 +12,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
         <AdminNav />
         <div className="min-w-0 flex-1 space-y-4">
-          <header className="amanah-surface px-4 py-3 sm:px-5">
+          <header className="jameiyah-surface px-4 py-3 sm:px-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
               Admin
             </p>

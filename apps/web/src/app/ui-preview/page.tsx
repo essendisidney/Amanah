@@ -32,7 +32,7 @@ import { TawarruqRequestForm } from '@/features/finance/components/tawarruq-requ
 import { CircleActionHub } from '@/features/circles/components/circle-action-hub';
 import { CirclesListCard } from '@/features/circles/components/circles-list-card';
 import { cn } from '@/lib/utils';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { AppPage, PageHeader } from '@/components/app-page';
 
 export const dynamic = 'force-dynamic';
@@ -204,7 +204,7 @@ export default function UiPreviewPage() {
   ];
 
   return (
-    <div className="amanah-ambient min-h-dvh overflow-x-hidden">
+    <div className="jameiyah-ambient min-h-dvh overflow-x-hidden">
       <div className="sticky top-0 z-50 border-b border-accent/40 bg-accent/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.12em] text-accent-foreground">
         Sample preview — not live data
       </div>
@@ -285,12 +285,12 @@ export default function UiPreviewPage() {
         <section id="money" className="scroll-mt-28 space-y-5" aria-label="Money sample">
           <h2 className="text-sm font-semibold text-foreground">Money</h2>
 
-          <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+          <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 {dict.wallet.availableLabel}
               </p>
-              <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                 {formatCurrency(110, 'KES')}
               </p>
             </div>
@@ -318,7 +318,7 @@ export default function UiPreviewPage() {
           <div className="grid gap-5 md:grid-cols-2">
             <div className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.wallet.topUp}</h3>
-              <div className="amanah-surface p-4 sm:p-5">
+              <div className="jameiyah-surface p-4 sm:p-5">
                 <TopUpForm
                   currency="KES"
                   labels={dict.walletForms}
@@ -330,7 +330,7 @@ export default function UiPreviewPage() {
             </div>
             <div className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.wallet.withdraw}</h3>
-              <div className="amanah-surface p-4 sm:p-5">
+              <div className="jameiyah-surface p-4 sm:p-5">
                 <WithdrawalForm
                   currency="KES"
                   labels={dict.walletForms}
@@ -343,7 +343,7 @@ export default function UiPreviewPage() {
 
           <div className="space-y-2.5">
             <h3 className="text-sm font-semibold text-foreground">{dict.wallet.historyTitle}</h3>
-            <ul className="amanah-surface divide-y divide-border/70">
+            <ul className="jameiyah-surface divide-y divide-border/70">
               {sampleTx.map((row) => {
                 const inflow = row.direction === 'credit';
                 return (
@@ -362,7 +362,7 @@ export default function UiPreviewPage() {
                         {formatRelativeTime(row.created_at)}
                       </p>
                     </div>
-                    <p className="amanah-money amanah-money-in shrink-0 text-sm font-semibold">
+                    <p className="jameiyah-money jameiyah-money-in shrink-0 text-sm font-semibold">
                       {inflow ? '+' : '−'}
                       {formatCurrency(row.amount, row.currency)}
                     </p>
@@ -455,7 +455,7 @@ export default function UiPreviewPage() {
                 { label: 'Contributions in the books', value: formatCurrency(2600, 'KES'), hint: 'Written in the books' },
                 { label: 'Paid on the schedule', value: formatCurrency(200, 'KES'), hint: 'Payments marked paid' },
               ].map((card) => (
-                <div key={card.label} className="amanah-surface px-4 py-4">
+                <div key={card.label} className="jameiyah-surface px-4 py-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {card.label}
                   </p>
@@ -465,11 +465,11 @@ export default function UiPreviewPage() {
               ))}
             </div>
           </section>
-          <div id="pay-due" className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
+          <div id="pay-due" className="jameiyah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Your next contribution
             </p>
-            <p className="amanah-money text-2xl font-bold text-foreground">{formatCurrency(2000, 'KES')}</p>
+            <p className="jameiyah-money text-2xl font-bold text-foreground">{formatCurrency(2000, 'KES')}</p>
             <p className="text-sm text-muted-foreground">Due 30 Sept 2026 · Sisters Circle</p>
             <Button className="min-h-11 w-full" disabled>
               Pay {formatCurrency(2000, 'KES')}
@@ -535,13 +535,13 @@ export default function UiPreviewPage() {
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
             <AdminNav />
             <div className="min-w-0 flex-1 space-y-4">
-              <header className="amanah-surface px-4 py-3 sm:px-5">
+              <header className="jameiyah-surface px-4 py-3 sm:px-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                   Admin
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">Sample officer · compliance</p>
               </header>
-              <div className="amanah-surface space-y-2 px-4 py-5 sm:px-5">
+              <div className="jameiyah-surface space-y-2 px-4 py-5 sm:px-5">
                 <p className="font-semibold text-foreground">Inbox content starts here</p>
                 <p className="text-sm text-muted-foreground">
                   On mobile, open Admin menu. On desktop, sections stay in the left sidebar — page
@@ -565,7 +565,7 @@ export default function UiPreviewPage() {
                 </Button>
               }
             />
-            <details className="amanah-surface px-4 py-4 sm:px-5">
+            <details className="jameiyah-surface px-4 py-4 sm:px-5">
               <summary className="cursor-pointer text-sm font-semibold text-foreground">
                 Have an invite code?
               </summary>
@@ -607,7 +607,7 @@ export default function UiPreviewPage() {
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Circles · empty</h3>
-            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+            <div className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
               <div>
                 <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
                   {dict.circles.emptyTitle}
@@ -640,7 +640,7 @@ export default function UiPreviewPage() {
             />
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Updates</h3>
-              <ul className="amanah-surface divide-y divide-border/70">
+              <ul className="jameiyah-surface divide-y divide-border/70">
                 <li className="flex items-start justify-between gap-3 bg-primary/[0.04] px-4 py-3.5 sm:px-5">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
@@ -676,7 +676,7 @@ export default function UiPreviewPage() {
                   {dict.notificationsPage.openMoney}
                 </span>
               </div>
-              <ul className="amanah-surface divide-y divide-border/70">
+              <ul className="jameiyah-surface divide-y divide-border/70">
                 {sampleTx.map((row) => {
                   const inflow = row.direction === 'credit';
                   return (
@@ -695,7 +695,7 @@ export default function UiPreviewPage() {
                           {formatRelativeTime(row.created_at)}
                         </p>
                       </div>
-                      <p className="amanah-money amanah-money-in shrink-0 text-sm font-semibold">
+                      <p className="jameiyah-money jameiyah-money-in shrink-0 text-sm font-semibold">
                         {inflow ? '+' : '−'}
                         {formatCurrency(row.amount, row.currency)}
                       </p>
@@ -708,7 +708,7 @@ export default function UiPreviewPage() {
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Activity · empty</h3>
-            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+            <div className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
               <div>
                 <p className="text-base font-semibold tracking-tight text-foreground">
                   {dict.notificationsPage.emptyTitle}
@@ -733,7 +733,7 @@ export default function UiPreviewPage() {
           <h2 className="text-sm font-semibold text-foreground">You · setup incomplete</h2>
           <AppPage width="medium" className="!space-y-5">
             <PageHeader title="Amina Sample" subtitle="+254712345678" />
-            <section className="amanah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
+            <section className="jameiyah-surface space-y-3 border-primary/20 px-4 py-4 sm:px-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                   {dict.profile.setupTitle}
@@ -763,7 +763,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.profile.linkVerification}</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-foreground">Not started</p>
                   <StatusBadge status="not_started" />
@@ -779,7 +779,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Shortcuts</h3>
-              <ul className="amanah-surface divide-y divide-border/70">
+              <ul className="jameiyah-surface divide-y divide-border/70">
                 {[
                   { title: dict.profile.linkVerification, meta: 'Not started' },
                   { title: dict.profile.linkHelp, meta: null },
@@ -810,7 +810,7 @@ export default function UiPreviewPage() {
 
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">You · setup complete</h3>
-            <div className="amanah-surface space-y-2 px-4 py-4 sm:px-5">
+            <div className="jameiyah-surface space-y-2 px-4 py-4 sm:px-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                 {dict.profile.setupDone}
               </p>
@@ -826,7 +826,7 @@ export default function UiPreviewPage() {
             <PageHeader title={dict.help.title} subtitle={dict.help.subtitle} />
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.help.circleTitle}</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <p className="text-sm text-muted-foreground">{dict.help.circleBody}</p>
                 <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
                   {dict.help.openCircles}
@@ -835,7 +835,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.help.accountTitle}</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <p className="text-sm text-muted-foreground">{dict.help.accountBody}</p>
                 <ul className="divide-y divide-border/70 overflow-hidden rounded-lg border border-border/70">
                   <li className="flex min-h-11 items-center justify-between gap-3 px-3.5 py-3 text-sm font-semibold">
@@ -851,7 +851,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.help.ticketTitle}</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <p className="text-sm text-muted-foreground">{dict.help.ticketBody}</p>
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">{dict.help.ticketSubject}</p>
@@ -868,7 +868,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">{dict.help.tipTitle}</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <p className="text-sm text-muted-foreground">{dict.help.tipBody}</p>
                 <Button variant="outline" className="min-h-11 w-full sm:w-auto" disabled>
                   {dict.help.openTip}
@@ -894,7 +894,7 @@ export default function UiPreviewPage() {
             </header>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Voluntary tip</h3>
-              <div className="amanah-surface max-w-md space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface max-w-md space-y-3.5 px-4 py-4 sm:px-5">
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-foreground">{dict.support.tipLabel}</p>
                   <div className="flex h-11 items-center rounded-md border border-border/70 bg-background px-3 text-sm text-muted-foreground">
@@ -914,7 +914,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Giving elsewhere?</h3>
-              <ul className="amanah-surface divide-y divide-border/70">
+              <ul className="jameiyah-surface divide-y divide-border/70">
                 <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
                   <span>{dict.common.sadaka} campaigns</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />
@@ -948,7 +948,7 @@ export default function UiPreviewPage() {
             </header>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Your wealth</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <div className="grid gap-3.5 sm:grid-cols-2">
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-foreground">
@@ -979,7 +979,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Estimate</h3>
-              <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
                 <p className="text-sm text-muted-foreground">Approximate nisab: KES 1,100,000</p>
                 <p className="text-sm text-foreground">
                   Qualifying wealth: <span className="font-semibold">KES 1,150,000</span>
@@ -999,7 +999,7 @@ export default function UiPreviewPage() {
             </section>
             <section className="space-y-2.5">
               <h3 className="text-sm font-semibold text-foreground">Related</h3>
-              <ul className="amanah-surface divide-y divide-border/70">
+              <ul className="jameiyah-surface divide-y divide-border/70">
                 <li className="flex min-h-11 items-center justify-between gap-3 px-4 py-3 text-sm font-semibold sm:px-5">
                   <span>{dict.common.sadaka} campaigns</span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden />

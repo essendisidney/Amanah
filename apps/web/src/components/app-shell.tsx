@@ -23,7 +23,7 @@ import {
 } from '@/lib/notification-events';
 import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { QuickSearch, type QuickSearchCircle } from '@/components/quick-search';
 import { WhatsAppShareButton } from '@/components/whatsapp-share-button';
 import { composeWhatsAppMessage, JAMEIYAH_SHARE_BLURB } from '@/lib/whatsapp-share';
@@ -156,13 +156,13 @@ export function AppShell({
   });
 
   return (
-    <div className="amanah-ambient min-h-dvh overflow-x-hidden">
+    <div className="jameiyah-ambient min-h-dvh overflow-x-hidden">
       <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:border-transparent md:bg-transparent">
         <div className="mx-auto flex h-12 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-14 md:px-6">
           <JameiyahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
           <nav
-            className="amanah-nav-glass hidden items-center gap-0.5 rounded-xl px-1 py-1 md:flex"
+            className="jameiyah-nav-glass hidden items-center gap-0.5 rounded-xl px-1 py-1 md:flex"
             aria-label="Primary"
           >
             {desktopLinks.map((item) => {

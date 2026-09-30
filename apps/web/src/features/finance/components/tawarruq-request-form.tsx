@@ -94,7 +94,7 @@ export function TawarruqRequestForm({
   }
 
   return (
-    <form action={onSubmit} className="amanah-surface max-w-xl space-y-4 p-5 sm:p-6">
+    <form action={onSubmit} className="jameiyah-surface max-w-xl space-y-4 p-5 sm:p-6">
       <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">
         Request from Jameiyah
       </h2>

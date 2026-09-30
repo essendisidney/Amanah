@@ -181,7 +181,7 @@ export default async function MyCirclesPage({
 
       <section id="redeem-invite" className="scroll-mt-24">
         {rows.length > 0 && !focusRedeem ? (
-          <details className="amanah-surface px-4 py-4 sm:px-5">
+          <details className="jameiyah-surface px-4 py-4 sm:px-5">
             <summary className="cursor-pointer text-sm font-semibold text-foreground">
               Have an invite code?
             </summary>
@@ -199,7 +199,7 @@ export default async function MyCirclesPage({
         ) : (
           <div
             className={cn(
-              'amanah-surface px-4 py-4 sm:px-5',
+              'jameiyah-surface px-4 py-4 sm:px-5',
               focusRedeem && 'border-primary/40 ring-2 ring-primary/20',
             )}
           >
@@ -228,7 +228,7 @@ export default async function MyCirclesPage({
               An officer added you. Join opens the circle so you can check it before you accept.
             </p>
           </div>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {invitedRows.map((row) => (
               <li
                 key={row.id}
@@ -256,7 +256,7 @@ export default async function MyCirclesPage({
       ) : null}
 
       {rows.length === 0 ? (
-        <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
           <div>
             <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
               {invitedRows.length > 0 ? 'No active circles yet' : labels.emptyTitle}

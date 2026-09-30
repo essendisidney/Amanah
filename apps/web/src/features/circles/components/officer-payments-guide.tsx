@@ -14,7 +14,7 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
 
   if (isRotating) {
     return (
-      <section className="amanah-surface border-primary/20 px-5 py-5 sm:px-6">
+      <section className="jameiyah-surface border-primary/20 px-5 py-5 sm:px-6">
         <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
           Record contributions
         </h2>
@@ -35,7 +35,7 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
 
   if (isShareDividend) {
     return (
-      <section className="amanah-surface border-primary/20 px-5 py-5 sm:px-6">
+      <section className="jameiyah-surface border-primary/20 px-5 py-5 sm:px-6">
         <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
           Record member payments
         </h2>
@@ -55,7 +55,7 @@ export function OfficerPaymentsGuide({ slug, challengeKind }: Props) {
   }
 
   return (
-    <section className="amanah-surface border-primary/20 px-5 py-5 sm:px-6">
+    <section className="jameiyah-surface border-primary/20 px-5 py-5 sm:px-6">
       <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
         Track savings
       </h2>

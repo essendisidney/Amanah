@@ -43,7 +43,7 @@ export function ShareChamaCard({
   }, [canNativeShare, circleName, inviteUrl, text]);
 
   return (
-    <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+    <section className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
       <div>
         <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
           Share this chama

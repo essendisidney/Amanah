@@ -56,7 +56,7 @@ Redeploy web after env changes.
 
 ### 4. Smoke
 
-1. `GET https://amanah-liart.vercel.app/api/v1/payments/mpesa-health` → `daraja_configured: true`
+1. `GET https://jameiyah.com/api/v1/payments/mpesa-health` → `daraja_configured: true`
 2. Sign in → Wallet → top-up with `+2547…` → approve STK on phone
 3. Sadaka donate while signed in → same STK path
 4. Confirm wallet / donation receipt after callback
@@ -96,7 +96,7 @@ Set `REQUIRE_REAL_PROVIDERS=true` only after live B2C works in sandbox.
 
 ### Custody
 
-- `custody_mode=amanah_pass_through` (default) — Option B short hold + auto B2C
+- `custody_mode=jameiyah_pass_through` (default) — Option B short hold + auto B2C
 - `custody_mode=psp_subaccount` — Option A reserved; Jameiyah will not auto-disburse from float
 
 ### Sponsorship renewals

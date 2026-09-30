@@ -48,7 +48,7 @@ export function MerryGoRoundBoard({
 }: Props) {
   if (slots.length === 0) {
     return (
-      <div className="amanah-surface space-y-2 px-5 py-5 text-sm text-muted-foreground">
+      <div className="jameiyah-surface space-y-2 px-5 py-5 text-sm text-muted-foreground">
         <p className="font-medium text-foreground">No merry-go-round slots yet</p>
         <p>
           Assign a round for each person under Members, then activate. Each round shows who
@@ -66,7 +66,7 @@ export function MerryGoRoundBoard({
 
   return (
     <div className="space-y-4">
-      <div className="amanah-surface border-accent/20 px-5 py-4">
+      <div className="jameiyah-surface border-accent/20 px-5 py-4">
         <p className="text-xs font-semibold uppercase tracking-wide text-accent">Merry-go-round</p>
         <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold">
           {circleName}
@@ -76,7 +76,7 @@ export function MerryGoRoundBoard({
         </p>
       </div>
 
-      <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
+      <ul className="jameiyah-surface divide-y divide-border/70 overflow-hidden p-0">
         {slots.map((slot) => {
           const isCurrent =
             slot.payoutStatus === 'scheduled' ||

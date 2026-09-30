@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
         `(${row.days_overdue} days, ${row.amount_due} ${row.currency}). ` +
         `Please top up and pay from the app.`;
 
-      if (profile?.email) {
+      if (profile?.email && !profile.email.endsWith(".internal")) {
         await supabase.from("notification_outbox").insert({
           user_id: row.user_id,
           channel: "email",

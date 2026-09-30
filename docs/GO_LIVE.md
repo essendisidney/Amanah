@@ -1,7 +1,7 @@
 # Jameiyah go-live checklist
 
 Primary production URL: **https://jameiyah.com**  
-Aliases: `https://jameiyah.co.ke`, `https://amanah-liart.vercel.app`  
+Aliases: `https://jameiyah.co.ke`, `https://jameiyah.com`  
 Supabase project: `vzpnixfqkvovbniaoudx`
 
 Phase 0 ops status: [PHASE_0.md](./PHASE_0.md) · Domains: [DOMAINS.md](./DOMAINS.md)
@@ -15,7 +15,7 @@ In [Supabase Dashboard](https://supabase.com/dashboard/project/vzpnixfqkvovbniao
 | Site URL | `https://jameiyah.com` |
 | Redirect URLs | `https://jameiyah.com/auth/callback` |
 | | `https://jameiyah.co.ke/auth/callback` |
-| | `https://amanah-liart.vercel.app/auth/callback` |
+| | `https://jameiyah.com/auth/callback` |
 | | `http://localhost:3002/auth/callback` (local) |
 
 Also allow the wildcard list in `DOMAINS.md`. Without this, login / OAuth / magic links fail on the custom domain.
@@ -72,8 +72,8 @@ Sadaka fee endorsement after board sign-off: `/admin/sadaka`
 
 Repo currently deploys via Vercel CLI. For git-based deploys:
 
-1. Create GitHub repo `amanah`
-2. `git remote add origin git@github.com:<you>/amanah.git`
+1. Create GitHub repo `jameiyah`
+2. `git remote add origin git@github.com:<you>/jameiyah.git`
 3. `git push -u origin master`
 4. Vercel → Project → Settings → Git → Connect repository
 

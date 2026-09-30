@@ -6,7 +6,7 @@ Kenya payment build order put **ops** first. Code phases 1–9 can sit local unt
 
 | Check | Status | Evidence |
 |-------|--------|----------|
-| Domains live | **Green** | `jameiyah.com`, `www`, `jameiyah.co.ke`, `www` verified on Vercel project **amanah**; HTTP 200 |
+| Domains live | **Green** | `jameiyah.com`, `www`, `jameiyah.co.ke`, `www` verified on Vercel project **jameiyah**; HTTP 200 |
 | `NEXT_PUBLIC_APP_URL` | **Green** | Set on Vercel (preview plain `https://jameiyah.com`; production present) |
 | Taifa SMS key | **Green** | `GET /api/v1/health` → `otp.taifa_key: true`; `TAIFA_API_KEY` / `TAIFA_SENDER_ID` on production |
 | Supabase project | **Green** | `vzpnixfqkvovbniaoudx` `ACTIVE_HEALTHY` |

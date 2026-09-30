@@ -25,7 +25,7 @@ npx supabase functions deploy payments-bank --project-ref vzpnixfqkvovbniaoudx
 
 # Optional webhook for machine ingest
 # Vercel: BANK_ALERT_WEBHOOK_SECRET=...
-# POST /api/webhooks/bank-alerts  with header x-amanah-webhook-secret
+# POST /api/webhooks/bank-alerts  with header x-jameiyah-webhook-secret
 ```
 
 ## Not in this wave

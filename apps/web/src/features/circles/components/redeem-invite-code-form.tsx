@@ -23,7 +23,7 @@ export function extractInviteCredential(raw: string): string | null {
     const asUrl = trimmed.includes('://')
       ? new URL(trimmed)
       : trimmed.startsWith('/')
-        ? new URL(trimmed, 'https://amanah.local')
+        ? new URL(trimmed, 'https://jameiyah.local')
         : null;
     if (asUrl) {
       const match = asUrl.pathname.match(/\/invitations\/([^/?#]+)/i);

@@ -488,7 +488,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {snapshotCards.map((card) => (
-            <div key={card.label} className="amanah-surface px-4 py-4 print:rounded-none">
+            <div key={card.label} className="jameiyah-surface px-4 py-4 print:rounded-none">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {card.label}
               </p>
@@ -501,7 +501,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         (Number(summary.schedule_contributions_outstanding ?? 0) > 0 ||
           Number(summary.book_contributions ?? 0) > 0 ||
           Number(summary.savings_total ?? 0) > 0) ? (
-          <dl className="amanah-surface grid gap-3 px-4 py-4 text-sm sm:grid-cols-3">
+          <dl className="jameiyah-surface grid gap-3 px-4 py-4 text-sm sm:grid-cols-3">
             <div>
               <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Schedule paid / due
@@ -836,7 +836,7 @@ function StatementSection({
         </div>
       ) : (
         <>
-          <ul className="amanah-surface divide-y divide-border/50">
+          <ul className="jameiyah-surface divide-y divide-border/50">
             {rows.map((row) => (
               <li
                 key={row.key}

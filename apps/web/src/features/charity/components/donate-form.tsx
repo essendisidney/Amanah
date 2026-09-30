@@ -69,7 +69,7 @@ export function DonateForm({
   }, [state, router, fromZakat]);
 
   return (
-    <form action={action} className="amanah-surface space-y-4 px-4 py-4 sm:px-5">
+    <form action={action} className="jameiyah-surface space-y-4 px-4 py-4 sm:px-5">
       <input type="hidden" name="campaignId" value={campaignId} />
       <input type="hidden" name="slug" value={slug} />
       <div className="space-y-1">

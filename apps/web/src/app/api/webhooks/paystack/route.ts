@@ -17,7 +17,7 @@ export const runtime = 'nodejs';
 
 /**
  * Paystack webhook — configure in dashboard:
- * https://amanah-liart.vercel.app/api/webhooks/paystack
+ * https://jameiyah.com/api/webhooks/paystack
  */
 export async function POST(req: Request) {
   const rawBody = await req.text();

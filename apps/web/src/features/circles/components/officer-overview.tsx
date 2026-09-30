@@ -70,7 +70,7 @@ export function OfficerOverviewStrip({
   const unpaidPreview = owing.slice(0, 6);
 
   return (
-    <section className="amanah-surface px-5 py-5">
+    <section className="jameiyah-surface px-5 py-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -133,7 +133,7 @@ export function OfficerOverviewStrip({
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-foreground">{row.label}</p>
                     {row.remaining > 0 ? (
-                      <p className="amanah-money text-xs text-muted-foreground">
+                      <p className="jameiyah-money text-xs text-muted-foreground">
                         {formatCurrency(row.remaining, row.currency)}
                       </p>
                     ) : null}
@@ -236,7 +236,7 @@ export function OfficerOverviewStrip({
         </div>
         <div>
           <dt className="text-xs uppercase tracking-wide text-muted-foreground">Amount</dt>
-          <dd className="amanah-money mt-1 text-2xl font-semibold">
+          <dd className="jameiyah-money mt-1 text-2xl font-semibold">
             {nextPayoutAmount != null ? formatCurrency(nextPayoutAmount, currency) : '—'}
           </dd>
         </div>

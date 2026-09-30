@@ -17,14 +17,14 @@ Jameiyah can take wallet top-ups (and charity/tips when `PAYMENT_PROVIDER=paysta
 |----------|--------|
 | `PAYMENT_PROVIDER=paystack` | Vercel |
 | `PAYSTACK_SECRET_KEY` | Vercel (test `sk_test_…` or live `sk_live_…`) |
-| `NEXT_PUBLIC_APP_URL` | `https://amanah-liart.vercel.app` |
+| `NEXT_PUBLIC_APP_URL` | `https://jameiyah.com` |
 | `SUPABASE_SERVICE_ROLE_KEY` | already required |
 
 ## Paystack dashboard
 
 1. Settings → API Keys → copy **Secret key**
 2. Settings → Webhooks → URL  
-   `https://amanah-liart.vercel.app/api/webhooks/paystack`
+   `https://jameiyah.com/api/webhooks/paystack`
 3. Enable `charge.success`
 
 ## Local / test
@@ -38,7 +38,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 Use Paystack test cards / test mobile money from their docs. Amounts are sent in subunits (KES × 100).
 
-Phone OTP accounts use synthetic emails (`…@amanah.internal`). Paystack rejects those, so Jameiyah maps them to `{phoneDigits}@customers.amanah.app` (or `user-{id}@…`) before Checkout initialize.
+Phone OTP accounts use synthetic emails (`…@jameiyah.internal`). Paystack rejects those, so Jameiyah maps them to `{phoneDigits}@customers.jameiyah.com` (or `user-{id}@…`) before Checkout initialize.
 
 ## Schema
 

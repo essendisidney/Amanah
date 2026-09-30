@@ -54,11 +54,11 @@ export default async function AdminCollectionsPage() {
         }
       />
       {rows.length === 0 ? (
-        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+        <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
           No collection cases yet.
         </p>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {rows.map((row) => {
             const amount =
               typeof row.amount_due === 'number' ? row.amount_due : Number(row.amount_due);

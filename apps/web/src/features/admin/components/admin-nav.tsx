@@ -142,7 +142,7 @@ export function AdminNav() {
         className="sticky top-20 hidden w-56 shrink-0 self-start lg:block"
         aria-label="Admin sections"
       >
-        <nav className="amanah-surface max-h-[calc(100vh-6rem)] overflow-y-auto px-3 py-4">
+        <nav className="jameiyah-surface max-h-[calc(100vh-6rem)] overflow-y-auto px-3 py-4">
           <NavGroups pathname={pathname} activeGroupId={activeGroupId} idPrefix="desk" />
         </nav>
       </aside>

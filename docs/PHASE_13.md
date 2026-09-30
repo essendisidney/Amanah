@@ -45,7 +45,7 @@ Top-up uses existing `PAYMENT_PROVIDER=simulated|bank` (Daraja still deferred).
 
 ## 13.4 USSD (Africa’s Talking)
 
-Callback: `https://amanah-liart.vercel.app/api/ussd`
+Callback: `https://jameiyah.com/api/ussd`
 
 | Env (Vercel) | Purpose |
 |--------------|---------|

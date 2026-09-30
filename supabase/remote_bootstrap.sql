@@ -1,4 +1,4 @@
-﻿-- Amanah remote bootstrap for project vzpnixfqkvovbniaoudx
+﻿-- Jameiyah remote bootstrap for project vzpnixfqkvovbniaoudx
 -- Apply via Supabase Dashboard → SQL Editor (Run)
 
 
@@ -199,7 +199,7 @@ GRANT SELECT, UPDATE ON public.profiles TO authenticated;
 
 -- ========== 20260722185603_domain_schema.sql ==========
 
--- Phase 1.3: Domain schema â€” Amanah ROSCA core
+-- Phase 1.3: Domain schema â€” Jameiyah ROSCA core
 -- Builds on 20260722181533_profiles_auth_bootstrap.sql
 
 -- ============================================================================
@@ -2831,7 +2831,7 @@ BEGIN
       'email',
       v_inv.email,
       'You are invited to join ' || coalesce(v_name, 'a circle'),
-      'You have been invited to join ' || coalesce(v_name, 'a savings circle on Amanah') ||
+      'You have been invited to join ' || coalesce(v_name, 'a savings circle on Jameiyah') ||
         '. Open this link to accept: ' || p_invite_url,
       v_inv.invitee_user_id,
       NULL,
@@ -2845,7 +2845,7 @@ BEGIN
       'sms',
       v_inv.phone,
       NULL,
-      'Amanah invite: join ' || coalesce(v_name, 'a circle') || ' â€” ' || p_invite_url,
+      'Jameiyah invite: join ' || coalesce(v_name, 'a circle') || ' â€” ' || p_invite_url,
       v_inv.invitee_user_id,
       NULL,
       jsonb_build_object('invitation_id', v_inv.id, 'kind', 'invitation')

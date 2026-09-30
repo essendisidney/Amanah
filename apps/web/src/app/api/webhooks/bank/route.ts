@@ -39,7 +39,7 @@ function verifyBankWebhook(headers: Headers): { ok: true } | { ok: false; error:
 
   const header =
     headers.get('x-jameiyah-webhook-secret') ??
-    headers.get('x-amanah-webhook-secret') ??
+    headers.get('x-jameiyah-webhook-secret') ??
     headers.get('authorization')?.replace(/^Bearer\s+/i, '') ??
     '';
 

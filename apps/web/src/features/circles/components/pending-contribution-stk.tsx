@@ -26,7 +26,7 @@ export function PendingContributionStk({
   return (
     <section
       id="stk-waiting"
-      className="amanah-surface space-y-3 border-primary/30 px-4 py-4 md:px-5"
+      className="jameiyah-surface space-y-3 border-primary/30 px-4 py-4 md:px-5"
     >
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
@@ -46,7 +46,7 @@ export function PendingContributionStk({
             className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
           >
             <div className="min-w-0">
-              <p className="amanah-money text-sm font-semibold">
+              <p className="jameiyah-money text-sm font-semibold">
                 {formatCurrency(intent.amount, intent.currency)}
               </p>
               <p className="text-xs capitalize text-muted-foreground">

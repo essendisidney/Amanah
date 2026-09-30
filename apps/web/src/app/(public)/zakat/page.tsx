@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { ChevronRight } from 'lucide-react';
 import { Button } from '@jamiya/ui';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import { ZakatCalculator } from './zakat-calculator';
@@ -16,7 +16,7 @@ export default async function ZakatPage() {
   const { locale, dict } = await getDictionary();
 
   return (
-    <main className="amanah-ambient min-h-dvh bg-background">
+    <main className="jameiyah-ambient min-h-dvh bg-background">
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
         <header className="flex flex-wrap items-center justify-between gap-3">
           <JameiyahLogo href={'/' as Route} size="md" tone="brand" />
@@ -47,7 +47,7 @@ export default async function ZakatPage() {
 
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">Related</h2>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             <li>
               <Link
                 href={'/shariah' as Route}

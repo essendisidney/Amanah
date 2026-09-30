@@ -36,7 +36,7 @@ export function MoneyMoreLinks({ labels }: { labels: Labels }) {
           <Link
             key={item.href}
             href={item.href as Route}
-            className="amanah-surface flex min-h-11 items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="jameiyah-surface flex min-h-11 items-center gap-3 px-3 py-3 transition-colors hover:border-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Icon className="h-4 w-4" />

@@ -20,7 +20,7 @@ Continues after Phase 13 **without Daraja**.
 1. Set Vercel: `CRON_SECRET`, `USSD_CALLBACK_SECRET`, optional `AT_USSD_SHORTCODE`
 2. Set Supabase Edge secrets: `AT_USERNAME`, `AT_API_KEY`, `AT_SMS_SHORTCODE` / `AT_SENDER_ID`, `CRON_SECRET`
 3. Redeploy Edge: `notify-dispatch`, `reminders`
-4. Provision AT USSD shortcode → `https://amanah-liart.vercel.app/api/ussd`
+4. Provision AT USSD shortcode → `https://jameiyah.com/api/ussd`
 
 ## 16 — Officer trust OS
 

@@ -187,7 +187,7 @@ export default async function AdminFinancePage() {
 
       <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((c) => (
-          <div key={c.label} className="amanah-surface px-4 py-3">
+          <div key={c.label} className="jameiyah-surface px-4 py-3">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {c.label}
             </dt>
@@ -287,9 +287,9 @@ function Section({
     <section className="space-y-2.5">
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {!has ? (
-        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">{empty}</p>
+        <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">{empty}</p>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/70">{children}</ul>
+        <ul className="jameiyah-surface divide-y divide-border/70">{children}</ul>
       )}
     </section>
   );

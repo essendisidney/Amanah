@@ -3,10 +3,10 @@
  * Light concurrency smoke against public + health endpoints.
  * Usage:
  *   node scripts/load-smoke.mjs
- *   BASE_URL=https://amanah-liart.vercel.app CONCURRENCY=20 REQUESTS=100 node scripts/load-smoke.mjs
+ *   BASE_URL=https://jameiyah.com CONCURRENCY=20 REQUESTS=100 node scripts/load-smoke.mjs
  */
 
-const BASE = (process.env.BASE_URL ?? 'https://amanah-liart.vercel.app').replace(/\/$/, '');
+const BASE = (process.env.BASE_URL ?? 'https://jameiyah.com').replace(/\/$/, '');
 const CONCURRENCY = Math.max(1, Number(process.env.CONCURRENCY ?? 12));
 const REQUESTS = Math.max(CONCURRENCY, Number(process.env.REQUESTS ?? 60));
 
@@ -23,7 +23,7 @@ async function hit(path) {
   const started = performance.now();
   try {
     const res = await fetch(`${BASE}${path}`, {
-      headers: { 'user-agent': 'amanah-load-smoke/1.0' },
+      headers: { 'user-agent': 'jameiyah-load-smoke/1.0' },
       redirect: 'manual',
     });
     const ms = Math.round(performance.now() - started);

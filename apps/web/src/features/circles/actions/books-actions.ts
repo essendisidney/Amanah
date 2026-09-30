@@ -429,7 +429,7 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
       return {
         success: false,
         message:
-          'Contribution paste needs a header row with NAME and SHARES (copy rows 1–2 from AMANAH TEST).',
+          'Contribution paste needs a header row with NAME and SHARES (copy rows 1–2 from JAMEIYAH TEST).',
       };
     }
 

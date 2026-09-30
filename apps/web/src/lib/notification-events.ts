@@ -1,6 +1,6 @@
-export const NOTIFICATION_INSERT_EVENT = 'amanah:notification-insert';
-export const NOTIFICATION_READ_EVENT = 'amanah:notification-read';
-export const NOTIFICATION_CLEAR_EVENT = 'amanah:notification-clear';
+export const NOTIFICATION_INSERT_EVENT = 'jameiyah:notification-insert';
+export const NOTIFICATION_READ_EVENT = 'jameiyah:notification-read';
+export const NOTIFICATION_CLEAR_EVENT = 'jameiyah:notification-clear';
 
 export function dispatchNotificationInsert() {
   if (typeof window === 'undefined') return;

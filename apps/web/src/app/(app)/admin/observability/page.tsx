@@ -187,7 +187,7 @@ export default async function AdminObservabilityPage() {
         subtitle="Ops snapshot: reconcile, cutover, queues. Probe /api/v1/payments/orchestrator-health."
       />
 
-      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h3 className="text-sm font-semibold text-foreground">Payment reconcile</h3>
           <form action={runReconcileNowAction}>
@@ -252,7 +252,7 @@ export default async function AdminObservabilityPage() {
         )}
       </section>
 
-      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
         <h3 className="text-sm font-semibold text-foreground">Payment cutover</h3>
         <dl className="grid gap-2 sm:grid-cols-2">
           {cutoverRows.map((row) => (
@@ -293,7 +293,7 @@ export default async function AdminObservabilityPage() {
 
       <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map((card) => (
-          <div key={card.label} className="amanah-surface px-4 py-3">
+          <div key={card.label} className="jameiyah-surface px-4 py-3">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               {card.label}
             </dt>

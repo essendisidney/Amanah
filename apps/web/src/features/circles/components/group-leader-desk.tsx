@@ -104,7 +104,7 @@ export function GroupLeaderDesk({
           </Button>
         ))}
       </div>
-      <form action={updateCircleSettingsAction} className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+      <form action={updateCircleSettingsAction} className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
         <h3 className="text-sm font-semibold text-foreground">Group settings</h3>
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />

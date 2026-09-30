@@ -133,11 +133,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Pending review</h3>
         {pending.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No campaigns awaiting review.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {pending.map((row) => (
               <li key={row.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div>
@@ -204,11 +204,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Queued disbursements</h3>
         {queued.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No pending or processing payouts.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {queued.map((d) => (
               <li
                 key={d.id}
@@ -237,11 +237,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Manual disburse</h3>
         {payable.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             Nothing available to disburse.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {payable.map((row) => {
               const available =
                 Number(row.raised_amount) - Number(row.disbursed_amount ?? 0);
@@ -282,11 +282,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Institution verification</h3>
         {orgs.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No institutions registered.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {orgs.map((org) => (
               <li key={org.id} className="space-y-2 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
@@ -330,11 +330,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Fee policy</h3>
         {rows.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No campaigns yet.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {rows.map((row) => {
               const raised = Number(row.raised_amount);
               const goal = Number(row.goal_amount);
@@ -447,11 +447,11 @@ export default async function AdminSadakaPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Recent policy decisions</h3>
         {history.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No policy events yet.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70 text-sm">
+          <ul className="jameiyah-surface divide-y divide-border/70 text-sm">
             {history.map((ev) => (
               <li key={ev.id} className="px-4 py-3 sm:px-5">
                 <p className="font-semibold text-foreground">

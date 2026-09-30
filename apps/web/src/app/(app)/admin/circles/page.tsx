@@ -43,11 +43,11 @@ export default async function AdminCirclesPage() {
         subtitle="Suspend or cancel live chamas before delete. Drafts can be removed directly."
       />
       {rows.length === 0 ? (
-        <p className="amanah-surface border-dashed px-4 py-8 text-sm text-muted-foreground sm:px-5">
+        <p className="jameiyah-surface border-dashed px-4 py-8 text-sm text-muted-foreground sm:px-5">
           No circles yet.
         </p>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {rows.map((item) => {
             const amount =
               typeof item.contribution_amount === 'number'

@@ -50,7 +50,7 @@ export function PaymentModeBanner({
 
   if (!copy) {
     return simulatedBlocked || requireReal ? (
-      <div className={`amanah-surface px-4 py-3.5 ${toneClass}`} role="status">
+      <div className={`jameiyah-surface px-4 py-3.5 ${toneClass}`} role="status">
         <p className="text-sm font-semibold tracking-tight">
           {simulatedBlocked ? 'Demo payments off' : 'Live payments required'}
         </p>
@@ -64,7 +64,7 @@ export function PaymentModeBanner({
   }
 
   return (
-    <div className={`amanah-surface px-4 py-3.5 ${toneClass}`} role="status">
+    <div className={`jameiyah-surface px-4 py-3.5 ${toneClass}`} role="status">
       <p className="text-sm font-semibold tracking-tight">{copy.title}</p>
       <p className="mt-1 text-sm opacity-90">{copy.body}</p>
       {requireReal || simulatedBlocked ? (

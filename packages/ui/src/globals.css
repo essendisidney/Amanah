@@ -148,7 +148,7 @@
     Atmospheric light — barely perceptible
     pale blue · lavender · lilac · blush · faint mint
   */
-  --amanah-ambient-image:
+  --jameiyah-ambient-image:
     radial-gradient(ellipse 100% 70% at 0% -20%, rgba(13, 92, 69, 0.08), transparent 55%),
     radial-gradient(ellipse 90% 60% at 100% -10%, rgba(197, 160, 68, 0.08), transparent 52%),
     radial-gradient(ellipse 80% 55% at 100% 100%, rgba(13, 92, 69, 0.05), transparent 55%),
@@ -228,7 +228,7 @@
   --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
   --nav-glass: rgba(10, 28, 24, 0.88);
 
-  --amanah-ambient-image:
+  --jameiyah-ambient-image:
     radial-gradient(ellipse 100% 70% at 0% -20%, rgba(25, 184, 121, 0.12), transparent 55%),
     radial-gradient(ellipse 90% 60% at 100% -10%, rgba(91, 141, 239, 0.08), transparent 52%),
     radial-gradient(ellipse 80% 55% at 50% 100%, rgba(139, 124, 246, 0.06), transparent 55%);
@@ -247,7 +247,7 @@
   html,
   body {
     background-color: var(--background);
-    background-image: var(--amanah-ambient-image);
+    background-image: var(--jameiyah-ambient-image);
     background-attachment: scroll;
     background-repeat: no-repeat;
     background-size: cover;
@@ -277,25 +277,25 @@
 }
 
 @layer utilities {
-  .amanah-money {
+  .jameiyah-money {
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.03em;
   }
 
-  .amanah-money-in {
+  .jameiyah-money-in {
     color: var(--success);
   }
 
-  .amanah-money-out {
+  .jameiyah-money-out {
     color: var(--coral);
   }
 
-  .amanah-money-transfer {
+  .jameiyah-money-transfer {
     color: var(--blue);
   }
 
   /* White / translucent glass — weightless */
-  .amanah-surface {
+  .jameiyah-surface {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     background: var(--glass-bg);
@@ -304,7 +304,7 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.1);
   }
 
-  .amanah-glass {
+  .jameiyah-glass {
     border: 1px solid var(--glass-border);
     background: var(--glass-bg);
     box-shadow: var(--glass-shadow);
@@ -312,7 +312,7 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.1);
   }
 
-  .amanah-glass-soft {
+  .jameiyah-glass-soft {
     border: 1px solid var(--glass-border);
     background: var(--glass-bg-soft);
     box-shadow: 0 1px 2px rgba(17, 24, 39, 0.03);
@@ -320,7 +320,7 @@
     -webkit-backdrop-filter: blur(12px) saturate(1.05);
   }
 
-  .amanah-glass-pill {
+  .jameiyah-glass-pill {
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.92);
     box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
@@ -328,45 +328,45 @@
     -webkit-backdrop-filter: blur(12px) saturate(1.05);
   }
 
-  .dark .amanah-glass-pill {
+  .dark .jameiyah-glass-pill {
     background: rgba(255, 255, 255, 0.06);
   }
 
   /* Icon tiles — colour in pale glass circles only */
-  .amanah-tint-add,
-  .amanah-tint-request {
+  .jameiyah-tint-add,
+  .jameiyah-tint-request {
     background: var(--wash-add);
     color: var(--tint-add);
   }
-  .amanah-tint-send {
+  .jameiyah-tint-send {
     background: var(--wash-send);
     color: var(--tint-send);
   }
-  .amanah-tint-pay {
+  .jameiyah-tint-pay {
     background: var(--wash-pay);
     color: var(--tint-pay);
   }
-  .amanah-tint-withdraw {
+  .jameiyah-tint-withdraw {
     background: var(--wash-withdraw);
     color: var(--tint-withdraw);
   }
 
   /* Circle identity accents (card stays white glass) */
-  .amanah-circle-mint {
+  .jameiyah-circle-mint {
     --circle-accent: var(--primary);
     --circle-wash: var(--primary-muted);
   }
-  .amanah-circle-blue {
+  .jameiyah-circle-blue {
     --circle-accent: var(--blue);
     --circle-wash: var(--blue-muted);
   }
-  .amanah-circle-lavender {
+  .jameiyah-circle-lavender {
     --circle-accent: var(--purple);
     --circle-wash: var(--purple-muted);
   }
 
   /* Pay / Score deep soft emerald glass */
-  .amanah-forest {
+  .jameiyah-forest {
     background:
       radial-gradient(ellipse 90% 70% at 20% 0%, rgba(56, 201, 138, 0.35), transparent 55%),
       radial-gradient(ellipse 60% 50% at 95% 90%, rgba(91, 141, 239, 0.18), transparent 50%),
@@ -374,11 +374,11 @@
     color: var(--forest-foreground);
   }
 
-  .amanah-ambient {
+  .jameiyah-ambient {
     background: transparent;
   }
 
-  .amanah-nav-glass {
+  .jameiyah-nav-glass {
     border: 1px solid var(--glass-border);
     background: var(--nav-glass);
     box-shadow: 0 2px 12px rgba(17, 24, 39, 0.06);
@@ -387,12 +387,12 @@
   }
 
   /* Compact data tables (admin + statements) */
-  .amanah-table {
+  .jameiyah-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.875rem;
   }
-  .amanah-table th {
+  .jameiyah-table th {
     padding: 0.625rem 0.75rem;
     text-align: left;
     font-size: 0.7rem;
@@ -402,28 +402,28 @@
     color: var(--muted-foreground);
     border-bottom: 1px solid var(--border);
   }
-  .amanah-table td {
+  .jameiyah-table td {
     padding: 0.75rem;
     vertical-align: middle;
     border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
   }
-  .amanah-table .amount {
+  .jameiyah-table .amount {
     font-variant-numeric: tabular-nums;
     text-align: right;
     font-weight: 600;
   }
-  .amanah-table .actions {
+  .jameiyah-table .actions {
     text-align: right;
     white-space: nowrap;
   }
 
-  .amanah-pay-glow {
+  .jameiyah-pay-glow {
     box-shadow:
       0 1px 2px rgba(17, 24, 39, 0.05),
       0 4px 12px rgba(17, 24, 39, 0.06);
   }
 
-  .amanah-btn-primary {
+  .jameiyah-btn-primary {
     background: linear-gradient(180deg, var(--primary-soft) 0%, var(--primary) 100%);
     color: var(--primary-foreground);
     border: 1px solid color-mix(in oklab, var(--primary) 78%, #06261d);
@@ -432,15 +432,15 @@
       0 1px 2px rgba(17, 24, 39, 0.06);
   }
 
-  .amanah-btn-primary:hover {
+  .jameiyah-btn-primary:hover {
     border-color: color-mix(in oklab, var(--primary) 65%, #041a14);
   }
 
-  .amanah-page-enter {
-    animation: amanah-page-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  .jameiyah-page-enter {
+    animation: jameiyah-page-enter 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
-  @keyframes amanah-page-enter {
+  @keyframes jameiyah-page-enter {
     from {
       opacity: 0;
       transform: translateY(6px);
@@ -451,17 +451,17 @@
     }
   }
 
-  .amanah-geo {
+  .jameiyah-geo {
     background-color: var(--background);
-    background-image: var(--amanah-ambient-image);
+    background-image: var(--jameiyah-ambient-image);
     background-attachment: fixed;
   }
 
-  .amanah-progress {
+  .jameiyah-progress {
     background: var(--muted);
   }
-  .amanah-progress > span,
-  .amanah-progress-fill {
+  .jameiyah-progress > span,
+  .jameiyah-progress-fill {
     background: linear-gradient(90deg, var(--primary) 0%, var(--primary-soft) 100%);
   }
 }

@@ -529,7 +529,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
           <div className="rounded-xl border border-border bg-card p-5">
             <p className="text-sm text-muted-foreground">
               From <strong className="font-medium text-foreground">HALAL CHAMA INVESTMENT.xlsx</strong>{' '}
-              → tab <strong className="font-medium text-foreground">AMANAH TEST</strong>: select rows
+              → tab <strong className="font-medium text-foreground">JAMEIYAH TEST</strong>: select rows
               1–10 (header + members), copy, paste below. Include both header rows. Preview first —
               import stays off until every name matches a member.
             </p>

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import type { Dictionary } from '@/i18n/dictionaries';
 
-const DISMISS_KEY = 'amanah-install-dismissed-at';
+const DISMISS_KEY = 'jameiyah-install-dismissed-at';
 const DISMISS_MS = 7 * 24 * 60 * 60 * 1000;
 const ANDROID_FALLBACK_MS = 2200;
 
@@ -121,12 +121,12 @@ export function InstallPrompt({ labels }: { labels: Dictionary['install'] }) {
     <div
       className="fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-[60] px-3 md:bottom-4 md:px-4"
       role="dialog"
-      aria-labelledby="amanah-install-title"
+      aria-labelledby="jameiyah-install-title"
     >
       <div className="mx-auto flex max-w-lg flex-col gap-3 rounded-xl border border-border/80 bg-card/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p
-            id="amanah-install-title"
+            id="jameiyah-install-title"
             className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight text-foreground"
           >
             {labels.title}

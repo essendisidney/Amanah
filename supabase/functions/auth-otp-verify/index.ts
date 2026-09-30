@@ -26,7 +26,7 @@ function isValidKeMobile(raw: string): boolean {
 }
 
 function internalEmail(normalized254: string) {
-  return `${normalized254}@amanah.internal`;
+  return `${normalized254}@jameiyah.internal`;
 }
 
 function errorMessage(value: unknown, fallback: string): string {

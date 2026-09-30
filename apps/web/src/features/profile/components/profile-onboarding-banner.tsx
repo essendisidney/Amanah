@@ -31,7 +31,7 @@ export function ProfileOnboardingBanner({
   const ready = nameDone && phoneDone;
 
   return (
-    <section className="amanah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">
+    <section className="jameiyah-surface space-y-4 border-primary/25 px-4 py-4 md:px-5">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {labels.onboardingEyebrow}

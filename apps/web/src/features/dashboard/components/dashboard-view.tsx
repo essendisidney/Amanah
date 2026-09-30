@@ -100,7 +100,7 @@ export function DashboardView({
           )}
         </header>
 
-        <section className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <Link
             href={'/wallet' as Route}
             className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -108,7 +108,7 @@ export function DashboardView({
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {labels.available}
             </p>
-            <p className="amanah-money mt-1 text-3xl font-bold leading-none tracking-tight text-foreground sm:text-4xl">
+            <p className="jameiyah-money mt-1 text-3xl font-bold leading-none tracking-tight text-foreground sm:text-4xl">
               {formatCurrency(available, currency)}
             </p>
           </Link>
@@ -132,13 +132,13 @@ export function DashboardView({
         {needsTopUpForDue && !circle ? (
           <Link
             href={topUpForDueHref}
-            className="amanah-surface flex items-center justify-between gap-3 border-primary/30 bg-primary/8 px-4 py-3.5 transition-colors hover:bg-primary/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="jameiyah-surface flex items-center justify-between gap-3 border-primary/30 bg-primary/8 px-4 py-3.5 transition-colors hover:bg-primary/12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                 {labels.duePrefix}
               </p>
-              <p className="amanah-money mt-1 text-lg font-bold text-foreground">
+              <p className="jameiyah-money mt-1 text-lg font-bold text-foreground">
                 {formatCurrency(dueRemaining, nextDue!.currency)}
               </p>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
@@ -158,7 +158,7 @@ export function DashboardView({
               {data.reservedSeats.map((seat) => (
                 <li
                   key={seat.jamiyaId}
-                  className="amanah-surface flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5"
+                  className="jameiyah-surface flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-semibold text-foreground">{seat.name}</p>
@@ -185,7 +185,7 @@ export function DashboardView({
 
         <section className="space-y-2.5">
           {!circle ? (
-            <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+            <div className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
               <div>
                 <h2 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
                   {labels.noCirclesTitle}
@@ -219,7 +219,7 @@ export function DashboardView({
               </div>
               <Link
                 href={`/circles/${circle.jamiya.slug}` as Route}
-                className="amanah-surface amanah-circle-mint block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="jameiyah-surface jameiyah-circle-mint block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -237,7 +237,7 @@ export function DashboardView({
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t(frequencyTemplate, { days: circle.jamiya.contributionFrequencyDays })}
                     </p>
-                    <p className="amanah-money text-base font-semibold text-foreground">
+                    <p className="jameiyah-money text-base font-semibold text-foreground">
                       {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
                     </p>
                   </div>
@@ -250,7 +250,7 @@ export function DashboardView({
                         <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {labels.nextContribution}
                         </dt>
-                        <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+                        <dd className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
                           {formatCurrency(
                             Math.max(
                               circleContribution.amount - circleContribution.amountPaid,
@@ -270,7 +270,7 @@ export function DashboardView({
                         <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {labels.nextPayout}
                         </dt>
-                        <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+                        <dd className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
                           {formatCurrency(circlePayout.amount, circlePayout.currency)}
                         </dd>
                         <dd className="mt-0.5 text-xs text-muted-foreground">
@@ -315,7 +315,7 @@ function RecentSection({
           {labels.activity}
         </Link>
       </div>
-      <div className="amanah-surface px-3 py-1">
+      <div className="jameiyah-surface px-3 py-1">
         <RecentList rows={rows} emptyLabel={labels.nothingYet} />
       </div>
     </>
@@ -353,8 +353,8 @@ function RecentList({
             <p
               className={
                 inflow
-                  ? 'amanah-money amanah-money-in shrink-0 text-sm font-semibold'
-                  : 'amanah-money amanah-money-out shrink-0 text-sm font-semibold'
+                  ? 'jameiyah-money jameiyah-money-in shrink-0 text-sm font-semibold'
+                  : 'jameiyah-money jameiyah-money-out shrink-0 text-sm font-semibold'
               }
             >
               {inflow ? '+' : '−'}

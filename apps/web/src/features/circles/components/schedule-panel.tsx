@@ -59,7 +59,7 @@ export function ActivateCircleButton({
   if (!canActivate) return null;
 
   return (
-    <form action={activateCircleAction} className="amanah-surface space-y-3 border-primary/25 px-4 py-4">
+    <form action={activateCircleAction} className="jameiyah-surface space-y-3 border-primary/25 px-4 py-4">
       <input type="hidden" name="jamiyaId" value={jamiyaId} />
       <input type="hidden" name="slug" value={slug} />
       <div>
@@ -108,7 +108,7 @@ export function ContributionCalendar({
       kind: circleKind,
     });
     return (
-      <div className="amanah-surface space-y-3 px-4 py-5">
+      <div className="jameiyah-surface space-y-3 px-4 py-5">
         <div>
           <p className="font-semibold text-foreground">{empty.title}</p>
           <p className="mt-1 text-sm text-muted-foreground">{empty.body}</p>
@@ -136,7 +136,7 @@ export function ContributionCalendar({
   });
 
   return (
-    <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
+    <ul className="jameiyah-surface divide-y divide-border/70 overflow-hidden p-0">
       {ordered.map((item) => {
         const paid = item.amountPaid ?? 0;
         const remaining = Math.max(item.amount - paid, 0);

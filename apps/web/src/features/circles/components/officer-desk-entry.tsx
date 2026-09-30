@@ -23,7 +23,7 @@ export function OfficerDeskEntry({
   ].filter(Boolean);
 
   return (
-    <section className="amanah-surface flex flex-col gap-3 border-primary/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <section className="jameiyah-surface flex flex-col gap-3 border-primary/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Officer

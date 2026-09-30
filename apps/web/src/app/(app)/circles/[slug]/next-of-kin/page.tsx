@@ -182,7 +182,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
       </div>
 
       {isOfficer && activeMembers.length > 0 ? (
-        <section className="amanah-surface px-5 py-4">
+        <section className="jameiyah-surface px-5 py-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <p className="text-sm font-medium text-foreground">
               Completion: {withKin}/{activeMembers.length} members have next of kin
@@ -206,7 +206,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
       ) : null}
 
       {isOfficer ? (
-        <section className="amanah-surface space-y-3 px-5 py-5">
+        <section className="jameiyah-surface space-y-3 px-5 py-5">
           <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
             Add or update next of kin
           </h2>
@@ -224,7 +224,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
       ) : null}
 
       {isOfficer ? (
-        <section className="amanah-surface space-y-3 px-5 py-5">
+        <section className="jameiyah-surface space-y-3 px-5 py-5">
           <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold">
             Bulk import
           </h2>
@@ -242,7 +242,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
             {isOfficer ? ' — use the form above after adding members.' : '.'}
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/50">
+          <ul className="jameiyah-surface divide-y divide-border/50">
             {kinList.map((row) => (
               <li
                 key={row.id}

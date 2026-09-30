@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { cn } from '@/lib/utils';
 
 const SADAKA_LINKS = [

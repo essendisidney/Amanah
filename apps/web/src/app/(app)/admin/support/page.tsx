@@ -64,7 +64,7 @@ export default async function AdminSupportPage() {
         }
       />
       {tickets.length === 0 ? (
-        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+        <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
           No tickets yet.
         </p>
       ) : (
@@ -74,7 +74,7 @@ export default async function AdminSupportPage() {
             const label =
               who?.full_name || who?.email || who?.phone || ticket.user_id.slice(0, 8);
             return (
-              <li key={ticket.id} className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+              <li key={ticket.id} className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-semibold text-foreground">{ticket.subject}</p>
                   <StatusBadge status={ticket.status} />

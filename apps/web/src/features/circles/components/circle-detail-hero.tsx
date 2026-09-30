@@ -60,7 +60,7 @@ export function CircleDetailHero({
 
   return (
     <section className={`relative overflow-hidden ${accent}`}>
-      <div className="amanah-surface relative border-l-4 border-l-primary px-4 py-4 sm:px-5 sm:py-5">
+      <div className="jameiyah-surface relative border-l-4 border-l-primary px-4 py-4 sm:px-5 sm:py-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="truncate font-[family-name:var(--font-display)] text-xl font-semibold tracking-tight sm:text-2xl">
@@ -80,7 +80,7 @@ export function CircleDetailHero({
               {dueRemaining != null && overdue ? ' · overdue' : ''}
             </p>
             {dueRemaining != null || !moneyBooks ? (
-              <p className="amanah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
+              <p className="jameiyah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
                 {formatCurrency(heroAmount, currency)}
               </p>
             ) : null}
@@ -129,7 +129,7 @@ export function CircleDetailHero({
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   {stat.label}
                 </dt>
-                <dd className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+                <dd className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
                   {stat.value}
                 </dd>
               </div>

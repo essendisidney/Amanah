@@ -15,7 +15,7 @@ type Props = {
 
 export function CircleQuickNav({ primary, secondary }: Props) {
   return (
-    <nav className="amanah-surface space-y-3 px-4 py-4 sm:px-5" aria-label="Circle shortcuts">
+    <nav className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5" aria-label="Circle shortcuts">
       <div className="flex flex-wrap gap-2">
         {primary.map((item) => (
           <Button

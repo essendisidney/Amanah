@@ -6,7 +6,7 @@ import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Button } from '@jamiya/ui';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 import type { Locale } from '@/i18n/config';
 import { cn } from '@/lib/utils';

@@ -104,11 +104,11 @@ export default async function AdminKycPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Personal KYC</h3>
         {docs.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No personal KYC documents submitted.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {docs.map((doc) => (
               <li key={doc.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -158,11 +158,11 @@ export default async function AdminKycPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Circle KYC</h3>
         {circleDocs.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No circle registration documents yet.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {circleDocs.map((doc) => (
               <li key={doc.id} className="space-y-3 px-4 py-4 sm:px-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -212,11 +212,11 @@ export default async function AdminKycPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">IPRS lookups</h3>
         {iprsRows.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No IPRS checks yet.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {iprsRows.map((row) => (
               <li
                 key={row.id}

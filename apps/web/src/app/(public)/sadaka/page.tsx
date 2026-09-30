@@ -106,7 +106,7 @@ export default async function SadakaPage({ searchParams }: Props) {
       </header>
 
       {hasZakatAmount ? (
-        <div className="amanah-surface space-y-1 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-1 px-4 py-4 sm:px-5">
           <p className="text-sm font-semibold text-foreground">Pay your zakat estimate</p>
           <p className="text-sm text-muted-foreground">
             Suggested gift: KES {Math.round(zakatAmount).toLocaleString()}. Pick a live campaign
@@ -117,7 +117,7 @@ export default async function SadakaPage({ searchParams }: Props) {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Shortcuts</h2>
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {shortcuts.map((item) => (
             <li key={item.title}>
               <Link
@@ -169,7 +169,7 @@ export default async function SadakaPage({ searchParams }: Props) {
           Active campaigns
         </h2>
         {campaigns.length ? (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {campaigns.map((campaign) => {
               const goal = Number(campaign.goal_amount);
               const raised = Number(campaign.raised_amount);
@@ -221,7 +221,7 @@ export default async function SadakaPage({ searchParams }: Props) {
             })}
           </ul>
         ) : (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No active campaigns yet.
           </p>
         )}

@@ -3,7 +3,7 @@
 You currently have two profiles both set to `platform_admin`:
 
 - Email / Google: `essendisidney@gmail.com`
-- Phone OTP: `+254722210711` (`254722210711@amanah.internal`)
+- Phone OTP: `+254722210711` (`254722210711@jameiyah.internal`)
 
 They are separate Auth users. Prefer **one login** for day-to-day:
 

@@ -110,7 +110,7 @@ export default async function AdminWithdrawalsPage() {
       {dualRows.length > 0 ? (
         <section className="space-y-2.5">
           <h3 className="text-sm font-semibold text-foreground">Awaiting second approval</h3>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {dualRows.map((row) => {
               const destPhone =
                 typeof row.payload?.destination_phone === 'string'
@@ -167,11 +167,11 @@ export default async function AdminWithdrawalsPage() {
         </section>
       ) : null}
       {rows.length === 0 ? (
-        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+        <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
           No withdrawal requests yet.
         </p>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {rows.map((row) => {
             const amount = typeof row.amount === 'number' ? row.amount : Number(row.amount);
             const kind = typeof row.metadata?.kind === 'string' ? row.metadata.kind : null;

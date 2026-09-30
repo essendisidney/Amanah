@@ -177,7 +177,7 @@ export default async function QardPage({ searchParams }: Props) {
       {caps.length > 0 ? (
         <ul className="grid gap-3 sm:grid-cols-2">
           {caps.map((cap) => (
-            <li key={cap.jamiyaId} className="amanah-surface px-4 py-3 sm:px-5">
+            <li key={cap.jamiyaId} className="jameiyah-surface px-4 py-3 sm:px-5">
               <p className="text-sm font-medium">{cap.name}</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 {cap.cap != null

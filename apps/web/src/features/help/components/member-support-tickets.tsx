@@ -29,11 +29,11 @@ export function MemberSupportTickets({
         {title}
       </h2>
       {tickets.length === 0 ? (
-        <p className="amanah-surface px-4 py-4 text-sm text-muted-foreground sm:px-5">{empty}</p>
+        <p className="jameiyah-surface px-4 py-4 text-sm text-muted-foreground sm:px-5">{empty}</p>
       ) : (
         <ul className="space-y-3">
           {tickets.map((ticket) => (
-            <li key={ticket.id} className="amanah-surface space-y-2 px-4 py-4 sm:px-5">
+            <li key={ticket.id} className="jameiyah-surface space-y-2 px-4 py-4 sm:px-5">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-foreground">{ticket.subject}</p>
                 <StatusBadge status={ticket.status} />

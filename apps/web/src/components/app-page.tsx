@@ -83,7 +83,7 @@ export function PageSection({
         </div>
         {action}
       </div>
-      <div className={padded ? 'amanah-surface px-4 py-4 sm:px-5 sm:py-5' : undefined}>
+      <div className={padded ? 'jameiyah-surface px-4 py-4 sm:px-5 sm:py-5' : undefined}>
         {children}
       </div>
     </section>
@@ -101,7 +101,7 @@ export function PageCard({
   id?: string;
 }) {
   return (
-    <div id={id} className={cn('amanah-surface scroll-mt-28 px-4 py-3.5 sm:px-5 sm:py-4', className)}>
+    <div id={id} className={cn('jameiyah-surface scroll-mt-28 px-4 py-3.5 sm:px-5 sm:py-4', className)}>
       {children}
     </div>
   );

@@ -43,7 +43,7 @@ function LinkGroup({ title, items }: { title?: string; items: PayLink[] }) {
   return (
     <section className="space-y-2.5">
       {title ? <h2 className="text-sm font-semibold text-foreground">{title}</h2> : null}
-      <ul className="amanah-surface divide-y divide-border/70">
+      <ul className="jameiyah-surface divide-y divide-border/70">
         {items.map((action) => {
           const Icon = action.icon;
           return (
@@ -164,12 +164,12 @@ export function PaySheet({
 
   return (
     <div className="space-y-5">
-      <section className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {labels.balanceLabel}
           </p>
-          <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {formatCurrency(balance ?? 0, currency)}
           </p>
         </div>
@@ -206,7 +206,7 @@ export function PaySheet({
                 <Link
                   href={due.href}
                   className={cn(
-                    'amanah-surface flex items-start justify-between gap-3 px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                    'jameiyah-surface flex items-start justify-between gap-3 px-4 py-3.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     due.overdue
                       ? 'border-destructive/35 bg-destructive/8 hover:bg-destructive/12'
                       : 'border-primary/25 hover:bg-muted/40',
@@ -221,7 +221,7 @@ export function PaySheet({
                     >
                       {due.overdue ? labels.overdue : labels.payDue}
                     </p>
-                    <p className="amanah-money mt-1 text-xl font-bold tracking-tight text-foreground">
+                    <p className="jameiyah-money mt-1 text-xl font-bold tracking-tight text-foreground">
                       {due.amountLabel}
                     </p>
                     <p className="mt-0.5 truncate text-xs text-muted-foreground">{due.circleName}</p>
@@ -235,7 +235,7 @@ export function PaySheet({
             ))}
           </ul>
         ) : (
-          <div className="amanah-surface space-y-3 px-4 py-5 text-center sm:px-5">
+          <div className="jameiyah-surface space-y-3 px-4 py-5 text-center sm:px-5">
             <p className="text-sm font-semibold text-foreground">{labels.noDueTitle}</p>
             <p className="text-sm text-muted-foreground">{labels.noDueBody}</p>
             <Button asChild variant="outline" className="min-h-11">
@@ -252,7 +252,7 @@ export function PaySheet({
         <button
           type="button"
           onClick={() => setMoreOpen((open) => !open)}
-          className="amanah-surface flex w-full items-center justify-between px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          className="jameiyah-surface flex w-full items-center justify-between px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-expanded={moreOpen}
         >
           <span className="text-sm font-semibold text-foreground">{labels.moreTools}</span>

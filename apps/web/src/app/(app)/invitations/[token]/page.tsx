@@ -151,7 +151,7 @@ export default async function InvitationPage({ params }: Props) {
         </p>
       </div>
 
-      <div className="amanah-surface space-y-4 px-5 py-5">
+      <div className="jameiyah-surface space-y-4 px-5 py-5">
         <div className="flex flex-wrap gap-2">
           <StatusBadge status={preview.status} />
           {circle?.status ? <StatusBadge status={circle.status} /> : null}
@@ -164,7 +164,7 @@ export default async function InvitationPage({ params }: Props) {
               <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Contribution
               </dt>
-              <dd className="amanah-money mt-1 font-semibold">
+              <dd className="jameiyah-money mt-1 font-semibold">
                 {formatCurrency(contributionAmount as number, circle.currency)}
               </dd>
             </div>

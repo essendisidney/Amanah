@@ -1298,7 +1298,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       ) : null}
 
       {membership?.status === 'active' ? (
-        <details className="amanah-surface px-5 py-4">
+        <details className="jameiyah-surface px-5 py-4">
           <summary className="cursor-pointer text-sm font-semibold">More</summary>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button asChild variant="outline" className="min-h-11">
@@ -1391,7 +1391,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               }
               padded={false}
             >
-              <div className="amanah-surface px-4 py-4 sm:px-5">
+              <div className="jameiyah-surface px-4 py-4 sm:px-5">
                 <MerryGoRoundPaymentsGrid
                   jamiyaId={jamiya.id}
                   slug={slug}
@@ -1484,7 +1484,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
           {isShareDividend ? (
             <section className="grid gap-4 sm:grid-cols-2">
-              <div className="amanah-surface p-5">
+              <div className="jameiyah-surface p-5">
                 <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
                   Loans & welfare
                 </h3>
@@ -1503,7 +1503,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
                   </Button>
                 </div>
               </div>
-              <div className="amanah-surface p-5">
+              <div className="jameiyah-surface p-5">
                 <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
                   Treasury & books
                 </h3>

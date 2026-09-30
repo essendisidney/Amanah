@@ -122,7 +122,7 @@ export function QuickSearch({
       {open ? (
         <div className="fixed inset-0 z-[60] bg-background/80 p-4 pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-sm">
           <button type="button" className="absolute inset-0" aria-label={labels.search} onClick={close} />
-          <div className="amanah-surface relative mx-auto w-full max-w-lg p-3">
+          <div className="jameiyah-surface relative mx-auto w-full max-w-lg p-3">
             <form
               onSubmit={(event) => {
                 event.preventDefault();

@@ -12,7 +12,7 @@ function hideSplash() {
   if (!splash || splash.getAttribute('data-out') === '1') return;
 
   splash.setAttribute('data-out', '1');
-  splash.classList.add('amanah-boot-splash--out');
+  splash.classList.add('jameiyah-boot-splash--out');
   splash.style.pointerEvents = 'none';
   document.documentElement.setAttribute('data-booted', '1');
 }

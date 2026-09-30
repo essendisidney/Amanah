@@ -42,7 +42,7 @@ export default async function CreateCirclePage({ searchParams }: Props) {
         </Link>
       </p>
 
-      <div className="amanah-surface px-4 py-4 sm:px-5 md:p-8">
+      <div className="jameiyah-surface px-4 py-4 sm:px-5 md:p-8">
         <CreateCircleForm defaultSegment={defaultSegment} segmentHint={segmentHint} />
       </div>
     

@@ -77,7 +77,7 @@ export default async function AdminPlaybooksPage() {
         {rows.map((pb) => {
           const pbSteps = stepRows.filter((s) => s.playbook_id === pb.id);
           return (
-            <li key={pb.id} className="amanah-surface px-4 py-4 sm:px-5">
+            <li key={pb.id} className="jameiyah-surface px-4 py-4 sm:px-5">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold text-foreground">{pb.name}</p>
                 <StatusBadge status={pb.is_active ? 'active' : 'paused'} />
@@ -115,11 +115,11 @@ export default async function AdminPlaybooksPage() {
       <section className="space-y-2.5">
         <h3 className="text-sm font-semibold text-foreground">Recent actions</h3>
         {actions.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
             No actions yet.
           </p>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {actions.map((row) => (
               <li key={row.id} className="px-4 py-3 text-sm sm:px-5">
                 <div className="flex flex-wrap items-center gap-2">

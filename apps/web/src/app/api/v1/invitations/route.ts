@@ -8,7 +8,7 @@ import {
 } from '@/features/circles/lib/invitation-token';
 
 function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? 'https://amanah-liart.vercel.app';
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'https://jameiyah.com';
 }
 
 /** Pending invitations for the signed-in user (email/phone match or invitee_user_id). */

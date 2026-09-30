@@ -40,12 +40,12 @@ export function SmoothRouteTransition({ children }: { children: ReactNode }) {
 
   return (
     <div className="relative min-h-[40vh]">
-      <div className="amanah-top-progress" aria-hidden>
+      <div className="jameiyah-top-progress" aria-hidden>
         <div
           className={[
-            'amanah-top-progress__bar',
-            progress === 'active' && 'amanah-top-progress__bar--active',
-            progress === 'done' && 'amanah-top-progress__bar--done',
+            'jameiyah-top-progress__bar',
+            progress === 'active' && 'jameiyah-top-progress__bar--active',
+            progress === 'done' && 'jameiyah-top-progress__bar--done',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -53,7 +53,7 @@ export function SmoothRouteTransition({ children }: { children: ReactNode }) {
       </div>
       <div
         key={pathname}
-        className="amanah-page-enter"
+        className="jameiyah-page-enter"
       >
         {children}
       </div>

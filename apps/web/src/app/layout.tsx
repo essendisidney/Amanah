@@ -61,7 +61,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var r=document.documentElement;if(!localStorage.getItem('amanah-palette-v5')){localStorage.setItem('amanah-theme','light');localStorage.setItem('amanah-palette-v5','1')}var t=localStorage.getItem('amanah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='light';localStorage.setItem('amanah-theme','light')}var d=t==='dark';if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){try{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'}catch(x){}}})();`,
+            __html: `(function(){try{var r=document.documentElement;if(!localStorage.getItem('jameiyah-palette-v5')){localStorage.setItem('jameiyah-theme','light');localStorage.setItem('jameiyah-palette-v5','1')}var t=localStorage.getItem('jameiyah-theme');if(t!=='light'&&t!=='dark'&&t!=='auto'){t='light';localStorage.setItem('jameiyah-theme','light')}var d=t==='dark';if(d){r.classList.add('dark');r.style.colorScheme='dark'}else{r.classList.remove('dark');r.style.colorScheme='light'}}catch(e){try{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light'}catch(x){}}})();`,
           }}
         />
       </head>

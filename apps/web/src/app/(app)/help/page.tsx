@@ -53,7 +53,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Share the app</h2>
-        <div className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">
             Send someone a WhatsApp link to try Jameiyah. Best for friends or testers who are new.
           </p>
@@ -63,7 +63,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.circleTitle}</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">{labels.circleBody}</p>
           <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
             <Link href={'/circles' as Route}>{labels.openCircles}</Link>
@@ -73,7 +73,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.accountTitle}</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">{labels.accountBody}</p>
           <ul className="divide-y divide-border/70 overflow-hidden rounded-lg border border-border/70">
             <li>
@@ -101,7 +101,7 @@ export default async function HelpPage() {
       {contact.hasDirectChannel ? (
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.contactTitle}</h2>
-          <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+          <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
             <p className="text-sm text-muted-foreground">{labels.contactBody}</p>
             <div className="grid gap-2 sm:grid-cols-2">
               {contact.mailtoHref && contact.email ? (
@@ -123,7 +123,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.faqTitle}</h2>
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           <li className="space-y-1 px-4 py-4 sm:px-5">
             <p className="text-sm font-semibold text-foreground">{labels.faqShariahQ}</p>
             <p className="text-sm text-muted-foreground">{labels.faqShariahA}</p>
@@ -158,7 +158,7 @@ export default async function HelpPage() {
 
       <section id="ticket" className="scroll-mt-24 space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.ticketTitle}</h2>
-        <div className="amanah-surface px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface px-4 py-4 sm:px-5">
           <SupportTicketForm
             labels={{
               ticketTitle: labels.ticketTitle,
@@ -175,7 +175,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.webTitle}</h2>
-        <div className="amanah-surface space-y-2 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-2 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">{labels.webBody}</p>
           <p className="text-sm font-semibold text-foreground">jameiyah.com</p>
         </div>
@@ -183,7 +183,7 @@ export default async function HelpPage() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.tipTitle}</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">{labels.tipBody}</p>
           <Button asChild variant="outline" className="min-h-11 w-full sm:w-auto">
             <Link href={'/support' as Route}>{labels.openTip}</Link>

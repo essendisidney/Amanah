@@ -32,11 +32,11 @@ export default function GlobalError({
       >
         <div style={{ maxWidth: 360, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: 12, letterSpacing: '0.16em', color: '#19b879' }}>
-            AMANAH
+            JAMEIYAH
           </p>
           <h1 style={{ margin: '12px 0', fontSize: 24 }}>Could not open the app</h1>
           <p style={{ margin: '0 0 20px', color: '#64748b', lineHeight: 1.5 }}>
-            Retrying now. If this stays, close the tab and open amanah-liart.vercel.app again.
+            Retrying now. If this stays, close the tab and open jameiyah.com again.
           </p>
           <button
             type="button"

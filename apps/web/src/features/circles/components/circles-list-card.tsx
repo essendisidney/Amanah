@@ -42,7 +42,7 @@ export function CirclesListCard({
   return (
     <Link
       href={href}
-      className="amanah-surface block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
+      className="jameiyah-surface block border-l-4 border-l-primary px-4 py-4 transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:px-5"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
@@ -58,7 +58,7 @@ export function CirclesListCard({
           <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             {eachMonthLabel}
           </p>
-          <p className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+          <p className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
             {formatCurrency(monthlyAmount, currency)}
           </p>
         </div>
@@ -77,7 +77,7 @@ export function CirclesListCard({
             </p>
             <p
               className={cn(
-                'amanah-money mt-0.5 text-sm font-semibold',
+                'jameiyah-money mt-0.5 text-sm font-semibold',
                 overdue ? 'text-destructive' : 'text-foreground',
               )}
             >

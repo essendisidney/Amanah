@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { JameiyahLogo } from '@/components/amanah-logo';
+import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { LanguageSwitcher } from '@/i18n/language-switcher';
 
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const { locale, dict } = await getDictionary();
   return (
-    <div className="amanah-geo min-h-dvh bg-background">
+    <div className="jameiyah-geo min-h-dvh bg-background">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-[50vh] bg-[radial-gradient(ellipse_at_top,_rgba(91,141,239,0.08)_0%,_transparent_60%)]"

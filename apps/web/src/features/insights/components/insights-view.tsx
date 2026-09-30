@@ -68,11 +68,11 @@ export function InsightsView({
         <p className="mt-2 text-sm text-muted-foreground">This month for {name}.</p>
       </div>
 
-      <section className="amanah-surface space-y-1 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-1 px-4 py-4 sm:px-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Inflow this month
         </p>
-        <p className="amanah-money text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <p className="jameiyah-money text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           {formatCurrency(monthInflow, currency)}
         </p>
         <p className="text-sm text-muted-foreground">
@@ -107,11 +107,11 @@ export function InsightsView({
             hint: 'Turns headed your way',
           },
         ].map((stat) => (
-          <div key={stat.label} className="amanah-surface px-3 py-3.5">
+          <div key={stat.label} className="jameiyah-surface px-3 py-3.5">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               {stat.label}
             </p>
-            <p className="amanah-money mt-1 text-2xl font-bold tracking-tight">{stat.value}</p>
+            <p className="jameiyah-money mt-1 text-2xl font-bold tracking-tight">{stat.value}</p>
             <p className="mt-1 text-[11px] text-muted-foreground">{stat.hint}</p>
           </div>
         ))}
@@ -122,7 +122,7 @@ export function InsightsView({
           <h2 className="text-sm font-semibold text-foreground">Upcoming dues</h2>
         </div>
         {dashboard.contributions.length === 0 ? (
-          <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground">
+          <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground">
             No open contributions.
           </p>
         ) : (
@@ -154,7 +154,7 @@ export function InsightsView({
         <div>
           <h2 className="text-sm font-semibold text-foreground">{payLabels.sectionSee}</h2>
         </div>
-        <ul className="amanah-surface divide-y divide-border/70 overflow-hidden">
+        <ul className="jameiyah-surface divide-y divide-border/70 overflow-hidden">
           {nextStops.map((item) => {
             const Icon = item.icon;
             return (
@@ -196,7 +196,7 @@ export function InsightsView({
             actionHref={'/wallet?focus=top-up#top-up' as Route}
           />
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70 overflow-hidden p-0">
+          <ul className="jameiyah-surface divide-y divide-border/70 overflow-hidden p-0">
             {dashboard.activity.map((row) => {
               const inflow = row.direction === 'credit';
               return (
@@ -216,8 +216,8 @@ export function InsightsView({
                   <p
                     className={
                       inflow
-                        ? 'amanah-money text-sm font-bold text-primary'
-                        : 'amanah-money text-sm font-bold text-foreground'
+                        ? 'jameiyah-money text-sm font-bold text-primary'
+                        : 'jameiyah-money text-sm font-bold text-foreground'
                     }
                   >
                     {inflow ? '+' : '−'}

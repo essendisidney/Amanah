@@ -132,11 +132,11 @@ export default async function AdminOverviewPage() {
         }
       />
 
-      <section className="amanah-surface space-y-3 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-3 px-4 py-4 sm:px-5">
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Today
         </p>
-        <p className="amanah-money text-3xl font-semibold tracking-tight sm:text-4xl">
+        <p className="jameiyah-money text-3xl font-semibold tracking-tight sm:text-4xl">
           {totalWaiting === 0 ? 'All clear' : totalWaiting}
         </p>
         <div className="flex flex-wrap gap-2">
@@ -156,7 +156,7 @@ export default async function AdminOverviewPage() {
       {actionable.length > 0 ? (
         <section className="space-y-2.5">
           <h3 className="text-sm font-semibold text-foreground">Needs action</h3>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {actionable.map((item) => (
               <li
                 key={item.href}
@@ -183,7 +183,7 @@ export default async function AdminOverviewPage() {
       {clear.length > 0 ? (
         <section className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground">Caught up</h3>
-          <ul className="amanah-surface divide-y divide-border/70 text-sm">
+          <ul className="jameiyah-surface divide-y divide-border/70 text-sm">
             {clear.map((item) => (
               <li key={item.href}>
                 <Link

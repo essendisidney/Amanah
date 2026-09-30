@@ -43,7 +43,7 @@ function BarList({
 }) {
   const max = Math.max(...rows.map((r) => r.value), 1);
   return (
-    <div className="amanah-surface space-y-3 px-4 py-4">
+    <div className="jameiyah-surface space-y-3 px-4 py-4">
       <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
       {rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{empty}</p>
@@ -75,7 +75,7 @@ export default async function AdminInsightsPage() {
 
   if (!insights) {
     return (
-      <div className="amanah-surface space-y-2 px-5 py-5">
+      <div className="jameiyah-surface space-y-2 px-5 py-5">
         <h2 className="text-xl font-semibold">Insights unavailable</h2>
         <p className="text-sm text-muted-foreground">
           Could not load product metrics. Confirm you are signed in as platform admin and that
@@ -184,7 +184,7 @@ export default async function AdminInsightsPage() {
             rows={formatCountMap(p.payment_methods)}
             empty="No contribution payments recorded in the last 30 days."
           />
-          <div className="amanah-surface space-y-3 px-4 py-4">
+          <div className="jameiyah-surface space-y-3 px-4 py-4">
             <h3 className="text-sm font-semibold tracking-tight">Top payment errors (30d)</h3>
             {p.top_errors.length === 0 ? (
               <p className="text-sm text-muted-foreground">No failed intents with messages yet.</p>
@@ -237,7 +237,7 @@ export default async function AdminInsightsPage() {
           <Metric label="Paid contributions" value={h.contributions_paid} />
         </div>
 
-        <div className="amanah-surface overflow-hidden">
+        <div className="jameiyah-surface overflow-hidden">
           <div className="border-b border-border px-4 py-3">
             <h3 className="text-sm font-semibold tracking-tight">Per circle</h3>
           </div>

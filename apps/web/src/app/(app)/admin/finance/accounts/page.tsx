@@ -69,7 +69,7 @@ export default async function AdminChartOfAccountsPage() {
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-border bg-card">
-        <table className="amanah-table min-w-[640px]">
+        <table className="jameiyah-table min-w-[640px]">
           <thead>
             <tr>
               <th>Code</th>

@@ -403,7 +403,7 @@ export type Dictionary = {
     title: string;
     subtitle: string;
     youFallback: string;
-    amanahScore: string;
+    jameiyahScore: string;
     scoreExcellent: string;
     scoreStrong: string;
     scoreBuilding: string;
@@ -1050,7 +1050,7 @@ export const en: Dictionary = {
     title: 'You',
     subtitle: 'Name, phone, and verification.',
     youFallback: 'You',
-    amanahScore: 'Jameiyah Score',
+    jameiyahScore: 'Jameiyah Score',
     scoreExcellent: 'Strong setup',
     scoreStrong: 'Getting there',
     scoreBuilding: 'Just starting',
@@ -1709,7 +1709,7 @@ export const sw: Dictionary = {
     title: 'Wewe',
     subtitle: 'Jina, simu, na uthibitisho.',
     youFallback: 'Wewe',
-    amanahScore: 'Alama ya Jameiyah',
+    jameiyahScore: 'Alama ya Jameiyah',
     scoreExcellent: 'Imara',
     scoreStrong: 'Inaendelea',
     scoreBuilding: 'Inaanza',

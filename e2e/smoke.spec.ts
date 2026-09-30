@@ -4,7 +4,7 @@ test.describe('smoke', () => {
   test('landing page loads brand and primary CTA', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/amanah/i).first()).toBeVisible();
+    await expect(page.getByText(/jameiyah/i).first()).toBeVisible();
   });
 
   test('login page renders email form', async ({ page }) => {

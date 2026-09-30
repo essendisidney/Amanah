@@ -93,7 +93,7 @@ export async function exportAuditLogsCsvAction(): Promise<ExportPayload | null> 
     metadata: { count: rows.length, format: 'csv+xls' },
   } as never);
 
-  return withExcel('amanah-audit', 'Audit', table);
+  return withExcel('jameiyah-audit', 'Audit', table);
 }
 
 export async function exportTransactionsCsvAction(): Promise<ExportPayload | null> {
@@ -154,5 +154,5 @@ export async function exportTransactionsCsvAction(): Promise<ExportPayload | nul
     metadata: { count: rows.length, format: 'csv+xls' },
   } as never);
 
-  return withExcel('amanah-transactions', 'Transactions', table);
+  return withExcel('jameiyah-transactions', 'Transactions', table);
 }

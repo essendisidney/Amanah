@@ -1,7 +1,7 @@
 # Production smoke test
 
 Base URL: https://jameiyah.com  
-Fallback: https://amanah-liart.vercel.app
+Fallback: https://jameiyah.com
 
 ## Automated pings
 

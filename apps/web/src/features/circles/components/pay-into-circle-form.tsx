@@ -39,7 +39,7 @@ export function PayIntoCircleForm({
   return (
     <section
       id={anchorId}
-      className="amanah-surface space-y-4 border-primary/20 px-4 py-4 sm:px-5"
+      className="jameiyah-surface space-y-4 border-primary/20 px-4 py-4 sm:px-5"
     >
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">

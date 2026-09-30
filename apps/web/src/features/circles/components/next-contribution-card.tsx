@@ -115,14 +115,14 @@ export function NextContributionCard({
   return (
     <section
       id={showAnchor ? 'pay-due' : undefined}
-      className="amanah-surface space-y-4 border-primary/20 px-4 py-4 sm:px-5"
+      className="jameiyah-surface space-y-4 border-primary/20 px-4 py-4 sm:px-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             {heading?.trim() || labels.nextTitle}
           </p>
-          <p className="amanah-money mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <p className="jameiyah-money mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {formatCurrency(remaining, currency)}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">{dueMeta}</p>
@@ -132,7 +132,7 @@ export function NextContributionCard({
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
               {labels.moneyAvailable}
             </p>
-            <p className="amanah-money mt-0.5 text-sm font-semibold text-foreground">
+            <p className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
               {formatCurrency(walletAvailable, walletCurrency)}
             </p>
           </div>

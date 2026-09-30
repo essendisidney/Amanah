@@ -7,6 +7,6 @@ npx supabase login
 npx supabase functions deploy payments-mpesa --project-ref vzpnixfqkvovbniaoudx
 ```
 
-Then check: https://amanah-liart.vercel.app/api/v1/payments/mpesa-health
+Then check: https://jameiyah.com/api/v1/payments/mpesa-health
 
 While `PAYMENT_PROVIDER=paystack`, wallet top-ups do not need Daraja. Flip to `mpesa` only after this deploy succeeds and `daraja_configured` is true.

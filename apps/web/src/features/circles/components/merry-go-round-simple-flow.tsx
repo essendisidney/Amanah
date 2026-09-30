@@ -57,7 +57,7 @@ export function MerryGoRoundSimpleFlow({
       ];
 
   return (
-    <section className="amanah-surface space-y-4 px-5 py-5 sm:px-6">
+    <section className="jameiyah-surface space-y-4 px-5 py-5 sm:px-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">Merry-go-round</p>
         <h2 className="mt-1 font-[family-name:var(--font-display)] text-xl font-semibold">

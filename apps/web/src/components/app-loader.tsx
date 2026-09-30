@@ -1,5 +1,5 @@
 import { APP_NAME, APP_TAGLINE } from '@jamiya/shared';
-import { JameiyahMark } from '@/components/amanah-logo';
+import { JameiyahMark } from '@/components/jameiyah-logo';
 
 type AppLoaderProps = {
   message?: string;
@@ -9,14 +9,14 @@ type AppLoaderProps = {
 
 function TrustEmblem() {
   return (
-    <div className="amanah-loader__emblem flex items-center justify-center" aria-hidden>
-      <div className="amanah-loader__ring-outer">
+    <div className="jameiyah-loader__emblem flex items-center justify-center" aria-hidden>
+      <div className="jameiyah-loader__ring-outer">
         <svg viewBox="0 0 120 120" className="h-full w-full">
           <circle
             cx="60"
             cy="60"
             r="52"
-            className="amanah-loader__svg-ring amanah-loader__svg-ring--a"
+            className="jameiyah-loader__svg-ring jameiyah-loader__svg-ring--a"
           />
         </svg>
       </div>
@@ -33,31 +33,31 @@ export function AppLoader({
   showBrand = true,
 }: AppLoaderProps) {
   const className = [
-    'amanah-loader',
-    variant === 'fullscreen' && 'amanah-loader--fullscreen',
-    variant === 'compact' && 'amanah-loader--compact',
-    variant === 'inline' && 'amanah-loader--inline',
+    'jameiyah-loader',
+    variant === 'fullscreen' && 'jameiyah-loader--fullscreen',
+    variant === 'compact' && 'jameiyah-loader--compact',
+    variant === 'inline' && 'jameiyah-loader--inline',
   ]
     .filter(Boolean)
     .join(' ');
 
   return (
     <div className={className} role="status" aria-live="polite" aria-busy="true">
-      <div className="amanah-loader__mesh" aria-hidden />
-      <div className="amanah-loader__pattern" aria-hidden />
-      <div className="amanah-loader__glow" aria-hidden />
+      <div className="jameiyah-loader__mesh" aria-hidden />
+      <div className="jameiyah-loader__pattern" aria-hidden />
+      <div className="jameiyah-loader__glow" aria-hidden />
 
-      <div className="amanah-loader__stage">
+      <div className="jameiyah-loader__stage">
         <TrustEmblem />
         {showBrand ? (
           <>
-            <p className="amanah-loader__title">{APP_NAME}</p>
-            <p className="amanah-loader__tagline">{APP_TAGLINE}</p>
+            <p className="jameiyah-loader__title">{APP_NAME}</p>
+            <p className="jameiyah-loader__tagline">{APP_TAGLINE}</p>
           </>
         ) : null}
-        <p className="amanah-loader__message">{message}</p>
-        <div className="amanah-loader__bar" aria-hidden>
-          <div className="amanah-loader__bar-shine" />
+        <p className="jameiyah-loader__message">{message}</p>
+        <div className="jameiyah-loader__bar" aria-hidden>
+          <div className="jameiyah-loader__bar-shine" />
         </div>
       </div>
     </div>
@@ -73,25 +73,25 @@ export function BootSplashMarkup() {
   return (
     <div
       id="boot-splash"
-      className="amanah-boot-splash"
+      className="jameiyah-boot-splash"
       role="status"
       aria-live="polite"
       aria-busy="true"
       suppressHydrationWarning
     >
-      <div className="amanah-loader amanah-loader--fullscreen">
-        <div className="amanah-loader__mesh" aria-hidden />
-        <div className="amanah-loader__pattern" aria-hidden />
-        <div className="amanah-loader__glow" aria-hidden />
-        <div className="amanah-loader__stage">
-          <div className="amanah-loader__emblem flex items-center justify-center" aria-hidden>
-            <div className="amanah-loader__ring-outer">
+      <div className="jameiyah-loader jameiyah-loader--fullscreen">
+        <div className="jameiyah-loader__mesh" aria-hidden />
+        <div className="jameiyah-loader__pattern" aria-hidden />
+        <div className="jameiyah-loader__glow" aria-hidden />
+        <div className="jameiyah-loader__stage">
+          <div className="jameiyah-loader__emblem flex items-center justify-center" aria-hidden>
+            <div className="jameiyah-loader__ring-outer">
               <svg viewBox="0 0 120 120" className="h-full w-full">
                 <circle
                   cx="60"
                   cy="60"
                   r="52"
-                  className="amanah-loader__svg-ring amanah-loader__svg-ring--a"
+                  className="jameiyah-loader__svg-ring jameiyah-loader__svg-ring--a"
                 />
               </svg>
             </div>
@@ -107,11 +107,11 @@ export function BootSplashMarkup() {
               />
             </div>
           </div>
-          <p className="amanah-loader__title">{APP_NAME}</p>
-          <p className="amanah-loader__tagline">{APP_TAGLINE}</p>
-          <p className="amanah-loader__message">Starting Jameiyah…</p>
-          <div className="amanah-loader__bar" aria-hidden>
-            <div className="amanah-loader__bar-shine" />
+          <p className="jameiyah-loader__title">{APP_NAME}</p>
+          <p className="jameiyah-loader__tagline">{APP_TAGLINE}</p>
+          <p className="jameiyah-loader__message">Starting Jameiyah…</p>
+          <div className="jameiyah-loader__bar" aria-hidden>
+            <div className="jameiyah-loader__bar-shine" />
           </div>
         </div>
       </div>

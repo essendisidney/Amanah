@@ -32,7 +32,7 @@ export async function CircleLinkedGoals({
   }>;
 
   return (
-    <section className="amanah-surface px-5 py-5">
+    <section className="jameiyah-surface px-5 py-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">Circle goals</h2>

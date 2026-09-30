@@ -137,17 +137,18 @@ function b2cConfigured(): boolean {
   );
 }
 
+/** Daraja TransactionDesc is capped at 13 characters. */
 function descForKind(kind: string | undefined, fallback?: string): string {
   if (fallback) return fallback.slice(0, 13);
   switch (kind) {
     case "sadaka":
-      return "Jameiyah sadaka";
+      return "Sadaka";
     case "sponsorship":
-      return "Jameiyah adopt";
+      return "Sponsorship";
     case "platform_tip":
-      return "Jameiyah support";
+      return "Jameiyah tip";
     default:
-      return "Jameiyah top-up";
+      return "Jameiyah";
   }
 }
 

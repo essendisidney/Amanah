@@ -9,7 +9,7 @@ import {
 } from '@/features/circles/lib/invitation-token';
 
 function getSiteUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? 'https://amanah-liart.vercel.app';
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'https://jameiyah.com';
 }
 
 /** POST — circle admin adds member (existing → active; new → provision + invited). */

@@ -12,7 +12,7 @@ function emit(level: LogLevel, message: string, fields?: LogFields) {
     ts: new Date().toISOString(),
     level,
     message,
-    service: 'amanah-web',
+    service: 'jameiyah-web',
     ...fields,
   };
 

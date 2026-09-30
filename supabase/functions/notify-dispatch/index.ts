@@ -34,9 +34,13 @@ function normalizePhone254(raw: string): string {
 
 async function sendEmail(to: string, subject: string, body: string): Promise<void> {
   const apiKey = env("RESEND_API_KEY");
-  const from = env("EMAIL_FROM") || "Jameiyah <noreply@jameiyah.app>";
+  const from = env("EMAIL_FROM") || "Jameiyah <noreply@jameiyah.com>";
   if (!apiKey) {
     console.info("email skipped (no RESEND_API_KEY)", { to, subject });
+    return;
+  }
+  if (to.endsWith(".internal")) {
+    console.info("email skipped (internal placeholder address)", { to });
     return;
   }
 

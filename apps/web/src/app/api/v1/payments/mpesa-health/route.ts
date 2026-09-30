@@ -14,7 +14,7 @@ export async function GET() {
 
   const body = {
     ok: mpesaRequired ? health.ok : true,
-    service: 'amanah-mpesa',
+    service: 'jameiyah-mpesa',
     daraja_configured: health.daraja_configured ?? false,
     b2c_configured: health.b2c_configured ?? false,
     payment_provider,

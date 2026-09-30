@@ -50,7 +50,7 @@ export function WelcomeIntentForm() {
                 type="button"
                 onClick={() => setIntentId(item.id)}
                 className={cn(
-                  'amanah-surface flex w-full items-center px-4 py-3.5 text-left text-sm font-semibold text-foreground transition-colors',
+                  'jameiyah-surface flex w-full items-center px-4 py-3.5 text-left text-sm font-semibold text-foreground transition-colors',
                   active ? 'border-primary/40 bg-secondary/60' : 'hover:border-primary/20',
                 )}
               >

@@ -48,7 +48,7 @@ async function lookupHttp(input: IprsLookupInput): Promise<IprsLookupResult> {
       lastName: input.lastName,
       dateOfBirth: input.dateOfBirth,
       country: 'KE',
-      source: 'amanah',
+      source: 'jameiyah',
     }),
   });
 

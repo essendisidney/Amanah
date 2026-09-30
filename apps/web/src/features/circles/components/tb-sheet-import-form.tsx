@@ -63,7 +63,7 @@ export function TbSheetImportForm({
       <input type="hidden" name="parValue" value={parValue || 100} />
       <input type="hidden" name="year" value="2026" />
       <div className="space-y-1">
-        <Label htmlFor="contributionsPaste">Contributions (AMANAH TEST rows 1–10)</Label>
+        <Label htmlFor="contributionsPaste">Contributions (JAMEIYAH TEST rows 1–10)</Label>
         <Textarea
           id="contributionsPaste"
           name="contributionsPaste"
@@ -76,7 +76,7 @@ HUSBAE…	KHADIJA ALADINA	5000	2000	2000`}
         />
       </div>
       <div className="space-y-1">
-        <Label htmlFor="loansPaste">Loans (AMANAH TEST from row 17 downward)</Label>
+        <Label htmlFor="loansPaste">Loans (JAMEIYAH TEST from row 17 downward)</Label>
         <Textarea
           id="loansPaste"
           name="loansPaste"

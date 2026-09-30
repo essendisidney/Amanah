@@ -304,7 +304,7 @@ export default async function WalletPage({ searchParams }: Props) {
       ) : null}
 
       {!hasPhone ? (
-        <div className="amanah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="jameiyah-surface flex flex-col gap-3 border-accent/30 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-foreground">{labels.phoneBannerTitle}</p>
             <p className="mt-1 text-sm text-muted-foreground">{labels.phoneBannerBody}</p>
@@ -317,13 +317,13 @@ export default async function WalletPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      <section className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
         {wallets.length === 0 ? (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {labels.availableLabel}
             </p>
-            <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground">
+            <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground">
               {formatCurrency(0, primaryCurrency)}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">{labels.emptyDesc}</p>
@@ -333,7 +333,7 @@ export default async function WalletPage({ searchParams }: Props) {
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {labels.availableLabel}
             </p>
-            <p className="amanah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {formatCurrency(available, primaryCurrency)}
             </p>
           </div>
@@ -365,7 +365,7 @@ export default async function WalletPage({ searchParams }: Props) {
         {focus !== 'withdraw' ? (
           <section id="top-up" className="scroll-mt-24 space-y-2.5">
             <h2 className="text-sm font-semibold text-foreground">{labels.topUp}</h2>
-            <div className="amanah-surface p-4 sm:p-5">
+            <div className="jameiyah-surface p-4 sm:p-5">
               <TopUpForm
                 currency={primaryCurrency}
                 labels={dict.walletForms}
@@ -395,7 +395,7 @@ export default async function WalletPage({ searchParams }: Props) {
         {focus !== 'top-up' ? (
           <section id="withdraw" className="scroll-mt-24 space-y-2.5">
             <h2 className="text-sm font-semibold text-foreground">{labels.withdraw}</h2>
-            <div className="amanah-surface p-4 sm:p-5">
+            <div className="jameiyah-surface p-4 sm:p-5">
               <WithdrawalForm
                 currency={primaryCurrency}
                 labels={dict.walletForms}
@@ -421,7 +421,7 @@ export default async function WalletPage({ searchParams }: Props) {
       {pendingIntents.length > 0 ? (
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.paymentsInProgress}</h2>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {pendingIntents.map((intent) => {
               const canCheck =
                 intent.provider === 'paystack' ||
@@ -430,7 +430,7 @@ export default async function WalletPage({ searchParams }: Props) {
               return (
                 <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">
-                    <p className="amanah-money text-sm font-semibold">
+                    <p className="jameiyah-money text-sm font-semibold">
                       {formatCurrency(Number(intent.amount), intent.currency)}
                     </p>
                     <p className="text-xs text-muted-foreground">
@@ -466,11 +466,11 @@ export default async function WalletPage({ searchParams }: Props) {
             </span>
           </summary>
           <p className="text-xs text-muted-foreground">{labels.failedPaymentsHint}</p>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {failedIntents.slice(0, 5).map((intent) => (
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="amanah-money text-sm font-semibold">
+                  <p className="jameiyah-money text-sm font-semibold">
                     {formatCurrency(Number(intent.amount), intent.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -494,11 +494,11 @@ export default async function WalletPage({ searchParams }: Props) {
         <section className="space-y-2.5">
           <h2 className="text-sm font-semibold text-foreground">{labels.withdrawalsInProgress}</h2>
           <p className="text-xs text-muted-foreground">{labels.pendingWithdrawalsHint}</p>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {pendingWithdrawals.map((row) => (
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="amanah-money text-sm font-semibold">
+                  <p className="jameiyah-money text-sm font-semibold">
                     {formatCurrency(Number(row.amount), row.currency)}
                   </p>
                   <p className="text-xs text-muted-foreground">
@@ -521,7 +521,7 @@ export default async function WalletPage({ searchParams }: Props) {
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">{labels.historyTitle}</h2>
         {transactions.length === 0 ? (
-          <div className="amanah-surface px-4 py-6 text-center">
+          <div className="jameiyah-surface px-4 py-6 text-center">
             <p className="text-sm font-medium text-foreground">{labels.historyEmpty}</p>
             <p className="mt-1 text-xs text-muted-foreground">{labels.emptyDesc}</p>
             <Button asChild className="mt-4 min-h-11">
@@ -529,7 +529,7 @@ export default async function WalletPage({ searchParams }: Props) {
             </Button>
           </div>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {transactions.map((row) => {
               const inflow = row.direction === 'credit';
               const line = moneyHistoryLine(row, declaredTotals);
@@ -563,8 +563,8 @@ export default async function WalletPage({ searchParams }: Props) {
                   <p
                     className={
                       inflow
-                        ? 'amanah-money amanah-money-in shrink-0 text-sm font-semibold'
-                        : 'amanah-money amanah-money-out shrink-0 text-sm font-semibold'
+                        ? 'jameiyah-money jameiyah-money-in shrink-0 text-sm font-semibold'
+                        : 'jameiyah-money jameiyah-money-out shrink-0 text-sm font-semibold'
                     }
                   >
                     {inflow ? '+' : '−'}
@@ -585,7 +585,7 @@ export default async function WalletPage({ searchParams }: Props) {
           <p className="text-xs text-muted-foreground">
             A permanent note of money in and out.
           </p>
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {journalEntries.map((row) => (
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">

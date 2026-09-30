@@ -134,7 +134,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
 
       {isOfficer ? (
         <div className="space-y-3 print:hidden">
-          <form action={nudgeCircleDuesAction} className="amanah-surface space-y-3 border-primary/25 px-4 py-4">
+          <form action={nudgeCircleDuesAction} className="jameiyah-surface space-y-3 border-primary/25 px-4 py-4">
             <input type="hidden" name="jamiyaId" value={jamiya.id} />
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="dueWithinDays" value="7" />

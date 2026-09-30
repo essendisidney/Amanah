@@ -38,11 +38,11 @@ export default async function AdminUsersPage() {
         subtitle={`${users.length} recent profiles. Role edits need platform admin.`}
       />
       {users.length === 0 ? (
-        <p className="amanah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
+        <p className="jameiyah-surface px-4 py-5 text-sm text-muted-foreground sm:px-5">
           No users yet.
         </p>
       ) : (
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {users.map((user) => (
             <li
               key={user.id}

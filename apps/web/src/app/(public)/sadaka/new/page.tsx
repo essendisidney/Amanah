@@ -73,7 +73,7 @@ export default async function NewSadakaCampaignPage() {
           Story, target, and docs — live after admin review.
         </p>
       </header>
-      <div className="amanah-surface px-4 py-4 sm:px-5">
+      <div className="jameiyah-surface px-4 py-4 sm:px-5">
         <CreateCampaignForm kycDocs={(docs ?? []) as unknown as KycDoc[]} />
       </div>
       <p className="text-sm text-muted-foreground">

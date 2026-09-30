@@ -56,7 +56,7 @@ export function ZakatCalculator() {
     <>
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Your wealth</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <div className="grid gap-3.5 sm:grid-cols-2">
             <Field
               id="cash"
@@ -82,7 +82,7 @@ export function ZakatCalculator() {
 
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Estimate</h2>
-        <div className="amanah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <div className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
           <p className="text-sm text-muted-foreground">
             Approximate nisab: KES {NISAB_KES.toLocaleString()}
           </p>

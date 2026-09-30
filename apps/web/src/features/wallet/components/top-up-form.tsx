@@ -129,7 +129,7 @@ export function TopUpForm({
           <dl className="mt-2 space-y-1.5">
             <div className="flex items-baseline justify-between gap-3">
               <dt className="text-muted-foreground">Amount</dt>
-              <dd className="amanah-money font-semibold text-foreground">
+              <dd className="jameiyah-money font-semibold text-foreground">
                 {formatCurrency(amountValue, currency)}
               </dd>
             </div>

@@ -1,4 +1,4 @@
-const ACCENTS = ['amanah-circle-mint', 'amanah-circle-blue', 'amanah-circle-lavender'] as const;
+const ACCENTS = ['jameiyah-circle-mint', 'jameiyah-circle-blue', 'jameiyah-circle-lavender'] as const;
 
 export function circleAccentClass(slug: string): (typeof ACCENTS)[number] {
   let hash = 0;

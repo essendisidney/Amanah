@@ -35,7 +35,7 @@ export function CircleActionHub({ groups }: Props) {
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {group.title}
             </h3>
-            <ul className="amanah-surface divide-y divide-border/70">
+            <ul className="jameiyah-surface divide-y divide-border/70">
               {group.items.map((item) => (
                 <li key={`${group.title}-${item.label}`}>
                   <Link

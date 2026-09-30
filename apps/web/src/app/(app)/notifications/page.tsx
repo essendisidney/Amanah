@@ -191,7 +191,7 @@ export default async function NotificationsPage() {
       <section className="space-y-2.5">
         <h2 className="text-sm font-semibold text-foreground">Updates</h2>
         {notifications.length === 0 ? (
-          <div className="amanah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
+          <div className="jameiyah-surface space-y-3.5 border-primary/20 px-4 py-4 sm:px-5">
             <div>
               <p className="text-base font-semibold tracking-tight text-foreground">
                 {labels.emptyTitle}
@@ -208,7 +208,7 @@ export default async function NotificationsPage() {
             </div>
           </div>
         ) : (
-          <ul className="amanah-surface divide-y divide-border/70">
+          <ul className="jameiyah-surface divide-y divide-border/70">
             {notifications.map((item) => {
               const enrichment = enrichNotification({
                 title: item.title,
@@ -279,7 +279,7 @@ export default async function NotificationsPage() {
             {labels.openMoney}
           </Link>
         </div>
-        <ul className="amanah-surface divide-y divide-border/70">
+        <ul className="jameiyah-surface divide-y divide-border/70">
           {recentTx.length === 0 ? (
             <li className="px-4 py-4 text-sm text-muted-foreground sm:px-5">
               No money movement yet
@@ -306,8 +306,8 @@ export default async function NotificationsPage() {
                   </div>
                   <p
                     className={cn(
-                      'amanah-money shrink-0 text-sm font-semibold',
-                      inflow ? 'amanah-money-in' : 'amanah-money-out',
+                      'jameiyah-money shrink-0 text-sm font-semibold',
+                      inflow ? 'jameiyah-money-in' : 'jameiyah-money-out',
                     )}
                   >
                     {inflow ? '+' : '−'}
