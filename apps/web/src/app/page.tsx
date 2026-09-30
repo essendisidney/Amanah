@@ -57,7 +57,7 @@ export default async function LandingPage() {
       </div>
 
       <section className="relative z-10 mx-auto grid min-h-[88dvh] w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:pt-6">
-        <div className="hidden lg:order-2 lg:block">
+        <div className="order-2 pt-2 lg:order-2 lg:pt-0">
           <PayoutBoardMockup copy={c.mock} />
         </div>
         <div className="max-w-2xl lg:order-1">

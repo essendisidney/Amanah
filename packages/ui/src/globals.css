@@ -472,3 +472,46 @@
     background: linear-gradient(90deg, var(--primary) 0%, var(--primary-soft) 100%);
   }
 }
+
+/* Home page hero mockup motion (see features/landing/payout-board-mockup.tsx) */
+@keyframes jm-ring {
+  from { stroke-dashoffset: 238.8; }
+}
+@keyframes jm-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes jm-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes jm-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(216, 160, 56, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(216, 160, 56, 0); }
+}
+.jm-ring { animation: jm-ring 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both; }
+.jm-float { animation: jm-float 7s ease-in-out infinite; }
+.jm-float-slow { animation: jm-float 9s ease-in-out infinite; }
+.jm-in { animation: jm-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.jm-pulse { animation: jm-pulse 2.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .jm-ring, .jm-float, .jm-float-slow, .jm-in, .jm-pulse { animation: none; }
+}
+
+/* 3D phone tilt for the home hero */
+@keyframes jm-tilt {
+  0%, 100% { transform: rotateY(-20deg) rotateX(9deg) rotateZ(1.5deg) translateY(0); }
+  50% { transform: rotateY(-11deg) rotateX(5deg) rotateZ(0.5deg) translateY(-10px); }
+}
+.jm-tilt {
+  transform: rotateY(-16deg) rotateX(7deg) rotateZ(1deg);
+  animation: jm-tilt 9s ease-in-out infinite;
+  will-change: transform;
+}
+@media (max-width: 639px) {
+  /* Gentler on phones so the screen stays easy to read */
+  .jm-tilt { animation-duration: 11s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jm-tilt { animation: none; }
+}
