@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import { cn } from '@/lib/utils';
+import { useCanNativeShare } from '@/lib/use-can-native-share';
 import {
   composeWhatsAppMessage,
   JAMEIYAH_SHARE_BLURB,
@@ -84,8 +85,7 @@ export function PageShareBar({
     }
   }, [body, pageUrl, title]);
 
-  const canNative =
-    typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const canNative = useCanNativeShare();
 
   return (
     <div

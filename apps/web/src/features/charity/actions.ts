@@ -302,6 +302,9 @@ export async function submitCampaignAction(
   const beneficiaryName = String(formData.get('beneficiaryName') ?? '').trim();
   const beneficiaryPhone = String(formData.get('beneficiaryPhone') ?? '').trim();
   const kycUrl = String(formData.get('kycDocUrl') ?? '').trim();
+  if (!kycUrl) {
+    return { success: false, message: 'Add a supporting document for admin review.' };
+  }
 
   const { createClient } = await import('@/lib/supabase/server');
   const supabase = await createClient();

@@ -210,7 +210,7 @@ export default async function AdminInsightsPage() {
           <h3 className="text-lg font-bold tracking-tight">Circle health</h3>
           <Link
             href={'/admin/collections' as Route}
-            className="text-sm font-semibold text-primary hover:underline"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:underline"
           >
             Open collections
           </Link>
@@ -253,7 +253,7 @@ export default async function AdminInsightsPage() {
                   <div className="min-w-0">
                     <Link
                       href={`/circles/${circle.slug}` as Route}
-                      className="font-semibold text-foreground hover:text-primary hover:underline"
+                      className="-my-2.5 inline-block py-2.5 font-semibold text-foreground hover:text-primary hover:underline"
                     >
                       {circle.name}
                     </Link>

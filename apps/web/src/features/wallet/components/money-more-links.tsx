@@ -7,6 +7,7 @@ import {
   Landmark,
   Scale,
   TrendingUp,
+  Users,
 } from 'lucide-react';
 import type { Dictionary } from '@/i18n/dictionaries';
 
@@ -22,7 +23,7 @@ const ITEMS: Array<{
   { href: '/finance/qard', title: 'moreQard', hint: 'moreQardDesc', icon: Landmark },
   { href: '/finance/tawarruq', title: 'moreTawarruq', hint: 'moreTawarruqDesc', icon: Scale },
   { href: '/finance/insights', title: 'quickInsights', hint: 'moreInsightsDesc', icon: ChartNoAxesCombined },
-  { href: '/finance/welfare', title: 'moreWelfare', hint: 'moreWelfareDesc', icon: HandHeart },
+  { href: '/finance/welfare', title: 'moreWelfare', hint: 'moreWelfareDesc', icon: Users },
   { href: '/sadaka', title: 'moreSadaka', hint: 'moreSadakaDesc', icon: HandHeart },
   { href: '/zakat', title: 'moreZakat', hint: 'moreZakatDesc', icon: Calculator },
 ];

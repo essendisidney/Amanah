@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { submitCampaignAction, type CharityActionState } from '../actions';
+import { prepareKycUploadFile } from '@/features/profile/lib/prepare-kyc-file';
+import { createClient } from '@/lib/supabase/client';
 
 const CATEGORIES = [
   { value: 'medical', label: 'Medical' },
@@ -29,12 +31,55 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [state, setState] = useState<CharityActionState | null>(null);
-  const [kycMode, setKycMode] = useState<'pick' | 'paste'>(kycDocs.length ? 'pick' : 'paste');
+  const [kycMode, setKycMode] = useState<'pick' | 'upload'>(kycDocs.length ? 'pick' : 'upload');
+  const [kycPath, setKycPath] = useState('');
+  const [kycStatus, setKycStatus] = useState({ busy: false, ok: false, message: '' });
+
+  // Upload straight from the browser into the member's private KYC folder (same as Profile → KYC),
+  // so large phone photos never pass through the server action body limit.
+  async function uploadKycDoc(file: File | undefined) {
+    setKycPath('');
+    if (!file) {
+      setKycStatus({ busy: false, ok: false, message: '' });
+      return;
+    }
+    setKycStatus({ busy: true, ok: false, message: 'Uploading…' });
+    try {
+      const prepared = await prepareKycUploadFile(file);
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error('Sign in again to upload.');
+      const safeName = prepared.name.replace(/[^a-zA-Z0-9._-]/g, '_') || 'document.jpg';
+      const path = `${user.id}/${crypto.randomUUID()}/${safeName}`;
+      const { error } = await supabase.storage.from('kyc-documents').upload(path, prepared, {
+        contentType: prepared.type || 'image/jpeg',
+        upsert: false,
+      });
+      if (error) throw new Error(error.message);
+      setKycPath(path);
+      setKycStatus({ busy: false, ok: true, message: 'Uploaded. Only Jameiyah admins can see it.' });
+    } catch (err) {
+      setKycStatus({
+        busy: false,
+        ok: false,
+        message: err instanceof Error ? err.message : 'Could not upload that file. Try a JPEG photo or a PDF.',
+      });
+    }
+  }
 
   return (
     <form
       className="max-w-2xl space-y-4"
       action={(fd) => {
+        if (kycMode === 'upload' && !kycPath) {
+          setState({
+            success: false,
+            message: 'Upload a supporting document (a photo of an ID or a letter) before submitting.',
+          });
+          return;
+        }
         startTransition(async () => {
           const result = await submitCampaignAction(fd);
           setState(result);
@@ -134,17 +179,17 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
           <div className="flex flex-wrap gap-2 text-xs">
             <button
               type="button"
-              className={`rounded-md px-2 py-1 ${kycMode === 'pick' ? 'bg-primary text-primary-foreground' : 'border border-border'}`}
+              className={`inline-flex min-h-10 items-center rounded-md px-3 ${kycMode === 'pick' ? 'bg-primary text-primary-foreground' : 'border border-border'}`}
               onClick={() => setKycMode('pick')}
             >
               Use uploaded doc
             </button>
             <button
               type="button"
-              className={`rounded-md px-2 py-1 ${kycMode === 'paste' ? 'bg-primary text-primary-foreground' : 'border border-border'}`}
-              onClick={() => setKycMode('paste')}
+              className={`inline-flex min-h-10 items-center rounded-md px-3 ${kycMode === 'upload' ? 'bg-primary text-primary-foreground' : 'border border-border'}`}
+              onClick={() => setKycMode('upload')}
             >
-              Paste link / path
+              Upload a new one
             </button>
           </div>
         ) : null}
@@ -163,12 +208,26 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
             ))}
           </select>
         ) : (
-          <Input
-            id="kycDocUrl"
-            name="kycDocUrl"
-            placeholder="Storage path or secure document URL"
-            required
-          />
+          <div className="space-y-2">
+            <Label htmlFor="kycDocument" className="text-sm font-normal">
+              Photo of an ID, medical letter or similar (JPEG, PNG or PDF)
+            </Label>
+            <Input
+              id="kycDocument"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,application/pdf"
+              onChange={(event) => void uploadKycDoc(event.target.files?.[0])}
+            />
+            <input type="hidden" name="kycDocUrl" value={kycPath} />
+            {kycStatus.message ? (
+              <p
+                role="status"
+                className={`text-xs ${kycStatus.ok || kycStatus.busy ? 'text-muted-foreground' : 'text-destructive'}`}
+              >
+                {kycStatus.message}
+              </p>
+            ) : null}
+          </div>
         )}
       </div>
 
@@ -177,7 +236,7 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
           <AlertDescription>{state.message}</AlertDescription>
         </Alert>
       ) : null}
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" disabled={pending || kycStatus.busy}>
         {pending ? 'Submitting…' : 'Submit for admin review'}
       </Button>
     </form>

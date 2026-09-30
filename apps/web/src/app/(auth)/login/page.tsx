@@ -1,17 +1,33 @@
 import type { Metadata } from 'next';
+import { Alert, AlertDescription } from '@jamiya/ui';
 import { AuthCard, LoginForm } from '@/features/auth';
+import { callRpc } from '@/lib/supabase/rpc';
+import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
 
 export const metadata: Metadata = {
   title: 'Sign in',
 };
 
-type SearchParams = Promise<{ next?: string; error?: string }>;
+type SearchParams = Promise<{ next?: string; error?: string; method?: string }>;
+
+/** True when `next` is an invite link that no longer works (checked before sign-up). */
+async function isDeadInviteLink(next: string): Promise<boolean> {
+  const match = next.match(/^\/invitations\/([^/?#]+)/);
+  if (!match) return false;
+  try {
+    const { data, error } = await callRpc('preview_invitation', invitationRpcArgs(decodeURIComponent(match[1]!)));
+    return Boolean(error) || !Array.isArray(data) || data.length === 0;
+  } catch {
+    return false;
+  }
+}
 
 export default async function LoginPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const next = params.next ?? '/dashboard';
   const joining =
     next.includes('/invitations/') || next.includes('/welcome') || next.includes('redeem');
+  const deadInvite = await isDeadInviteLink(next);
 
   return (
     <AuthCard
@@ -22,7 +38,20 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           : 'Sign in with phone SMS, email, or Google.'
       }
     >
-      <LoginForm next={next} error={params.error} isReturning={!joining} />
+      {deadInvite ? (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>
+            This invite link is invalid or has expired. Ask the circle officer for a fresh link
+            — you can still create your account below.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      <LoginForm
+        next={next}
+        error={params.error}
+        isReturning={!joining}
+        initialMethod={params.method}
+      />
     </AuthCard>
   );
 }

@@ -22,13 +22,24 @@ export function LoginForm({
   next = '/dashboard',
   error,
   isReturning = true,
+  initialMethod,
 }: {
   next?: string;
   error?: string;
   /** False for invite / first-join flows. */
   isReturning?: boolean;
+  /** From ?method= so option links work before the page hydrates. */
+  initialMethod?: string;
 }) {
-  const [method, setMethod] = useState<Method>(error ? 'email' : 'choose');
+  const startMethod: Method =
+    initialMethod === 'phone' || initialMethod === 'email' || initialMethod === 'google'
+      ? initialMethod
+      : error
+        ? 'email'
+        : 'choose';
+  const [method, setMethod] = useState<Method>(startMethod);
+  const methodHref = (id: string) =>
+    `/login?method=${id}&next=${encodeURIComponent(next)}` as Route;
   const [state, formAction, pending] = useActionState(loginAction, initialAuthActionState);
   const showError = error || (state.message && !state.success);
   const phoneHref = `/phone?next=${encodeURIComponent(next)}` as Route;
@@ -45,9 +56,14 @@ export function LoginForm({
         <ul className="space-y-2">
           {METHODS.map((item) => (
             <li key={item.id}>
-              <button
-                type="button"
-                onClick={() => setMethod(item.id)}
+              {/* A real link: works on a tap before hydration; after hydration it switches in place. */}
+              <a
+                href={methodHref(item.id)}
+                role="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMethod(item.id);
+                }}
                 className={cn(
                   'jameiyah-surface flex w-full flex-col items-start gap-0.5 px-4 py-3.5 text-left transition-colors',
                   'hover:border-primary/30 hover:bg-secondary/40',
@@ -55,7 +71,7 @@ export function LoginForm({
               >
                 <span className="text-sm font-semibold text-foreground">{item.title}</span>
                 <span className="text-xs text-muted-foreground">{item.hint}</span>
-              </button>
+              </a>
             </li>
           ))}
         </ul>

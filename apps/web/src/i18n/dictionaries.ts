@@ -1172,8 +1172,9 @@ export const en: Dictionary = {
     faqShariahA: 'Circles avoid interest between members. Guidance only — not a fatwa.',
     faqFeesQ: 'What about fees?',
     faqFeesA: 'Platform fees are disclosed before you pay. They are not interest on loans.',
-    faqRibaQ: 'Can circles charge interest?',
-    faqRibaA: 'No. Qard Hassan is interest-free. Ask your scholar for personal cases.',
+    faqRibaQ: 'Do circle loans carry a charge?',
+    faqRibaA:
+      'Qard Hassan loans are interest-free. Each circle sets its own loan terms; new circles start at 0%. Jameiyah financing shows its flat fee before you agree.',
     openShariah: 'Read Shariah stance',
   },
   shariahPage: {
@@ -1831,8 +1832,9 @@ export const sw: Dictionary = {
     faqShariahA: 'Miduara huepuka riba kati ya wanachama. Mwongozo tu — si fatwa.',
     faqFeesQ: 'Ada zinamaanisha nini?',
     faqFeesA: 'Ada za jukwaa huonyeshwa kabla ya kulipa. Si riba ya mkopo.',
-    faqRibaQ: 'Je, miduara inaweza kuchaji riba?',
-    faqRibaA: 'Hapana. Qard Hassan haina riba. Uliza mwanachuoni kwa kesi yako.',
+    faqRibaQ: 'Je, mikopo ya mduara ina malipo ya ziada?',
+    faqRibaA:
+      'Mikopo ya Qard Hassan haina riba. Kila mduara huweka masharti yake ya mkopo; miduara mipya huanza na 0%. Ufadhili wa Jameiyah huonyesha ada yake kabla ya kukubali.',
     openShariah: 'Soma msimamo wa Shariah',
   },
   shariahPage: {

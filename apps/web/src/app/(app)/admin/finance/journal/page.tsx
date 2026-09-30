@@ -110,7 +110,7 @@ export default async function AdminJournalPage({
       <div className="flex flex-wrap gap-2">
         <Link
           href={'/admin/finance/journal' as Route}
-          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+          className={`inline-flex min-h-10 items-center rounded-lg border px-3 text-xs font-semibold ${
             !qs.domain ? 'border-primary bg-primary/10 text-primary' : 'border-border'
           }`}
         >
@@ -120,7 +120,7 @@ export default async function AdminJournalPage({
           <Link
             key={d}
             href={`/admin/finance/journal?domain=${d}` as Route}
-            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+            className={`inline-flex min-h-10 items-center rounded-lg border px-3 text-xs font-semibold ${
               qs.domain === d
                 ? 'border-primary bg-primary/10 text-primary'
                 : 'border-border'

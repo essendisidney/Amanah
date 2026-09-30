@@ -33,6 +33,7 @@ export default async function AdminOverviewPage() {
     openDisputes,
     pendingTawarruq,
     pendingInstitutions,
+    openSupport,
   ] = await Promise.all([
     supabase
       .from('kyc_documents')
@@ -66,6 +67,10 @@ export default async function AdminOverviewPage() {
       .from('sadaka_institutions')
       .select('id', { count: 'exact', head: true })
       .eq('verification_status', 'pending_verification'),
+    db
+      .from('support_tickets')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'open'),
   ]);
 
   const kycCount = (pendingKyc.count ?? 0) + (pendingCircleKyc.count ?? 0);
@@ -112,6 +117,14 @@ export default async function AdminOverviewPage() {
       blurb: 'Partner applications.',
       cta: 'Open',
       priority: 5,
+    },
+    {
+      href: '/admin/support' as Route,
+      title: 'Support',
+      count: openSupport.count ?? 0,
+      blurb: 'Member help requests awaiting a reply.',
+      cta: 'Reply',
+      priority: 6,
     },
   ];
 

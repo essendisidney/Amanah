@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import { whatsappShareHref } from '@/lib/whatsapp-share';
+import { useCanNativeShare } from '@/lib/use-can-native-share';
 
 type InviteSharePanelProps = {
   inviteUrl: string;
@@ -60,8 +61,7 @@ export function InviteSharePanel({
 
   const smsHref = `sms:?body=${encodeURIComponent(shareText)}`;
   const emailHref = `mailto:?subject=${encodeURIComponent('Jameiyah circle invitation')}&body=${encodeURIComponent(shareText)}`;
-  const canNativeShare =
-    typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const canNativeShare = useCanNativeShare();
 
   if (compact) {
     return (

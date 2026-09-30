@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { Button } from '@jamiya/ui';
 import { whatsappShareHref } from '@/lib/whatsapp-share';
+import { useCanNativeShare } from '@/lib/use-can-native-share';
 
 function shareText(circleName: string, inviteUrl: string) {
   return `Join ${circleName} on Jameiyah.\n\n${inviteUrl}`;
@@ -20,8 +21,7 @@ export function ShareChamaCard({
 }) {
   const [copied, setCopied] = useState(false);
   const text = shareText(circleName, inviteUrl);
-  const canNativeShare =
-    typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const canNativeShare = useCanNativeShare();
 
   const copy = useCallback(async () => {
     try {

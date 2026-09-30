@@ -5,6 +5,7 @@ import { APP_NAME, APP_DESCRIPTION } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { PublicSiteHeader } from '@/components/public-site-header';
 import { PesaraCredit } from '@/components/pesara-credit';
+import { PayoutBoardMockup } from '@/features/landing/payout-board-mockup';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
@@ -53,8 +54,11 @@ export default async function LandingPage() {
         />
       </div>
 
-      <section className="relative z-10 mx-auto flex min-h-[88dvh] w-full max-w-6xl flex-col justify-center px-4 pb-16 pt-10 sm:px-6 lg:pt-6">
-        <div className="max-w-2xl">
+      <section className="relative z-10 mx-auto grid min-h-[88dvh] w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:pt-6">
+        <div className="hidden lg:order-2 lg:block">
+          <PayoutBoardMockup />
+        </div>
+        <div className="max-w-2xl lg:order-1">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
             {dict.brand.tagline}
           </p>
@@ -84,7 +88,7 @@ export default async function LandingPage() {
           </div>
           <p className="mt-3 text-sm text-[#5a6f66]">
             New here?{' '}
-            <Link href="/welcome" className="font-semibold text-[#0d5c45] hover:underline">
+            <Link href="/welcome" className="-my-2.5 inline-block py-2.5 font-semibold text-[#0d5c45] hover:underline">
               {dict.landing.startWithPhone}
             </Link>
           </p>
@@ -99,11 +103,11 @@ export default async function LandingPage() {
           </ul>
           <p className="mt-5 text-sm text-[#5a6f66]">
             {dict.landing.preferEmail}{' '}
-            <Link href="/login" className="font-semibold text-[#0d5c45] hover:underline">
+            <Link href="/login" className="-my-2.5 inline-block py-2.5 font-semibold text-[#0d5c45] hover:underline">
               {dict.common.signIn}
             </Link>
             {' · '}
-            <Link href="/register" className="font-semibold text-[#0d5c45] hover:underline">
+            <Link href="/register" className="-my-2.5 inline-block py-2.5 font-semibold text-[#0d5c45] hover:underline">
               {dict.landing.createAccount}
             </Link>
           </p>
@@ -151,7 +155,7 @@ export default async function LandingPage() {
                 {item.href ? (
                   <Link
                     href={item.href}
-                    className="mt-4 inline-block text-sm font-semibold text-[#0d5c45] hover:underline"
+                    className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#0d5c45] hover:underline"
                   >
                     Open giving →
                   </Link>
@@ -269,7 +273,7 @@ export default async function LandingPage() {
           </div>
           <p className="mt-10 max-w-2xl text-xs leading-relaxed text-white/50">
             {dict.landing.shariaDisclaimer}{' '}
-            <Link href={'/shariah' as Route} className="underline underline-offset-2 hover:text-white">
+            <Link href={'/shariah' as Route} className="-my-2.5 inline-block py-2.5 underline underline-offset-2 hover:text-white">
               Full Shariah stance
             </Link>
             . Jameiyah is community software, not a bank and not an investment fund. We do not claim
@@ -353,22 +357,22 @@ export default async function LandingPage() {
             <PesaraCredit className="mt-3" />
           </div>
           <nav className="flex flex-wrap gap-4 text-sm font-medium text-[#0d5c45]">
-            <Link href="/pricing" className="hover:underline">
+            <Link href="/pricing" className="inline-flex min-h-11 items-center hover:underline">
               Pricing
             </Link>
-            <Link href="/sadaka" className="hover:underline">
+            <Link href="/sadaka" className="inline-flex min-h-11 items-center hover:underline">
               {dict.common.sadaka}
             </Link>
-            <Link href="/support" className="hover:underline">
+            <Link href="/support" className="inline-flex min-h-11 items-center hover:underline">
               {dict.common.support}
             </Link>
-            <Link href="/login" className="hover:underline">
+            <Link href="/login" className="inline-flex min-h-11 items-center hover:underline">
               {dict.common.signIn}
             </Link>
-            <Link href="/privacy" className="hover:underline">
+            <Link href="/privacy" className="inline-flex min-h-11 items-center hover:underline">
               Privacy
             </Link>
-            <Link href="/terms" className="hover:underline">
+            <Link href="/terms" className="inline-flex min-h-11 items-center hover:underline">
               Terms
             </Link>
           </nav>

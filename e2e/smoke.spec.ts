@@ -4,11 +4,13 @@ test.describe('smoke', () => {
   test('landing page loads brand and primary CTA', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    await expect(page.getByText(/jameiyah/i).first()).toBeVisible();
+    // The boot splash also says "Jameiyah" but is hidden once loaded; check a visible match.
+    await expect(page.getByText(/jameiyah/i).filter({ visible: true }).first()).toBeVisible();
   });
 
   test('login page renders email form', async ({ page }) => {
-    await page.goto('/login');
+    // Sign-in opens on a method picker; ?method=email links straight to the form (works before hydration).
+    await page.goto('/login?method=email');
     await expect(page.getByLabel(/email/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /sign in|log in/i })).toBeVisible();
   });

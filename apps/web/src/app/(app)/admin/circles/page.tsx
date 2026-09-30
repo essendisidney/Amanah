@@ -62,7 +62,7 @@ export default async function AdminCirclesPage() {
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
                       href={`/circles/${item.slug}` as Route}
-                      className="font-semibold text-foreground hover:text-primary"
+                      className="-my-2.5 inline-block py-2.5 font-semibold text-foreground hover:text-primary"
                     >
                       {item.name}
                     </Link>

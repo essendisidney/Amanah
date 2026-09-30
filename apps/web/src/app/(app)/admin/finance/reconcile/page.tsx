@@ -94,7 +94,7 @@ export default async function AdminFinanceReconcilePage({ searchParams }: Props)
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Link href={'/admin/finance' as Route} className="hover:underline">
+            <Link href={'/admin/finance' as Route} className="inline-flex min-h-10 items-center hover:underline">
               Finance
             </Link>{' '}
             · Reconcile

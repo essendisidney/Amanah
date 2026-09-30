@@ -380,7 +380,7 @@ export default async function AdminPaymentIntentCasePage({ params }: Props) {
             </div>
             <Link
               href={`/admin/finance/journal?entry=${je.id}` as Route}
-              className="text-xs font-semibold text-primary hover:underline"
+              className="inline-flex min-h-10 items-center text-xs font-semibold text-primary hover:underline"
             >
               Open
             </Link>

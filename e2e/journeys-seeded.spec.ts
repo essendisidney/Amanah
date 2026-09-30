@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { signInEmail } from './helpers';
 
 /**
  * Seeded local journeys — requires `npx supabase start` + seed users:
@@ -6,16 +7,7 @@ import { expect, test, type Page } from '@playwright/test';
  * Run only against local Next pointed at local Supabase (never production).
  */
 
-const PASSWORD = 'Password1!';
 
-async function signInEmail(page: Page, email: string) {
-  await page.goto('/login');
-  await page.getByRole('button', { name: /email/i }).click();
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(PASSWORD);
-  await page.getByRole('button', { name: /sign in|log in/i }).click();
-  await expect(page).not.toHaveURL(/login/, { timeout: 30_000 });
-}
 
 test.describe('Journey 8 — Platform admin Support (seeded)', () => {
   test('admin opens Support via direct load', async ({ page }) => {
@@ -31,7 +23,10 @@ test.describe('Journey 8 — Platform admin Support (seeded)', () => {
   test('admin opens Support via nav (no client exception)', async ({ page }) => {
     await signInEmail(page, 'admin@jamiya.local');
     await page.goto('/admin');
-    await page.getByRole('link', { name: 'Support' }).first().click();
+    // Phones keep admin sections in a drawer.
+    const menu = page.getByRole('button', { name: /^admin menu$/i });
+    if (await menu.isVisible().catch(() => false)) await menu.click();
+    await page.getByRole('link', { name: /^support/i }).last().click();
     await expect(page).toHaveURL(/\/admin\/support/);
     await expect(page.getByRole('heading', { name: /support tickets/i })).toBeVisible({
       timeout: 20_000,
@@ -60,7 +55,7 @@ test.describe('Journey 7 — Support ticket (seeded)', () => {
     await signInEmail(page, 'alice@jamiya.local');
     await page.goto('/help#ticket');
     await page.getByLabel(/subject/i).fill('E2E audit ticket — do not escalate');
-    await page.getByLabel(/message/i).fill(
+    await page.getByLabel(/message|what happened/i).fill(
       'Isolated local seed ticket for journey audit. Safe to close.',
     );
     await page.getByRole('button', { name: /send|submit/i }).click();
@@ -70,7 +65,7 @@ test.describe('Journey 7 — Support ticket (seeded)', () => {
   test('admin replies in-app and member sees status', async ({ page }) => {
     await signInEmail(page, 'admin@jamiya.local');
     await page.goto('/admin/support');
-    await expect(page.getByText(/E2E audit ticket/i)).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/E2E audit ticket/i).first()).toBeVisible({ timeout: 20_000 });
     const replyBox = page.getByLabel('Reply').first();
     await replyBox.fill('Local seed reply — safe to ignore.');
     await page.getByRole('button', { name: /send reply/i }).first().click();
@@ -79,8 +74,8 @@ test.describe('Journey 7 — Support ticket (seeded)', () => {
     await page.goto('/login');
     await signInEmail(page, 'alice@jamiya.local');
     await page.goto('/help');
-    await expect(page.getByText(/E2E audit ticket/i)).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText(/Local seed reply/i)).toBeVisible();
+    await expect(page.getByText(/E2E audit ticket/i).first()).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText(/Local seed reply/i).first()).toBeVisible();
   });
 
   test('bob cannot see alice ticket', async ({ page }) => {

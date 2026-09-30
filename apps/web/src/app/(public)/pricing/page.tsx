@@ -23,9 +23,6 @@ export default async function PricingPage() {
         <Button asChild variant="outline" size="sm">
           <Link href={'/' as Route}>{dict.common.home}</Link>
         </Button>
-        <Button asChild variant="ghost" size="sm">
-          <Link href={'/dashboard' as Route}>{dict.common.backToDashboard}</Link>
-        </Button>
         <LanguageSwitcher locale={locale} label={dict.common.language} />
       </div>
 
@@ -47,7 +44,7 @@ export default async function PricingPage() {
           return (
             <li
               key={plan.id}
-              className="flex flex-col border border-border bg-card p-6"
+              className="jameiyah-surface flex flex-col rounded-2xl p-6"
             >
               <p className="text-sm font-medium uppercase tracking-[0.14em] text-accent">
                 {plan.name}

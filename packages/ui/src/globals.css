@@ -93,10 +93,12 @@
   --secondary: rgba(255, 255, 255, 0.72);
   --secondary-foreground: #111827;
 
+  /* Accent — deep logo gold (readable on white: ~5:1). Blue stays below for transfer identity. */
+  --accent: #8a6414;
+  --accent-foreground: #4a3508;
+  --accent-muted: #f7f0de;
+
   /* Soft blue (transfers / info) */
-  --accent: #5b8def;
-  --accent-foreground: #0b1f3a;
-  --accent-muted: #e8f0ff;
   --blue: #5b8def;
   --blue-soft: #7ea7ff;
   --blue-muted: #e8f0ff;
@@ -184,9 +186,9 @@
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: #eef2f0;
 
-  --accent: #7ea7ff;
-  --accent-foreground: #041018;
-  --accent-muted: rgba(91, 141, 239, 0.16);
+  --accent: #d8b45a;
+  --accent-foreground: #f3e6c4;
+  --accent-muted: rgba(197, 160, 68, 0.16);
   --blue: #7ea7ff;
   --blue-soft: #5b8def;
   --blue-muted: rgba(91, 141, 239, 0.16);
