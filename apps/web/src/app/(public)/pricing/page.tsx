@@ -3,7 +3,6 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
-import { getDictionary } from '@/i18n/get-dictionary';
 import { getActivePlatformPlans } from '@/lib/platform-plans';
 
 export const metadata: Metadata = {
@@ -14,7 +13,7 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function PricingPage() {
-  const [{ dict }, plans] = await Promise.all([getDictionary(), getActivePlatformPlans()]);
+  const plans = await getActivePlatformPlans();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">

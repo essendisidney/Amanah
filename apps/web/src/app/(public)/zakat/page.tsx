@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import type { Metadata } from 'next';
 import { ChevronRight } from 'lucide-react';
-import { Button } from '@jamiya/ui';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { ZakatCalculator } from './zakat-calculator';
 
