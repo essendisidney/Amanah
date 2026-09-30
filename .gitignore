@@ -57,3 +57,6 @@ next-env.d.ts
 # Misc
 *.pem
 .cache
+
+# live UI sweep output
+ui-sweep/
