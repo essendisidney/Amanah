@@ -89,7 +89,8 @@ test.describe('Journey 1 — New / existing member smoke (seeded)', () => {
   test('alice sees seeded circle on dashboard', async ({ page }) => {
     await signInEmail(page, 'alice@jamiya.local');
     await page.goto('/dashboard');
-    await expect(page.getByText(/Nairobi Sisters|circle/i).first()).toBeVisible({
+    // Look inside the page body: the desktop nav's "Circles" link is hidden on phones.
+    await expect(page.locator('main').getByText(/Nairobi Sisters|circle/i).first()).toBeVisible({
       timeout: 20_000,
     });
   });

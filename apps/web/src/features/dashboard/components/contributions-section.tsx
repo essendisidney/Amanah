@@ -56,7 +56,7 @@ export function ContributionsSection({
               </div>
               <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
                 <p className="text-sm font-semibold text-foreground">
-                  {formatCurrency(item.amount, item.currency)}
+                  <span className="jm-amount">{formatCurrency(item.amount, item.currency)}</span>
                   {item.amountPaid > 0 ? (
                     <span className="ml-2 font-normal text-muted-foreground">
                       · {common.left}{' '}

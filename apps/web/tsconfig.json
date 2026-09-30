@@ -2,6 +2,7 @@
   "extends": "@jamiya/typescript-config/nextjs.json",
   "compilerOptions": {
     "plugins": [{ "name": "next" }],
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": ["./src/*"]
     },

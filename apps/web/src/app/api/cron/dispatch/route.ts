@@ -10,14 +10,17 @@ export const dynamic = 'force-dynamic';
 async function invokeEdge(fn: string, cronSecret: string) {
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   if (!base) throw new Error('SUPABASE_URL missing');
-  const res = await fetch(`${base}/functions/v1/${fn}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${cronSecret}`,
-      'Content-Type': 'application/json',
-    },
-    body: '{}',
-  });
+  // Edge functions accept a service-role key or their own CRON_SECRET. Try the
+  // service key first, then the shared cron secret (set it in Supabase secrets too).
+  const call = (token: string) =>
+    fetch(`${base}/functions/v1/${fn}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  let res = await call(serviceKey || cronSecret);
+  if (res.status === 401 && serviceKey) res = await call(cronSecret);
   const text = await res.text();
   let json: unknown = text;
   try {

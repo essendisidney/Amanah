@@ -27,6 +27,16 @@ const COPY: Record<
     body: 'Top-ups create a bank transfer for settlement.',
     tone: 'live',
   },
+  coop: {
+    title: 'Co-op Bank transfer',
+    body: 'Top-ups create a Co-op Bank transfer for settlement.',
+    tone: 'live',
+  },
+  kcb: {
+    title: 'KCB transfer',
+    body: 'Top-ups create a KCB transfer for settlement.',
+    tone: 'live',
+  },
 };
 
 export function PaymentModeBanner({

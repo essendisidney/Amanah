@@ -23,7 +23,7 @@ export async function requestRefundAction(formData: FormData) {
   const { data, error } = await supabase.rpc('request_refund', {
     p_payment_intent_id: intentId,
     p_amount: amount,
-    p_reason: reason,
+    p_reason: reason ?? undefined,
     p_metadata: { source: 'admin_finance_refunds' },
   });
 
@@ -58,7 +58,7 @@ export async function completeRefundAction(formData: FormData) {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc('complete_refund', {
     p_refund_id: refundId,
-    p_provider_reference: null,
+    p_provider_reference: undefined,
   });
 
   const ok =

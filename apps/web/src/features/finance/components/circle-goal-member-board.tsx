@@ -65,7 +65,7 @@ export function CircleGoalMemberBoard({
                 </p>
               </div>
               <p className="jameiyah-money text-lg font-semibold">
-                {formatCurrency(Number(m.total_saved), currency)}
+                <span className="jm-amount">{formatCurrency(Number(m.total_saved), currency)}</span>
               </p>
             </li>
           ))}

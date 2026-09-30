@@ -220,7 +220,7 @@ export default async function CircleInvoicesPage({ params, searchParams }: Props
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="text-sm font-semibold">
-                    {formatCurrency(Number(inv.amount_due), inv.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(inv.amount_due), inv.currency)}</span>
                   </p>
                   {isOpen && isMine ? (
                     <Button asChild size="sm" className="min-h-11 print:hidden">

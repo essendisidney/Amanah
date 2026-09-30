@@ -55,8 +55,20 @@ export function CircleDetailHero({
   const meta = [kindLabel, roleLabel].filter(Boolean).join(' · ');
   const dueRemaining = personalDue && personalDue.remaining > 0 ? personalDue.remaining : null;
   const heroAmount = dueRemaining ?? poolAmount;
-  const heroLabel = dueRemaining != null ? 'You owe' : moneyBooks ? 'Group money' : 'Pool so far';
   const overdue = personalDue?.status === 'late';
+  // "You owe" only when the payment is due within a week (or late); further out it is the next contribution.
+  const daysToDue = personalDue?.dueDate
+    ? Math.ceil((Date.parse(`${personalDue.dueDate.slice(0, 10)}T00:00:00Z`) - Date.now()) / 86_400_000)
+    : null;
+  const upcoming = !overdue && daysToDue != null && daysToDue > 7;
+  const heroLabel =
+    dueRemaining != null
+      ? upcoming
+        ? 'Next contribution'
+        : 'You owe'
+      : moneyBooks
+        ? 'Group money'
+        : 'Pool so far';
 
   return (
     <section className={`relative overflow-hidden ${accent}`}>
@@ -81,7 +93,7 @@ export function CircleDetailHero({
             </p>
             {dueRemaining != null || !moneyBooks ? (
               <p className="jameiyah-money mt-0.5 text-3xl font-bold tracking-tight sm:text-4xl">
-                {formatCurrency(heroAmount, currency)}
+                <span className="jm-amount">{formatCurrency(heroAmount, currency)}</span>
               </p>
             ) : null}
             {moneyBooks ? (
@@ -93,13 +105,13 @@ export function CircleDetailHero({
                 <div className="flex items-baseline justify-between gap-3">
                   <dt className="text-muted-foreground">Contributions in the books</dt>
                   <dd className="font-semibold">
-                    {formatCurrency(moneyBooks.bookContributions, currency)}
+                    <span className="jm-amount">{formatCurrency(moneyBooks.bookContributions, currency)}</span>
                   </dd>
                 </div>
                 <div className="flex items-baseline justify-between gap-3">
                   <dt className="text-muted-foreground">Paid on the schedule</dt>
                   <dd className="font-semibold">
-                    {formatCurrency(moneyBooks.schedulePaid, currency)}
+                    <span className="jm-amount">{formatCurrency(moneyBooks.schedulePaid, currency)}</span>
                   </dd>
                 </div>
                 <p className="pt-1 text-xs text-muted-foreground">
@@ -115,7 +127,7 @@ export function CircleDetailHero({
                   href={`#pay-due` as Route}
                   className="font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
-                  Pay now
+                  {upcoming ? 'Pay ahead' : 'Pay now'}
                 </Link>
               </p>
             ) : null}

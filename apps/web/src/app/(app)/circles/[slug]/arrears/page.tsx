@@ -159,7 +159,7 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
           <div key={key} className="rounded-xl border border-border bg-card p-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
             <p className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold">
-              {formatCurrency(Number(buckets[key] ?? 0), currency)}
+              <span className="jm-amount">{formatCurrency(Number(buckets[key] ?? 0), currency)}</span>
             </p>
           </div>
         ))}
@@ -252,7 +252,7 @@ export default async function CircleArrearsPage({ params, searchParams }: Props)
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-semibold">
-                      {formatCurrency(Number(row.outstanding), currency)}
+                      <span className="jm-amount">{formatCurrency(Number(row.outstanding), currency)}</span>
                     </p>
                     <form action={remindInvoicesAction}>
                       <input type="hidden" name="jamiyaId" value={jamiya.id} />

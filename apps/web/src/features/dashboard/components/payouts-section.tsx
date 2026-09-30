@@ -48,7 +48,7 @@ export function PayoutsSection({
                 </p>
               </div>
               <p className="text-sm font-semibold text-foreground">
-                {formatCurrency(item.amount, item.currency)}
+                <span className="jm-amount">{formatCurrency(item.amount, item.currency)}</span>
               </p>
             </li>
           ))}

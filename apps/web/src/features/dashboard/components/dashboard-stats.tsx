@@ -45,7 +45,7 @@ export function DashboardStats({
       label: labels.wallet,
       value: data.wallet ? (
         <PrivateAmount>
-          {formatCurrency(data.wallet.availableBalance, data.wallet.currency)}
+          <span className="jm-amount">{formatCurrency(data.wallet.availableBalance, data.wallet.currency)}</span>
         </PrivateAmount>
       ) : (
         '—'

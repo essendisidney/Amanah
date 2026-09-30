@@ -311,6 +311,22 @@
     display: none;
   }
 
+  /* Hidden balances also blur every other amount (lists, circle totals, pay pages). */
+  [data-hide-balance] .jameiyah-money:not(:has(.jm-private)),
+  [data-hide-balance] .jameiyah-money-in,
+  [data-hide-balance] .jameiyah-money-out,
+  [data-hide-balance] .jameiyah-money-transfer,
+  [data-hide-balance] .jameiyah-table .amount,
+  [data-hide-balance] .jm-amount {
+    filter: blur(7px);
+    user-select: none;
+  }
+
+  /* App lock: hide the signed-in app until the PIN is entered. */
+  [data-locked] .jm-lockable {
+    visibility: hidden;
+  }
+
   .jameiyah-money-in {
     color: var(--success);
   }
@@ -681,3 +697,98 @@
 }
 .jameiyah-premium .jameiyah-on-dark .jameiyah-btn-primary:hover { background-color: #e6b451; }
 .jameiyah-premium .jameiyah-on-dark h1, .jameiyah-premium .jameiyah-on-dark h2 { color: #ffffff; }
+
+/* Signed-in app: same premium language as the public site (paper, deep green, gold, grotesk). */
+html:not(.dark) .jameiyah-app {
+  --background: #f5f3ee;
+  --foreground: #0b1f1b;
+  --card: #ffffff;
+  --card-foreground: #0b1f1b;
+  --muted: #ece7dc;
+  --muted-foreground: #56675f;
+  --border: rgba(11, 31, 27, 0.1);
+  --input: rgba(11, 31, 27, 0.18);
+  --primary: #004038;
+  --primary-hover: #00564a;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(0, 64, 56, 0.08);
+  --ring: #004038;
+  --glass-bg: #ffffff;
+  --glass-border: rgba(11, 31, 27, 0.08);
+  --glass-shadow: 0 1px 2px rgba(11, 31, 27, 0.04), 0 18px 40px -28px rgba(11, 31, 27, 0.25);
+  background-color: #f5f3ee;
+}
+.jameiyah-app {
+  --font-display: var(--font-grotesk), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+.jameiyah-app h1,
+.jameiyah-app h2 {
+  font-family: var(--font-grotesk), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+.jameiyah-app .jameiyah-surface {
+  border-radius: 22px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.jameiyah-app .jameiyah-btn-primary {
+  background-image: none;
+  border-radius: 9999px;
+}
+html:not(.dark) .jameiyah-app .jameiyah-btn-primary {
+  background-color: #004038;
+  color: #ffffff;
+  box-shadow: 0 10px 24px -14px rgba(0, 64, 56, 0.8);
+}
+html:not(.dark) .jameiyah-app .jameiyah-btn-primary:hover { background-color: #00564a; }
+
+/* Night header band */
+.jameiyah-app .jm-app-header {
+  background: #03201b;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.jameiyah-app .jm-app-header .jameiyah-nav-glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+.jameiyah-app .jm-app-header a[aria-current='page'] {
+  border-radius: 9999px;
+}
+
+/* Balance card: night green with a gold glow, like a premium bank card */
+.jameiyah-app .jameiyah-surface.jm-balance-card {
+  position: relative;
+  overflow: hidden;
+  color: #f3f7f5;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(216, 160, 56, 0.28) 0%, transparent 55%),
+    radial-gradient(90% 80% at 0% 100%, rgba(0, 110, 95, 0.45) 0%, transparent 60%),
+    #03201b;
+  border: 1px solid rgba(216, 160, 56, 0.22);
+  box-shadow: 0 24px 50px -30px rgba(3, 32, 27, 0.9);
+}
+.jameiyah-app .jameiyah-surface.jm-balance-card .jameiyah-btn-primary {
+  background-color: #d8a038;
+  color: #1f1606;
+  box-shadow: 0 10px 24px -12px rgba(216, 160, 56, 0.8);
+}
+.jameiyah-app .jameiyah-surface.jm-balance-card .jameiyah-btn-primary:hover { background-color: #e6b451; }
+
+/* Mobile tab bar: floating pill */
+.jameiyah-app .jm-tabbar {
+  background: rgba(255, 255, 255, 0.92);
+}
+.dark .jameiyah-app .jm-tabbar {
+  background: rgba(3, 32, 27, 0.94);
+}
+.jameiyah-app .jm-tabbar-center {
+  background: #004038;
+  color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 8px 20px -10px rgba(0, 64, 56, 0.9);
+}
+.jameiyah-app .jm-tabbar-center[data-active='true'] {
+  background: #d8a038;
+  color: #1f1606;
+}

@@ -182,7 +182,7 @@ export function TreasuryPanel({
                   {label}
                 </dt>
                 <dd className="mt-1 text-lg font-semibold">
-                  {formatCurrency(Number(value), currency)}
+                  <span className="jm-amount">{formatCurrency(Number(value), currency)}</span>
                 </dd>
                 {label === 'Contributions outstanding' &&
                 canManage &&
@@ -199,7 +199,7 @@ export function TreasuryPanel({
           </dl>
           <p className="text-sm text-muted-foreground">
             Fines paid {formatCurrency(snapshot.finesPaid, currency)} · Loans repaid{' '}
-            {formatCurrency(snapshot.loansRepaid, currency)}
+            <span className="jm-amount">{formatCurrency(snapshot.loansRepaid, currency)}</span>
           </p>
         </section>
       ) : null}
@@ -698,7 +698,7 @@ export function TreasuryPanel({
                     </p>
                   </div>
                   <p className="text-sm font-semibold">
-                    {formatCurrency(inv.currentValue, inv.currency)}
+                    <span className="jm-amount">{formatCurrency(inv.currentValue, inv.currency)}</span>
                     <span className="block text-xs font-normal text-muted-foreground">
                       principal {formatCurrency(inv.principal, inv.currency)}
                     </span>

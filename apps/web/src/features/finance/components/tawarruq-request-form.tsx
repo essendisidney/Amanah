@@ -191,7 +191,7 @@ export function TawarruqRequestForm({
           <div className="flex justify-between gap-3">
             <dt>Each month</dt>
             <dd className="font-medium">
-              {formatCurrency(quote.installmentAmount, 'KES')}
+              <span className="jm-amount">{formatCurrency(quote.installmentAmount, 'KES')}</span>
               {quote.lastInstallmentAmount !== quote.installmentAmount
                 ? `, last ${formatCurrency(quote.lastInstallmentAmount, 'KES')}`
                 : ''}

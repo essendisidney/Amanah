@@ -59,7 +59,7 @@ export default async function AdminFinanceReconcilePage({ searchParams }: Props)
   }
 
   if (providerFilter) {
-    query = query.eq('provider', providerFilter);
+    query = query.eq('provider', providerFilter as never);
   }
 
   const [{ data: intents }, { data: runs }] = await Promise.all([

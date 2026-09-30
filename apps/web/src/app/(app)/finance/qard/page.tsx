@@ -12,6 +12,106 @@ import {
   respondQardGuaranteeFormAction,
 } from '@/features/finance/actions';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
+import { getDictionary } from '@/i18n/get-dictionary';
+
+const money = (n: number) => formatCurrency(n, 'KES');
+
+const COPY = {
+  en: {
+    eyebrow: 'Money',
+    title: 'Member loan',
+    intro: 'Interest-free. The amount you can ask for depends on what you have already paid in, minus what you still owe.',
+    joinTitle: 'Join a circle first',
+    joinDesc: 'Qard is available inside an active circle.',
+    circles: 'Circles',
+    overdue: 'Clear the overdue loan before asking for more.',
+    canBorrow: (a: number) => `You can borrow up to ${money(a)}.`,
+    payFirst: 'Pay into the circle before you can ask for a loan.',
+    payFirstLong: 'Pay into the circle before you can ask for a loan. What you still owe is already counted.',
+    capNA: 'Cap unavailable',
+    capShare: (sp: number, bc: number, sh: number) =>
+      `Schedule paid ${money(sp)} · book contributions ${money(bc)} · shares ${money(sh)}. `,
+    capPlain: (sp: number) => `Schedule paid ${money(sp)}. `,
+    capRoom: (owed: number, room: number) => `Still owing ${money(owed)}. The circle can still lend ${money(room)}.`,
+    guaranteeTitle: 'Guarantee requests for you',
+    kafala: 'kafala request',
+    accept: 'Accept',
+    decline: 'Decline',
+    askTitle: 'Ask for a loan',
+    circle: 'Circle',
+    amount: 'Amount (KES)',
+    installments: 'Monthly installments',
+    purpose: 'Purpose',
+    send: 'Send request',
+    pendingTitle: 'Pending approvals',
+    requested: 'requested',
+    signed: ' · agreement signed',
+    awaiting: ' · awaiting borrower agreement',
+    approve: 'Approve',
+    reject: 'Reject',
+    yourLoans: 'Your loans',
+    topUp: 'Top up Money',
+    remaining: 'remaining',
+    due: 'due',
+    agreement:
+      'Qard Hassan facility agreement (v1): interest-free loan repaid in agreed installments. I accept the circle rules and repayment schedule.',
+    signer: 'Full name as signature',
+    acceptAgreement: 'Accept agreement',
+    agreementSigned: 'Agreement signed',
+    by: 'by',
+    repayNote: 'This comes from your Money balance. Add money with M-Pesa first if it is short.',
+    repay: 'Repay',
+    noLoans: 'No loans yet',
+    noLoansDesc: 'Ask for an interest-free loan from this circle. The treasurer approves, then you repay.',
+  },
+  sw: {
+    eyebrow: 'Pesa',
+    title: 'Mkopo wa mwanachama',
+    intro: 'Bila riba. Kiasi unachoweza kuomba kinategemea ulichokwisha lipa, ukiondoa unachodaiwa bado.',
+    joinTitle: 'Jiunge na mduara kwanza',
+    joinDesc: 'Qard inapatikana ndani ya mduara unaoendelea.',
+    circles: 'Miduara',
+    overdue: 'Maliza mkopo uliochelewa kabla ya kuomba zaidi.',
+    canBorrow: (a: number) => `Unaweza kukopa hadi ${money(a)}.`,
+    payFirst: 'Lipa kwenye mduara kwanza kabla ya kuomba mkopo.',
+    payFirstLong: 'Lipa kwenye mduara kwanza kabla ya kuomba mkopo. Unachodaiwa bado kimeshahesabiwa.',
+    capNA: 'Kikomo hakipatikani',
+    capShare: (sp: number, bc: number, sh: number) =>
+      `Umelipa kwa ratiba ${money(sp)} · michango kwenye vitabu ${money(bc)} · hisa ${money(sh)}. `,
+    capPlain: (sp: number) => `Umelipa kwa ratiba ${money(sp)}. `,
+    capRoom: (owed: number, room: number) => `Bado unadaiwa ${money(owed)}. Mduara bado unaweza kukopesha ${money(room)}.`,
+    guaranteeTitle: 'Maombi ya udhamini kwako',
+    kafala: 'ombi la kafala',
+    accept: 'Kubali',
+    decline: 'Kataa',
+    askTitle: 'Omba mkopo',
+    circle: 'Mduara',
+    amount: 'Kiasi (KES)',
+    installments: 'Awamu za kila mwezi',
+    purpose: 'Sababu',
+    send: 'Tuma ombi',
+    pendingTitle: 'Yanayosubiri idhini',
+    requested: 'imeombwa',
+    signed: ' · makubaliano yamesainiwa',
+    awaiting: ' · inasubiri makubaliano ya mkopaji',
+    approve: 'Idhinisha',
+    reject: 'Kataa',
+    yourLoans: 'Mikopo yako',
+    topUp: 'Ongeza Pesa',
+    remaining: 'imebaki',
+    due: 'inadaiwa',
+    agreement:
+      'Makubaliano ya Qard Hassan (v1): mkopo bila riba unaolipwa kwa awamu zilizokubaliwa. Nakubali kanuni za mduara na ratiba ya kulipa.',
+    signer: 'Jina kamili kama sahihi',
+    acceptAgreement: 'Kubali makubaliano',
+    agreementSigned: 'Makubaliano yamesainiwa',
+    by: 'na',
+    repayNote: 'Hii inatoka kwenye salio lako la Pesa. Ongeza pesa kwa M-Pesa kwanza kama haitoshi.',
+    repay: 'Lipa',
+    noLoans: 'Bado huna mkopo',
+    noLoansDesc: 'Omba mkopo bila riba kutoka mduara huu. Mweka hazina anaidhinisha, kisha unalipa.',
+  },
+} as const;
 
 export const dynamic = 'force-dynamic';
 
@@ -47,6 +147,8 @@ export default async function QardPage({ searchParams }: Props) {
   if (!user) redirect('/login?next=/finance/qard');
 
   const params = (await searchParams) ?? {};
+  const { locale } = await getDictionary();
+  const t = COPY[locale === 'sw' ? 'sw' : 'en'];
   const preferredJamiyaId = params.jamiyaId?.trim() || '';
 
   const [
@@ -154,22 +256,21 @@ export default async function QardPage({ searchParams }: Props) {
     <div className="space-y-10">
       <div>
         <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
-          Money
+          {t.eyebrow}
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          Member loan
+          {t.title}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Interest-free. The amount you can ask for depends on what you have already paid in, minus
-          what you still owe.
+          {t.intro}
         </p>
       </div>
 
       {memberships.length === 0 ? (
         <EmptyState
-          title="Join a circle first"
-          description="Qard is available inside an active circle."
-          actionLabel="Circles"
+          title={t.joinTitle}
+          description={t.joinDesc}
+          actionLabel={t.circles}
           actionHref={'/circles' as Route}
         />
       ) : null}
@@ -182,19 +283,18 @@ export default async function QardPage({ searchParams }: Props) {
               <p className="mt-1 text-sm text-muted-foreground">
                 {cap.cap != null
                   ? cap.overdue
-                    ? 'Clear the overdue loan before asking for more.'
+                    ? t.overdue
                     : cap.cap >= 100
-                      ? `You can borrow up to ${formatCurrency(cap.cap, 'KES')}.`
-                      : 'Pay into the circle before you can ask for a loan.'
-                  : 'Cap unavailable'}
+                      ? t.canBorrow(cap.cap)
+                      : t.payFirst
+                  : t.capNA}
               </p>
               {cap.cap != null ? (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {cap.isShare
-                    ? `Schedule paid ${formatCurrency(cap.schedulePaid, 'KES')} · book contributions ${formatCurrency(cap.bookContributions, 'KES')} · shares ${formatCurrency(cap.shares, 'KES')}. `
-                    : `Schedule paid ${formatCurrency(cap.schedulePaid, 'KES')}. `}
-                  Still owing {formatCurrency(cap.owed, 'KES')}. The circle can still lend{' '}
-                  {formatCurrency(cap.circleRoom, 'KES')}.
+                    ? t.capShare(cap.schedulePaid, cap.bookContributions, cap.shares)
+                    : t.capPlain(cap.schedulePaid)}
+                  {t.capRoom(cap.owed, cap.circleRoom)}
                 </p>
               ) : null}
             </li>
@@ -205,7 +305,7 @@ export default async function QardPage({ searchParams }: Props) {
       {pendingGuarantees.length > 0 ? (
         <section className="space-y-3">
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Guarantee requests for you
+            {t.guaranteeTitle}
           </h2>
           <ul className="divide-y divide-border border-y border-border">
             {pendingGuarantees.map((row) => {
@@ -219,7 +319,7 @@ export default async function QardPage({ searchParams }: Props) {
                   <div>
                     <p className="font-medium">{loan.purpose}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(Number(loan.amount), loan.currency)} · kafala request
+                      {formatCurrency(Number(loan.amount), loan.currency)} · {t.kafala}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -227,14 +327,14 @@ export default async function QardPage({ searchParams }: Props) {
                       <input type="hidden" name="guaranteeId" value={row.id} />
                       <input type="hidden" name="accept" value="true" />
                       <Button type="submit" size="sm" className="min-h-11">
-                        Accept
+                        {t.accept}
                       </Button>
                     </form>
                     <form action={respondQardGuaranteeFormAction}>
                       <input type="hidden" name="guaranteeId" value={row.id} />
                       <input type="hidden" name="accept" value="false" />
                       <Button type="submit" size="sm" variant="destructive" className="min-h-11">
-                        Decline
+                        {t.decline}
                       </Button>
                     </form>
                   </div>
@@ -248,11 +348,10 @@ export default async function QardPage({ searchParams }: Props) {
       {memberships.length > 0 && !canRequestLoan ? (
         <section className="max-w-xl space-y-2 rounded-xl border border-border bg-card p-6">
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Ask for a loan
+            {t.askTitle}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Pay into the circle before you can ask for a loan. What you still owe is already
-            counted.
+            {t.payFirstLong}
           </p>
         </section>
       ) : null}
@@ -263,10 +362,10 @@ export default async function QardPage({ searchParams }: Props) {
           className="max-w-xl space-y-4 rounded-xl border border-border bg-card p-6"
         >
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Ask for a loan
+            {t.askTitle}
           </h2>
           <div className="space-y-2">
-            <Label htmlFor="jamiyaId">Circle</Label>
+            <Label htmlFor="jamiyaId">{t.circle}</Label>
             <select
               id="jamiyaId"
               name="jamiyaId"
@@ -282,11 +381,11 @@ export default async function QardPage({ searchParams }: Props) {
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount (KES)</Label>
+            <Label htmlFor="amount">{t.amount}</Label>
             <Input id="amount" name="amount" type="number" min="100" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="installments">Monthly installments</Label>
+            <Label htmlFor="installments">{t.installments}</Label>
             <Input
               id="installments"
               name="installments"
@@ -298,11 +397,11 @@ export default async function QardPage({ searchParams }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="purpose">Purpose</Label>
+            <Label htmlFor="purpose">{t.purpose}</Label>
             <Textarea id="purpose" name="purpose" minLength={5} required />
           </div>
           <Button type="submit" className="min-h-11">
-            Send request
+            {t.send}
           </Button>
         </form>
       ) : null}
@@ -310,7 +409,7 @@ export default async function QardPage({ searchParams }: Props) {
       {pendingForOfficer.length > 0 ? (
         <section>
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Pending approvals
+            {t.pendingTitle}
           </h2>
           <ul className="mt-4 divide-y divide-border border-y border-border">
             {pendingForOfficer.map((loan) => (
@@ -321,10 +420,8 @@ export default async function QardPage({ searchParams }: Props) {
                 <div>
                   <p className="font-medium">{loan.purpose}</p>
                   <p className="text-sm text-muted-foreground">
-                    {formatCurrency(Number(loan.amount), loan.currency)} · requested
-                    {loan.agreement_accepted_at
-                      ? ' · agreement signed'
-                      : ' · awaiting borrower agreement'}
+                    {formatCurrency(Number(loan.amount), loan.currency)} · {t.requested}
+                    {loan.agreement_accepted_at ? t.signed : t.awaiting}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -337,14 +434,14 @@ export default async function QardPage({ searchParams }: Props) {
                       className="min-h-11"
                       disabled={!loan.agreement_accepted_at}
                     >
-                      Approve
+                      {t.approve}
                     </Button>
                   </form>
                   <form action={decideQardFormAction}>
                     <input type="hidden" name="loanId" value={loan.id} />
                     <input type="hidden" name="approve" value="false" />
                     <Button type="submit" size="sm" variant="destructive" className="min-h-11">
-                      Reject
+                      {t.reject}
                     </Button>
                   </form>
                 </div>
@@ -357,11 +454,11 @@ export default async function QardPage({ searchParams }: Props) {
       <section>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
-            Your loans
+            {t.yourLoans}
           </h2>
           {hasActiveRepay ? (
             <Button asChild variant="outline" size="sm" className="min-h-11">
-              <Link href={'/wallet?focus=top-up#top-up' as Route}>Top up Money</Link>
+              <Link href={'/wallet?focus=top-up#top-up' as Route}>{t.topUp}</Link>
             </Button>
           ) : null}
         </div>
@@ -377,8 +474,8 @@ export default async function QardPage({ searchParams }: Props) {
                   <div>
                     <p className="font-medium">{loan.purpose}</p>
                     <p className="text-sm text-muted-foreground">
-                      {loan.status} · {formatCurrency(due, loan.currency)} remaining
-                      {loan.due_date ? ` · due ${loan.due_date}` : ''}
+                      {loan.status} · {formatCurrency(due, loan.currency)} {t.remaining}
+                      {loan.due_date ? ` · ${t.due} ${loan.due_date}` : ''}
                     </p>
                   </div>
                   {loan.status === 'requested' && !loan.agreement_accepted_at ? (
@@ -388,24 +485,23 @@ export default async function QardPage({ searchParams }: Props) {
                     >
                       <input type="hidden" name="loanId" value={loan.id} />
                       <p className="text-xs text-muted-foreground">
-                        Qard Hassan facility agreement (v1): interest-free loan repaid in agreed
-                        installments. I accept the circle rules and repayment schedule.
+                        {t.agreement}
                       </p>
                       <Input
                         name="signerName"
-                        placeholder="Full name as signature"
+                        placeholder={t.signer}
                         required
                         minLength={2}
                       />
                       <Button type="submit" size="sm" className="min-h-11">
-                        Accept agreement
+                        {t.acceptAgreement}
                       </Button>
                     </form>
                   ) : null}
                   {loan.status === 'requested' && loan.agreement_accepted_at ? (
                     <p className="text-xs text-muted-foreground">
-                      Agreement signed
-                      {loan.agreement_signer_name ? ` by ${loan.agreement_signer_name}` : ''}
+                      {t.agreementSigned}
+                      {loan.agreement_signer_name ? ` ${t.by} ${loan.agreement_signer_name}` : ''}
                     </p>
                   ) : null}
                   {loan.status === 'active' ? (
@@ -415,20 +511,19 @@ export default async function QardPage({ searchParams }: Props) {
                     >
                       <input type="hidden" name="loanId" value={loan.id} />
                       <p className="w-full text-xs text-muted-foreground">
-                        This comes from your Money balance. Add money with M-Pesa first if it is
-                        short.
+                        {t.repayNote}
                       </p>
                       <Input
                         name="amount"
                         type="number"
                         min="1"
                         max={due}
-                        placeholder="Repay"
+                        placeholder={t.repay}
                         required
                         className="h-11 w-28"
                       />
                       <Button type="submit" size="sm" className="min-h-11">
-                        Repay
+                        {t.repay}
                       </Button>
                     </form>
                   ) : null}
@@ -438,11 +533,11 @@ export default async function QardPage({ searchParams }: Props) {
           </ul>
         ) : (
           <EmptyState
-            title="No loans yet"
+            title={t.noLoans}
             description={
               canRequestLoan
-                ? 'Ask for an interest-free loan from this circle. The treasurer approves, then you repay.'
-                : 'Pay into the circle before you can ask for a loan.'
+                ? t.noLoansDesc
+                : t.payFirst
             }
           />
         )}

@@ -29,10 +29,8 @@ async function importRows(
     p_rows: rows,
   });
   if (error) return { ok: false, error: error.message };
-  return (data as { ok?: boolean; imported?: number; error?: string } | null) ?? {
-    ok: false,
-    error: 'Import failed.',
-  };
+  const result = data as { ok?: boolean; imported?: number; error?: string } | null;
+  return result ? { ...result, ok: result.ok ?? false } : { ok: false, error: 'Import failed.' };
 }
 
 /** Record one past cashbook row for a member (savings / loan / repayment). */

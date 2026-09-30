@@ -170,7 +170,7 @@ export function PaySheet({
             {labels.balanceLabel}
           </p>
           <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            {formatCurrency(balance ?? 0, currency)}
+            <span className="jm-amount">{formatCurrency(balance ?? 0, currency)}</span>
           </p>
         </div>
 

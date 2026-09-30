@@ -62,7 +62,7 @@ export function MyCirclesSection({
                     </p>
                   </div>
                   <div className="shrink-0 text-sm font-medium text-foreground sm:text-right">
-                    {formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}
+                    <span className="jm-amount">{formatCurrency(item.jamiya.contributionAmount, item.jamiya.currency)}</span>
                     <span className="block text-xs font-normal text-muted-foreground">
                       {isRotatingKind(item.jamiya.challengeKind) ? (
                         <>

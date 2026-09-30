@@ -198,7 +198,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .from('payouts')
         .select('id, cycle_number, amount, currency, scheduled_date, status')
         .eq('jamiya_id', jamiya.id)
-        .in('status', ['scheduled', 'pending'])
+        .in('status', ['scheduled', 'processing'])
         .order('scheduled_date', { ascending: true })
         .limit(5),
       supabase
@@ -237,7 +237,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .from('qard_loans')
         .select('id, amount, currency, status, purpose, borrower_id, created_at')
         .eq('jamiya_id', jamiya.id)
-        .eq('status', 'pending')
+        .eq('status', 'requested')
         .order('created_at', { ascending: false })
         .limit(20),
       supabase
@@ -626,7 +626,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                 <div>
                   <p className="text-sm font-medium capitalize">
                     {row.kind.replaceAll('_', ' ')} ·{' '}
-                    {formatCurrency(Number(row.amount), row.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(row.amount), row.currency)}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">
                     First:{' '}

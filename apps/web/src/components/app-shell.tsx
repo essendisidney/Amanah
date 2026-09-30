@@ -25,6 +25,7 @@ import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { QuickSearch, type QuickSearchCircle } from '@/components/quick-search';
+import { AppLockGate } from '@/components/app-lock';
 import { WhatsAppShareButton } from '@/components/whatsapp-share-button';
 import { composeWhatsAppMessage, JAMEIYAH_SHARE_BLURB } from '@/lib/whatsapp-share';
 import { getSiteUrl } from '@/lib/site-url';
@@ -156,8 +157,8 @@ export function AppShell({
   });
 
   return (
-    <div className="jameiyah-ambient min-h-dvh overflow-x-hidden">
-      <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-md md:border-transparent md:bg-transparent">
+    <div className="jameiyah-app jameiyah-ambient min-h-dvh overflow-x-hidden">
+      <header className="jm-lockable jm-app-header jameiyah-on-dark sticky top-0 z-40 pt-[env(safe-area-inset-top)] text-foreground">
         <div className="mx-auto flex h-12 w-full max-w-6xl items-center justify-between gap-3 px-4 md:h-14 md:px-6">
           <JameiyahLogo href={'/dashboard' as Route} size="md" tone="brand" />
 
@@ -173,7 +174,7 @@ export function AppShell({
                   href={item.href}
                   aria-current={active ? 'page' : undefined}
                   className={cn(
-                    'whitespace-nowrap rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors',
+                    'whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors',
                     active
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -181,7 +182,12 @@ export function AppShell({
                 >
                   {item.label}
                   {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-md bg-white/90 px-1.5 text-[10px] font-semibold text-primary">
+                    <span
+                      className={cn(
+                        'ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold',
+                        active ? 'bg-[#03201b] text-[#d8a038]' : 'bg-[#d8a038] text-[#1f1606]',
+                      )}
+                    >
                       {liveUnread > 9 ? '9+' : liveUnread}
                     </span>
                   ) : null}
@@ -223,7 +229,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="relative mx-auto w-full max-w-6xl px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-12 md:pt-6">
+      <main className="jm-lockable relative mx-auto w-full max-w-6xl px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 md:px-6 md:pb-12 md:pt-6">
         <div
           className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_at_top,_rgba(13,92,69,0.07)_0%,_rgba(197,160,68,0.05)_45%,_transparent_72%)]"
           aria-hidden
@@ -234,7 +240,7 @@ export function AppShell({
       </main>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/95 px-2 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur-md md:hidden"
+        className="jm-lockable jm-tabbar fixed inset-x-0 bottom-0 z-50 border-t border-border/70 px-2 pb-[env(safe-area-inset-bottom)] pt-1 backdrop-blur-md md:hidden"
         aria-label="Mobile primary"
       >
         <ul className="mx-auto grid max-w-lg grid-cols-5 items-center gap-0.5">
@@ -252,12 +258,8 @@ export function AppShell({
                     className="flex min-h-12 flex-col items-center justify-center gap-0.5 px-1"
                   >
                     <span
-                      className={cn(
-                        'inline-flex h-10 w-10 items-center justify-center rounded-xl transition-colors',
-                        active
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-primary/12 text-primary',
-                      )}
+                      data-active={active ? 'true' : 'false'}
+                      className="jm-tabbar-center inline-flex h-11 w-11 items-center justify-center transition-colors"
                     >
                       <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.75} />
                     </span>
@@ -296,6 +298,7 @@ export function AppShell({
           })}
         </ul>
       </nav>
+      <AppLockGate locale={locale} signOutAction={signOutAction} />
     </div>
   );
 }

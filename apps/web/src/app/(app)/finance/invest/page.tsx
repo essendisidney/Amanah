@@ -138,7 +138,7 @@ export default async function InvestPage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="text-sm font-semibold tabular-nums">
-                      {formatCurrency(Number(project.current_value ?? 0), currency)}
+                      <span className="jm-amount">{formatCurrency(Number(project.current_value ?? 0), currency)}</span>
                     </p>
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/circles/${circle.slug}/treasury` as Route}>

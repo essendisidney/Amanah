@@ -35,7 +35,7 @@ export async function updateProfileAction(
 
   if (requirePhone || phoneNormalized) {
     const phoneCheck = phoneSchema.safeParse(phoneNormalized || parsed.data.phone);
-    if (!phoneCheck.success || !isValidKeMobile(phoneNormalized || parsed.data.phone)) {
+    if (!phoneCheck.success || !isValidKeMobile(phoneNormalized || parsed.data.phone || '')) {
       return {
         success: false,
         message: 'Please fix the errors below.',

@@ -1,5 +1,6 @@
 'use client';
 
+import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
 import { Label } from '@jamiya/ui';
 import { booksHref } from '@/features/circles/lib/member-books-view';
@@ -29,7 +30,7 @@ export function MemberBooksMemberPicker({ slug, members }: Props) {
         onChange={(e) => {
           const id = e.target.value;
           if (!id) return;
-          router.push(booksHref(slug, 'member', id));
+          router.push(booksHref(slug, 'member', id) as Route);
         }}
       >
         <option value="">Choose a name…</option>

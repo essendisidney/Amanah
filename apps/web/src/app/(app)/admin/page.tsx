@@ -62,7 +62,7 @@ export default async function AdminOverviewPage() {
     supabase
       .from('tawarruq_applications')
       .select('id', { count: 'exact', head: true })
-      .in('status', ['submitted', 'under_review', 'pending']),
+      .in('status', ['requested', 'submitted_to_partner']),
     supabase
       .from('sadaka_institutions')
       .select('id', { count: 'exact', head: true })

@@ -32,7 +32,7 @@ export function MemberBooksMemberSwitcher({ slug, members, currentMemberId }: Pr
           className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
           onChange={(e) => {
             const id = e.target.value;
-            if (id) router.push(booksHref(slug, 'member', id));
+            if (id) router.push(booksHref(slug, 'member', id) as Route);
           }}
         >
           {[...members]

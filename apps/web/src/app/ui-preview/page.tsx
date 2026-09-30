@@ -497,7 +497,17 @@ export default function UiPreviewPage() {
             kind="share_dividend"
           />
           <h2 className="pt-6 text-sm font-semibold text-foreground">Tawarruq · Jameiyah finance</h2>
-          <TawarruqRequestForm />
+          <TawarruqRequestForm
+            qualification={{
+              room: 50000,
+              owed: 0,
+              phoneOk: true,
+              kycApproved: true,
+              companyLeft: 1000000,
+              overdue: false,
+            }}
+            guarantors={[{ id: 'g1', name: 'Amina W.' }]}
+          />
           <CircleActionHub
             groups={[
               {

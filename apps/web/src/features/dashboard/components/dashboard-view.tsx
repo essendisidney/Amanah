@@ -101,7 +101,7 @@ export function DashboardView({
           )}
         </header>
 
-        <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
+        <section className="jameiyah-surface jm-balance-card jameiyah-on-dark space-y-4 px-5 py-5 sm:px-6">
           <div className="flex items-start justify-between gap-2">
             <Link
               href={'/wallet' as Route}
@@ -147,7 +147,7 @@ export function DashboardView({
                 {labels.duePrefix}
               </p>
               <p className="jameiyah-money mt-1 text-lg font-bold text-foreground">
-                {formatCurrency(dueRemaining, nextDue!.currency)}
+                <span className="jm-amount">{formatCurrency(dueRemaining, nextDue!.currency)}</span>
               </p>
               <p className="mt-0.5 truncate text-xs text-muted-foreground">
                 {nextDue?.jamiyaName
@@ -246,7 +246,7 @@ export function DashboardView({
                       {t(frequencyTemplate, { days: circle.jamiya.contributionFrequencyDays })}
                     </p>
                     <p className="jameiyah-money text-base font-semibold text-foreground">
-                      {formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}
+                      <span className="jm-amount">{formatCurrency(circle.jamiya.contributionAmount, circle.jamiya.currency)}</span>
                     </p>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export function DashboardView({
                           {labels.nextPayout}
                         </dt>
                         <dd className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
-                          {formatCurrency(circlePayout.amount, circlePayout.currency)}
+                          <span className="jm-amount">{formatCurrency(circlePayout.amount, circlePayout.currency)}</span>
                         </dd>
                         <dd className="mt-0.5 text-xs text-muted-foreground">
                           {formatDate(circlePayout.scheduledDate)}
@@ -366,7 +366,7 @@ function RecentList({
               }
             >
               {inflow ? '+' : '−'}
-              {formatCurrency(row.amount, row.currency)}
+              <span className="jm-amount">{formatCurrency(row.amount, row.currency)}</span>
             </p>
           </li>
         );

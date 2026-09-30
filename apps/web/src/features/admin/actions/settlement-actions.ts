@@ -95,7 +95,7 @@ export async function markSettlementStatusAction(formData: FormData) {
   const { data, error } = await supabase.rpc('mark_settlement_status', {
     p_settlement_id: settlementId,
     p_status: status,
-    p_note: note,
+    p_note: note ?? undefined,
   });
 
   const ok =

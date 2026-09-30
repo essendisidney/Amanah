@@ -96,15 +96,15 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
                 <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm">
                   <span>
                     <span className="text-muted-foreground">Shares </span>
-                    {formatCurrency(m.shareAmount, currency)}
+                    <span className="jm-amount">{formatCurrency(m.shareAmount, currency)}</span>
                   </span>
                   <span>
                     <span className="text-muted-foreground">Savings </span>
-                    {formatCurrency(m.savings, currency)}
+                    <span className="jm-amount">{formatCurrency(m.savings, currency)}</span>
                   </span>
                   <span>
                     <span className="text-muted-foreground">Facility </span>
-                    {formatCurrency(m.loanOut, currency)}
+                    <span className="jm-amount">{formatCurrency(m.loanOut, currency)}</span>
                   </span>
                   {isIncomplete(m) ? (
                     <span className="text-xs font-medium text-amber-700 dark:text-amber-400">

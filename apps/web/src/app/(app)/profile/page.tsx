@@ -22,6 +22,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { AppPage, PageHeader } from '@/components/app-page';
 import { ShareAppInvite } from '@/components/share-app-invite';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { AppLockSettings } from '@/components/app-lock';
 import { getSiteUrl } from '@/lib/site-url';
 
 export const metadata: Metadata = {
@@ -78,7 +79,7 @@ export default async function ProfilePage({ searchParams }: Props) {
     redirect(`/login?next=${encodeURIComponent(profilePath)}`);
   }
 
-  const { dict } = await getDictionary();
+  const { dict, locale } = await getDictionary();
   const labels = dict.profile;
 
   const [{ data: profileData }, { data: docsData }, { data: referralData }, { data: latestIprs }] =
@@ -365,6 +366,8 @@ export default async function ProfilePage({ searchParams }: Props) {
           </div>
         </div>
       </details>
+
+      <AppLockSettings locale={locale} />
 
       <form action={signOutAction}>
         <Button type="submit" variant="outline" className="min-h-11 w-full">

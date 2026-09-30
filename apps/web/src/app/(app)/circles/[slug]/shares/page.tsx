@@ -193,7 +193,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
         <div className="rounded-xl border border-border bg-card p-4">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Par value</p>
           <p className="mt-1 text-2xl font-semibold">
-            {formatCurrency(Number(jamiya.share_par_value), currency)}
+            <span className="jm-amount">{formatCurrency(Number(jamiya.share_par_value), currency)}</span>
           </p>
         </div>
         <div className="rounded-xl border border-border bg-card p-4">
@@ -337,7 +337,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                 <p className="text-sm font-semibold">
                   {Number(row.shares).toLocaleString()} shares
                   <span className="block text-xs font-normal text-muted-foreground">
-                    {formatCurrency(Number(row.amount), currency)}
+                    <span className="jm-amount">{formatCurrency(Number(row.amount), currency)}</span>
                   </span>
                 </p>
               </li>
@@ -372,12 +372,12 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                   <p className="font-medium">{labelFor(String(lot.member_id))}</p>
                   <p className="text-xs text-muted-foreground">
                     {formatDate(String(lot.purchased_on))} · {Number(lot.shares)} @{' '}
-                    {formatCurrency(Number(lot.unit_price), String(lot.currency))}
+                    <span className="jm-amount">{formatCurrency(Number(lot.unit_price), String(lot.currency))}</span>
                     {lot.notes ? ` · ${lot.notes}` : ''}
                   </p>
                 </div>
                 <p className="font-semibold">
-                  {formatCurrency(Number(lot.amount), String(lot.currency))}
+                  <span className="jm-amount">{formatCurrency(Number(lot.amount), String(lot.currency))}</span>
                 </p>
               </li>
             ))}
@@ -444,7 +444,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                     </p>
                   </div>
                   <p className="font-semibold">
-                    {formatCurrency(Number(d.total_amount), String(d.currency))}
+                    <span className="jm-amount">{formatCurrency(Number(d.total_amount), String(d.currency))}</span>
                   </p>
                 </div>
                 {(allocationsByDividend.get(String(d.id)) ?? []).length > 0 ? (

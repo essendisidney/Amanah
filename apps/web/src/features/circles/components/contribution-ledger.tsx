@@ -70,7 +70,7 @@ export function ContributionLedger({
                   </p>
                 </div>
                 <p className="text-sm font-medium text-foreground">
-                  {formatCurrency(row.amountPaid, row.currency)}
+                  <span className="jm-amount">{formatCurrency(row.amountPaid, row.currency)}</span>
                   <span className="font-normal text-muted-foreground">
                     {' '}
                     / {formatCurrency(row.amount, row.currency)}
@@ -118,7 +118,7 @@ export function ContributionLedger({
                   </p>
                 </div>
                 <p className="text-sm font-semibold text-foreground">
-                  {formatCurrency(pay.amount, pay.currency)}
+                  <span className="jm-amount">{formatCurrency(pay.amount, pay.currency)}</span>
                 </p>
               </li>
             ))}

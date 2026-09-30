@@ -172,7 +172,7 @@ export const tendepayAdapter: PaymentAdapter = {
       };
     }
 
-    const msisdn = toMsisdn(input.phone);
+    const msisdn = toMsisdn(input.phone ?? '');
     const { ok, status, json } = await tendepayFetch(disbursePath(), {
       amount: Math.round(Number(input.amount)),
       phone: msisdn,

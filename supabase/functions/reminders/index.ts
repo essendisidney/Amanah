@@ -12,15 +12,31 @@ Deno.serve(async (req) => {
     const cronSecret = Deno.env.get("CRON_SECRET");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-    if (
-      cronSecret &&
-      auth !== `Bearer ${cronSecret}` &&
-      auth !== `Bearer ${serviceKey}`
-    ) {
+    // Always require a service-role key or the cron secret (it used to be open when CRON_SECRET was unset).
+    // The caller's key may be a different service-role key format than this runtime's,
+    // so an unknown bearer is checked against the Auth admin API, which only service-role keys can read.
+    const token = auth.startsWith("Bearer ") ? auth.slice(7).trim() : "";
+    const isServiceRole = async (t: string) => {
+      if (!t) return false;
+      if (t === serviceKey || (cronSecret && t === cronSecret)) return true;
+      try {
+        const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/auth/v1/admin/users?per_page=1`, {
+          headers: { apikey: t, Authorization: `Bearer ${t}` },
+        });
+        return r.ok;
+      } catch {
+        return false;
+      }
+    };
+    if (!(await isServiceRole(token))) {
       return new Response(JSON.stringify({ ok: false, error: "UNAUTHORIZED" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
+    }
+    // Auth check only, no work: lets deploys confirm the cron can reach this function.
+    if (new URL(req.url).searchParams.get("probe") === "1") {
+      return Response.json({ ok: true, probe: true });
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -46,13 +62,27 @@ Deno.serve(async (req) => {
       )
       .in("status", ["pending", "late"])
       .lte("due_date", dueBefore)
+      .gte("due_date", new Date(Date.now() - 8 * 86_400_000).toISOString().slice(0, 10))
       .limit(200);
     if (upcomingError) throw upcomingError;
 
     let contributionReminders = 0;
     let contributionSkipped = 0;
 
+    // Remind on key days only (SMS costs money and daily nagging gets ignored):
+    // the day before, the due day, then 1, 3 and 7 days late.
+    const REMIND_DAYS = new Set([1, 0, -1, -3, -7]);
+    const siteUrl = (Deno.env.get("SITE_URL") ?? "https://jameiyah.com").replace(/\/$/, "");
+    const dayMs = 86_400_000;
+    const todayUtc = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const daysUntil = (isoDate: string) =>
+      Math.round((Date.parse(`${isoDate}T00:00:00Z`) - todayUtc) / dayMs);
+    const money = (amount: number | string, currency: string) =>
+      `${currency === "KES" ? "KES" : currency} ${Number(amount).toLocaleString("en-KE", { maximumFractionDigits: 0 })}`;
+
     for (const row of upcoming ?? []) {
+      const d = daysUntil(row.due_date as string);
+      if (!REMIND_DAYS.has(d)) continue;
       const member = row.members as { user_id: string } | { user_id: string }[] | null;
       const jamiya = row.jamiyas as
         | { name: string; slug: string }
@@ -62,9 +92,14 @@ Deno.serve(async (req) => {
       const circle = Array.isArray(jamiya) ? jamiya[0] : jamiya;
       if (!userId || !circle) continue;
 
-      const title = "Contribution reminder";
+      const when = d === 1
+        ? "is due tomorrow"
+        : d === 0
+        ? "is due today"
+        : `was due ${-d} day${d === -1 ? "" : "s"} ago`;
+      const title = d < 0 ? "Contribution overdue" : "Contribution reminder";
       const body =
-        `${circle.name}: cycle ${row.cycle_number} is due ${row.due_date}.`;
+        `${circle.name}: ${money(row.amount, row.currency)} (cycle ${row.cycle_number}) ${when}. Pay: ${siteUrl}/pay`;
       const dedupe = `contrib:${row.id}:${dayKey}`;
 
       const { data, error } = await supabase.rpc("enqueue_user_reminder", {
@@ -100,6 +135,8 @@ Deno.serve(async (req) => {
     let payoutSkipped = 0;
 
     for (const row of payouts ?? []) {
+      // One heads-up, the day before the payout.
+      if (daysUntil(row.scheduled_date as string) !== 1) continue;
       const member = row.members as { user_id: string } | { user_id: string }[] | null;
       const jamiya = row.jamiyas as
         | { name: string; slug: string }
@@ -111,7 +148,7 @@ Deno.serve(async (req) => {
 
       const title = "Payout coming up";
       const body =
-        `${circle.name}: your payout for cycle ${row.cycle_number} is scheduled ${row.scheduled_date}.`;
+        `${circle.name}: your payout of ${money(row.amount, row.currency)} (cycle ${row.cycle_number}) is scheduled for tomorrow.`;
       const dedupe = `payout:${row.id}:${dayKey}`;
 
       const { data, error } = await supabase.rpc("enqueue_user_reminder", {

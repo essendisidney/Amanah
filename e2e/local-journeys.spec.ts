@@ -95,6 +95,8 @@ test('member pays a circle contribution from the wallet', async ({ page }) => {
   );
   test.skip(due === 0, 'seed has no started circle, so bob has no dues to pay');
   const before = walletBalance('bob@jamiya.local');
+  // With too little Money the card sends an M-Pesa prompt instead; money-journeys.spec covers that full path.
+  test.skip(before < 5000, 'wallet cannot cover a full contribution; covered by money-journeys.spec');
   await signInEmail(page, 'bob@jamiya.local');
   await page.goto(`/circles/${CIRCLE}`);
   const pay = page.getByRole('button', { name: /pay( now| dues| contribution)?|pay from (money|wallet)/i }).first();

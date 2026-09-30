@@ -134,7 +134,7 @@ export function OfficerOverviewStrip({
                     <p className="truncate text-sm font-medium text-foreground">{row.label}</p>
                     {row.remaining > 0 ? (
                       <p className="jameiyah-money text-xs text-muted-foreground">
-                        {formatCurrency(row.remaining, row.currency)}
+                        <span className="jm-amount">{formatCurrency(row.remaining, row.currency)}</span>
                       </p>
                     ) : null}
                   </div>

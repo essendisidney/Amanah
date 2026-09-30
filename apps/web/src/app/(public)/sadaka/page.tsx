@@ -58,7 +58,7 @@ export default async function SadakaPage({ searchParams }: Props) {
     .order('created_at', { ascending: false });
 
   if (category && CATEGORY_LABELS[category]) {
-    query = query.eq('category', category);
+    query = query.eq('category', category as never);
   }
 
   const { data } = await query;

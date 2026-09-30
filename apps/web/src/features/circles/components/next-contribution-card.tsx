@@ -123,7 +123,7 @@ export function NextContributionCard({
             {heading?.trim() || labels.nextTitle}
           </p>
           <p className="jameiyah-money mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            {formatCurrency(remaining, currency)}
+            <span className="jm-amount">{formatCurrency(remaining, currency)}</span>
           </p>
           <p className="mt-1 text-sm text-muted-foreground">{dueMeta}</p>
         </div>
@@ -133,7 +133,7 @@ export function NextContributionCard({
               {labels.moneyAvailable}
             </p>
             <p className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
-              {formatCurrency(walletAvailable, walletCurrency)}
+              <span className="jm-amount">{formatCurrency(walletAvailable, walletCurrency)}</span>
             </p>
           </div>
         ) : null}

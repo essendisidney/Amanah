@@ -136,7 +136,7 @@ export function CircleOpsPanel({
                 Available to lend
               </dt>
               <dd className="mt-1 text-lg font-semibold">
-                {formatCurrency(fund.availableToLend, currency)}
+                <span className="jm-amount">{formatCurrency(fund.availableToLend, currency)}</span>
               </dd>
             </div>
             <div className="rounded-xl border border-border bg-card p-4">
@@ -144,13 +144,13 @@ export function CircleOpsPanel({
                 Outstanding
               </dt>
               <dd className="mt-1 text-lg font-semibold">
-                {formatCurrency(fund.outstanding, currency)}
+                <span className="jm-amount">{formatCurrency(fund.outstanding, currency)}</span>
               </dd>
             </div>
             <div className="rounded-xl border border-border bg-card p-4">
               <dt className="text-xs uppercase tracking-wide text-muted-foreground">Overdue</dt>
               <dd className="mt-1 text-lg font-semibold">
-                {formatCurrency(fund.overdue, currency)}
+                <span className="jm-amount">{formatCurrency(fund.overdue, currency)}</span>
               </dd>
             </div>
             <div className="rounded-xl border border-border bg-card p-4">
@@ -162,7 +162,7 @@ export function CircleOpsPanel({
             Contributions {formatCurrency(fund.memberContributions, currency)} · penalties{' '}
             {formatCurrency(fund.penaltiesReceived, currency)} · lent{' '}
             {formatCurrency(fund.lentOut, currency)} · repaid{' '}
-            {formatCurrency(fund.repaid, currency)}
+            <span className="jm-amount">{formatCurrency(fund.repaid, currency)}</span>
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             <Button asChild className="min-h-11">
@@ -330,7 +330,7 @@ export function CircleOpsPanel({
                 <li key={row.id} className="px-4 py-3 text-sm">
                   <p className="font-medium">
                     {row.entryType.replaceAll('_', ' ')} ·{' '}
-                    {formatCurrency(row.amount, row.currency)}
+                    <span className="jm-amount">{formatCurrency(row.amount, row.currency)}</span>
                   </p>
                   <p className="text-muted-foreground">
                     Effective {formatDate(row.effectiveDate)}
@@ -424,7 +424,7 @@ export function CircleOpsPanel({
                       </p>
                     </div>
                     <p className="text-lg font-semibold">
-                      {formatCurrency(pocket.balance, pocket.currency)}
+                      <span className="jm-amount">{formatCurrency(pocket.balance, pocket.currency)}</span>
                     </p>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">

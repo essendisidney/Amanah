@@ -186,7 +186,7 @@ export function ContributionCalendar({
               </div>
               <p className="mt-1 text-sm text-muted-foreground">
                 Due {formatDate(item.dueDate)} ·{' '}
-                {formatCurrency(item.amount, item.currency)}
+                <span className="jm-amount">{formatCurrency(item.amount, item.currency)}</span>
                 {paid > 0
                   ? ` · Paid ${formatCurrency(paid, item.currency)} · Remaining ${formatCurrency(remaining, item.currency)}`
                   : null}
@@ -363,7 +363,7 @@ export function PayoutSchedule({
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
               Scheduled {formatDate(item.scheduledDate)} ·{' '}
-              {formatCurrency(item.amount, item.currency)}
+              <span className="jm-amount">{formatCurrency(item.amount, item.currency)}</span>
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:items-end">

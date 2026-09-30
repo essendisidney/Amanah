@@ -318,14 +318,14 @@ export default async function WalletPage({ searchParams }: Props) {
         </div>
       ) : null}
 
-      <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
+      <section className="jameiyah-surface jm-balance-card jameiyah-on-dark space-y-4 px-5 py-5 sm:px-6">
         {wallets.length === 0 ? (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {labels.availableLabel}
             </p>
             <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground">
-              {formatCurrency(0, primaryCurrency)}
+              <span className="jm-amount">{formatCurrency(0, primaryCurrency)}</span>
             </p>
             <p className="mt-2 text-sm text-muted-foreground">{labels.emptyDesc}</p>
           </div>
@@ -439,7 +439,7 @@ export default async function WalletPage({ searchParams }: Props) {
                 <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div className="min-w-0">
                     <p className="jameiyah-money text-sm font-semibold">
-                      {formatCurrency(Number(intent.amount), intent.currency)}
+                      <span className="jm-amount">{formatCurrency(Number(intent.amount), intent.currency)}</span>
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {intent.phone ? `${intent.phone} · ` : ''}
@@ -479,7 +479,7 @@ export default async function WalletPage({ searchParams }: Props) {
               <li key={intent.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <p className="jameiyah-money text-sm font-semibold">
-                    {formatCurrency(Number(intent.amount), intent.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(intent.amount), intent.currency)}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {intent.error_message ?? intent.status}
@@ -507,7 +507,7 @@ export default async function WalletPage({ searchParams }: Props) {
               <li key={row.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
                   <p className="jameiyah-money text-sm font-semibold">
-                    {formatCurrency(Number(row.amount), row.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(row.amount), row.currency)}</span>
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {row.destination_type === 'mpesa'
@@ -576,7 +576,7 @@ export default async function WalletPage({ searchParams }: Props) {
                     }
                   >
                     {inflow ? '+' : '−'}
-                    {formatCurrency(Number(row.amount), row.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(row.amount), row.currency)}</span>
                   </p>
                 </li>
               );

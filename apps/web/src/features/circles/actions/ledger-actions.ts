@@ -82,7 +82,7 @@ async function payIntoCircle(formData: FormData, method: 'wallet' | 'mpesa'): Pr
 
   if (!jamiyaId || !slug) return;
   if (!Number.isFinite(amount) || amount <= 0) {
-    payBack(formData, slug, OPEN_PAY_ERRORS.INVALID_AMOUNT);
+    payBack(formData, slug, OPEN_PAY_ERRORS.INVALID_AMOUNT ?? 'Enter a valid amount.');
     return;
   }
 

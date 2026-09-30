@@ -59,7 +59,7 @@ export function CirclesListCard({
             {eachMonthLabel}
           </p>
           <p className="jameiyah-money mt-0.5 text-sm font-semibold text-foreground">
-            {formatCurrency(monthlyAmount, currency)}
+            <span className="jm-amount">{formatCurrency(monthlyAmount, currency)}</span>
           </p>
         </div>
       </div>
@@ -81,7 +81,7 @@ export function CirclesListCard({
                 overdue ? 'text-destructive' : 'text-foreground',
               )}
             >
-              {formatCurrency(due.remaining, due.currency)}
+              <span className="jm-amount">{formatCurrency(due.remaining, due.currency)}</span>
             </p>
             {due.dueDate ? (
               <p className="mt-0.5 text-xs text-muted-foreground">{formatDate(due.dueDate)}</p>

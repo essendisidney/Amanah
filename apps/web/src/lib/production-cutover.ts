@@ -4,6 +4,9 @@
  * Prefer PAYMENT_PROVIDER=paystack|mpesa in production — simulated is local-only.
  */
 
+import type { PaymentProviderId } from '@/lib/payments/types';
+import { isBankRailConfigured } from '@/lib/payments/adapters/bank-rails';
+
 export function requireRealProviders(): boolean {
   return process.env.REQUIRE_REAL_PROVIDERS === 'true';
 }
@@ -21,9 +24,14 @@ export function shouldBlockSimulatedPayments(): boolean {
   return requireRealProviders();
 }
 
-export function assertProviderConfigured(
-  provider: 'mpesa' | 'bank' | 'paystack' | 'intasend' | 'tendepay' | 'simulated',
-): void {
+export function assertProviderConfigured(provider: PaymentProviderId): void {
+  if ((provider === 'coop' || provider === 'kcb') && requireRealProviders()) {
+    if (!isBankRailConfigured(provider)) {
+      throw new Error(
+        `${provider === 'coop' ? 'Co-op Bank' : 'KCB'} rail is not configured on the web app.`,
+      );
+    }
+  }
   if (provider === 'simulated' && shouldBlockSimulatedPayments()) {
     throw new Error(
       'Simulated payments are disabled in this environment. Set PAYMENT_PROVIDER=mpesa|bank|paystack|intasend|tendepay.',

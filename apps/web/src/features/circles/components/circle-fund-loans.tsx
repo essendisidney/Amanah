@@ -211,7 +211,7 @@ export function CircleFundLoans({
                   <div>
                     <p className="font-medium">{loan.purpose}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatCurrency(loan.amount, loan.currency)}
+                      <span className="jm-amount">{formatCurrency(loan.amount, loan.currency)}</span>
                       {loan.agreementAcceptedAt
                         ? ` · ${labels.agreementSigned}`
                         : ` · ${labels.awaitingAgreement}`}

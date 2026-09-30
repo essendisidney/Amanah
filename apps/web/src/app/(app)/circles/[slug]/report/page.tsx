@@ -210,7 +210,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
         <div className="rounded-xl border border-border p-4 print:rounded-none">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Loan book</p>
           <p className="mt-2 text-2xl font-semibold">
-            {formatCurrency(loanBookOutstanding, jamiya.currency)}
+            <span className="jm-amount">{formatCurrency(loanBookOutstanding, jamiya.currency)}</span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Outstanding across {loans.length} loan(s)
@@ -219,7 +219,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
         <div className="rounded-xl border border-border p-4 print:rounded-none">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">Savings book</p>
           <p className="mt-2 text-2xl font-semibold">
-            {formatCurrency(savingsBookTotal, jamiya.currency)}
+            <span className="jm-amount">{formatCurrency(savingsBookTotal, jamiya.currency)}</span>
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Across {pockets.length} savings pocket(s)
@@ -251,12 +251,12 @@ export default async function CirclePrintReportPage({ params }: Props) {
             <li>
               Fines open / paid:{' '}
               {formatCurrency(Number(snap.fines_open), jamiya.currency)} /{' '}
-              {formatCurrency(Number(snap.fines_paid), jamiya.currency)}
+              <span className="jm-amount">{formatCurrency(Number(snap.fines_paid), jamiya.currency)}</span>
             </li>
             <li>
               Loans disbursed / repaid:{' '}
               {formatCurrency(Number(snap.loans_disbursed), jamiya.currency)} /{' '}
-              {formatCurrency(Number(snap.loans_repaid), jamiya.currency)}
+              <span className="jm-amount">{formatCurrency(Number(snap.loans_repaid), jamiya.currency)}</span>
             </li>
             <li>
               Investments: {formatCurrency(Number(snap.investments_value), jamiya.currency)}
@@ -274,15 +274,15 @@ export default async function CirclePrintReportPage({ params }: Props) {
             <ul className="text-sm text-muted-foreground">
               <li>
                 Income:{' '}
-                {formatCurrency(Number(gl.income_statement?.income_total ?? 0), jamiya.currency)}
+                <span className="jm-amount">{formatCurrency(Number(gl.income_statement?.income_total ?? 0), jamiya.currency)}</span>
               </li>
               <li>
                 Expenses:{' '}
-                {formatCurrency(Number(gl.income_statement?.expense_total ?? 0), jamiya.currency)}
+                <span className="jm-amount">{formatCurrency(Number(gl.income_statement?.expense_total ?? 0), jamiya.currency)}</span>
               </li>
               <li>
                 Surplus / (deficit):{' '}
-                {formatCurrency(Number(gl.income_statement?.surplus ?? 0), jamiya.currency)}
+                <span className="jm-amount">{formatCurrency(Number(gl.income_statement?.surplus ?? 0), jamiya.currency)}</span>
               </li>
             </ul>
             {(gl.income_statement?.expense_by_category?.length ?? 0) > 0 ? (
@@ -310,7 +310,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
               <li>Net: {formatCurrency(Number(gl.cash_flow?.net ?? 0), jamiya.currency)}</li>
               <li>
                 Closing cash:{' '}
-                {formatCurrency(Number(gl.cash_flow?.closing_cash ?? 0), jamiya.currency)}
+                <span className="jm-amount">{formatCurrency(Number(gl.cash_flow?.closing_cash ?? 0), jamiya.currency)}</span>
               </li>
             </ul>
           </section>
@@ -342,7 +342,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
                   </li>
                   <li className="font-medium text-foreground">
                     Total:{' '}
-                    {formatCurrency(Number(gl.balance_sheet?.assets?.total ?? 0), jamiya.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(gl.balance_sheet?.assets?.total ?? 0), jamiya.currency)}</span>
                   </li>
                 </ul>
               </div>
@@ -391,7 +391,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
             {loans.map((loan) => (
               <li key={loan.id}>
                 {loan.purpose} · {loan.status} ·{' '}
-                {formatCurrency(Number(loan.amount), loan.currency)}
+                <span className="jm-amount">{formatCurrency(Number(loan.amount), loan.currency)}</span>
                 {' · remaining '}
                 {formatCurrency(
                   Math.max(Number(loan.amount) - Number(loan.amount_repaid), 0),
@@ -415,7 +415,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
             {pockets.map((pocket) => (
               <li key={pocket.id}>
                 {pocket.label || pocket.category} ·{' '}
-                {formatCurrency(Number(pocket.balance), pocket.currency)}
+                <span className="jm-amount">{formatCurrency(Number(pocket.balance), pocket.currency)}</span>
                 {pocket.target_amount
                   ? ` · target ${formatCurrency(Number(pocket.target_amount), pocket.currency)}`
                   : ''}
@@ -441,7 +441,7 @@ export default async function CirclePrintReportPage({ params }: Props) {
             }>).map((a) => (
               <li key={a.name}>
                 {a.name} ({a.account_kind.replaceAll('_', ' ')}):{' '}
-                {formatCurrency(Number(a.balance), a.currency)}
+                <span className="jm-amount">{formatCurrency(Number(a.balance), a.currency)}</span>
               </li>
             ))}
           </ul>

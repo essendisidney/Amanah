@@ -249,7 +249,7 @@ export function MemberBooksDetail({
               <p>
                 <span className="text-muted-foreground">Borrowed </span>
                 <span className="font-medium">
-                  {formatCurrency(totals.loanDisbursed + totals.qardAmount, currency)}
+                  <span className="jm-amount">{formatCurrency(totals.loanDisbursed + totals.qardAmount, currency)}</span>
                 </span>
               </p>
               <p>

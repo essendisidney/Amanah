@@ -13,11 +13,12 @@ import {
 } from '../lib/invitation-token';
 import { mapZodFieldErrors, type ActionState, type BulkAddResultRow, type BulkAddMembersState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { BULK_PHONE_MAX_ROWS, parseBulkPhoneLines } from '../lib/parse-bulk-phones';
 
 async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;
-  writer: Awaited<ReturnType<typeof createClient>> | ReturnType<typeof createServiceRoleClient>;
+  writer: SupabaseClient;
   jamiyaId: string;
   invitedBy: string;
   email: string | null;

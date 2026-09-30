@@ -70,7 +70,7 @@ export default async function NextOfKinPage({ params, searchParams }: Props) {
     .from('members')
     .select('id, user_id, member_code, status')
     .eq('jamiya_id', jamiya.id)
-    .in('status', ['active', 'pending', 'suspended'])
+    .in('status', ['active', 'invited', 'suspended'])
     .order('joined_at', { ascending: true });
 
   const members = (membersData ?? []) as Array<{

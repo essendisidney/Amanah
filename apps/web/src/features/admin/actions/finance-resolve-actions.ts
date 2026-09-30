@@ -22,7 +22,7 @@ export async function resolveIntentExceptionAction(formData: FormData) {
   const { data, error } = await supabase.rpc('resolve_payment_intent_exception', {
     p_intent_id: intentId,
     p_action: action,
-    p_note: note,
+    p_note: note ?? undefined,
   });
 
   const ok =

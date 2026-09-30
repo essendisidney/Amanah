@@ -127,7 +127,7 @@ export default async function CircleJournalPage({ params }: Props) {
                     {row.entry_type.replaceAll('_', ' ')}
                   </td>
                   <td className="px-4 py-3 align-top text-right font-semibold">
-                    {formatCurrency(Number(row.amount), row.currency || jamiya.currency)}
+                    <span className="jm-amount">{formatCurrency(Number(row.amount), row.currency || jamiya.currency)}</span>
                   </td>
                 </tr>
               ))}

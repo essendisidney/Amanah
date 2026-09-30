@@ -60,7 +60,7 @@ export function withNoticeQuery(
   notice: string,
   noticeType: 'success' | 'error' | 'info' = 'success',
 ): string {
-  const [withoutHash, hash] = path.split('#');
+  const [withoutHash = '', hash] = path.split('#');
   const sep = withoutHash.includes('?') ? '&' : '?';
   return `${withoutHash}${sep}notice=${encodeURIComponent(notice)}&noticeType=${noticeType}${
     hash ? `#${hash}` : ''

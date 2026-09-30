@@ -51,7 +51,7 @@ export function OpenPenaltiesPanel({
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              {formatCurrency(row.amount, row.currency)}
+              <span className="jm-amount">{formatCurrency(row.amount, row.currency)}</span>
               {row.assessedAt ? ` · Assessed ${formatDate(row.assessedAt)}` : ''}
               {row.notes ? ` · ${row.notes}` : ''}
             </p>

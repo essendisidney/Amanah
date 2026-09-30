@@ -47,7 +47,7 @@ export function PendingContributionStk({
           >
             <div className="min-w-0">
               <p className="jameiyah-money text-sm font-semibold">
-                {formatCurrency(intent.amount, intent.currency)}
+                <span className="jm-amount">{formatCurrency(intent.amount, intent.currency)}</span>
               </p>
               <p className="text-xs capitalize text-muted-foreground">
                 {intent.phone ? `${intent.phone} · ` : ''}

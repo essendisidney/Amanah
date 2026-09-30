@@ -38,7 +38,6 @@ export function mapMoneyError(code: string | undefined | null): string {
     INVALID_AMOUNT: 'Enter a valid amount.',
     NOT_PAYABLE: 'That contribution is not open for payment.',
     ALREADY_PAID: 'That contribution is already paid.',
-    FORBIDDEN: 'You do not have permission to do that.',
     SECOND_APPROVER_MUST_DIFFER:
       'A different person must second-approve. You already gave the first approval.',
     FORBIDDEN: 'You do not have permission for this action.',
@@ -60,7 +59,7 @@ export function mapMoneyError(code: string | undefined | null): string {
   const mapped = messages[code];
   if (mapped) return mapped;
   if (code.toLowerCase().includes('insufficient')) {
-    return messages.INSUFFICIENT_FUNDS;
+    return messages.INSUFFICIENT_FUNDS ?? code;
   }
   return code;
 }
