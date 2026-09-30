@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Plus, CircleDollarSign } from 'lucide-react';
 import { formatCurrency, formatDate, formatRelativeTime, isValidKeMobile } from '@jamiya/shared';
+import { BalanceToggle, PrivateAmount } from '@/features/wallet/components/balance-privacy';
 import { Button } from '@jamiya/ui';
 import { t, type Dictionary } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
@@ -101,17 +102,24 @@ export function DashboardView({
         </header>
 
         <section className="jameiyah-surface space-y-3.5 px-4 py-4 sm:px-5">
-          <Link
-            href={'/wallet' as Route}
-            className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {labels.available}
-            </p>
-            <p className="jameiyah-money mt-1 text-3xl font-bold leading-none tracking-tight text-foreground sm:text-4xl">
-              {formatCurrency(available, currency)}
-            </p>
-          </Link>
+          <div className="flex items-start justify-between gap-2">
+            <Link
+              href={'/wallet' as Route}
+              className="block min-w-0 flex-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {labels.available}
+              </p>
+              <p className="jameiyah-money mt-1 text-3xl font-bold leading-none tracking-tight text-foreground sm:text-4xl">
+                <PrivateAmount>{formatCurrency(available, currency)}</PrivateAmount>
+              </p>
+            </Link>
+            <BalanceToggle
+              showLabel={labels.showBalance}
+              hideLabel={labels.hideBalance}
+              className="-mr-2 -mt-1"
+            />
+          </div>
 
           <div className="grid grid-cols-2 gap-2">
             <Button asChild className="min-h-11 w-full">

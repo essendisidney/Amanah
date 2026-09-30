@@ -141,6 +141,8 @@ export type Dictionary = {
     scheduledForYou: string;
     wallet: string;
     available: string;
+    showBalance: string;
+    hideBalance: string;
     availableHint: string;
     noWalletYet: string;
     contributionsTitle: string;
@@ -293,6 +295,8 @@ export type Dictionary = {
     historyTitle: string;
     historyEmpty: string;
     availableLabel: string;
+    showBalance: string;
+    hideBalance: string;
     quickPay: string;
     quickSave: string;
     quickInsights: string;
@@ -782,6 +786,8 @@ export const en: Dictionary = {
     scheduledForYou: 'Scheduled for you',
     wallet: 'Wallet',
     available: 'Available',
+    showBalance: 'Show balance',
+    hideBalance: 'Hide balance',
     availableHint: '{currency} available',
     noWalletYet: 'No wallet yet',
     contributionsTitle: 'Upcoming contributions',
@@ -935,6 +941,8 @@ export const en: Dictionary = {
     historyTitle: 'History',
     historyEmpty: 'No transactions yet.',
     availableLabel: 'Available',
+    showBalance: 'Show balance',
+    hideBalance: 'Hide balance',
     quickPay: 'Pay',
     quickSave: 'Save',
     quickInsights: 'Insights',
@@ -1438,6 +1446,8 @@ export const sw: Dictionary = {
     scheduledForYou: 'Yaliyoratibiwa kwako',
     wallet: 'Pochi',
     available: 'Inayopatikana',
+    showBalance: 'Onyesha salio',
+    hideBalance: 'Ficha salio',
     availableHint: '{currency} inayopatikana',
     noWalletYet: 'Bado hakuna pochi',
     contributionsTitle: 'Michango inayokuja',
@@ -1592,6 +1602,8 @@ export const sw: Dictionary = {
     historyTitle: 'Historia',
     historyEmpty: 'Bado hakuna shughuli.',
     availableLabel: 'Inayopatikana',
+    showBalance: 'Onyesha salio',
+    hideBalance: 'Ficha salio',
     quickPay: 'Lipa',
     quickSave: 'Okoa',
     quickInsights: 'Ufahamu',

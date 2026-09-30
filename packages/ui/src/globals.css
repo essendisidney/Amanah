@@ -289,6 +289,28 @@
     letter-spacing: -0.03em;
   }
 
+  /* Balance privacy: <html data-hide-balance> masks .jm-private amounts. */
+  [data-hide-balance] .jm-private > .jm-private-v {
+    display: none;
+  }
+
+  [data-hide-balance] .jm-private::after {
+    content: '••••••';
+    letter-spacing: 0.08em;
+  }
+
+  .jm-private-show {
+    display: none;
+  }
+
+  [data-hide-balance] .jm-private-show {
+    display: inline;
+  }
+
+  [data-hide-balance] .jm-private-hide {
+    display: none;
+  }
+
   .jameiyah-money-in {
     color: var(--success);
   }

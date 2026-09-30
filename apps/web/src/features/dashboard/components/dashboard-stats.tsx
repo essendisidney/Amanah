@@ -3,6 +3,7 @@ import { formatCurrency } from '@jamiya/shared';
 import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
 import type { DashboardData } from '../types';
+import { PrivateAmount } from '@/features/wallet/components/balance-privacy';
 
 export function DashboardStats({
   data,
@@ -42,9 +43,13 @@ export function DashboardStats({
     },
     {
       label: labels.wallet,
-      value: data.wallet
-        ? formatCurrency(data.wallet.availableBalance, data.wallet.currency)
-        : '—',
+      value: data.wallet ? (
+        <PrivateAmount>
+          {formatCurrency(data.wallet.availableBalance, data.wallet.currency)}
+        </PrivateAmount>
+      ) : (
+        '—'
+      ),
       hint: data.wallet
         ? t(labels.availableHint, { currency: data.wallet.currency })
         : labels.noWalletYet,

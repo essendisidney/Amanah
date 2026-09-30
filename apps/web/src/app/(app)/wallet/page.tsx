@@ -23,6 +23,7 @@ import {
   Plus,
 } from 'lucide-react';
 import { AppPage, PageHeader } from '@/components/app-page';
+import { BalanceToggle, PrivateAmount } from '@/features/wallet/components/balance-privacy';
 
 export const metadata: Metadata = {
   title: 'Money',
@@ -329,13 +330,20 @@ export default async function WalletPage({ searchParams }: Props) {
             <p className="mt-2 text-sm text-muted-foreground">{labels.emptyDesc}</p>
           </div>
         ) : (
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-              {labels.availableLabel}
-            </p>
-            <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              {formatCurrency(available, primaryCurrency)}
-            </p>
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {labels.availableLabel}
+              </p>
+              <p className="jameiyah-money mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                <PrivateAmount>{formatCurrency(available, primaryCurrency)}</PrivateAmount>
+              </p>
+            </div>
+            <BalanceToggle
+              showLabel={labels.showBalance}
+              hideLabel={labels.hideBalance}
+              className="-mr-2 -mt-1"
+            />
           </div>
         )}
 
