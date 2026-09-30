@@ -515,3 +515,57 @@
 @media (prefers-reduced-motion: reduce) {
   .jm-tilt { animation: none; }
 }
+
+/* Home hero phone advert: 5 scenes x 4s = 20s loop (features/landing/phone-advert.tsx) */
+@keyframes jm-ad-slide {
+  0% { opacity: 0; transform: translateX(16px); }
+  2.5%, 18% { opacity: 1; transform: none; }
+  20.5%, 100% { opacity: 0; transform: translateX(-16px); }
+}
+@keyframes jm-ad-cap {
+  0% { opacity: 0; transform: translateY(6px); }
+  2.5%, 18% { opacity: 1; transform: none; }
+  20.5%, 100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes jm-ad-dot {
+  0%, 20.5%, 100% { background-color: rgba(0, 64, 56, 0.2); width: 8px; }
+  2.5%, 18% { background-color: #004038; width: 22px; }
+}
+@keyframes jm-ad-pop {
+  0%, 4% { opacity: 0; }
+  6%, 12% { opacity: 1; }
+  13%, 100% { opacity: 0; }
+}
+@keyframes jm-ad-ok {
+  0%, 12.5% { opacity: 0; transform: scale(0.92); }
+  14%, 18.5% { opacity: 1; transform: none; }
+  20%, 100% { opacity: 0; transform: none; }
+}
+@keyframes jm-ad-bar {
+  0%, 2% { width: 8%; }
+  12%, 100% { width: 72%; }
+}
+@keyframes jm-ad-zero {
+  0%, 3% { opacity: 0; transform: scale(0.6); }
+  6% { opacity: 1; transform: scale(1.12); }
+  8%, 100% { opacity: 1; transform: none; }
+}
+@keyframes jm-tilt-soft {
+  0%, 100% { transform: rotateY(-13deg) rotateX(5deg) rotateZ(0.8deg) translateY(0); }
+  50% { transform: rotateY(-5deg) rotateX(2deg) rotateZ(0deg) translateY(-8px); }
+}
+.jm-ad-slide { opacity: 0; animation: jm-ad-slide 20s ease-in-out infinite both; }
+.jm-ad-cap { opacity: 0; animation: jm-ad-cap 20s ease-in-out infinite both; }
+.jm-ad-dot { background-color: rgba(0, 64, 56, 0.2); animation: jm-ad-dot 20s ease-in-out infinite both; }
+.jm-ad-pop { opacity: 0; animation: jm-ad-pop 20s ease-in-out infinite both; }
+.jm-ad-ok { opacity: 0; animation: jm-ad-ok 20s ease-in-out infinite both; }
+.jm-ad-bar { animation: jm-ad-bar 20s ease-out infinite both; }
+.jm-ad-zero { display: inline-block; animation: jm-ad-zero 20s ease-out infinite both; }
+.jm-tilt-soft { transform: rotateY(-10deg) rotateX(4deg); animation: jm-tilt-soft 10s ease-in-out infinite; will-change: transform; }
+@media (prefers-reduced-motion: reduce) {
+  .jm-ad-slide, .jm-ad-cap, .jm-ad-pop, .jm-ad-ok { animation: none; opacity: 0; }
+  .jm-ad-slide:first-child, .jm-ad-cap:first-child { opacity: 1; transform: none; }
+  .jm-ad-dot { animation: none; }
+  .jm-ad-dot:first-child { background-color: #004038; width: 22px; }
+  .jm-ad-bar, .jm-ad-zero, .jm-tilt-soft { animation: none; }
+}

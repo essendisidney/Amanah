@@ -5,7 +5,7 @@ import { APP_NAME, APP_DESCRIPTION } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { PublicSiteHeader } from '@/components/public-site-header';
 import { PesaraCredit } from '@/components/pesara-credit';
-import { PayoutBoardMockup } from '@/features/landing/payout-board-mockup';
+import { PhoneAdvert } from '@/features/landing/phone-advert';
 import { landingCopy } from '@/features/landing/landing-copy';
 import { getDictionary } from '@/i18n/get-dictionary';
 
@@ -58,7 +58,7 @@ export default async function LandingPage() {
 
       <section className="relative z-10 mx-auto grid min-h-[88dvh] w-full max-w-6xl items-center gap-12 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:pt-6">
         <div className="order-2 pt-2 lg:order-2 lg:pt-0">
-          <PayoutBoardMockup copy={c.mock} />
+          <PhoneAdvert ad={c.ad} mock={c.mock} />
         </div>
         <div className="max-w-2xl lg:order-1">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.22em] text-[#0d5c45]">
