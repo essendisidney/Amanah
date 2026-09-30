@@ -36,7 +36,7 @@ export default async function ShariahPage() {
           <JameiyahLogo href={'/' as Route} size="md" tone="brand" />
           <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/dashboard' as Route}>{dict.common.home}</Link>
+              <Link href={'/' as Route}>{dict.common.home}</Link>
             </Button>
             <LanguageSwitcher locale={locale} label={dict.common.language} />
           </div>

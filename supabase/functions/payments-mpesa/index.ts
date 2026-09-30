@@ -557,6 +557,14 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Callbacks come from Safaricom, not our own services. When MPESA_CALLBACK_TOKEN is set,
+    // MPESA_CALLBACK_URL / MPESA_B2C_RESULT_URL must end in ?token=<same value>.
+    const callbackToken = env("MPESA_CALLBACK_TOKEN");
+    if (callbackToken && new URL(req.url).searchParams.get("token") !== callbackToken) {
+      console.error("payments-mpesa: callback rejected (bad or missing token)");
+      return Response.json({ ResultCode: 1, ResultDesc: "Rejected" }, { status: 401 });
+    }
+
     // ---- Daraja callback ----
     const callback = (
       json as {

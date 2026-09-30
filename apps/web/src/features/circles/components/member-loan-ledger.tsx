@@ -54,7 +54,7 @@ export function MemberLoanLedger({
   events,
 }: Props) {
   const principal = facility?.principal_outstanding ?? 0;
-  const rate = facility?.profit_rate_pct ?? 10;
+  const rate = facility?.profit_rate_pct ?? 0;
   const suggestedProfit = Math.round((principal * rate) / 100);
   const today = new Date().toISOString().slice(0, 10);
 

@@ -365,6 +365,12 @@ export default async function LandingPage() {
             <Link href="/login" className="hover:underline">
               {dict.common.signIn}
             </Link>
+            <Link href="/privacy" className="hover:underline">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:underline">
+              Terms
+            </Link>
           </nav>
         </div>
       </footer>
