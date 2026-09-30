@@ -569,3 +569,48 @@
   .jm-ad-dot:first-child { background-color: #004038; width: 22px; }
   .jm-ad-bar, .jm-ad-zero, .jm-tilt-soft { animation: none; }
 }
+
+/* Dark marketing bands (home hero/footer): flip tokens so shared components read on dark green */
+.jameiyah-on-dark {
+  color-scheme: dark;
+  --foreground: #f3f7f5;
+  --muted-foreground: rgba(243, 247, 245, 0.72);
+  --muted: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.14);
+  --card: #0b2a24;
+  --card-foreground: #f3f7f5;
+  --primary: #d8a038;
+  --primary-hover: #e6b451;
+  --primary-foreground: #1f1606;
+  --ring: #d8a038;
+}
+.jameiyah-on-dark img[src*="jameiyah-mark"] {
+  background: #f6f1e4;
+  border-radius: 14px;
+  padding: 5px;
+}
+@keyframes jm-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.jm-marquee { animation: jm-marquee 38s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .jm-marquee { animation: none; }
+}
+@keyframes jm-ad-dot-dark {
+  0%, 20.5%, 100% { background-color: rgba(255, 255, 255, 0.22); width: 8px; }
+  2.5%, 18% { background-color: #d8a038; width: 22px; }
+}
+.jm-ad-dot.jm-ad-dot-dark { background-color: rgba(255, 255, 255, 0.22); animation-name: jm-ad-dot-dark; }
+@media (prefers-reduced-motion: reduce) {
+  .jm-ad-dot.jm-ad-dot-dark:first-child { background-color: #d8a038; }
+}
+.jameiyah-on-dark .jameiyah-btn-primary {
+  background-image: none;
+  background-color: #d8a038;
+  color: #1f1606;
+  border-color: transparent;
+  border-radius: 9999px;
+  box-shadow: 0 10px 24px -12px rgba(216, 160, 56, 0.8);
+}
+.jameiyah-on-dark .jameiyah-btn-primary:hover { background-color: #e6b451; }

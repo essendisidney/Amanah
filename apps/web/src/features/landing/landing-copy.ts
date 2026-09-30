@@ -89,6 +89,14 @@ const en = {
   footerPrivacy: 'Privacy',
   footerTerms: 'Terms',
 
+  marquee: ['Merry-go-round', 'Chama', 'Table banking', 'Savings goals', 'M-Pesa', 'Qard Hassan', 'Sadaka', 'Zakat', 'Kiswahili & English', '0% riba'],
+  stats: [
+    { value: '0%', label: 'riba on circle loans' },
+    { value: 'M-Pesa', label: 'pay in, get paid out' },
+    { value: '2', label: 'languages, English and Kiswahili' },
+    { value: '1 tap', label: 'to your member statement' },
+  ],
+  ctaEyebrow: 'Start today',
   ad: {
     tabs: ['Home', 'Circles', 'Money', 'Activity', 'You'],
     captions: [
@@ -240,6 +248,14 @@ const sw: LandingCopy = {
   footerPrivacy: 'Faragha',
   footerTerms: 'Masharti',
 
+  marquee: ['Merry-go-round', 'Chama', 'Table banking', 'Malengo ya akiba', 'M-Pesa', 'Qard Hassan', 'Sadaka', 'Zaka', 'Kiswahili na Kiingereza', 'Bila riba'],
+  stats: [
+    { value: '0%', label: 'riba kwa mikopo ya kikundi' },
+    { value: 'M-Pesa', label: 'changia na upokee' },
+    { value: '2', label: 'lugha, Kiswahili na Kiingereza' },
+    { value: 'Mguso 1', label: 'kufikia taarifa yako' },
+  ],
+  ctaEyebrow: 'Anza leo',
   ad: {
     tabs: ['Nyumbani', 'Vikundi', 'Pesa', 'Shughuli', 'Wewe'],
     captions: [

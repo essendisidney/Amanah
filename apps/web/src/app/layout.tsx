@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Manrope } from 'next/font/google';
+import { Manrope, Space_Grotesk } from 'next/font/google';
 import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
 import { InstallPrompt } from '@/components/install-prompt';
 import { BootSplashMarkup } from '@/components/app-loader';
@@ -13,6 +13,14 @@ import '@/components/app-loader.css';
 const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
+  display: 'swap',
+});
+
+/** Display face for marketing headlines (home page). */
+const grotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-grotesk',
+  weight: ['500', '600', '700'],
   display: 'swap',
 });
 
@@ -57,7 +65,7 @@ export default async function RootLayout({
 }>) {
   const { locale, dict } = await getDictionary();
   return (
-    <html lang={locale} className={manrope.variable} suppressHydrationWarning>
+    <html lang={locale} className={`${manrope.variable} ${grotesk.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

@@ -40,7 +40,17 @@ function Initial({ name, tone }: { name: string; tone: number }) {
   );
 }
 
-export function PhoneAdvert({ ad, mock }: { ad: LandingCopy['ad']; mock: LandingCopy['mock'] }) {
+export function PhoneAdvert({
+  ad,
+  mock,
+  tone = 'light',
+}: {
+  ad: LandingCopy['ad'];
+  mock: LandingCopy['mock'];
+  /** 'dark' when placed on the dark hero band. */
+  tone?: 'light' | 'dark';
+}) {
+  const onDark = tone === 'dark';
   const m = mock.months;
   const C = 238.8; // ring circumference for r=38
 
@@ -376,16 +386,16 @@ export function PhoneAdvert({ ad, mock }: { ad: LandingCopy['ad']; mock: Landing
       <figcaption className="relative mt-7 h-[58px] text-center">
         {ad.captions.map((c, i) => (
           <div key={c.title} className="jm-ad-cap absolute inset-x-0 top-0" style={delay(i)}>
-            <p className="text-[15px] font-bold" style={{ color: GREEN }}>
+            <p className="text-[15px] font-bold" style={{ color: onDark ? '#f3f7f5' : GREEN }}>
               {c.title}
             </p>
-            <p className="mt-0.5 text-[12.5px] text-[#5a6f66]">{c.body}</p>
+            <p className={`mt-0.5 text-[12.5px] ${onDark ? 'text-white/60' : 'text-[#5a6f66]'}`}>{c.body}</p>
           </div>
         ))}
       </figcaption>
       <div className="mt-1 flex justify-center gap-1.5" aria-hidden>
         {ad.captions.map((c, i) => (
-          <span key={c.title} className="jm-ad-dot h-2 w-2 rounded-full" style={delay(i)} />
+          <span key={c.title} className={`jm-ad-dot h-2 w-2 rounded-full ${onDark ? 'jm-ad-dot-dark' : ''}`} style={delay(i)} />
         ))}
       </div>
     </figure>
