@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
 import { APP_NAME, APP_DESCRIPTION } from '@jamiya/shared';
 import { PublicSiteHeader } from '@/components/public-site-header';
-import { PesaraCredit } from '@/components/pesara-credit';
+import { SiteFooter } from '@/components/site-chrome';
 import { PhoneAdvert } from '@/features/landing/phone-advert';
 import { landingCopy } from '@/features/landing/landing-copy';
 import { getDictionary } from '@/i18n/get-dictionary';
@@ -361,37 +361,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ─────────────────────────── FOOTER (night) ─────────────────────────── */}
-      <footer className="jameiyah-on-dark relative z-10 bg-[#021814] text-white/70">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className={`${DISPLAY} text-2xl font-bold tracking-tight text-white`}>{APP_NAME}</p>
-            <p className="mt-1 text-sm">{dict.brand.tagline}</p>
-            <p className="mt-3 text-xs text-white/45">jameiyah.com · Jameiyah Limited</p>
-            <PesaraCredit className="mt-3" />
-          </div>
-          <nav className="flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium text-white/80">
-            <Link href="/pricing" className="inline-flex min-h-11 items-center hover:text-white">
-              {c.footerPricing}
-            </Link>
-            <Link href="/sadaka" className="inline-flex min-h-11 items-center hover:text-white">
-              {dict.common.sadaka}
-            </Link>
-            <Link href="/support" className="inline-flex min-h-11 items-center hover:text-white">
-              {dict.common.support}
-            </Link>
-            <Link href="/login" className="inline-flex min-h-11 items-center hover:text-white">
-              {dict.common.signIn}
-            </Link>
-            <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-white">
-              {c.footerPrivacy}
-            </Link>
-            <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-white">
-              {c.footerTerms}
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

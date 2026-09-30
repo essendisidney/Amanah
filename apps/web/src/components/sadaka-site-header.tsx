@@ -4,7 +4,6 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { Menu, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { cn } from '@/lib/utils';
 
 const SADAKA_LINKS = [
@@ -24,9 +23,7 @@ function pathActive(pathname: string, href: string) {
 }
 
 export function SadakaSiteHeader({ signedIn, pathname = '' }: SadakaSiteHeaderProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const homeHref = (signedIn ? '/dashboard' : '/') as Route;
-
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => {
@@ -35,9 +32,11 @@ export function SadakaSiteHeader({ signedIn, pathname = '' }: SadakaSiteHeaderPr
   }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/70 bg-card/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+    <header className="sticky top-0 z-20 border-b border-border/70 bg-[#f5f3ee]/90 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 px-4 md:h-16 md:gap-3 md:px-6">
-        <JameiyahLogo href={homeHref} size="sm" tone="brand" />
+        <Link href={'/sadaka' as Route} className="inline-flex min-h-11 items-center font-[family-name:var(--font-grotesk)] text-lg font-bold tracking-tight text-[#004038]">
+          Sadaka
+        </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Sadaka">
           {SADAKA_LINKS.map((item) => {

@@ -5,7 +5,6 @@ import { formatCurrency } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { getActivePlatformPlans } from '@/lib/platform-plans';
-import { LanguageSwitcher } from '@/i18n/language-switcher';
 
 export const metadata: Metadata = {
   title: 'Pricing',
@@ -15,16 +14,10 @@ export const metadata: Metadata = {
 export const revalidate = 3600;
 
 export default async function PricingPage() {
-  const [{ locale, dict }, plans] = await Promise.all([getDictionary(), getActivePlatformPlans()]);
+  const [{ dict }, plans] = await Promise.all([getDictionary(), getActivePlatformPlans()]);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-      <div className="mb-6 flex flex-wrap items-center gap-2 sm:mb-8 sm:gap-3">
-        <Button asChild variant="outline" size="sm">
-          <Link href={'/' as Route}>{dict.common.home}</Link>
-        </Button>
-        <LanguageSwitcher locale={locale} label={dict.common.language} />
-      </div>
+    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
 
       <p className="text-sm font-medium uppercase tracking-[0.16em] text-accent">
         Group plans

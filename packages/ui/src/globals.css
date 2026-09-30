@@ -614,3 +614,48 @@
   box-shadow: 0 10px 24px -12px rgba(216, 160, 56, 0.8);
 }
 .jameiyah-on-dark .jameiyah-btn-primary:hover { background-color: #e6b451; }
+
+/* Public + sign-in pages: warm paper, deep green, grotesk headings (matches the home page) */
+.jameiyah-premium {
+  --background: #f5f3ee;
+  --foreground: #0b1f1b;
+  --card: #ffffff;
+  --card-foreground: #0b1f1b;
+  --muted: #ece7dc;
+  --muted-foreground: #56675f;
+  --border: rgba(11, 31, 27, 0.1);
+  --input: rgba(11, 31, 27, 0.18);
+  --primary: #004038;
+  --primary-hover: #00564a;
+  --primary-foreground: #ffffff;
+  --primary-muted: rgba(0, 64, 56, 0.08);
+  --accent: #9a6c12;
+  --ring: #004038;
+  --font-display: var(--font-grotesk), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+.jameiyah-premium h1, .jameiyah-premium h2 {
+  font-family: var(--font-grotesk), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+.jameiyah-premium .jameiyah-btn-primary {
+  background-image: none;
+  background-color: #004038;
+  color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 10px 24px -14px rgba(0, 64, 56, 0.8);
+}
+.jameiyah-premium .jameiyah-btn-primary:hover { background-color: #00564a; }
+.jameiyah-premium .jameiyah-surface {
+  background: #ffffff;
+  border: 1px solid rgba(11, 31, 27, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 1px 2px rgba(11, 31, 27, 0.04), 0 18px 40px -28px rgba(11, 31, 27, 0.25);
+}
+/* Keep gold on the dark header band inside premium pages */
+.jameiyah-premium .jameiyah-on-dark .jameiyah-btn-primary {
+  background-color: #d8a038;
+  color: #1f1606;
+  box-shadow: 0 10px 24px -12px rgba(216, 160, 56, 0.8);
+}
+.jameiyah-premium .jameiyah-on-dark .jameiyah-btn-primary:hover { background-color: #e6b451; }
+.jameiyah-premium .jameiyah-on-dark h1, .jameiyah-premium .jameiyah-on-dark h2 { color: #ffffff; }

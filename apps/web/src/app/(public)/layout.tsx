@@ -1,11 +1,12 @@
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+import type { ReactNode } from 'react';
+import { SiteFooter, SiteHeaderBand } from '@/components/site-chrome';
+
+export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="jameiyah-ambient relative min-h-dvh overflow-x-hidden">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,_rgba(25,184,121,0.07)_0%,_rgba(91,141,239,0.04)_42%,_transparent_72%)]"
-        aria-hidden
-      />
-      <div className="relative">{children}</div>
+    <div className="jameiyah-light jameiyah-premium relative flex min-h-dvh flex-col overflow-x-hidden bg-[#f5f3ee] text-foreground">
+      <SiteHeaderBand />
+      <div className="relative flex-1">{children}</div>
+      <SiteFooter />
     </div>
   );
 }

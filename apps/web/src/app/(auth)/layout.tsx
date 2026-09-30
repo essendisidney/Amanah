@@ -1,26 +1,19 @@
 import type { Metadata } from 'next';
-import { JameiyahLogo } from '@/components/jameiyah-logo';
-import { getDictionary } from '@/i18n/get-dictionary';
-import { LanguageSwitcher } from '@/i18n/language-switcher';
+import type { ReactNode } from 'react';
+import { SiteHeaderBand } from '@/components/site-chrome';
 
 export const metadata: Metadata = {
   title: 'Account',
 };
 
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const { locale, dict } = await getDictionary();
+export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="jameiyah-geo min-h-dvh bg-background">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[50vh] bg-[radial-gradient(ellipse_at_top,_rgba(91,141,239,0.08)_0%,_transparent_60%)]"
-      />
-      <div className="relative mx-auto flex min-h-dvh w-full max-w-6xl flex-col px-4 py-8 sm:px-6">
-        <div className="mb-10 flex items-center justify-between gap-3">
-          <JameiyahLogo href="/" size="lg" tone="brand" />
-          <LanguageSwitcher locale={locale} label={dict.common.language} />
-        </div>
-        <div className="flex flex-1 items-start justify-center md:items-center">{children}</div>
+    <div className="jameiyah-light jameiyah-premium flex min-h-dvh flex-col bg-[#f5f3ee] text-foreground">
+      <SiteHeaderBand />
+      <div className="relative flex-1 overflow-hidden">
+        <div aria-hidden className="pointer-events-none absolute -right-40 top-10 h-[420px] w-[420px] rounded-full bg-[#D8A038]/10 blur-[110px]" />
+        <div aria-hidden className="pointer-events-none absolute -left-40 bottom-0 h-[420px] w-[420px] rounded-full bg-[#004038]/10 blur-[110px]" />
+        <div className="relative mx-auto flex w-full max-w-6xl justify-center px-4 py-10 sm:px-6 sm:py-16">{children}</div>
       </div>
     </div>
   );

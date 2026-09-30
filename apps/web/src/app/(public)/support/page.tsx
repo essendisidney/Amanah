@@ -6,8 +6,6 @@ import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { ChevronRight } from 'lucide-react';
 import { tipFormAction } from '@/features/charity/actions';
 import { getDictionary } from '@/i18n/get-dictionary';
-import { LanguageSwitcher } from '@/i18n/language-switcher';
-import { JameiyahLogo } from '@/components/jameiyah-logo';
 
 export const metadata: Metadata = {
   title: 'Support Jameiyah',
@@ -16,24 +14,12 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function SupportPage() {
-  const { locale, dict } = await getDictionary();
+  const { dict } = await getDictionary();
   const labels = dict.support;
 
   return (
     <main className="jameiyah-ambient min-h-dvh bg-background">
       <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 sm:py-10">
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <JameiyahLogo href={'/' as Route} size="md" tone="brand" />
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/wallet' as Route}>{dict.nav.walletShort}</Link>
-            </Button>
-            <Button asChild variant="outline" className="min-h-11">
-              <Link href={'/dashboard' as Route}>{dict.common.home}</Link>
-            </Button>
-            <LanguageSwitcher locale={locale} label={dict.common.language} />
-          </div>
-        </header>
 
         <header className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
