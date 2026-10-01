@@ -60,6 +60,7 @@ export function QuickSearch({
         kind: 'page',
         keywords: 'withdraw send mpesa toa',
       },
+      { title: 'Services', href: '/services' as Route, kind: 'page', keywords: 'services huduma loan qard goals zakat sadaka welfare' },
       { title: 'Help', href: '/help' as Route, kind: 'page', keywords: 'help support msaada', pinned: true },
       { title: 'Activity', href: '/notifications' as Route, kind: 'page', keywords: 'activity notifications arifa' },
       { title: 'You', href: '/profile' as Route, kind: 'page', keywords: 'profile you account jina' },

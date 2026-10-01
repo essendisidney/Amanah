@@ -137,6 +137,7 @@ export function DashboardView({
           </div>
         </section>
 
+
         {needsTopUpForDue && !circle ? (
           <Link
             href={topUpForDueHref}

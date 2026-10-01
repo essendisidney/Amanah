@@ -43,6 +43,8 @@ export type Dictionary = {
     financeShort: string;
     activity: string;
     activityShort: string;
+    services: string;
+    servicesShort: string;
     profile: string;
     profileShort: string;
   };
@@ -142,6 +144,7 @@ export type Dictionary = {
     wallet: string;
     available: string;
     showBalance: string;
+    services: string;
     hideBalance: string;
     availableHint: string;
     noWalletYet: string;
@@ -683,6 +686,8 @@ export const en: Dictionary = {
     financeShort: 'Finance',
     activity: 'Activity',
     activityShort: 'Activity',
+    services: 'Services',
+    servicesShort: 'Services',
     profile: 'You',
     profileShort: 'You',
   },
@@ -787,6 +792,7 @@ export const en: Dictionary = {
     wallet: 'Wallet',
     available: 'Available',
     showBalance: 'Show balance',
+    services: 'Services',
     hideBalance: 'Hide balance',
     availableHint: '{currency} available',
     noWalletYet: 'No wallet yet',
@@ -1343,6 +1349,8 @@ export const sw: Dictionary = {
     financeShort: 'Fedha',
     activity: 'Shughuli',
     activityShort: 'Shughuli',
+    services: 'Huduma',
+    servicesShort: 'Huduma',
     profile: 'Wewe',
     profileShort: 'Wewe',
   },
@@ -1447,6 +1455,7 @@ export const sw: Dictionary = {
     wallet: 'Pochi',
     available: 'Inayopatikana',
     showBalance: 'Onyesha salio',
+    services: 'Huduma',
     hideBalance: 'Ficha salio',
     availableHint: '{currency} inayopatikana',
     noWalletYet: 'Bado hakuna pochi',

@@ -5,9 +5,10 @@ import type { Route } from 'next';
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import {
-  Activity,
+  Bell,
   Home,
   LayoutGrid,
+  UsersRound,
   Wallet,
   Shield,
   UserRound,
@@ -46,7 +47,12 @@ function pathActive(pathname: string, href: string) {
     return (
       pathname === '/wallet' ||
       pathname.startsWith('/wallet/') ||
-      pathname === '/pay' ||
+      pathname === '/pay'
+    );
+  }
+  if (href === '/services') {
+    return (
+      pathname === '/services' ||
       pathname === '/finance' ||
       pathname.startsWith('/finance/') ||
       pathname === '/sadaka' ||
@@ -116,7 +122,7 @@ export function AppShell({
       href: '/circles' as Route,
       label: dict.nav.circles,
       short: dict.nav.circlesShort,
-      icon: LayoutGrid,
+      icon: UsersRound,
     },
     {
       href: '/wallet' as Route,
@@ -126,10 +132,10 @@ export function AppShell({
       center: true,
     },
     {
-      href: '/notifications' as Route,
-      label: dict.nav.activity,
-      short: dict.nav.activityShort,
-      icon: Activity,
+      href: '/services' as Route,
+      label: dict.nav.services,
+      short: dict.nav.servicesShort,
+      icon: LayoutGrid,
     },
     {
       href: '/profile' as Route,
@@ -143,7 +149,7 @@ export function AppShell({
     { href: '/dashboard' as Route, label: dict.nav.dashboard },
     { href: '/circles' as Route, label: dict.nav.circles },
     { href: '/wallet' as Route, label: dict.nav.wallet },
-    { href: '/notifications' as Route, label: dict.nav.activity },
+    { href: '/services' as Route, label: dict.nav.services },
     { href: '/profile' as Route, label: dict.nav.profile },
   ];
   if (showAdmin) {
@@ -181,16 +187,6 @@ export function AppShell({
                   )}
                 >
                   {item.label}
-                  {item.href === '/notifications' && liveUnread > 0 ? (
-                    <span
-                      className={cn(
-                        'ml-1.5 inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold',
-                        active ? 'bg-[#03201b] text-[#d8a038]' : 'bg-[#d8a038] text-[#1f1606]',
-                      )}
-                    >
-                      {liveUnread > 9 ? '9+' : liveUnread}
-                    </span>
-                  ) : null}
                 </Link>
               );
             })}
@@ -205,6 +201,30 @@ export function AppShell({
               size="sm"
               className="hidden min-h-10 px-2 sm:inline-flex"
             />
+            <Link
+              href={'/notifications' as Route}
+              aria-label={
+                liveUnread > 0 ? `${dict.nav.activity} (${liveUnread})` : dict.nav.activity
+              }
+              title={dict.nav.activity}
+              aria-current={pathActive(pathname, '/notifications') ? 'page' : undefined}
+              className={cn(
+                'jm-bell relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors',
+                pathActive(pathname, '/notifications')
+                  ? 'bg-primary/15 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <Bell
+                className={cn('h-5 w-5', liveUnread > 0 && 'jm-bell-ring')}
+                strokeWidth={1.9}
+              />
+              {liveUnread > 0 ? (
+                <span className="absolute -right-0.5 -top-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#d8a038] px-1 text-[10px] font-bold leading-none text-[#1f1606] ring-2 ring-[#03201b]">
+                  {liveUnread > 9 ? '9+' : liveUnread}
+                </span>
+              ) : null}
+            </Link>
             <ThemeToggle />
             <LanguageSwitcher locale={locale} label={dict.common.language} />
             {showAdmin ? (
@@ -247,7 +267,6 @@ export function AppShell({
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = pathActive(pathname, item.href);
-            const showBadge = item.href === '/notifications' && liveUnread > 0;
             if (item.center) {
               return (
                 <li key={item.href} className="flex justify-center">
@@ -289,9 +308,6 @@ export function AppShell({
                 >
                   <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.6} />
                   {item.short}
-                  {showBadge ? (
-                    <span className="absolute right-[22%] top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                  ) : null}
                 </Link>
               </li>
             );
