@@ -2,13 +2,19 @@ import type { Metadata } from 'next';
 import { Alert, AlertDescription } from '@jamiya/ui';
 import { AuthCard, LoginForm } from '@/features/auth';
 import { callRpc } from '@/lib/supabase/rpc';
+import { getDictionary } from '@/i18n/get-dictionary';
 import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
 
 export const metadata: Metadata = {
   title: 'Sign in',
 };
 
-type SearchParams = Promise<{ next?: string; error?: string; method?: string }>;
+type SearchParams = Promise<{ next?: string; error?: string; method?: string; reason?: string }>;
+
+const IDLE_NOTE = {
+  en: 'For your safety you were signed out after 7 days away. Sign in again to continue.',
+  sw: 'Kwa usalama wako umetolewa baada ya siku 7 bila kutumia programu. Ingia tena kuendelea.',
+};
 
 /** True when `next` is an invite link that no longer works (checked before sign-up). */
 async function isDeadInviteLink(next: string): Promise<boolean> {
@@ -28,6 +34,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const joining =
     next.includes('/invitations/') || next.includes('/welcome') || next.includes('redeem');
   const deadInvite = await isDeadInviteLink(next);
+  const { locale } = await getDictionary();
+  const idle = params.reason === 'idle';
 
   return (
     <AuthCard
@@ -38,6 +46,11 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
           : 'Sign in with phone SMS, email, or Google.'
       }
     >
+      {idle ? (
+        <Alert className="mb-4">
+          <AlertDescription>{IDLE_NOTE[locale === 'sw' ? 'sw' : 'en']}</AlertDescription>
+        </Alert>
+      ) : null}
       {deadInvite ? (
         <Alert variant="destructive" className="mb-4">
           <AlertDescription>

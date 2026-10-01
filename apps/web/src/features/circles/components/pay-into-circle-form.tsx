@@ -54,7 +54,7 @@ export function PayIntoCircleForm({
             : 'Enter your contribution, then pay from your wallet or with M-Pesa.'}
         </p>
       </div>
-      <form className="space-y-3">
+      <form data-step-up="large" className="space-y-3">
         <input type="hidden" name="jamiyaId" value={jamiyaId} />
         <input type="hidden" name="slug" value={slug} />
         {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
@@ -88,6 +88,7 @@ export function PayIntoCircleForm({
         </Button>
         <Button
           type="submit"
+          data-skip-step-up
           formAction={payIntoCircleMpesaAction}
           variant="outline"
           className="min-h-11 w-full"

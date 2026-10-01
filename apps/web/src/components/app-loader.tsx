@@ -52,7 +52,14 @@ export function AppLoader({
         {showBrand ? (
           <>
             <p className="jameiyah-loader__title">{APP_NAME}</p>
-            <p className="jameiyah-loader__tagline">{APP_TAGLINE}</p>
+            <p className="jameiyah-loader__tagline">
+          {APP_TAGLINE.split(' · ').map((part, i) => (
+            <span key={part} style={{ whiteSpace: 'nowrap' }}>
+              {i > 0 ? ' · ' : ''}
+              {part}
+            </span>
+          ))}
+        </p>
           </>
         ) : null}
         <p className="jameiyah-loader__message">{message}</p>
@@ -108,7 +115,14 @@ export function BootSplashMarkup() {
             </div>
           </div>
           <p className="jameiyah-loader__title">{APP_NAME}</p>
-          <p className="jameiyah-loader__tagline">{APP_TAGLINE}</p>
+          <p className="jameiyah-loader__tagline">
+          {APP_TAGLINE.split(' · ').map((part, i) => (
+            <span key={part} style={{ whiteSpace: 'nowrap' }}>
+              {i > 0 ? ' · ' : ''}
+              {part}
+            </span>
+          ))}
+        </p>
           <p className="jameiyah-loader__message">Starting Jameiyah…</p>
           <div className="jameiyah-loader__bar" aria-hidden>
             <div className="jameiyah-loader__bar-shine" />

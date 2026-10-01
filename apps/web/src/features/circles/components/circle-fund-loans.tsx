@@ -286,7 +286,7 @@ export function CircleFundLoans({
                     </form>
                   ) : null}
                   {loan.status === 'active' ? (
-                    <form action={repayQardFormAction} className="flex gap-2">
+                    <form action={repayQardFormAction} data-step-up="large" className="flex gap-2">
                       <input type="hidden" name="loanId" value={loan.id} />
                       <input type="hidden" name="slug" value={slug} />
                       <Input

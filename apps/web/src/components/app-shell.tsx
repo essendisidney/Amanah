@@ -26,7 +26,7 @@ import { SmoothRouteTransition } from '@/components/smooth-route-transition';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { JameiyahLogo } from '@/components/jameiyah-logo';
 import { QuickSearch, type QuickSearchCircle } from '@/components/quick-search';
-import { AppLockGate } from '@/components/app-lock';
+import { AppLockGate, AppLockPrompt, MoneyStepUp } from '@/components/app-lock';
 import { WhatsAppShareButton } from '@/components/whatsapp-share-button';
 import { composeWhatsAppMessage, JAMEIYAH_SHARE_BLURB } from '@/lib/whatsapp-share';
 import { getSiteUrl } from '@/lib/site-url';
@@ -315,6 +315,8 @@ export function AppShell({
         </ul>
       </nav>
       <AppLockGate locale={locale} signOutAction={signOutAction} />
+      <AppLockPrompt locale={locale} />
+      <MoneyStepUp locale={locale} signOutAction={signOutAction} />
     </div>
   );
 }

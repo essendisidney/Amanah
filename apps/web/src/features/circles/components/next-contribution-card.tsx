@@ -140,7 +140,7 @@ export function NextContributionCard({
       </div>
 
       {canCover ? (
-        <form action={ahead ? payContributionAheadAction : payContributionAction}>
+        <form action={ahead ? payContributionAheadAction : payContributionAction} data-step-up="large" data-amount={String(remaining)}>
           <input type="hidden" name="contributionId" value={contributionId} />
           <input type="hidden" name="slug" value={slug} />
           {returnTo === '/pay' ? <input type="hidden" name="returnTo" value="/pay" /> : null}
@@ -197,7 +197,7 @@ export function NextContributionCard({
           {canCover ? (
             <>
               <form
-                action={ahead ? payContributionAheadAction : payContributionAction}
+                action={ahead ? payContributionAheadAction : payContributionAction} data-step-up="large"
                 className="flex flex-col gap-2 sm:flex-row sm:items-end"
               >
                 <input type="hidden" name="contributionId" value={contributionId} />
@@ -236,7 +236,7 @@ export function NextContributionCard({
             <>
               {walletAvailable != null && walletAvailable > 0 ? (
                 <form
-                  action={ahead ? payContributionAheadAction : payContributionAction}
+                  action={ahead ? payContributionAheadAction : payContributionAction} data-step-up="large"
                   className="flex flex-col gap-2 sm:flex-row sm:items-end"
                 >
                   <input type="hidden" name="contributionId" value={contributionId} />

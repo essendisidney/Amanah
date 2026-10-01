@@ -59,7 +59,7 @@ export function WithdrawalForm({
       : 'Bank account';
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} data-step-up="always" className="space-y-4">
       <input type="hidden" name="currency" value={currency} />
       <input type="hidden" name="destinationType" value={destinationType} />
 

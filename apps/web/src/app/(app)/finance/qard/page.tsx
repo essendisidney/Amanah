@@ -506,7 +506,7 @@ export default async function QardPage({ searchParams }: Props) {
                   ) : null}
                   {loan.status === 'active' ? (
                     <form
-                      action={repayQardFormAction}
+                      action={repayQardFormAction} data-step-up="large"
                       className="flex flex-wrap items-center gap-2"
                     >
                       <input type="hidden" name="loanId" value={loan.id} />

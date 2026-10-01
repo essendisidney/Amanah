@@ -106,7 +106,7 @@ export default async function LandingPage() {
 
         <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:pb-24 lg:pt-16">
           <div className="max-w-2xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80 backdrop-blur">
+            <p className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold tracking-[0.02em] text-white/85 backdrop-blur sm:rounded-full sm:text-[13px]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#D8A038] shadow-[0_0_12px_#D8A038]" aria-hidden />
               {dict.brand.tagline}
             </p>

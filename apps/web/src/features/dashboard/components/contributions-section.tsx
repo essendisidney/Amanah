@@ -71,7 +71,7 @@ export function ContributionsSection({
                 item.status === 'late' ||
                 item.status === 'partial' ? (
                   <form
-                    action={payContributionAction}
+                    action={payContributionAction} data-step-up="large"
                     className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
                   >
                     <input type="hidden" name="contributionId" value={item.id} />

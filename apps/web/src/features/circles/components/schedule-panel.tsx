@@ -229,7 +229,7 @@ export function ContributionCalendar({
                 <>
                   {canCover ? (
                     <form
-                      action={ahead ? payContributionAheadAction : payContributionAction}
+                      action={ahead ? payContributionAheadAction : payContributionAction} data-step-up="large"
                       className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
                     >
                       <input type="hidden" name="contributionId" value={item.id} />
@@ -288,7 +288,7 @@ export function ContributionCalendar({
                   )}
                   {!canCover && walletAvailable != null && walletAvailable > 0 ? (
                     <form
-                      action={ahead ? payContributionAheadAction : payContributionAction}
+                      action={ahead ? payContributionAheadAction : payContributionAction} data-step-up="large"
                       className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-end"
                     >
                       <input type="hidden" name="contributionId" value={item.id} />
@@ -370,14 +370,14 @@ export function PayoutSchedule({
             {isCircleAdmin &&
             (item.status === 'scheduled' || item.status === 'processing') ? (
               <>
-                <form action={settlePayoutAction}>
+                <form action={settlePayoutAction} data-step-up="always">
                   <input type="hidden" name="payoutId" value={item.id} />
                   <input type="hidden" name="slug" value={slug} />
                   <Button type="submit" size="sm" variant="outline">
                     Settle to wallet
                   </Button>
                 </form>
-                <form action={settlePayoutToMpesaAction} className="flex flex-wrap gap-2">
+                <form action={settlePayoutToMpesaAction} data-step-up="always" className="flex flex-wrap gap-2">
                   <input type="hidden" name="payoutId" value={item.id} />
                   <input type="hidden" name="slug" value={slug} />
                   <input

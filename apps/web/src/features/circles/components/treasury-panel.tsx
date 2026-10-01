@@ -349,6 +349,7 @@ export function TreasuryPanel({
           {payoutDestinations.length > 0 ? (
             <form
               action={requestTreasuryPayoutAction}
+          data-step-up="always"
               className="grid max-w-2xl gap-3 rounded-xl border border-border bg-card p-5 sm:grid-cols-2"
             >
               <input type="hidden" name="jamiyaId" value={jamiyaId} />

@@ -167,7 +167,7 @@ export default async function WelfarePage({ searchParams }: Props) {
             Contribute
           </h2>
           <p className="text-sm text-muted-foreground">Debits your wallet into the circle fund.</p>
-          <form action={contributeWelfareFormAction} className="space-y-3">
+          <form action={contributeWelfareFormAction} data-step-up="large" className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="contribJamiya">Circle</Label>
               <select

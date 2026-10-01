@@ -468,7 +468,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                 ) : null}
                 {canManage && String(d.status) === 'allocated' ? (
                   bankAccounts.length > 0 ? (
-                    <form action={payDividendAction} className="flex flex-wrap items-end gap-2">
+                    <form action={payDividendAction} data-step-up="always" className="flex flex-wrap items-end gap-2">
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="dividendId" value={String(d.id)} />
                       <div className="space-y-1">
