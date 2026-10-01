@@ -2355,6 +2355,9 @@ isOneToOne: false
 "admin_product_insights":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"admin_revenue_summary":
+{ Args: { "p_from": string,"p_to": string }; Returns: Json
+                           },
 "admin_set_jamiya_status":
 { Args: { "p_jamiya_id": string,"p_status": string }; Returns: Json
                            },
@@ -3040,4 +3043,3 @@ export const Constants = {
           }
         }
 } as const
-

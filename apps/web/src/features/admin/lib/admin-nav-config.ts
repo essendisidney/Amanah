@@ -26,6 +26,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
     title: 'Payments & finance',
     items: [
       { href: '/admin/finance' as Route, label: 'Finance' },
+      { href: '/admin/finance/revenue' as Route, label: 'Revenue' },
       { href: '/admin/finance/reconcile' as Route, label: 'Reconcile' },
       { href: '/admin/finance/journal' as Route, label: 'Journal' },
       { href: '/admin/finance/accounts' as Route, label: 'Accounts' },
