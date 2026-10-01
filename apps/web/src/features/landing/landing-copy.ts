@@ -39,7 +39,7 @@ const en = {
     },
     {
       title: 'Members',
-      body: 'Join with a code from WhatsApp, pay from Money, and open your statement. You see your circle — not everyone else’s private groups.',
+      body: 'Join with a code from WhatsApp, pay by M-Pesa or from your Jameiyah balance, and see your statement. You see your circle — not everyone else’s private groups.',
     },
     {
       title: 'Mosques & campaigns',
@@ -194,15 +194,15 @@ const sw: LandingCopy = {
   who: [
     {
       title: 'Viongozi wa kikundi',
-      body: 'Alika kwa namba ya simu, rekodi hisa na akiba ya kila mwezi, leta karatasi ya zamani, na toa taarifa. Faili la Excel linabaki kuwa nakala ya ziada, si kitabu pekee.',
+      body: 'Alika wanachama kwa namba ya simu, rekodi hisa na akiba ya kila mwezi, hamisha rekodi za zamani kutoka Excel, na toa taarifa za hesabu. Excel inabaki kuwa nakala ya akiba tu, si daftari pekee.',
     },
     {
       title: 'Wanachama',
-      body: 'Jiunge kwa msimbo kutoka WhatsApp, lipa kutoka Pesa, na fungua taarifa yako. Unaona kikundi chako — si vikundi binafsi vya watu wengine.',
+      body: 'Jiunge kwa msimbo kutoka WhatsApp, lipa kwa M-Pesa au kutoka salio lako la Jameiyah, na uone taarifa yako. Unaona kikundi chako — si vikundi binafsi vya watu wengine.',
     },
     {
       title: 'Misikiti na kampeni',
-      body: 'Chapisha ukurasa wa sadaka, shiriki kiungo, na mpe kila mtoaji risiti. Zaka inabaki kuwa kikokotoo, si ada iliyofichwa.',
+      body: 'Weka ukurasa wa sadaka, shiriki kiungo, na kila mtoaji apate risiti. Zaka ni kikokotoo cha kukusaidia kuhesabu, si ada iliyofichwa.',
     },
   ],
 
