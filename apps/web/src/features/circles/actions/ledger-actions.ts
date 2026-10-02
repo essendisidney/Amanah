@@ -63,6 +63,60 @@ export async function activateCircleAction(formData: FormData): Promise<void> {
   );
 }
 
+const SCHEDULE_ERRORS: Record<string, string> = {
+  FORBIDDEN: 'Only circle officers can set contribution dates.',
+  CIRCLE_NOT_ACTIVE: 'Activate the circle first.',
+  FIXED_SCHEDULE: 'This circle already has a fixed calendar from activation.',
+  INVALID_AMOUNT: 'Enter an amount greater than zero.',
+  INVALID_FREQUENCY: 'Choose how often members contribute.',
+  INVALID_DATE: 'Pick a date from today onwards.',
+  NOT_FOUND: 'That circle was not found.',
+  UNAUTHENTICATED: 'Sign in again, then retry.',
+};
+
+/** Officers set the next contribution date, amount and how often (open-ended circles). */
+export async function setCircleScheduleAction(formData: FormData): Promise<void> {
+  const jamiyaId = String(formData.get('jamiyaId') ?? '');
+  const slug = String(formData.get('slug') ?? '');
+  if (!jamiyaId || !slug) return;
+  const turnOff = String(formData.get('mode') ?? '') === 'off';
+  const nextDue = String(formData.get('nextDue') ?? '').trim();
+  const amount = Number(String(formData.get('amount') ?? '').trim());
+  const everyDays = Number(String(formData.get('everyDays') ?? '30'));
+
+  if (!turnOff && !/^\d{4}-\d{2}-\d{2}$/.test(nextDue)) {
+    redirectWithCircleNotice(slug, SCHEDULE_ERRORS.INVALID_DATE!, 'error');
+  }
+
+  const { data, error } = await callRpc('set_circle_schedule', {
+    p_jamiya_id: jamiyaId,
+    p_next_due: turnOff ? null : nextDue,
+    p_amount: turnOff ? null : amount,
+    p_every_days: turnOff ? null : everyDays,
+  } as never);
+
+  if (error) {
+    redirectWithCircleNotice(slug, error.message, 'error');
+  }
+  const result = data as { ok?: boolean; error?: string } | null;
+  if (!result?.ok) {
+    redirectWithCircleNotice(
+      slug,
+      SCHEDULE_ERRORS[result?.error ?? ''] || 'Could not save the contribution dates.',
+      'error',
+    );
+  }
+
+  revalidateCircle(slug);
+  redirectWithCircleNotice(
+    slug,
+    turnOff
+      ? 'Contribution dates turned off. Members can still pay in any time.'
+      : 'Contribution dates saved. Members have been told.',
+    'success',
+  );
+}
+
 const OPEN_PAY_ERRORS: Record<string, string> = {
   UNKNOWN_PURPOSE: 'Could not start that payment.',
   NOT_SHARE_DIVIDEND: 'This group uses the contribution on the group page.',

@@ -44,6 +44,7 @@ import { CircleActionHub, type CircleHubGroup } from '@/features/circles/compone
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
 import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
+import { ScheduleForm, ScheduleSummary } from '@/features/circles/components/contribution-schedule';
 import { CircleSection } from '@/features/circles/components/circle-section';
 import { isCircleLeader, isRotatingKind, isSavingsKind, isShareDividendKind } from '@/features/circles/lib/circle-mode';
 import { GroupLeaderDesk } from '@/features/circles/components/group-leader-desk';
@@ -84,6 +85,7 @@ type JamiyaRow = {
   current_cycle: number;
   contribution_frequency_days: number;
   start_date: string | null;
+  next_due_date?: string | null;
   late_contribution_penalty?: number | string | null;
   missed_contribution_penalty?: number | string | null;
   late_loan_penalty_fixed?: number | string | null;
@@ -116,7 +118,7 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
       `
       id, name, slug, description, status, segment, contribution_amount, currency,
       max_members, member_count, cycle_count, current_cycle,
-      contribution_frequency_days, start_date,
+      contribution_frequency_days, start_date, next_due_date,
       late_contribution_penalty, missed_contribution_penalty,
       late_loan_penalty_fixed, late_loan_penalty_pct, payout_compliance_mode,
       challenge_kind
@@ -577,6 +579,23 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   const isRotating = isRotatingKind(jamiya.challenge_kind);
   const isShareDividend = isShareDividendKind(jamiya.challenge_kind);
   const isSavings = isSavingsKind(jamiya.challenge_kind);
+  // Open-ended savings / share circles keep a rolling calendar (next_due_date).
+  const openEnded =
+    (isShareDividend || isSavings) && (jamiya.cycle_count ?? 0) < 2 && jamiya.status === 'active';
+  const scheduleEvery = Math.max(jamiya.contribution_frequency_days || 30, 1);
+  const scheduleOn = Boolean(jamiya.next_due_date);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const shiftDays = (iso: string, days: number) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+  // The round already on the calendar (one cycle before next_due_date) if still upcoming.
+  const nextRoundDue = jamiya.next_due_date
+    ? shiftDays(jamiya.next_due_date, -scheduleEvery) >= todayIso
+      ? shiftDays(jamiya.next_due_date, -scheduleEvery)
+      : jamiya.next_due_date
+    : null;
 
   const estimatedPool =
     contributedTotal > 0
@@ -1244,9 +1263,23 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
         <CircleSection
           id="calendar"
           title="Contribution calendar"
-          description="Due dates and wallet payments for each cycle."
+          description={
+            openEnded
+              ? 'Each round\'s due date and what everyone has paid.'
+              : 'Due dates and wallet payments for each cycle.'
+          }
           padded={false}
         >
+          {openEnded ? (
+            <ScheduleSummary
+              nextRoundDue={nextRoundDue}
+              amount={amount}
+              currency={jamiya.currency}
+              everyDays={scheduleEvery}
+              scheduleOn={scheduleOn}
+              canManage={Boolean(canManageOps)}
+            />
+          ) : null}
           <ContributionCalendar
             contributions={contributions}
             slug={jamiya.slug}
@@ -1342,6 +1375,18 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
               isShareDividend ? 'share_dividend' : isRotating ? 'rotating' : isSavings ? 'savings' : 'other'
             }
           />
+
+          {openEnded ? (
+            <ScheduleForm
+              jamiyaId={jamiya.id}
+              slug={slug}
+              defaultDue={nextRoundDue && nextRoundDue >= todayIso ? nextRoundDue : shiftDays(todayIso, 7)}
+              amount={amount}
+              currency={jamiya.currency}
+              everyDays={scheduleEvery}
+              scheduleOn={scheduleOn}
+            />
+          ) : null}
 
           {paymentProvider() === 'simulated' ? (
             <PaymentModeBanner provider="simulated" requireReal={false} simulatedBlocked={false} />

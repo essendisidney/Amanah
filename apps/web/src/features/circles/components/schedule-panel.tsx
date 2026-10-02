@@ -177,7 +177,11 @@ export function ContributionCalendar({
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">
                   {item.memberLabel ? `${item.memberLabel} · ` : null}
-                  Cycle {item.cycleNumber}
+                  {item.notes === 'Maulid'
+                    ? 'Maulid payment'
+                    : item.notes === 'Contribution'
+                      ? 'Payment'
+                      : `Cycle ${item.cycleNumber}`}
                 </p>
                 <StatusBadge status={item.status} />
                 {item.isMine ? (

@@ -52,6 +52,11 @@ export async function GET(request: Request) {
   const results: Record<string, unknown> = {};
   try {
     if (job === 'all' || job === 'reminders') {
+      // Add the next contribution round for open-ended circles first, so it gets reminders.
+      const { createServiceRoleClient } = await import('@/lib/supabase/service');
+      const admin = createServiceRoleClient();
+      const { data, error } = await admin.rpc('roll_open_schedules');
+      results.roll_schedules = error ? { ok: false, error: error.message } : data;
       results.reminders = await invokeEdge('reminders', secret);
     }
     if (job === 'all' || job === 'auto-fines') {
