@@ -47,6 +47,7 @@ App: [http://localhost:3000](http://localhost:3000)
 | `pnpm format` | Prettier write |
 | `pnpm db:start` | Start local Supabase stack |
 | `pnpm gen:types` | Generate DB types into `@jamiya/database` |
+| `pnpm test:db` | Apply all migrations to a throwaway Postgres in Docker and run pgTAP tests in `supabase/tests/database` |
 
 ## Deployment (Vercel)
 
