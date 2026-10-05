@@ -57,6 +57,10 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 - IntaSend: challenge **required** when `INTASEND_WEBHOOK_CHALLENGE` is set; optional `INTASEND_WEBHOOK_SECRET` for signature header  
 - Routes also verify IntaSend status via `getPaymentStatus` before settling when an invoice id is present  
 
+## Contribution overpayments
+
+An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 3000) plus a `contribution_change` entry for the extra that stayed in the wallet (Dr 3000 / Cr 2000), linked to the same intent. Posted by `post_journal_for_payment_intent`, so it also covers backfills.
+
 ## Qard
 
 `repay_qard` posts `transaction_type = qard_repayment` (not `contribution`) and a QARD journal pair.
