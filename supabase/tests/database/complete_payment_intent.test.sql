@@ -4,7 +4,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
 
-SELECT plan(105);
+SELECT plan(113);
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -48,8 +48,9 @@ RETURNS BIGINT LANGUAGE sql AS $$
   SELECT count(*) FROM public.transactions WHERE user_id = p_user
 $$;
 
--- '<debit code>/<credit code> <amount> <domain>' for the intent's journal entry.
-CREATE FUNCTION pg_temp.journal(p_intent UUID)
+-- '<debit code>/<credit code> <amount> <domain>' for the intent's journal entry
+-- of the given source type ('payment_intent' is the receipt itself).
+CREATE FUNCTION pg_temp.journal(p_intent UUID, p_source_type TEXT DEFAULT 'payment_intent')
 RETURNS TEXT LANGUAGE sql AS $$
   SELECT string_agg(x, '; ')
   FROM (
@@ -60,8 +61,18 @@ RETURNS TEXT LANGUAGE sql AS $$
     JOIN public.journal_lines cl ON cl.journal_entry_id = e.id AND cl.side = 'credit'
     JOIN public.ledger_accounts d ON d.id = dl.ledger_account_id
     JOIN public.ledger_accounts c ON c.id = cl.ledger_account_id
-    WHERE e.source_type = 'payment_intent' AND e.source_id = p_intent::text
+    WHERE e.source_type = p_source_type AND e.source_id = p_intent::text
   ) s
+$$;
+
+-- Net credit to 2000 member wallet liability in the journal for one user.
+CREATE FUNCTION pg_temp.wallet_liability(p_user UUID)
+RETURNS NUMERIC LANGUAGE sql AS $$
+  SELECT coalesce(sum(CASE WHEN l.side = 'credit' THEN l.amount ELSE -l.amount END), 0)
+  FROM public.journal_lines l
+  JOIN public.journal_entries e ON e.id = l.journal_entry_id
+  JOIN public.ledger_accounts a ON a.id = l.ledger_account_id
+  WHERE a.code = '2000' AND e.user_id = p_user
 $$;
 
 -- ---------------------------------------------------------------------------
@@ -471,11 +482,33 @@ SELECT is(
   1000.00,
   'overpayment: payment row is capped at what was owed'
 );
--- Pins current behaviour, which looks wrong: the 500 change is wallet liability
--- (2000), but the whole 1500 is posted to dues clearing (3000). Update this
--- test when the journal posting is split.
 SELECT is(pg_temp.journal('e0000000-0000-0000-0000-000000000013'), '1000/3000 1500.00 CONTRIBUTIONS',
-  'overpayment: journal posts the full 1500 to dues clearing (known gap)');
+  'overpayment: receipt entry is the full 1500 received');
+SELECT is(pg_temp.journal('e0000000-0000-0000-0000-000000000013', 'contribution_change'),
+  '3000/2000 500.00 CONTRIBUTIONS',
+  'overpayment: the 500 change moves from dues clearing to wallet liability');
+SELECT is(
+  (SELECT payment_intent_id FROM public.journal_entries
+   WHERE source_type = 'contribution_change' AND source_id = 'e0000000-0000-0000-0000-000000000013'),
+  'e0000000-0000-0000-0000-000000000013'::uuid,
+  'overpayment: change entry is linked to the intent (shows on its admin case file)'
+);
+SELECT is(pg_temp.complete('e0000000-0000-0000-0000-000000000013')->>'already_completed', 'true',
+  'overpayment replay: no-op');
+SELECT is(
+  (SELECT count(*) FROM public.journal_entries
+   WHERE source_type = 'contribution_change' AND source_id = 'e0000000-0000-0000-0000-000000000013'),
+  1::bigint,
+  'overpayment replay: still one change entry'
+);
+SELECT is(
+  (SELECT count(*) FROM public.journal_entries
+   WHERE source_type = 'contribution_change' AND source_id IN (
+     'e0000000-0000-0000-0000-000000000010', 'e0000000-0000-0000-0000-000000000011',
+     'e0000000-0000-0000-0000-000000000012')),
+  0::bigint,
+  'exact and part payments post no change entry'
+);
 
 -- Circle transaction fee comes out of the wallet once the contribution is fully paid.
 SELECT is(pg_temp.complete('e0000000-0000-0000-0000-000000000014')->>'status', 'paid', 'fee circle: contribution paid');
@@ -487,6 +520,9 @@ SELECT results_eq(
 );
 SELECT is(pg_temp.wallet('a0000000-0000-0000-0000-000000000001'), 1500.00,
   'fee circle: 1050 in, 1000 contribution, 50 fee');
+SELECT is(pg_temp.journal('e0000000-0000-0000-0000-000000000014', 'contribution_change'),
+  '3000/2000 50.00 CONTRIBUTIONS',
+  'fee circle: the 50 over the contribution goes to wallet liability before the fee takes it');
 
 -- ---------------------------------------------------------------------------
 -- Sadaka
@@ -658,6 +694,23 @@ SELECT is(
    FROM public.transactions WHERE user_id = 'a0000000-0000-0000-0000-000000000001' AND status = 'completed'),
   pg_temp.wallet('a0000000-0000-0000-0000-000000000001'),
   'payer wallet balance equals the sum of their completed transactions'
+);
+SELECT is(
+  pg_temp.wallet_liability('a0000000-0000-0000-0000-000000000001'),
+  pg_temp.wallet('a0000000-0000-0000-0000-000000000001'),
+  'journal wallet liability (2000) for the payer equals their wallet balance'
+);
+SELECT is(
+  (SELECT count(*) FROM (
+     SELECT e.id
+     FROM public.journal_entries e
+     JOIN public.journal_lines l ON l.journal_entry_id = e.id
+     WHERE e.source_type = 'contribution_change'
+     GROUP BY e.id
+     HAVING sum(CASE WHEN l.side = 'debit' THEN l.amount_minor ELSE -l.amount_minor END) <> 0
+   ) unbalanced),
+  0::bigint,
+  'change entries balance'
 );
 SELECT is(pg_temp.tx_count('a0000000-0000-0000-0000-000000000003'), 0::bigint, 'other user has no transactions');
 
