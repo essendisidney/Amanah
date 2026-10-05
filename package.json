@@ -25,7 +25,8 @@
     "gen:types": "npx supabase gen types typescript --local > packages/database/src/generated.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:load-smoke": "node scripts/load-smoke.mjs"
+    "test:load-smoke": "node scripts/load-smoke.mjs",
+    "test:db": "node scripts/test-db.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",
