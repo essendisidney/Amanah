@@ -87,6 +87,7 @@ export function StatusBadge({
     normalized === 'paid' ||
     normalized === 'approved' ||
     normalized === 'completed' ||
+    normalized === 'collected' ||
     normalized === 'vouch:approved'
       ? 'success'
       : normalized === 'late' ||
@@ -103,6 +104,7 @@ export function StatusBadge({
           : normalized === 'open' ||
               normalized === 'scheduled' ||
               normalized === 'pending' ||
+              normalized === 'owed' ||
               normalized === 'pending_review' ||
               normalized === 'under_review' ||
               normalized === 'not_started' ||
