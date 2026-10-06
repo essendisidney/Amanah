@@ -99,9 +99,4 @@ export type KycDocumentTypeEnum =
 
 export type KycDocumentStatusEnum = 'uploaded' | 'under_review' | 'approved' | 'rejected';
 
-type Timestamps = {
-  created_at: string;
-  updated_at: string;
-};
-
 export type { Database } from './generated';
