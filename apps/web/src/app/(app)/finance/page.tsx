@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-/** Finance lives under Money — keep deep links working. */
+/** Loans, goals and giving live under Services — keep old /finance links working. */
 export default function FinancePage() {
-  redirect('/wallet#more');
+  redirect('/services');
 }

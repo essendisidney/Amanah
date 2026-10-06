@@ -21,7 +21,6 @@ import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
 import { PaySheet } from '@/features/wallet/components/pay-sheet';
-import { MoneyMoreLinks } from '@/features/wallet/components/money-more-links';
 import { CircleDetailHero } from '@/features/circles/components/circle-detail-hero';
 import { ShareChamaCard } from '@/features/circles/components/share-chama-card';
 import { AdminNav } from '@/features/admin/components/admin-nav';
@@ -308,11 +307,6 @@ export default function UiPreviewPage() {
                 <span className="truncate">{dict.wallet.withdraw}</span>
               </Button>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-sm font-semibold text-foreground">{dict.wallet.moreTitle}</h3>
-            <MoneyMoreLinks labels={dict.wallet} />
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">

@@ -201,37 +201,20 @@ export type Dictionary = {
     payCircleHint: string;
     payDue: string;
     payDueHint: string;
-    goals: string;
-    goalsHint: string;
     close: string;
     balanceLabel: string;
     openMoney: string;
     openMoneyHint: string;
     sectionPay: string;
     sectionSee: string;
-    sectionGrow: string;
-    sectionGive: string;
-    moreTools: string;
     overdue: string;
     noDueTitle: string;
     noDueBody: string;
     browseCircles: string;
     insights: string;
     insightsHint: string;
-    qard: string;
-    qardHint: string;
-    welfare: string;
-    welfareHint: string;
-    invest: string;
-    investHint: string;
-    tawarruq: string;
-    tawarruqHint: string;
-    sadaka: string;
-    sadakaHint: string;
-    zakat: string;
-    zakatHint: string;
-    allFinance: string;
-    allFinanceHint: string;
+    allServices: string;
+    allServicesHint: string;
   };
   contributionCard: {
     nextTitle: string;
@@ -303,22 +286,13 @@ export type Dictionary = {
     quickPay: string;
     quickSave: string;
     quickInsights: string;
-    quickMore: string;
-    moreTitle: string;
-    moreDesc: string;
     moreGoals: string;
-    moreGoalsDesc: string;
+    moreInvest: string;
     moreQard: string;
-    moreQardDesc: string;
     moreTawarruq: string;
-    moreTawarruqDesc: string;
     moreWelfare: string;
-    moreWelfareDesc: string;
-    moreInsightsDesc: string;
     moreSadaka: string;
-    moreSadakaDesc: string;
     moreZakat: string;
-    moreZakatDesc: string;
     phoneBannerTitle: string;
     phoneBannerBody: string;
     addPhone: string;
@@ -849,37 +823,20 @@ export const en: Dictionary = {
     payCircleHint: 'Pay dues',
     payDue: 'Pay due',
     payDueHint: 'Next contribution',
-    goals: 'Goals',
-    goalsHint: 'Personal saves',
     close: 'Close',
     balanceLabel: 'Available',
     openMoney: 'Money',
     openMoneyHint: 'Balance and history',
     sectionPay: 'Pay & send',
     sectionSee: 'See & plan',
-    sectionGrow: 'Borrow & grow',
-    sectionGive: 'Give',
-    moreTools: 'More',
     overdue: 'Overdue',
     noDueTitle: 'No contributions due',
     noDueBody: 'When a circle posts dues, they appear here. Open Circles to join or check schedules.',
     browseCircles: 'Open Circles',
     insights: 'Insights',
     insightsHint: 'This month',
-    qard: 'Qard Hassan',
-    qardHint: 'Interest-free loans',
-    welfare: 'Welfare',
-    welfareHint: 'Support funds',
-    invest: 'Invest',
-    investHint: 'Shares',
-    tawarruq: 'Tawarruq',
-    tawarruqHint: 'Shariah finance',
-    sadaka: 'Sadaka',
-    sadakaHint: 'Give',
-    zakat: 'Zakat',
-    zakatHint: 'Estimate',
-    allFinance: 'All money tools',
-    allFinanceHint: 'Money · More',
+    allServices: 'All services',
+    allServicesHint: 'Loans, goals, giving and more',
   },
   contributionCard: {
     nextTitle: 'Your next contribution',
@@ -952,22 +909,13 @@ export const en: Dictionary = {
     quickPay: 'Pay',
     quickSave: 'Save',
     quickInsights: 'Insights',
-    quickMore: 'More',
-    moreTitle: 'More',
-    moreDesc: 'Goals, loans, giving.',
     moreGoals: 'Goals',
-    moreGoalsDesc: 'Personal saves',
+    moreInvest: 'Invest',
     moreQard: 'Circle loan',
-    moreQardDesc: 'From money you already paid in',
     moreTawarruq: 'Financing',
-    moreTawarruqDesc: 'You repay Jameiyah',
     moreWelfare: 'Welfare',
-    moreWelfareDesc: 'Help inside a group',
-    moreInsightsDesc: 'How your money moved',
     moreSadaka: 'Giving',
-    moreSadakaDesc: 'Send to someone',
     moreZakat: 'Zakat',
-    moreZakatDesc: 'Estimate',
     phoneBannerTitle: 'Add your phone',
     phoneBannerBody: 'Needed for M-Pesa top-ups.',
     addPhone: 'Add phone',
@@ -1512,17 +1460,12 @@ export const sw: Dictionary = {
     payCircleHint: 'Lipa michango',
     payDue: 'Lipa deni',
     payDueHint: 'Mchango unaofuata',
-    goals: 'Malengo',
-    goalsHint: 'Akiba binafsi',
     close: 'Funga',
     balanceLabel: 'Inayopatikana',
     openMoney: 'Pesa',
     openMoneyHint: 'Salio na historia',
     sectionPay: 'Lipa na tuma',
     sectionSee: 'Angalia na panga',
-    sectionGrow: 'Kopa na kukuza',
-    sectionGive: 'Changia',
-    moreTools: 'Zaidi',
     overdue: 'Imechelewa',
     noDueTitle: 'Hakuna michango inayodaiwa',
     noDueBody:
@@ -1530,20 +1473,8 @@ export const sw: Dictionary = {
     browseCircles: 'Fungua Miduara',
     insights: 'Ufahamu',
     insightsHint: 'Mwezi huu',
-    qard: 'Qard Hassan',
-    qardHint: 'Mikopo bila riba',
-    welfare: 'Ustawi',
-    welfareHint: 'Hazina za msaada',
-    invest: 'Uwekezaji',
-    investHint: 'Hisa',
-    tawarruq: 'Tawarruq',
-    tawarruqHint: 'Fedha za Sharia',
-    sadaka: 'Sadaka',
-    sadakaHint: 'Changia',
-    zakat: 'Zakat',
-    zakatHint: 'Kadiria',
-    allFinance: 'Zana zote za pesa',
-    allFinanceHint: 'Kituo cha Fedha',
+    allServices: 'Huduma zote',
+    allServicesHint: 'Mikopo, malengo, sadaka na zaidi',
   },
   contributionCard: {
     nextTitle: 'Mchango wako unaofuata',
@@ -1616,22 +1547,13 @@ export const sw: Dictionary = {
     quickPay: 'Lipa',
     quickSave: 'Okoa',
     quickInsights: 'Ufahamu',
-    quickMore: 'Zaidi',
-    moreTitle: 'Zaidi',
-    moreDesc: 'Malengo, mikopo, kuchangia.',
     moreGoals: 'Malengo',
-    moreGoalsDesc: 'Akiba binafsi',
+    moreInvest: 'Uwekezaji',
     moreQard: 'Mkopo wa mduara',
-    moreQardDesc: 'Kutoka pesa ulizolipa',
     moreTawarruq: 'Ufadhili',
-    moreTawarruqDesc: 'Unalipa Jameiyah',
     moreWelfare: 'Ustawi',
-    moreWelfareDesc: 'Msaada ndani ya mduara',
-    moreInsightsDesc: 'Pesa yako iliendaje',
     moreSadaka: 'Kuchangia',
-    moreSadakaDesc: 'Tuma kwa mtu',
     moreZakat: 'Zakat',
-    moreZakatDesc: 'Kadiria',
     phoneBannerTitle: 'Ongeza simu',
     phoneBannerBody: 'Inahitajika kwa M-Pesa.',
     addPhone: 'Ongeza simu',
