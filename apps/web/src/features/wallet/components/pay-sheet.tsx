@@ -2,19 +2,14 @@
 
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useEffect, useState, type ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import {
   ArrowUpFromLine,
-  Calculator,
   ChartNoAxesCombined,
-  ChevronDown,
   ChevronRight,
-  HandHeart,
-  Landmark,
   LayoutGrid,
   Plus,
-  Target,
-  TrendingUp,
+  Sparkles,
   Wallet,
 } from 'lucide-react';
 import { formatCurrency } from '@jamiya/shared';
@@ -85,14 +80,6 @@ export function PaySheet({
   dues?: PayDueItem[];
   hideDueList?: boolean;
 }) {
-  const [moreOpen, setMoreOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#more') {
-      setMoreOpen(true);
-    }
-  }, []);
-
   const primary: PayLink[] = [
     {
       href: '/wallet' as Route,
@@ -112,50 +99,11 @@ export function PaySheet({
       hint: labels.insightsHint,
       icon: ChartNoAxesCombined,
     },
-  ];
-
-  const moreTools: PayLink[] = [
     {
-      href: '/finance/goals' as Route,
-      label: labels.goals,
-      hint: labels.goalsHint,
-      icon: Target,
-    },
-    {
-      href: '/finance/qard' as Route,
-      label: labels.qard,
-      hint: labels.qardHint,
-      icon: Landmark,
-    },
-    {
-      href: '/finance/welfare' as Route,
-      label: labels.welfare,
-      hint: labels.welfareHint,
-      icon: HandHeart,
-    },
-    {
-      href: '/finance/invest' as Route,
-      label: labels.invest,
-      hint: labels.investHint,
-      icon: TrendingUp,
-    },
-    {
-      href: '/finance/tawarruq' as Route,
-      label: labels.tawarruq,
-      hint: labels.tawarruqHint,
-      icon: Landmark,
-    },
-    {
-      href: '/sadaka' as Route,
-      label: labels.sadaka,
-      hint: labels.sadakaHint,
-      icon: HandHeart,
-    },
-    {
-      href: '/zakat' as Route,
-      label: labels.zakat,
-      hint: labels.zakatHint,
-      icon: Calculator,
+      href: '/services' as Route,
+      label: labels.allServices,
+      hint: labels.allServicesHint,
+      icon: Sparkles,
     },
   ];
 
@@ -247,25 +195,6 @@ export function PaySheet({
       )}
 
       <LinkGroup items={primary} />
-
-      <div className="space-y-2.5" id="more">
-        <button
-          type="button"
-          onClick={() => setMoreOpen((open) => !open)}
-          className="jameiyah-surface flex w-full items-center justify-between px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-expanded={moreOpen}
-        >
-          <span className="text-sm font-semibold text-foreground">{labels.moreTools}</span>
-          <ChevronDown
-            className={cn(
-              'h-4 w-4 text-muted-foreground transition-transform',
-              moreOpen && 'rotate-180',
-            )}
-            strokeWidth={1.75}
-          />
-        </button>
-        {moreOpen ? <LinkGroup items={moreTools} /> : null}
-      </div>
     </div>
   );
 }

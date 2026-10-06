@@ -8,8 +8,6 @@ import { createClient } from '@/lib/supabase/server';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { TopUpForm } from '@/features/wallet/components/top-up-form';
 import { WithdrawalForm } from '@/features/wallet/components/withdrawal-form';
-import { OpenDetailsOnHash } from '@/features/wallet/components/open-details-on-hash';
-import { MoneyMoreLinks } from '@/features/wallet/components/money-more-links';
 import { RetryIntentButton } from '@/features/wallet/components/retry-intent-button';
 import { CheckPaystackStatusButton } from '@/features/wallet/components/check-paystack-status-button';
 import { IntasendTrustBadge } from '@/features/wallet/components/intasend-trust-badge';
@@ -612,16 +610,6 @@ export default async function WalletPage({ searchParams }: Props) {
           </ul>
         </details>
       ) : null}
-
-      <details id="more" className="scroll-mt-24">
-        <OpenDetailsOnHash id="more" />
-        <summary className="cursor-pointer text-sm font-semibold text-foreground">
-          {labels.moreTitle}
-        </summary>
-        <div className="mt-3">
-          <MoneyMoreLinks labels={labels} />
-        </div>
-      </details>
 
       {provider === 'intasend' ? <IntasendTrustBadge /> : null}
     </AppPage>

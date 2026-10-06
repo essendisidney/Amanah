@@ -1,11 +1,6 @@
 import Link from 'next/link';
 import type { Route } from 'next';
-import {
-  Calculator,
-  HandHeart,
-  Landmark,
-  Target,
-} from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { formatCurrency, formatRelativeTime, toE164Kenya } from '@jamiya/shared';
 import type { InsightsData } from '../lib/get-insights-data';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
@@ -28,31 +23,13 @@ export function InsightsView({
   const payDefaultPhone =
     toE164Kenya(payPhoneRaw) ?? (/^\+[1-9]\d{7,14}$/.test(payPhoneRaw) ? payPhoneRaw : '');
 
-  // Skip Circles / Money — those are already tabs.
+  // Loans, goals and giving all live on Services; link there rather than repeat them.
   const nextStops = [
     {
-      href: '/finance/goals' as Route,
-      label: payLabels.goals,
-      hint: payLabels.goalsHint,
-      icon: Target,
-    },
-    {
-      href: '/finance/qard' as Route,
-      label: payLabels.qard,
-      hint: payLabels.qardHint,
-      icon: Landmark,
-    },
-    {
-      href: '/sadaka' as Route,
-      label: payLabels.sadaka,
-      hint: payLabels.sadakaHint,
-      icon: HandHeart,
-    },
-    {
-      href: '/zakat' as Route,
-      label: payLabels.zakat,
-      hint: payLabels.zakatHint,
-      icon: Calculator,
+      href: '/services' as Route,
+      label: payLabels.allServices,
+      hint: payLabels.allServicesHint,
+      icon: Sparkles,
     },
   ];
 

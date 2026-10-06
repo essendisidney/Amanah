@@ -7,6 +7,7 @@ import {
   Calculator,
   ChartNoAxesCombined,
   ChevronRight,
+  Coins,
   HandHeart,
   Landmark,
   Scale,
@@ -30,6 +31,7 @@ const GROUPS: Array<{ title: L; items: Item[] }> = [
       { href: '/finance/qard', icon: Landmark, label: 'moreQard', desc: { en: 'Interest-free loan from your circle', sw: 'Mkopo bila riba kutoka mduara wako' } },
       { href: '/finance/tawarruq', icon: Scale, label: 'moreTawarruq', desc: { en: 'Sharia-compliant financing for bigger needs', sw: 'Ufadhili unaofuata Sharia kwa mahitaji makubwa' } },
       { href: '/finance/goals', icon: TrendingUp, label: 'moreGoals', desc: { en: 'Save towards something that matters', sw: 'Weka akiba kwa jambo muhimu kwako' } },
+      { href: '/finance/invest', icon: Coins, label: 'moreInvest', desc: { en: 'Your circle\'s shared investments', sw: 'Uwekezaji wa pamoja wa mduara wako' } },
     ],
   },
   {
