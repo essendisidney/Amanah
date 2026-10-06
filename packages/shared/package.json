@@ -35,6 +35,7 @@
   "devDependencies": {
     "@jamiya/eslint-config": "workspace:*",
     "@jamiya/typescript-config": "workspace:*",
+    "@types/node": "^22.15.21",
     "eslint": "^9.27.0",
     "rimraf": "^6.0.1",
     "tsx": "^4.23.14",

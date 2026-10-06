@@ -44,10 +44,13 @@ App: [http://localhost:3000](http://localhost:3000)
 | `pnpm build` | Production build |
 | `pnpm lint` | ESLint across the workspace |
 | `pnpm typecheck` | TypeScript `--noEmit` across packages |
+| `pnpm test` | Unit tests across packages |
 | `pnpm format` | Prettier write |
 | `pnpm db:start` | Start local Supabase stack |
 | `pnpm gen:types` | Generate DB types into `@jamiya/database` |
 | `pnpm test:db` | Apply all migrations to a throwaway Postgres in Docker and run pgTAP tests in `supabase/tests/database` |
+
+CI (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, a production build and `pnpm test:db` on every pull request and on pushes to `master`.
 
 ## Deployment (Vercel)
 
