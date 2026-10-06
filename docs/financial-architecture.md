@@ -57,6 +57,10 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 - IntaSend: challenge **required** when `INTASEND_WEBHOOK_CHALLENGE` is set; optional `INTASEND_WEBHOOK_SECRET` for signature header  
 - Routes also verify IntaSend status via `getPaymentStatus` before settling when an invoice id is present  
 
+## Circle fees
+
+A circle's `transaction_fee_amount` is due once a contribution is fully paid, whatever the payment path (M-Pesa via `complete_payment_intent`, wallet via `pay_contribution` / `pay_contribution_ahead`, or the web app's `charge_contribution_fee`). All of them call `private.charge_circle_fee`, which debits the fee if the wallet's spendable balance (available minus pending withdrawals) covers it, and otherwise records it in `fees_owed` and notifies the member. `private.collect_fees_owed` takes owed fees, oldest first, after money comes in through `complete_payment_intent` and before `request_withdrawal`. Collected fees post Dr 2000 / Cr 2120 like any other fee.
+
 ## Contribution overpayments
 
 An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 3000) plus a `contribution_change` entry for the extra that stayed in the wallet (Dr 3000 / Cr 2000), linked to the same intent. Posted by `post_journal_for_payment_intent`, so it also covers backfills.
