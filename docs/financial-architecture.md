@@ -59,7 +59,7 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 
 ## Circle fees
 
-A circle's `transaction_fee_amount` is due once a contribution is fully paid, whatever the payment path (M-Pesa via `complete_payment_intent`, wallet via `pay_contribution` / `pay_contribution_ahead`, or the web app's `charge_contribution_fee`). All of them call `private.charge_circle_fee`, which debits the fee if the wallet's spendable balance (available minus pending withdrawals) covers it, and otherwise records it in `fees_owed` and notifies the member. `private.collect_fees_owed` takes owed fees, oldest first, after money comes in through `complete_payment_intent` and before `request_withdrawal`. Collected fees post Dr 2000 / Cr 2120 like any other fee.
+A circle's `transaction_fee_amount` is due once a contribution is fully paid, whatever the payment path (M-Pesa via `complete_payment_intent`, wallet via `pay_contribution` / `pay_contribution_ahead`, or the web app's `charge_contribution_fee`). All of them call `private.charge_circle_fee`, which debits the fee if the wallet's spendable balance (available minus pending withdrawals) covers it, and otherwise records it in `fees_owed` and notifies the member. `private.collect_fees_owed` takes owed fees, oldest first, after money comes in through `complete_payment_intent` and before `request_withdrawal`. Collected fees post Dr 2000 / Cr 2120 like any other fee. Admins see and manage owed fees at `/admin/finance/fees-owed` (`admin_fees_owed_overview`, `admin_collect_fees_owed`, `admin_waive_fee_owed`). A waived fee is never collected.
 
 ## Contribution overpayments
 
@@ -82,6 +82,7 @@ An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 300
 | `/admin/finance/settlements` | PSP settlements mirror + backfill / dispute |
 | `/admin/finance/integrity` | Wallet vs journal 2000 delta + backfill missing posts |
 | `/admin/finance/refunds` | Queue / complete refunds (never edits posted lines) |
+| `/admin/finance/fees-owed` | Circle fees members owe: collect now, or waive with a reason (member notified, audit-logged) |
 | `/admin/finance/approvals` | Maker–checker for large refunds (+ withdrawals) |
 | `/admin/architecture` | How the finance stack is built (layers + status maps) |
 

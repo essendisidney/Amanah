@@ -33,6 +33,7 @@ export const ADMIN_NAV_GROUPS: AdminNavGroup[] = [
       { href: '/admin/finance/settlements' as Route, label: 'Settlements' },
       { href: '/admin/finance/integrity' as Route, label: 'Integrity' },
       { href: '/admin/finance/refunds' as Route, label: 'Refunds' },
+      { href: '/admin/finance/fees-owed' as Route, label: 'Fees owed' },
       { href: '/admin/transactions' as Route, label: 'Transactions' },
       { href: '/admin/withdrawals' as Route, label: 'Money out' },
     ],

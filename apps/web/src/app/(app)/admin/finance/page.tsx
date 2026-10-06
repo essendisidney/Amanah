@@ -175,6 +175,7 @@ export default async function AdminFinancePage() {
             ['/admin/finance/settlements', 'Settlements'],
             ['/admin/finance/accounts', 'Accounts'],
             ['/admin/finance/refunds', 'Refunds'],
+            ['/admin/finance/fees-owed', 'Fees owed'],
             ['/admin/finance/approvals', 'Approvals'],
             ['/admin/observability', 'Health'],
           ] as const
