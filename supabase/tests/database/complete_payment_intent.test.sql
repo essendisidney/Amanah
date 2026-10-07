@@ -130,6 +130,10 @@ VALUES ('f3000000-0000-0000-0000-000000000001', 'f2000000-0000-0000-0000-0000000
 INSERT INTO public.sponsorship_charges (id, sponsorship_id, amount, status)
 VALUES ('f4000000-0000-0000-0000-000000000001', 'f3000000-0000-0000-0000-000000000001', 2000, 'pending');
 
+-- e…06 is a simulated intent, so this file runs with simulation switched on
+-- (simulated_payments.test.sql covers it switched off).
+UPDATE public.platform_settings SET value = '{"enabled": true}' WHERE key = 'simulated_payments';
+
 -- Payment intents (e…). Payer unless noted; mpesa unless noted.
 INSERT INTO public.payment_intents (id, user_id, provider, status, amount, currency, phone, metadata) VALUES
   -- wallet top-ups

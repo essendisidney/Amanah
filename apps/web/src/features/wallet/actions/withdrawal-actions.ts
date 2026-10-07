@@ -377,6 +377,17 @@ export async function processPayoutCashoutAction(formData: FormData): Promise<vo
     );
   }
 
+  const { shouldBlockSimulatedPayments } = await import('@/lib/production-cutover');
+  if (shouldBlockSimulatedPayments()) {
+    redirect(
+      withNoticeQuery(
+        '/admin/withdrawals',
+        'M-Pesa payouts are not configured, so this cashout cannot be sent.',
+        'error',
+      ),
+    );
+  }
+
   await callRpc('process_payout_cashout', {
     p_withdrawal_id: withdrawalId,
     p_simulate: true,

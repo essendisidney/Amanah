@@ -626,7 +626,9 @@ export async function settlePayoutToMpesaAction(formData: FormData): Promise<voi
   const { shouldUseLiveDisburse, runWithdrawalDisbursement } = await import(
     '@/lib/payments/disburse-withdrawal'
   );
-  const autoSimulate = !shouldUseLiveDisburse();
+  const { shouldBlockSimulatedPayments } = await import('@/lib/production-cutover');
+  // Without a live B2C rail in production, leave the cashout pending for an admin.
+  const autoSimulate = !shouldUseLiveDisburse() && !shouldBlockSimulatedPayments();
 
   const { data, error } = await callRpc('settle_payout_to_mpesa', {
     p_payout_id: payoutId,

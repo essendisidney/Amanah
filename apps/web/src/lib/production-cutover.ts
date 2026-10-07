@@ -16,12 +16,14 @@ export function isProductionRuntime(): boolean {
 }
 
 /**
- * Block simulated wallet top-ups only when real providers are required.
- * M-Pesa/Daraja remains optional — demos use PAYMENT_PROVIDER=simulated.
+ * Simulated payments are blocked when real providers are required and in every
+ * production build, unless ALLOW_SIMULATED_IN_PROD=true. Local `next dev` keeps them
+ * for demos. The database enforces the same rule (platform_settings.simulated_payments),
+ * so this only decides which error the user sees.
  */
 export function shouldBlockSimulatedPayments(): boolean {
   if (process.env.ALLOW_SIMULATED_IN_PROD === 'true') return false;
-  return requireRealProviders();
+  return requireRealProviders() || isProductionRuntime();
 }
 
 export function assertProviderConfigured(provider: PaymentProviderId): void {

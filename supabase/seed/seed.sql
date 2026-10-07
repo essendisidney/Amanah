@@ -3,6 +3,11 @@
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- Local demos complete payments without a real provider. Production keeps this off.
+INSERT INTO public.platform_settings (key, value)
+VALUES ('simulated_payments', '{"enabled": true}'::jsonb)
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW();
+
 DO $$
 DECLARE
   admin_id UUID := '11111111-1111-1111-1111-111111111111';

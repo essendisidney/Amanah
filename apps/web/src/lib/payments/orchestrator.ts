@@ -12,6 +12,7 @@ import {
 } from './adapters/bank-rails';
 import { isPaystackConfigured } from '@/lib/payments/paystack';
 import { paymentProvider } from './provider';
+import { shouldBlockSimulatedPayments } from '@/lib/production-cutover';
 import type {
   CollectPaymentInput,
   CollectPaymentResult,
@@ -20,6 +21,10 @@ import type {
   PaymentProviderId,
   PaymentStatusResult,
 } from './types';
+
+// Contains "not configured" so the failover logic treats it as non-retriable.
+const SIMULATED_BLOCKED =
+  'Simulated payments are disabled here and no real provider is configured.';
 
 /**
  * Payment orchestrator — features call these helpers, never a PSP SDK.
@@ -149,6 +154,9 @@ async function collectVia(
   input: CollectPaymentInput,
 ): Promise<CollectPaymentResult> {
   const adapter = adapterFor(id);
+  if (adapter.id === 'simulated' && shouldBlockSimulatedPayments()) {
+    return { ok: false, provider: id, error: SIMULATED_BLOCKED };
+  }
   if (!adapter.isConfigured() && id !== 'simulated') {
     return {
       ok: false,
@@ -164,6 +172,9 @@ async function disburseVia(
   input: DisbursePaymentInput,
 ): Promise<DisbursePaymentResult> {
   const adapter = adapterFor(id);
+  if (adapter.id === 'simulated' && shouldBlockSimulatedPayments()) {
+    return { ok: false, provider: id, error: SIMULATED_BLOCKED };
+  }
   if (!adapter.isConfigured() && id !== 'simulated') {
     return {
       ok: false,
