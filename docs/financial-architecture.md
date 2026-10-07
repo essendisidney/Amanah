@@ -69,6 +69,22 @@ An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 300
 
 `repay_qard` posts `transaction_type = qard_repayment` (not `contribution`) and a QARD journal pair (Dr 4100 / Cr 4000). The wallet side is posted as a wallet movement (below), so 4100 nets to zero and a repayment reads Dr 2000 / Cr 4000. A disbursement from `decide_qard` posts Dr 4000 / Cr 2000.
 
+## Simulated payments
+
+Simulated money is off unless `platform_settings` row `simulated_payments` is `{"enabled": true}`. Only the local seed turns it on; a missing row counts as off. While it is off, the database raises `SIMULATED_PAYMENTS_DISABLED` for:
+
+- a `simulated` payment intent;
+- completing an intent with an `mpesa-sim:` reference or a simulated source;
+- a wallet transaction marked simulated;
+- a withdrawal completed with a `sim-b2c:` reference.
+
+Other layers follow the same rule:
+
+- **`payments-mpesa`:** without Daraja secrets, it fails the payment or sadaka disbursement instead of completing it, unless the switch is on and `REQUIRE_REAL_PROVIDERS` is not `true`. Its `health` action reports `simulation_allowed`.
+- **Web app:** production builds also refuse the simulated adapter, simulated payout cash-outs and simulated M-Pesa B2B (`shouldBlockSimulatedPayments`, overridable with `ALLOW_SIMULATED_IN_PROD=true`).
+
+Transactions recorded as simulated before 2026-10-07 stay as they are.
+
 ## Wallet movements
 
 Wallet credits and debits that are not payments, dues or fees post from the `wallet_movement_journal` trigger on `transactions` (`private.post_journal_for_wallet_movement`, `source_type = 'wallet_movement'`, one entry per transaction). Migration `20261007120000` backfilled history.

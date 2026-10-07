@@ -4,6 +4,7 @@ import {
   disburseProvider,
 } from '@/lib/payments/orchestrator';
 import { shouldUseLiveDisburse } from '@/lib/payments/disburse-withdrawal';
+import { shouldBlockSimulatedPayments } from '@/lib/production-cutover';
 import { logger } from '@/lib/observability';
 import type { DisburseMethod } from '@/lib/payments/types';
 
@@ -88,6 +89,10 @@ export async function runTreasuryB2bDisbursement(
 
   const live = shouldUseLiveDisburse() && method === 'mpesa_b2b';
   const admin = createServiceRoleClient();
+
+  if (!live && method === 'mpesa_b2b' && shouldBlockSimulatedPayments()) {
+    return { ok: false, error: 'M-Pesa B2B is not configured, so this payout cannot be sent.' };
+  }
 
   if (!live) {
     const ref = `sim-b2b:${payout.id}:${Date.now()}`;

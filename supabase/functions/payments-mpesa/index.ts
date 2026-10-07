@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 /**
  * M-Pesa STK Push + B2C initiator + Daraja callback handler (Phase 9 / Option B).
@@ -17,7 +17,9 @@ import { createClient } from "npm:@supabase/supabase-js@2";
  * optional B2C: MPESA_B2C_INITIATOR, MPESA_B2C_SECURITY_CREDENTIAL,
  * MPESA_B2C_RESULT_URL, MPESA_B2C_TIMEOUT_URL, MPESA_B2C_COMMAND_ID.
  *
- * Without Daraja secrets: completes as simulated unless REQUIRE_REAL_PROVIDERS=true.
+ * Without Daraja secrets the call fails (intent / sadaka disbursement marked failed).
+ * It completes as simulated only when platform_settings 'simulated_payments' is
+ * {"enabled": true} and REQUIRE_REAL_PROVIDERS is not "true" (local development).
  */
 
 type StkBody = {
@@ -39,6 +41,18 @@ function env(name: string): string {
 
 function requireReal(): boolean {
   return env("REQUIRE_REAL_PROVIDERS") === "true";
+}
+
+/** Simulated completion is opt-in and fails closed: any error reading the switch means no. */
+async function simulationAllowed(supabase: SupabaseClient): Promise<boolean> {
+  if (requireReal()) return false;
+  const { data, error } = await supabase
+    .from("platform_settings")
+    .select("value")
+    .eq("key", "simulated_payments")
+    .maybeSingle();
+  if (error || !data) return false;
+  return (data.value as { enabled?: unknown } | null)?.enabled === true;
 }
 
 /** Accept exact service-role secret match or a JWT whose role is service_role for this project. */
@@ -182,6 +196,7 @@ Deno.serve(async (req) => {
         daraja_configured: darajaConfigured(),
         b2c_configured: b2cConfigured(),
         require_real: requireReal(),
+        simulation_allowed: await simulationAllowed(supabase),
         base_url: env("MPESA_BASE_URL") || "https://sandbox.safaricom.co.ke",
         transaction_type:
           env("MPESA_TRANSACTION_TYPE") || "CustomerPayBillOnline",
@@ -252,7 +267,7 @@ Deno.serve(async (req) => {
 
       const token = await getDarajaToken();
       if (!token || !b2cConfigured()) {
-        if (requireReal()) {
+        if (!(await simulationAllowed(supabase))) {
           if (kind !== "withdrawal" && kind !== "wallet") {
             await supabase.rpc("complete_sadaka_disbursement", {
               p_disbursement_id: body.disbursement_id,
@@ -478,13 +493,13 @@ Deno.serve(async (req) => {
 
       const token = await getDarajaToken();
       if (!token) {
-        if (requireReal() || darajaConfigured()) {
-          // Configured but oauth failed, or real mode without secrets
+        if (darajaConfigured() || !(await simulationAllowed(supabase))) {
+          // Configured but OAuth failed, or no secrets and simulation is off
           await supabase.rpc("fail_payment_intent", {
             p_intent_id: body.intent_id,
             p_error_message: darajaConfigured()
               ? "Daraja OAuth failed"
-              : "M-Pesa secrets not configured",
+              : "M-Pesa is not configured",
           });
           return Response.json(
             { ok: false, error: "DARAJA_UNAVAILABLE" },
@@ -492,11 +507,17 @@ Deno.serve(async (req) => {
           );
         }
 
-        const { data } = await supabase.rpc("complete_payment_intent", {
+        const { data, error: simErr } = await supabase.rpc("complete_payment_intent", {
           p_intent_id: body.intent_id,
           p_provider_reference: `mpesa-sim:${body.intent_id}`,
           p_metadata: { source: "mpesa_fallback_simulated" },
         });
+        if (simErr || (data as { ok?: boolean } | null)?.ok !== true) {
+          return Response.json(
+            { ok: false, error: simErr?.message ?? "SIMULATED_COMPLETE_FAILED", result: data },
+            { status: 502 },
+          );
+        }
         return Response.json({ ok: true, fallback: "simulated", result: data });
       }
 
