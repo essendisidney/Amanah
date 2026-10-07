@@ -67,7 +67,24 @@ An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 300
 
 ## Qard
 
-`repay_qard` posts `transaction_type = qard_repayment` (not `contribution`) and a QARD journal pair.
+`repay_qard` posts `transaction_type = qard_repayment` (not `contribution`) and a QARD journal pair (Dr 4100 / Cr 4000). The wallet side is posted as a wallet movement (below), so 4100 nets to zero and a repayment reads Dr 2000 / Cr 4000. A disbursement from `decide_qard` posts Dr 4000 / Cr 2000.
+
+## Wallet movements
+
+Wallet credits and debits that are not payments, dues or fees post from the `wallet_movement_journal` trigger on `transactions` (`private.post_journal_for_wallet_movement`, `source_type = 'wallet_movement'`, one entry per transaction). Migration `20261007120000` backfilled history.
+
+| `metadata.kind` | Wallet | Journal | From |
+|---|---|---|---|
+| `welfare_contribution` | debit | Dr 2000 / Cr 6000 | `contribute_to_welfare` |
+| `welfare_claim` | credit | Dr 6000 / Cr 2000 | `decide_welfare_claim` |
+| `pocket_deposit` | debit | Dr 2000 / Cr 3000 | `move_savings_pocket` |
+| `pocket_withdraw` | credit | Dr 3000 / Cr 2000 | `move_savings_pocket` |
+| `circle_dividend` | credit | Dr 3000 / Cr 2000 | `pay_circle_dividend` |
+| (payout with `payout_id`) | credit | Dr 3000 / Cr 2000 | `settle_payout`, `service_settle_payout` |
+| `qard_disbursement` | credit | Dr 4000 / Cr 2000 | `decide_qard` |
+| `qard_repayment` | debit | Dr 2000 / Cr 4100 | `repay_qard` |
+
+A new wallet path with a kind not in this table posts nothing; add it to `private.wallet_movement_accounts` or journal it in its own function.
 
 ## Admin
 
