@@ -85,6 +85,10 @@ Other layers follow the same rule:
 
 Transactions recorded as simulated before 2026-10-07 stay as they are.
 
+## Withdrawal holds
+
+`admin_hold_withdrawal(id, reason)` puts a `hold` in a pending or processing withdrawal's metadata; `admin_release_withdrawal(id, reason)` lifts it (platform admins or the service role; both audit-logged). While held, the `withdrawal_hold` trigger refuses any status change, so it cannot be paid, failed or cancelled, and its amount stays reserved against the wallet. Dual approval can still record. `runWithdrawalDisbursement` re-reads the hold before calling any payout provider.
+
 ## Wallet movements
 
 Wallet credits and debits that are not payments, dues or fees post from the `wallet_movement_journal` trigger on `transactions` (`private.post_journal_for_wallet_movement`, `source_type = 'wallet_movement'`, one entry per transaction). Migration `20261007120000` backfilled history.

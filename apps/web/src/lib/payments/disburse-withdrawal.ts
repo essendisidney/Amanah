@@ -125,6 +125,23 @@ export async function runWithdrawalDisbursement(
     return { ok: false, error: 'NOT_PROCESSABLE' };
   }
 
+  // Re-read just before money moves: a hold (admin_hold_withdrawal) must stop the provider
+  // call, not only the later status update the database refuses.
+  const { data: fresh, error: freshErr } = await createServiceRoleClient()
+    .from('withdrawal_requests')
+    .select('status, metadata')
+    .eq('id', withdrawal.id)
+    .maybeSingle();
+  if (freshErr || !fresh) {
+    return { ok: false, error: 'NOT_FOUND' };
+  }
+  if ((fresh.metadata as Record<string, unknown> | null)?.hold) {
+    return { ok: false, error: 'This withdrawal is on hold and cannot be paid out.' };
+  }
+  if (fresh.status !== 'pending' && fresh.status !== 'processing') {
+    return { ok: false, error: 'NOT_PROCESSABLE' };
+  }
+
   const collected = await disbursePayment({
     disbursementId: withdrawal.id,
     amount: Number(withdrawal.amount),
