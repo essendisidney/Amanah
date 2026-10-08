@@ -10,6 +10,8 @@ import {
   acceptInvitationAction,
   declineInvitationAction,
 } from '../actions/invitation-actions';
+import type { CircleTermsView } from '../lib/circle-terms';
+import { CircleTermsSummary } from './circle-terms-summary';
 
 export type InviteSlotContext = {
   challengeKind: string | null;
@@ -28,6 +30,7 @@ export function InvitationDecisionButtons({
   slotContext,
   acceptLabel = 'Accept invitation',
   allowDecline = true,
+  terms,
 }: {
   token: string;
   disabled?: boolean;
@@ -35,6 +38,8 @@ export function InvitationDecisionButtons({
   acceptLabel?: string;
   /** Personal invites can be declined. A shared chama link cannot. */
   allowDecline?: boolean;
+  /** The circle's fees and penalties; a member must accept them before any is charged. */
+  terms?: CircleTermsView | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -50,6 +55,9 @@ export function InvitationDecisionButtons({
   }, [slotContext]);
 
   const [slot, setSlot] = useState<number | ''>('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const termsVersion = terms?.ok && terms.terms ? terms.terms.version : null;
+  const mustAcceptTerms = Boolean(terms?.ok && terms.has_charges);
 
   return (
     <div className="space-y-4">
@@ -104,16 +112,38 @@ export function InvitationDecisionButtons({
         </div>
       ) : null}
 
+      {terms?.ok && terms.terms ? (
+        <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+          <p className="font-semibold">Fees and penalties</p>
+          <CircleTermsSummary terms={terms.terms} />
+          {mustAcceptTerms ? (
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+              />
+              <span>
+                I have read these fees and penalties and accept them. Nothing is charged
+                without this.
+              </span>
+            </label>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-3">
         <Button
           type="button"
-          disabled={disabled || pending}
+          disabled={disabled || pending || (mustAcceptTerms && !termsAccepted)}
           onClick={() => {
             setError(null);
             startTransition(async () => {
               const result = await acceptInvitationAction(
                 token,
                 typeof slot === 'number' ? slot : null,
+                !mustAcceptTerms || termsAccepted ? termsVersion : null,
               );
               if (!result.success) {
                 setError(result.message ?? 'Accept failed');

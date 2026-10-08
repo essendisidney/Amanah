@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
 import { InvitationDecisionButtons } from '@/features/circles/components/invitation-decision-buttons';
+import type { CircleTermsView } from '@/features/circles/lib/circle-terms';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = {
@@ -131,6 +132,13 @@ export default async function InvitationPage({ params }: Props) {
         }
       : null;
 
+  // Every fee and penalty, shown before joining; the member ticks to accept them.
+  const { data: termsData } = await callRpc(
+    'preview_invitation_terms',
+    invitationRpcArgs(token),
+  );
+  const terms = (termsData ?? null) as CircleTermsView | null;
+
   const isPending = preview.status === 'pending';
   const isExpired = new Date(preview.expires_at).getTime() < Date.now();
   const openLink = !preview.email && !preview.phone;
@@ -206,6 +214,7 @@ export default async function InvitationPage({ params }: Props) {
           slotContext={slotContext}
           acceptLabel={openLink ? 'Join this chama' : 'Accept invitation'}
           allowDecline={!openLink}
+          terms={terms}
         />
       ) : (
         <Alert>

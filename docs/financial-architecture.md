@@ -61,6 +61,17 @@ Journal posts are **idempotent** on `(source_type, source_id)` (e.g. `payment_in
 
 A circle's `transaction_fee_amount` is due once a contribution is fully paid, whatever the payment path (M-Pesa via `complete_payment_intent`, wallet via `pay_contribution` / `pay_contribution_ahead`, or the web app's `charge_contribution_fee`). All of them call `private.charge_circle_fee`, which debits the fee if the wallet's spendable balance (available minus pending withdrawals) covers it, and otherwise records it in `fees_owed` and notifies the member. `private.collect_fees_owed` takes owed fees, oldest first, after money comes in through `complete_payment_intent` and before `request_withdrawal`. Collected fees post Dr 2000 / Cr 2120 like any other fee. Admins see and manage owed fees at `/admin/finance/fees-owed` (`admin_fees_owed_overview`, `admin_collect_fees_owed`, `admin_waive_fee_owed`). A waived fee is never collected.
 
+## Member consent to circle fees
+
+A member pays a circle's fees only after accepting its terms. `jamiyas.terms_version` goes up whenever a fee, penalty or the contribution amount changes. `accept_circle_terms(jamiya_id, version)` records the version the member saw in `member_consents`, with a copy of the terms, and is audit-logged. `charge_join_fee`, `charge_early_slot_fee` and `private.charge_circle_fee` charge only a member who has accepted, and never more than they accepted (`private.agreed_circle_fee`: the lower of the accepted and current amounts). A fee cut applies at once; a rise applies once the member accepts it.
+
+- The invitation screen shows every fee and penalty (`preview_invitation_terms`) and needs an "I accept" tick before joining a circle that charges anything.
+- The circle page asks members who haven't accepted the current terms (`get_circle_terms`); accepting charges any one-off fees they now owe.
+- `admin_add_circle_member` no longer charges a join fee.
+- A contribution paid before acceptance never carries a fee.
+
+Penalties are shown in the terms, but they are records, not wallet debits, so they are not gated here.
+
 ## Contribution overpayments
 
 An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 3000) plus a `contribution_change` entry for the extra that stayed in the wallet (Dr 3000 / Cr 2000), linked to the same intent. Posted by `post_journal_for_payment_intent`, so it also covers backfills.
