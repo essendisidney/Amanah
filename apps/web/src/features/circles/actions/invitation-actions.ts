@@ -15,6 +15,7 @@ import {
 import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
+import { acceptAndChargeCircleTerms } from './circle-terms-actions';
 
 async function findInviteeUserId(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -326,6 +327,8 @@ export async function resendPendingInvitationsAction(formData: FormData): Promis
 export async function acceptInvitationAction(
   token: string,
   payoutPosition?: number | null,
+  /** The version of the circle's terms the member ticked "I accept" on, if any. */
+  termsVersion?: number | null,
 ): Promise<ActionState> {
   const supabase = await createClient();
   const {
@@ -372,18 +375,15 @@ export async function acceptInvitationAction(
     };
   }
 
-  if (result.jamiya_id) {
-    await callRpc('charge_early_slot_fee', { p_jamiya_id: result.jamiya_id });
-    const fee = await callRpc('charge_join_fee', { p_jamiya_id: result.jamiya_id });
-    if (fee.error) {
-      revalidatePath('/dashboard');
-      revalidatePath('/circles');
-      if (result.slug) revalidatePath(`/circles/${result.slug}`);
-      return {
-        success: true,
-        message: 'You joined the chama. Top up your wallet if a fee is still due.',
-        inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1` : '/circles',
-      };
+  // Fees are charged only once the member has accepted the circle's terms, and only what
+  // they accepted; without acceptance they join fee-free and the circle page asks them.
+  let termsNote = '';
+  if (result.jamiya_id && termsVersion != null && Number.isInteger(termsVersion)) {
+    const terms = await acceptAndChargeCircleTerms(result.jamiya_id, termsVersion);
+    if (!terms.accepted) {
+      termsNote = terms.changed
+        ? ' The circle’s fees changed while you were joining. Review and accept them on the circle page.'
+        : ' Review and accept the circle’s terms on the circle page.';
     }
   }
 
@@ -394,7 +394,7 @@ export async function acceptInvitationAction(
 
   return {
     success: true,
-    message: 'You joined the chama.',
+    message: `You joined the chama.${termsNote}`,
     inviteUrl: result.slug ? `/circles/${result.slug}?welcome=1` : '/circles',
   };
 }

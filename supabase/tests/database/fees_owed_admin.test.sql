@@ -105,6 +105,13 @@ VALUES ('b0000000-0000-0000-0000-000000000001', 'Sisters Circle', 'fees-admin-ci
 INSERT INTO public.members (id, jamiya_id, user_id, role, status)
 VALUES ('c0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001',
         'a0000000-0000-0000-0000-000000000001', 'member', 'active');
+
+-- Members accepted their circle's terms; fees are only charged after that
+-- (circle_terms_consent.test.sql covers members who have not).
+INSERT INTO public.member_consents (user_id, jamiya_id, kind, version, terms)
+SELECT m.user_id, j.id, 'circle_terms', j.terms_version, private.circle_terms(j)
+FROM public.members m JOIN public.jamiyas j ON j.id = m.jamiya_id
+WHERE m.status = 'active';
 INSERT INTO public.contributions (id, jamiya_id, member_id, cycle_number, amount, currency, due_date)
 SELECT ('d0000000-0000-0000-0000-00000000000' || n)::uuid, 'b0000000-0000-0000-0000-000000000001',
        'c0000000-0000-0000-0000-000000000001', n, 1000, 'KES', CURRENT_DATE

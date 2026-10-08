@@ -24,6 +24,8 @@ import { ExportCircleReportButtons } from '@/features/circles/components/export-
 import { paymentProvider } from '@/lib/payments/provider';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
+import { CircleTermsCard } from '@/features/circles/components/circle-terms-card';
+import type { CircleTermsView } from '@/features/circles/lib/circle-terms';
 import { MemberTodayStrip } from '@/features/circles/components/member-today-strip';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
@@ -321,6 +323,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   }>;
 
   const membership = memberRows.find((row) => row.user_id === user.id) ?? null;
+
+  // Fees are charged only after a member accepts the circle's current terms.
+  let termsToAccept: CircleTermsView | null = null;
+  if (membership?.status === 'active') {
+    const { data: termsData } = await callRpc('get_circle_terms', { p_jamiya_id: jamiya.id });
+    const view = termsData as CircleTermsView | null;
+    if (view?.ok && view.terms && view.has_charges && view.needs_acceptance) {
+      termsToAccept = view;
+    }
+  }
 
   let shareUrl: string | null = null;
   if (membership?.status === 'active') {
@@ -1066,6 +1078,13 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+
+      {termsToAccept?.ok && termsToAccept.terms ? (
+        <CircleTermsCard
+          terms={{ ...termsToAccept, ok: true, terms: termsToAccept.terms }}
+          slug={jamiya.slug}
+        />
+      ) : null}
 
       {pendingContributionIntents.length > 0 ? (
         <PendingContributionStk
