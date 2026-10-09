@@ -92,6 +92,18 @@ Two other rules need the member's own consent:
 - `settle_payout` in `deduct` mode takes dues and penalties only from members whose accepted terms include deductions. For everyone else the payout waits, as in `block` mode.
 - Only the member can move money from their wallet into a savings pocket (`OWNER_ONLY`).
 
+## Opting in and out ("My choices")
+
+Members manage optional things on one page, `/profile/choices` (`get_my_choices`).
+
+- **Messages:** contribution reminders and payout heads-ups can be turned off per channel (SMS, WhatsApp, email, push) with `set_notification_preference`.
+  - The `notification_outbox_respect_preferences` trigger drops an outbound message the member turned off, so every sender respects it, Edge Functions included. `private.outbox_category` classifies a message from its metadata; anything it doesn't recognise is essential.
+  - Essential messages are always sent: receipts, security, KYC, collections notices and circle decisions. The in-app inbox always gets everything.
+- **Sponsorships:** the sponsor can pause, resume or stop a monthly sponsorship (`set_sponsorship_status`). Resuming never charges for the paused months. A stopped sponsorship can't be restarted.
+- **Circle plans:** officers can turn auto-renew off (`set_circle_plan_auto_renew`). `process_circle_subscription_renewals` then ends the plan on its renewal date (status `cancelled`) instead of charging the lead officer's wallet.
+- **Accepted terms:** each circle with the version of its fees the member accepted, and a link to review newer terms.
+- **History:** `member_choice_events` records each choice both ways with its date. The page also lists accepted terms and fee votes.
+
 ## Contribution overpayments
 
 An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 3000) plus a `contribution_change` entry for the extra that stayed in the wallet (Dr 3000 / Cr 2000), linked to the same intent. Posted by `post_journal_for_payment_intent`, so it also covers backfills.
