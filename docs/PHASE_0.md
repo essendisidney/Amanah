@@ -20,7 +20,7 @@ Kenya payment build order put **ops** first. Code phases 1–9 can sit local unt
 
 1. Confirm Supabase Auth URL config (`DOMAINS.md` §3).
 2. Commit + push Kenya payment work (phases 1–9) when you say **commit**.
-3. `npx vercel deploy --prod` (or Git-connected deploy) when you say **deploy**.
+3. Web deploys: the `Deploy` GitHub Actions workflow deploys to Vercel production after CI passes on `master`. It needs the `VERCEL_TOKEN` repository secret and can also be run by hand from the Actions tab. Apply database migrations before merging code that needs them. `npx vercel deploy --prod` still works from a laptop.
 4. `npx supabase functions deploy payments-mpesa --project-ref vzpnixfqkvovbniaoudx` (needs CLI login / access token).
 5. Re-run smoke: [SMOKE_TEST.md](./SMOKE_TEST.md) — expect orchestrator-health `ok: true`.
 6. Optional: rotate DB password + service role; update Vercel; redeploy.

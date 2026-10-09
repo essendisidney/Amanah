@@ -1,0 +1,90 @@
+name: Deploy
+
+# Deploys the web app to Vercel production after CI passes on master.
+# Vercel's own Git deploys are off (vercel.json: git.deploymentEnabled false), so this is
+# the only automatic path to production. Database migrations are not applied here: apply
+# them to Supabase before merging code that needs them.
+#
+# Needs the repository secret VERCEL_TOKEN (a Vercel access token for the team that owns
+# the project). Without it the job is skipped with a notice.
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_ORG_ID: team_E6Ou6Q653k4by7HrKqo4Y8l2
+  VERCEL_PROJECT_ID: prj_kVaPN4K9A3zRVqw3tu4yja3RaRfp
+
+jobs:
+  production:
+    name: Deploy to production
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check for the Vercel token
+        id: token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::notice::VERCEL_TOKEN is not set; skipping the deploy."
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.present == 'true'
+        with:
+          # The commit CI passed on, not whatever master is now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: pnpm/action-setup@v4 # version comes from packageManager in package.json
+        if: steps.token.outputs.present == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.token.outputs.present == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install the Vercel CLI
+        if: steps.token.outputs.present == 'true'
+        run: npm install --global vercel@latest
+
+      - name: Pull production settings and environment
+        if: steps.token.outputs.present == 'true'
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build
+        if: steps.token.outputs.present == 'true'
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        if: steps.token.outputs.present == 'true'
+        run: |
+          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          echo "Deployed: $url"
+          echo "### Deployed to production" >> "$GITHUB_STEP_SUMMARY"
+          echo "$url (commit ${{ github.event.workflow_run.head_sha || github.sha }})" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
