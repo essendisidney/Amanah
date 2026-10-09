@@ -54,6 +54,9 @@ export function mapMoneyError(code: string | undefined | null): string {
     PHONE_REQUIRED: 'Add a Kenya mobile on your profile first.',
     KYC_REQUIRED: 'This amount needs an approved identity check.',
     GUARANTOR_REQUIRED: 'This amount needs one guarantor who shares a circle with you.',
+    TERMS_INCREASE_NEEDS_VOTE:
+      'Raising a fee or penalty needs a members’ vote. Propose it under “Fee changes” on the treasury page.',
+    OWNER_ONLY: 'Only the member can move their own money into a savings pocket.',
   };
   if (!code) return 'Something went wrong. Please try again.';
   const mapped = messages[code];

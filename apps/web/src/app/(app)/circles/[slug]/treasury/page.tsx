@@ -9,6 +9,11 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { TreasuryPanel } from '@/features/circles/components/treasury-panel';
 import { ensureTreasuryAction } from '@/features/circles/actions/treasury-actions';
+import { TermsProposalPanel } from '@/features/circles/components/terms-proposal-panel';
+import type {
+  CircleTermsProposal,
+  CircleTermsView,
+} from '@/features/circles/lib/circle-terms';
 
 export const metadata: Metadata = { title: 'Circle treasury' };
 export const dynamic = 'force-dynamic';
@@ -60,6 +65,20 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
   if (!membership) notFound();
 
   const canManage = OFFICER_ROLES.has(membership.role);
+
+  // Raising a fee or penalty goes to a members' vote.
+  let termsView: CircleTermsView | null = null;
+  let latestProposal: CircleTermsProposal | null = null;
+  if (canManage) {
+    await callRpc('refresh_circle_terms_proposals', { p_jamiya_id: jamiya.id });
+    const [{ data: termsData }, { data: proposalsData }] = await Promise.all([
+      callRpc('get_circle_terms', { p_jamiya_id: jamiya.id }),
+      callRpc('get_circle_terms_proposals', { p_jamiya_id: jamiya.id }),
+    ]);
+    termsView = termsData as CircleTermsView | null;
+    latestProposal =
+      (proposalsData as { proposals?: CircleTermsProposal[] } | null)?.proposals?.[0] ?? null;
+  }
 
   await callRpc('ensure_circle_treasury', { p_jamiya_id: jamiya.id });
 
@@ -370,7 +389,15 @@ export default async function CircleTreasuryPage({ params, searchParams }: Props
           }));
         })()}
       />
-    
+
+      {canManage && termsView?.ok && termsView.terms ? (
+        <TermsProposalPanel
+          jamiyaId={jamiya.id}
+          slug={jamiya.slug}
+          terms={termsView.terms}
+          proposal={latestProposal}
+        />
+      ) : null}
     </AppPage>
   );
 }

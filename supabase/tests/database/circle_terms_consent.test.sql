@@ -162,6 +162,9 @@ SELECT is(pg_temp.fee_paid('a0000000-0000-0000-0000-000000000003', 'contribution
 -- ---------------------------------------------------------------------------
 -- Officers change the terms
 -- ---------------------------------------------------------------------------
+-- These are direct database changes by an operator (no member session); through the app a
+-- raise needs a members' vote (circle_terms_votes.test.sql).
+SELECT set_config('request.jwt.claims', '{}', true);
 UPDATE public.jamiyas SET name = 'Consent Circle (renamed)' WHERE id = 'b0000000-0000-0000-0000-000000000001';
 SELECT is(pg_temp.version(), 1, 'a change that is not about money keeps the version');
 
