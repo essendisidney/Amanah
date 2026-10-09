@@ -11,7 +11,7 @@ const PROPOSAL_ERRORS: Record<string, string> = {
   REASON_REQUIRED: 'Explain to members why the change is needed.',
   INVALID_CHANGE: 'Check the amounts: they must be zero or more, and percentages at most 100.',
   NO_VOTE_NEEDED:
-    'Nothing goes up, so no vote is needed. Lower fees directly in the penalty settings.',
+    'No vote is needed: either nothing goes up, or no member has accepted the circle’s terms yet. Change it directly in the penalty settings.',
   PROPOSAL_IN_PROGRESS: 'Members are already voting on a change. Wait for it to finish.',
 };
 

@@ -5,8 +5,9 @@
 --    when it was proposed vote yes or no within 7 days. It passes with a quorum of half the
 --    members and more yes than no votes, and takes effect 7 days after it passes. Members keep
 --    the terms they accepted until they accept the new ones (step 1), so anyone who voted no can
---    stay on the old terms. Lowering a fee needs no vote. Through the API, the database refuses
---    any increase that does not come from a passed proposal.
+--    stay on the old terms. Lowering a fee needs no vote, and neither does a circle where no
+--    other member has accepted terms yet. Through the API, the database refuses any other
+--    increase that does not come from a passed proposal.
 -- 2. Dues and penalties are taken from a payout ('deduct' mode) only for members whose accepted
 --    terms include it; for others the payout waits, as in 'block' mode.
 -- 3. Only the member can move money from their wallet into a savings pocket.
@@ -95,6 +96,26 @@ BEGIN
 END;
 $$;
 
+-- A vote protects members who accepted the circle's terms. With nobody else having accepted
+-- them (a circle still being set up), there is no one to ask: anyone who joins later accepts
+-- the terms as they then are.
+CREATE OR REPLACE FUNCTION private.circle_terms_have_other_members(p_jamiya_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path TO ''
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.member_consents c
+    JOIN public.members m ON m.jamiya_id = c.jamiya_id AND m.user_id = c.user_id
+    WHERE c.jamiya_id = p_jamiya_id AND c.kind = 'circle_terms'
+      AND m.status = 'active'
+      AND c.user_id IS DISTINCT FROM auth.uid()
+  );
+$$;
+
 -- Through the API (members, officers), raising a money term needs a passed proposal.
 CREATE OR REPLACE FUNCTION private.trg_circle_terms_increase_guard()
 RETURNS trigger
@@ -105,7 +126,8 @@ AS $$
 BEGIN
   IF coalesce(auth.role(), '') = 'authenticated'
      AND current_setting('jamiya.applying_terms_proposal', true) IS DISTINCT FROM NEW.id::text
-     AND cardinality(private.terms_increases(OLD, NEW)) > 0 THEN
+     AND cardinality(private.terms_increases(OLD, NEW)) > 0
+     AND private.circle_terms_have_other_members(NEW.id) THEN
     RAISE EXCEPTION 'TERMS_INCREASE_NEEDS_VOTE'
       USING HINT = 'Propose the change (propose_circle_terms_change) and let members vote.';
   END IF;
@@ -352,8 +374,9 @@ BEGIN
   EXCEPTION WHEN raise_exception THEN
     RETURN jsonb_build_object('ok', false, 'error', 'INVALID_CHANGE');
   END;
-  IF cardinality(private.terms_increases(v_j, v_new)) = 0 THEN
-    -- Nothing goes up: officers can make this change directly.
+  IF cardinality(private.terms_increases(v_j, v_new)) = 0
+     OR NOT private.circle_terms_have_other_members(p_jamiya_id) THEN
+    -- Nothing goes up, or no other member has accepted terms yet: officers change it directly.
     RETURN jsonb_build_object('ok', false, 'error', 'NO_VOTE_NEEDED');
   END IF;
   IF EXISTS (SELECT 1 FROM public.circle_terms_proposals
@@ -807,6 +830,7 @@ $$;
 
 REVOKE ALL ON FUNCTION private.terms_increases(public.jamiyas, public.jamiyas) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.with_terms_changes(public.jamiyas, JSONB) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION private.circle_terms_have_other_members(UUID) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.trg_circle_terms_increase_guard() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.terms_proposal_voters(public.circle_terms_proposals) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION private.notify_circle_members(UUID, TEXT, TEXT, JSONB) FROM PUBLIC, anon, authenticated;
