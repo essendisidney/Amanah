@@ -32,6 +32,10 @@
       "schedule": "45 6 * * *"
     },
     {
+      "path": "/api/cron/dispatch?job=terms-votes",
+      "schedule": "50 6 * * *"
+    },
+    {
       "path": "/api/cron/dispatch?job=reconcile-payments",
       "schedule": "0 5 * * *"
     }
