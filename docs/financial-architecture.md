@@ -84,7 +84,7 @@ Raising a fee or penalty needs a members' vote. This includes switching on autom
 - **Applying:** a passed change takes effect 7 days later. `refresh_circle_terms_proposals` runs when a circle page loads, and `process_circle_terms_proposals` runs as the `terms-votes` scheduled job.
 - **Existing members:** they keep the terms they accepted until they accept the new ones, so anyone who voted no can stay on the old terms.
 - **One at a time:** only one proposal per circle can be open or awaiting effect.
-- **Lowering fees** needs no vote.
+- **No vote needed:** lowering a fee, or any change while no other member has accepted the circle's terms (a circle still being set up). Anyone who joins later accepts the terms as they then are.
 
 Through the API, the `circle_terms_increase_guard` trigger refuses any increase that doesn't come from a passed proposal (`TERMS_INCREASE_NEEDS_VOTE`).
 

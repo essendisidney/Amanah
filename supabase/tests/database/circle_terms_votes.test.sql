@@ -5,7 +5,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
 
-SELECT plan(43);
+SELECT plan(45);
 
 -- ---------------------------------------------------------------------------
 -- Helpers
@@ -117,6 +117,21 @@ SELECT lives_ok(
         WHERE id = ''b0000000-0000-0000-0000-000000000001'' RETURNING to_jsonb(id)') $$,
   'but can lower one without a vote');
 SELECT is((pg_temp.circle()).transaction_fee_amount, 40.00::numeric, 'the fee is now 40');
+
+-- A circle still being set up (no other member has accepted terms) needs no vote.
+INSERT INTO public.jamiyas (id, name, slug, created_by, contribution_amount, max_members)
+VALUES ('b0000000-0000-0000-0000-000000000009', 'New Circle', 'new-circle',
+        'a0000000-0000-0000-0000-000000000010', 1000, 8);
+SELECT lives_ok(
+  $$ SELECT pg_temp.rpc('a0000000-0000-0000-0000-000000000010',
+       'UPDATE public.jamiyas SET late_contribution_penalty = 100
+        WHERE id = ''b0000000-0000-0000-0000-000000000009'' RETURNING to_jsonb(id)') $$,
+  'an officer sets penalties directly on a circle nobody else has joined');
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000010', format(
+    'SELECT public.propose_circle_terms_change(%L, %L::jsonb, %L)',
+    'b0000000-0000-0000-0000-000000000009', '{"transaction_fee_amount": 60}', 'Setting up fees'))->>'error',
+  'NO_VOTE_NEEDED', 'so a proposal there is not needed');
 
 -- ---------------------------------------------------------------------------
 -- Proposing
