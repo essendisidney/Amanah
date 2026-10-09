@@ -97,7 +97,7 @@ Two other rules need the member's own consent:
 Members manage optional things on one page, `/profile/choices` (`get_my_choices`).
 
 - **Messages:** contribution reminders and payout heads-ups can be turned off per channel (SMS, WhatsApp, email, push) with `set_notification_preference`.
-  - The `notification_outbox_respect_preferences` trigger drops an outbound message the member turned off, so every sender respects it, Edge Functions included. `private.outbox_category` classifies a message from its metadata; anything it doesn't recognise is essential.
+  - The `notification_outbox_respect_preferences` trigger skips an outbound message the member turned off, so every sender respects it, Edge Functions included. `private.outbox_category` classifies a message from its metadata; anything it doesn't recognise is essential.
   - Essential messages are always sent: receipts, security, KYC, collections notices and circle decisions. The in-app inbox always gets everything.
 - **Sponsorships:** the sponsor can pause, resume or stop a monthly sponsorship (`set_sponsorship_status`). Resuming never charges for the paused months. A stopped sponsorship can't be restarted.
 - **Circle plans:** officers can turn auto-renew off (`set_circle_plan_auto_renew`). `process_circle_subscription_renewals` then ends the plan on its renewal date (status `cancelled`) instead of charging the lead officer's wallet.

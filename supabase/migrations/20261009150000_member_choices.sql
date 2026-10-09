@@ -103,7 +103,7 @@ BEGIN
     WHERE p.user_id = NEW.user_id AND p.category = v_category
       AND p.channel = NEW.channel AND NOT p.enabled
   ) THEN
-    RETURN NULL; -- the member turned this off: drop it quietly
+    RETURN NULL; -- the member turned this off: skip it quietly
   END IF;
   RETURN NEW;
 END;
