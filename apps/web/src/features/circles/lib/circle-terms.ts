@@ -94,3 +94,81 @@ export function describeCircleTerms(
 
   return lines;
 }
+
+export type CircleTermsChange = { label: string; before: string; after: string };
+
+const COMPLIANCE_LABELS: Record<string, string> = {
+  block: 'Payout waits until dues are paid',
+  approve: 'Officers approve each payout',
+  deduct: 'Dues and penalties taken from payouts',
+  allow: 'Payout made regardless of dues',
+};
+
+/** What a proposal changes, line by line, in plain words. */
+export function diffCircleTerms(
+  before: CircleTerms,
+  after: CircleTerms,
+  money: (amount: number) => string,
+): CircleTermsChange[] {
+  const rows: Array<[string, string, string]> = [
+    ['Join fee', money(num(before.join_fee_amount)), money(num(after.join_fee_amount))],
+    [
+      'Contribution fee',
+      money(num(before.transaction_fee_amount)),
+      money(num(after.transaction_fee_amount)),
+    ],
+    [
+      'Early payout slot fee',
+      `${num(before.early_slot_fee_pct)}%`,
+      `${num(after.early_slot_fee_pct)}%`,
+    ],
+    [
+      'Late contribution penalty',
+      money(num(before.late_contribution_penalty)),
+      money(num(after.late_contribution_penalty)),
+    ],
+    [
+      'Missed contribution penalty',
+      money(num(before.missed_contribution_penalty)),
+      money(num(after.missed_contribution_penalty)),
+    ],
+    [
+      'Late loan penalty',
+      `${money(num(before.late_loan_penalty_fixed))} + ${num(before.late_loan_penalty_pct)}%`,
+      `${money(num(after.late_loan_penalty_fixed))} + ${num(after.late_loan_penalty_pct)}%`,
+    ],
+    [
+      'Automatic fines',
+      before.auto_fine_enabled ? 'On' : 'Off',
+      after.auto_fine_enabled ? 'On' : 'Off',
+    ],
+    [
+      'At payout',
+      COMPLIANCE_LABELS[before.payout_compliance_mode ?? 'block'] ?? String(before.payout_compliance_mode),
+      COMPLIANCE_LABELS[after.payout_compliance_mode ?? 'block'] ?? String(after.payout_compliance_mode),
+    ],
+  ];
+  return rows
+    .filter(([, b, a]) => b !== a)
+    .map(([label, b, a]) => ({ label, before: b, after: a }));
+}
+
+/** get_circle_terms_proposals */
+export type CircleTermsProposal = {
+  id: string;
+  status: 'open' | 'passed' | 'rejected' | 'applied' | 'cancelled';
+  reason: string;
+  terms_before: CircleTerms;
+  terms_after: CircleTerms;
+  eligible_voters: number;
+  quorum: number;
+  yes_votes: number;
+  no_votes: number;
+  voting_closes_at: string;
+  decided_at: string | null;
+  effective_at: string | null;
+  applied_at: string | null;
+  created_at: string;
+  my_vote: boolean | null;
+  can_vote: boolean;
+};

@@ -72,6 +72,26 @@ A member pays a circle's fees only after accepting its terms. `jamiyas.terms_ver
 
 Penalties are shown in the terms, but they are records, not wallet debits, so they are not gated here.
 
+## Members vote on raised fees
+
+Raising a fee or penalty needs a members' vote. This includes switching on automatic fines, early-slot pricing or payout deductions.
+
+- **Proposing:** an officer proposes the change with a reason (`propose_circle_terms_change`), from "Fee changes" on the treasury page.
+- **Voting:**
+  - Members who were active when it was proposed vote yes or no within 7 days (`cast_circle_terms_vote`). They can change their vote until it closes.
+  - Ballots are private; only totals are shown.
+  - It passes with a quorum of half the eligible members and more yes than no votes. It is decided early once the remaining votes can't change the outcome.
+- **Applying:** a passed change takes effect 7 days later. `refresh_circle_terms_proposals` runs when a circle page loads, and `process_circle_terms_proposals` runs as the `terms-votes` scheduled job.
+- **Existing members:** they keep the terms they accepted until they accept the new ones, so anyone who voted no can stay on the old terms.
+- **One at a time:** only one proposal per circle can be open or awaiting effect.
+- **Lowering fees** needs no vote.
+
+Through the API, the `circle_terms_increase_guard` trigger refuses any increase that doesn't come from a passed proposal (`TERMS_INCREASE_NEEDS_VOTE`).
+
+Two other rules need the member's own consent:
+- `settle_payout` in `deduct` mode takes dues and penalties only from members whose accepted terms include deductions. For everyone else the payout waits, as in `block` mode.
+- Only the member can move money from their wallet into a savings pocket (`OWNER_ONLY`).
+
 ## Contribution overpayments
 
 An STK payment larger than what is owed posts the full receipt (Dr 1000 / Cr 3000) plus a `contribution_change` entry for the extra that stayed in the wallet (Dr 3000 / Cr 2000), linked to the same intent. Posted by `post_journal_for_payment_intent`, so it also covers backfills.

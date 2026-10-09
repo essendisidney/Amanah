@@ -25,7 +25,11 @@ import { paymentProvider } from '@/lib/payments/provider';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { CircleTermsCard } from '@/features/circles/components/circle-terms-card';
-import type { CircleTermsView } from '@/features/circles/lib/circle-terms';
+import { TermsVoteCard } from '@/features/circles/components/terms-vote-card';
+import type {
+  CircleTermsProposal,
+  CircleTermsView,
+} from '@/features/circles/lib/circle-terms';
 import { MemberTodayStrip } from '@/features/circles/components/member-today-strip';
 import { PaymentModeBanner } from '@/features/wallet/components/payment-mode-banner';
 import { NextContributionCard } from '@/features/circles/components/next-contribution-card';
@@ -324,9 +328,19 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
   const membership = memberRows.find((row) => row.user_id === user.id) ?? null;
 
-  // Fees are charged only after a member accepts the circle's current terms.
+  // Fees are charged only after a member accepts the circle's current terms; raising them
+  // needs a members' vote.
   let termsToAccept: CircleTermsView | null = null;
+  let termsProposal: CircleTermsProposal | null = null;
   if (membership?.status === 'active') {
+    await callRpc('refresh_circle_terms_proposals', { p_jamiya_id: jamiya.id });
+    const { data: proposalsData } = await callRpc('get_circle_terms_proposals', {
+      p_jamiya_id: jamiya.id,
+    });
+    const latest = (proposalsData as { proposals?: CircleTermsProposal[] } | null)?.proposals?.[0];
+    if (latest && (latest.status === 'open' || latest.status === 'passed')) {
+      termsProposal = latest;
+    }
     const { data: termsData } = await callRpc('get_circle_terms', { p_jamiya_id: jamiya.id });
     const view = termsData as CircleTermsView | null;
     if (view?.ok && view.terms && view.has_charges && view.needs_acceptance) {
@@ -1078,6 +1092,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
   return (
     <AppPage>
       <CircleNoticeBanner notice={notices.notice} noticeType={notices.noticeType} />
+
+      {termsProposal ? <TermsVoteCard proposal={termsProposal} slug={jamiya.slug} /> : null}
 
       {termsToAccept?.ok && termsToAccept.terms ? (
         <CircleTermsCard

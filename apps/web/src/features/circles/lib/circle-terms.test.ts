@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { describeCircleTerms, type CircleTerms } from './circle-terms.ts';
+import { describeCircleTerms, diffCircleTerms, type CircleTerms } from './circle-terms.ts';
 
 const money = (n: number) => `KES ${n}`;
 
@@ -70,5 +70,34 @@ describe('describeCircleTerms', () => {
 
   it('does not mention payout deductions when there is nothing to deduct', () => {
     assert.deepEqual(describeCircleTerms({ ...none, payout_compliance_mode: 'deduct' }, money), []);
+  });
+});
+
+describe('diffCircleTerms', () => {
+  it('lists only what changes, before and after', () => {
+    const changes = diffCircleTerms(
+      none,
+      { ...none, transaction_fee_amount: '60.00', late_contribution_penalty: 100, auto_fine_enabled: true },
+      money,
+    );
+    assert.deepEqual(changes, [
+      { label: 'Contribution fee', before: 'KES 0', after: 'KES 60' },
+      { label: 'Late contribution penalty', before: 'KES 0', after: 'KES 100' },
+      { label: 'Automatic fines', before: 'Off', after: 'On' },
+    ]);
+  });
+
+  it('describes a switch to deducting from payouts', () => {
+    assert.deepEqual(diffCircleTerms(none, { ...none, payout_compliance_mode: 'deduct' }, money), [
+      {
+        label: 'At payout',
+        before: 'Payout waits until dues are paid',
+        after: 'Dues and penalties taken from payouts',
+      },
+    ]);
+  });
+
+  it('is empty when nothing changes', () => {
+    assert.deepEqual(diffCircleTerms(none, { ...none }, money), []);
   });
 });

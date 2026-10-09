@@ -65,6 +65,13 @@ export async function GET(request: Request) {
       const { data, error } = await admin.rpc('run_auto_fines', { p_jamiya_id: null });
       results.auto_fines = error ? { ok: false, error: error.message } : data;
     }
+    if (job === 'all' || job === 'terms-votes') {
+      // Close fee-change votes that ran out and apply approved changes after their notice period.
+      const { createServiceRoleClient } = await import('@/lib/supabase/service');
+      const admin = createServiceRoleClient();
+      const { data, error } = await admin.rpc('process_circle_terms_proposals');
+      results.terms_votes = error ? { ok: false, error: error.message } : data;
+    }
     if (job === 'all' || job === 'plan-renewals') {
       const { createServiceRoleClient } = await import('@/lib/supabase/service');
       const admin = createServiceRoleClient();
