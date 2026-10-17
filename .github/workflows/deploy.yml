@@ -54,35 +54,17 @@ jobs:
           # The commit CI passed on, not whatever master is now.
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - uses: pnpm/action-setup@v4 # version comes from packageManager in package.json
-        if: steps.token.outputs.present == 'true'
-
-      - uses: actions/setup-node@v4
-        if: steps.token.outputs.present == 'true'
-        with:
-          node-version: 22
-          cache: pnpm
-
       - name: Install the Vercel CLI
         if: steps.token.outputs.present == 'true'
         run: npm install --global vercel@latest
 
-      - name: Pull production settings and environment
-        if: steps.token.outputs.present == 'true'
-        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build
-        if: steps.token.outputs.present == 'true'
-        run: vercel build --prod --token="$VERCEL_TOKEN"
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-
+      # Vercel builds the uploaded source itself. Building here with `vercel build` does not
+      # work: the project's Sensitive environment variables cannot be pulled, so the build
+      # would see placeholders instead of the Supabase URL and keys.
       - name: Deploy
         if: steps.token.outputs.present == 'true'
         run: |
-          url=$(vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN")
+          url=$(vercel deploy --prod --yes --token="$VERCEL_TOKEN")
           echo "Deployed: $url"
           echo "### Deployed to production" >> "$GITHUB_STEP_SUMMARY"
           echo "$url (commit ${{ github.event.workflow_run.head_sha || github.sha }})" >> "$GITHUB_STEP_SUMMARY"
