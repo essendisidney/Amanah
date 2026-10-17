@@ -1046,6 +1046,16 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           label: circleLabels.meetingsChat,
           hint: 'Meetings and chat',
         },
+        {
+          href: `/circles/${slug}/records` as Route,
+          label: 'Minutes & resolutions',
+          hint: 'What the circle met about and decided',
+        },
+        {
+          href: `/circles/${slug}/leave` as Route,
+          label: canManageMembers ? 'Members leaving' : 'Leave the circle',
+          hint: canManageMembers ? 'Approve exits and share transfers' : 'Hand over your shares and leave',
+        },
         ...(canManageMembers
           ? [
               {
@@ -1390,6 +1400,12 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
             ) : null}
             <Button asChild variant="outline" className="min-h-11">
               <Link href={`/circles/${slug}/community` as Route}>{circleLabels.meetingsChat}</Link>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={`/circles/${slug}/records` as Route}>Minutes &amp; resolutions</Link>
+            </Button>
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href={`/circles/${slug}/leave` as Route}>Leave the circle</Link>
             </Button>
           </div>
         </details>

@@ -92,6 +92,42 @@ Two other rules need the member's own consent:
 - `settle_payout` in `deduct` mode takes dues and penalties only from members whose accepted terms include deductions. For everyone else the payout waits, as in `block` mode.
 - Only the member can move money from their wallet into a savings pocket (`OWNER_ONLY`).
 
+## Loans: what a circle may charge
+
+- **Qard Hassan stays interest-free.** A loan carries no interest, profit or charge for time; the borrower repays exactly the amount borrowed. The full terms are at `/finance/qard/terms`, linked wherever a member signs, asks for or approves a loan. They show each circle's own penalty and fee.
+- **Loan facilitation fee:** a circle may set one flat fee per loan (`jamiyas.qard_fee_amount`, KES, never a percentage).
+  - `decide_qard` takes it from the borrower's wallet when the loan is approved and records it on the loan (`qard_loans.fee_amount`).
+  - It is a circle term: charged only once the borrower accepts terms that include it, and raising it needs a members' vote.
+- **Late penalties need consent too.** `assess_contribution_penalties` (also run by `run_auto_fines`) and `assess_loan_penalties` charge only what each member accepted: the lower of the accepted and current amounts. A member who never accepted terms is not charged. Officers can still levy a fine by hand.
+- **Tawarruq rate is Jameiyah's.** `submit_jameiyah_tawarruq` uses Jameiyah's rate for the chosen term (platform setting `tawarruq_profit_bps`), not one picked by the applicant.
+  - A rate sent by the client must match, otherwise the request is refused with `RATE_CHANGED`.
+  - Platform admins set the rates on Admin → Finance approvals (`set_tawarruq_rates`). Every term starts at 10%.
+
+## Leaving a circle
+
+- **Asking to leave:** a member asks with `request_circle_exit` on `/circles/<slug>/leave`.
+  - A member who holds shares names another member to take them over, and that member agrees with `respond_share_transfer`.
+  - An officer other than the leaver approves with `decide_circle_exit`.
+- **On approval:**
+  - The leaver's share lots are handed to the recipient, and each move is logged in `circle_share_transfers`.
+  - The member becomes `left`.
+  - Their future pending contributions are waived and their scheduled payouts cancelled.
+  - Wallet money stays theirs.
+  - Any payment for the shares is agreed between the two members, outside the app.
+- **When leaving is refused** (`private.circle_exit_blocker`):
+  - an open loan (Qard or ledger facility)
+  - overdue contributions or open penalties
+  - having been paid out with contributions still pending
+  - being the circle's last admin.
+
+## Minutes and resolutions
+
+The secretary, chair or circle admin keeps the circle's minutes and resolutions on `/circles/<slug>/records`.
+
+- **Writing:** records are written with `save_circle_record`, optionally with a signed copy.
+- **Files:** the browser uploads the file to the private `circle-records` bucket under `<jamiya_id>/`. Only record keepers can write there, and only the circle's members can read.
+- **Publishing:** `publish_circle_record` makes a record visible to members and notifies them. Published records cannot be edited or deleted.
+
 ## Opting in and out ("My choices")
 
 Members manage optional things on one page, `/profile/choices` (`get_my_choices`).
