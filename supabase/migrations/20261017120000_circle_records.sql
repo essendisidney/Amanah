@@ -4,7 +4,8 @@
 -- circle adopted, optionally attaches the signed copy (PDF, photo or Word file), and publishes
 -- it. Members read published records and their files; drafts are visible only to those who can
 -- write them. Files live in the private 'circle-records' bucket under '<jamiya_id>/...', readable
--- only by that circle's members.
+-- only by that circle's members. A discarded draft is kept, hidden, rather than deleted; the app
+-- removes its file with the service key.
 
 CREATE TABLE IF NOT EXISTS public.circle_records (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -14,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.circle_records (
   title TEXT NOT NULL CHECK (char_length(btrim(title)) BETWEEN 3 AND 200),
   body TEXT NOT NULL DEFAULT '' CHECK (char_length(body) <= 20000),
   record_date DATE NOT NULL DEFAULT CURRENT_DATE,
-  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published')),
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'discarded')),
   file_path TEXT,
   file_name TEXT,
   mime_type TEXT,
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.circle_records (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CHECK (file_path IS NULL OR file_path LIKE jamiya_id::text || '/%'),
-  CHECK (status = 'draft' OR char_length(btrim(body)) > 0 OR file_path IS NOT NULL)
+  CHECK (status <> 'published' OR char_length(btrim(body)) > 0 OR file_path IS NOT NULL)
 );
 CREATE INDEX IF NOT EXISTS circle_records_jamiya_idx
   ON public.circle_records (jamiya_id, record_date DESC, created_at DESC);
@@ -53,7 +54,7 @@ CREATE POLICY circle_records_select ON public.circle_records
   FOR SELECT TO authenticated
   USING (
     (status = 'published' AND (private.is_active_jamiya_member(jamiya_id) OR private.is_circle_officer(jamiya_id)))
-    OR private.can_keep_circle_records(jamiya_id)
+    OR (status = 'draft' AND private.can_keep_circle_records(jamiya_id))
     OR private.is_compliance_or_admin()
   );
 
@@ -97,13 +98,6 @@ CREATE POLICY circle_records_files_insert ON storage.objects
     bucket_id = 'circle-records'
     AND private.can_keep_circle_records(private.circle_record_folder(name))
   );
-CREATE POLICY circle_records_files_delete ON storage.objects
-  FOR DELETE TO authenticated
-  USING (
-    bucket_id = 'circle-records'
-    AND private.can_keep_circle_records(private.circle_record_folder(name))
-  );
-
 -- ---------------------------------------------------------------------------
 -- Writing, publishing and deleting
 -- ---------------------------------------------------------------------------
@@ -164,7 +158,7 @@ BEGIN
       RETURN jsonb_build_object('ok', false, 'error', 'NOT_FOUND');
     END IF;
     IF v_r.status <> 'draft' THEN
-      RETURN jsonb_build_object('ok', false, 'error', 'ALREADY_PUBLISHED');
+      RETURN jsonb_build_object('ok', false, 'error', CASE WHEN v_r.status = 'published' THEN 'ALREADY_PUBLISHED' ELSE 'NOT_FOUND' END);
     END IF;
     UPDATE public.circle_records
     SET kind = p_kind, title = btrim(p_title), body = coalesce(p_body, ''),
@@ -204,6 +198,9 @@ BEGIN
   IF v_r.status = 'published' THEN
     RETURN jsonb_build_object('ok', true, 'unchanged', true);
   END IF;
+  IF v_r.status <> 'draft' THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'NOT_FOUND');
+  END IF;
   IF char_length(btrim(v_r.body)) = 0 AND v_r.file_path IS NULL THEN
     RETURN jsonb_build_object('ok', false, 'error', 'EMPTY');
   END IF;
@@ -227,7 +224,7 @@ BEGIN
 END;
 $$;
 
--- Delete a draft. Published records stay: they are the circle's record. Returns the file path
+-- Discard a draft. Published records stay: they are the circle's record. Returns the file path
 -- so the caller can remove the file.
 CREATE OR REPLACE FUNCTION public.delete_circle_record(p_record_id UUID)
 RETURNS JSONB
@@ -246,9 +243,11 @@ BEGIN
     RETURN jsonb_build_object('ok', false, 'error', 'NOT_FOUND');
   END IF;
   IF v_r.status <> 'draft' THEN
-    RETURN jsonb_build_object('ok', false, 'error', 'ALREADY_PUBLISHED');
+    RETURN jsonb_build_object('ok', false, 'error', CASE WHEN v_r.status = 'published' THEN 'ALREADY_PUBLISHED' ELSE 'NOT_FOUND' END);
   END IF;
-  DELETE FROM public.circle_records WHERE id = p_record_id;
+  UPDATE public.circle_records
+  SET status = 'discarded', file_path = NULL, file_name = NULL, mime_type = NULL, updated_at = NOW()
+  WHERE id = p_record_id;
   RETURN jsonb_build_object('ok', true, 'file_path', v_r.file_path);
 END;
 $$;

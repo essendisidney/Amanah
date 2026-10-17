@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
+import { createServiceRoleClient } from '@/lib/supabase/service';
 import { callRpc } from '@/lib/supabase/rpc';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
 
@@ -46,7 +46,6 @@ export async function saveCircleRecordAction(formData: FormData): Promise<void> 
     redirectWithCircleNotice(slug, 'Attach a PDF, photo (JPEG, PNG, WebP) or Word file.', 'error', '/records');
   }
 
-  const supabase = await createClient();
   const { data, error } = await callRpc('save_circle_record', {
     p_jamiya_id: jamiyaId,
     p_kind: kind,
@@ -61,7 +60,6 @@ export async function saveCircleRecordAction(formData: FormData): Promise<void> 
   });
   const result = data as { ok?: boolean; error?: string; record_id?: string } | null;
   if (error || !result?.ok || !result.record_id) {
-    if (filePath) await supabase.storage.from('circle-records').remove([filePath]);
     done(slug);
     redirectWithCircleNotice(
       slug,
@@ -108,13 +106,17 @@ export async function deleteCircleRecordAction(formData: FormData): Promise<void
   if (!recordId || !slug) return;
   const { data, error } = await callRpc('delete_circle_record', { p_record_id: recordId });
   const result = data as { ok?: boolean; error?: string; file_path?: string | null } | null;
+  // The database checked the caller keeps this circle's records and that this was a draft.
   if (!error && result?.ok && result.file_path) {
-    const supabase = await createClient();
-    await supabase.storage.from('circle-records').remove([result.file_path]);
+    try {
+      await createServiceRoleClient().storage.from('circle-records').remove([result.file_path]);
+    } catch {
+      // The draft is discarded either way; an unremoved file stays private to the circle.
+    }
   }
   done(slug);
   if (error || !result?.ok) {
     redirectWithCircleNotice(slug, ERRORS[result?.error ?? ''] ?? 'Could not delete.', 'error', '/records');
   }
-  redirectWithCircleNotice(slug, 'Draft deleted.', 'success', '/records');
+  redirectWithCircleNotice(slug, 'Draft discarded.', 'success', '/records');
 }
