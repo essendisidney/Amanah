@@ -4,7 +4,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
 
-SELECT plan(34);
+SELECT plan(37);
 
 CREATE FUNCTION pg_temp.rpc(p_uid UUID, p_sql TEXT)
 RETURNS JSONB LANGUAGE plpgsql AS $$
@@ -81,6 +81,16 @@ SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000051', format(
   'SELECT public.save_circle_record(%L, %L, %L, %L, NULL, NULL, NULL, NULL, NULL, %L)',
   'b0000000-0000-0000-0000-000000000005', 'minutes', 'Changed', 'Changed', (SELECT id FROM rec)))->>'error',
   'ALREADY_PUBLISHED', 'or edited');
+CREATE TEMP TABLE draft AS
+SELECT (pg_temp.rpc('a0000000-0000-0000-0000-000000000051', $$SELECT public.save_circle_record(
+  'b0000000-0000-0000-0000-000000000005', 'resolution', 'Half-written', '')$$)->>'record_id')::uuid AS id;
+SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000051', format(
+  'SELECT public.delete_circle_record(%L)', (SELECT id FROM draft)))->>'ok', 'true', 'a draft can be discarded');
+SELECT is(pg_temp.visible('a0000000-0000-0000-0000-000000000051', 'SELECT count(*) FROM public.circle_records'),
+  1::bigint, 'and disappears, leaving only the published minutes');
+SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000051', format(
+  'SELECT public.publish_circle_record(%L)', (SELECT id FROM draft)))->>'error', 'NOT_FOUND',
+  'a discarded draft cannot be published');
 SELECT throws_ok(
   $$ SELECT pg_temp.visible('a0000000-0000-0000-0000-000000000051',
        'WITH x AS (INSERT INTO public.circle_records (jamiya_id, kind, title) VALUES

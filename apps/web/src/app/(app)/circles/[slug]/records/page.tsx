@@ -28,7 +28,7 @@ type RecordRow = {
   title: string;
   body: string;
   record_date: string;
-  status: 'draft' | 'published';
+  status: 'draft' | 'published' | 'discarded';
   file_path: string | null;
   file_name: string | null;
   published_at: string | null;
@@ -64,6 +64,7 @@ export default async function CircleRecordsPage({ params, searchParams }: Props)
       .from('circle_records')
       .select('id, kind, title, body, record_date, status, file_path, file_name, published_at, meeting_id')
       .eq('jamiya_id', j.id)
+      .neq('status', 'discarded')
       .order('record_date', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(100),
@@ -159,7 +160,7 @@ export default async function CircleRecordsPage({ params, searchParams }: Props)
                     <input type="hidden" name="recordId" value={r.id} />
                     <input type="hidden" name="slug" value={slug} />
                     <Button type="submit" size="sm" variant="outline">
-                      Delete draft
+                      Discard draft
                     </Button>
                   </form>
                 </div>
