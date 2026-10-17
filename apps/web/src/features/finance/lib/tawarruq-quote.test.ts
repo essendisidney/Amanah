@@ -23,7 +23,8 @@ describe('quoteTawarruq', () => {
 
   it('rejects a quote that is not a real facility', () => {
     assert.equal(quoteTawarruq({ cashAmount: 500, profitRateBps: 1000, tenorMonths: 12 }), null);
-    assert.equal(quoteTawarruq({ cashAmount: 200_000, profitRateBps: 200, tenorMonths: 12 }), null);
+    assert.equal(quoteTawarruq({ cashAmount: 200_000, profitRateBps: 0, tenorMonths: 12 }), null);
+    assert.equal(quoteTawarruq({ cashAmount: 200_000, profitRateBps: 6000, tenorMonths: 12 }), null);
     assert.equal(quoteTawarruq({ cashAmount: 200_000, profitRateBps: 1000, tenorMonths: 5 }), null);
   });
 });

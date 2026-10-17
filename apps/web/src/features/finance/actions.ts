@@ -94,7 +94,8 @@ export async function repayQardAction(formData: FormData): Promise<FinanceAction
 const TAWARRUQ_ERRORS: Record<string, string> = {
   WAKALAH_REQUIRED: 'Tick the agency agreement before you submit.',
   NOT_A_MEMBER: 'Choose a circle you belong to, or leave the circle blank.',
-  INVALID: 'Check the amount, profit, months, and purpose.',
+  INVALID: 'Check the amount, months, and purpose.',
+  RATE_CHANGED: 'Jameiyah has just changed its profit rate. Check the new total and send again.',
   UNAUTHENTICATED: 'Sign in to submit a request.',
   PHONE_REQUIRED: 'Add a Kenya mobile on your profile first.',
   OVERDUE: 'Clear the overdue loan before asking for more.',
@@ -107,7 +108,10 @@ const TAWARRUQ_ERRORS: Record<string, string> = {
 export async function submitTawarruqAction(formData: FormData): Promise<FinanceActionState> {
   const amount = Number(formData.get('amount'));
   const purpose = String(formData.get('purpose') ?? '').trim();
-  const profitRateBps = Number(formData.get('profitRateBps'));
+  // Jameiyah sets the rate; the form sends back the rate it showed so the database can refuse
+  // the request if the rate changed in the meantime (RATE_CHANGED).
+  const profitRateRaw = Number(formData.get('profitRateBps'));
+  const profitRateBps = Number.isInteger(profitRateRaw) && profitRateRaw > 0 ? profitRateRaw : null;
   const tenorMonths = Number(formData.get('tenorMonths'));
   const wakalah = String(formData.get('wakalah') ?? '') === '1';
   const guarantorUserId = String(formData.get('guarantorUserId') ?? '').trim();

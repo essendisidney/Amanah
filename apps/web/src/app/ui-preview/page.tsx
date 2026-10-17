@@ -501,6 +501,7 @@ export default function UiPreviewPage() {
               overdue: false,
             }}
             guarantors={[{ id: 'g1', name: 'Amina W.' }]}
+            rates={{ '3': 1000, '6': 1000, '12': 1000, '24': 1000 }}
           />
           <CircleActionHub
             groups={[
