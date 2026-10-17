@@ -29,6 +29,8 @@ export async function updatePenaltySettingsAction(formData: FormData): Promise<v
   const loanFixed = Number(formData.get('lateLoanPenaltyFixed') ?? 0);
   const loanPct = Number(formData.get('lateLoanPenaltyPct') ?? 0);
   const mode = String(formData.get('payoutComplianceMode') ?? 'block');
+  const qardFeeRaw = formData.get('qardFeeAmount');
+  const qardFee = qardFeeRaw === null ? null : Number(qardFeeRaw);
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -41,6 +43,7 @@ export async function updatePenaltySettingsAction(formData: FormData): Promise<v
       payout_compliance_mode: ['block', 'approve', 'deduct', 'allow'].includes(mode)
         ? mode
         : 'block',
+      ...(qardFee !== null && Number.isFinite(qardFee) && qardFee >= 0 ? { qard_fee_amount: qardFee } : {}),
       updated_at: new Date().toISOString(),
     } as never)
     .eq('id', jamiyaId);

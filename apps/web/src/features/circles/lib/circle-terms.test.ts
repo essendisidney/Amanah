@@ -68,6 +68,15 @@ describe('describeCircleTerms', () => {
     assert.equal(lines[2]!.value, 'KES 50 + 2% of the overdue amount');
   });
 
+  it('lists the loan facilitation fee as a flat amount per loan', () => {
+    assert.deepEqual(describeCircleTerms({ ...none, qard_fee_amount: '150.00' }, money), [
+      {
+        label: 'Loan facilitation fee',
+        value: 'KES 150, once per interest-free loan, when the loan is approved',
+      },
+    ]);
+  });
+
   it('does not mention payout deductions when there is nothing to deduct', () => {
     assert.deepEqual(describeCircleTerms({ ...none, payout_compliance_mode: 'deduct' }, money), []);
   });
@@ -94,6 +103,13 @@ describe('diffCircleTerms', () => {
         before: 'Payout waits until dues are paid',
         after: 'Dues and penalties taken from payouts',
       },
+    ]);
+  });
+
+  it('treats terms accepted before the loan fee existed as no fee', () => {
+    assert.deepEqual(diffCircleTerms(none, { ...none, qard_fee_amount: 0 }, money), []);
+    assert.deepEqual(diffCircleTerms(none, { ...none, qard_fee_amount: 100 }, money), [
+      { label: 'Loan facilitation fee', before: 'KES 0', after: 'KES 100' },
     ]);
   });
 

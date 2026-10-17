@@ -16,6 +16,7 @@ export type PenaltySettings = {
   missedContributionPenalty: number;
   lateLoanPenaltyFixed: number;
   lateLoanPenaltyPct: number;
+  qardFeeAmount?: number;
   payoutComplianceMode: string;
 };
 
@@ -232,6 +233,17 @@ export function CircleOpsPanel({
                 max="100"
                 step="0.01"
                 defaultValue={settings.lateLoanPenaltyPct}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="qardFeeAmount">Loan facilitation fee (flat, per loan)</Label>
+              <Input
+                id="qardFeeAmount"
+                name="qardFeeAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={settings.qardFeeAmount ?? 0}
               />
             </div>
             <div className="space-y-1 sm:col-span-2">

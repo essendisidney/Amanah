@@ -79,6 +79,7 @@ export function TermsProposalPanel({
                 ['missedContributionPenalty', 'Missed contribution penalty', terms.missed_contribution_penalty],
                 ['lateLoanPenaltyFixed', 'Late loan penalty (fixed)', terms.late_loan_penalty_fixed],
                 ['lateLoanPenaltyPct', 'Late loan penalty (%)', terms.late_loan_penalty_pct],
+                ['qardFeeAmount', 'Loan facilitation fee (flat, per loan)', terms.qard_fee_amount],
               ] as const
             ).map(([name, label, value]) => (
               <div key={name} className="space-y-1">
