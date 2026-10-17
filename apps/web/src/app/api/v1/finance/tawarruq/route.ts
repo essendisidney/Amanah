@@ -52,7 +52,8 @@ export async function POST(request: Request) {
     p_amount: body.amount,
     p_purpose: body.purpose.trim(),
     p_jamiya_id: null,
-    p_profit_rate_bps: body.profitRateBps ?? 1000,
+    // Jameiyah sets the rate; a rate sent here is only checked against it.
+    p_profit_rate_bps: body.profitRateBps ?? null,
     p_tenor_months: body.tenorMonths ?? 12,
     p_wakalah: true,
   });

@@ -48,3 +48,38 @@ export async function updateRefundDualApprovalAction(formData: FormData) {
     ),
   );
 }
+
+/** Jameiyah's Tawarruq profit rate for each term, in percent (stored in basis points). */
+export async function updateTawarruqRatesAction(formData: FormData) {
+  await requireAdminAccess('admin');
+  const rates: Record<string, number> = {};
+  for (const term of ['3', '6', '12', '24']) {
+    const pct = Number(String(formData.get(`rate_${term}`) ?? '').trim());
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 50) {
+      redirect(
+        withNoticeQuery(
+          '/admin/finance/approvals',
+          `Tawarruq rate for ${term} months must be above 0% and at most 50%.`,
+          'error',
+        ),
+      );
+    }
+    rates[term] = Math.round(pct * 100);
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('set_tawarruq_rates' as never, { p_rates: rates } as never);
+  const ok = !error && (data as { ok?: boolean } | null)?.ok === true;
+
+  revalidatePath('/admin/finance/approvals');
+  revalidatePath('/finance/tawarruq');
+  redirect(
+    withNoticeQuery(
+      '/admin/finance/approvals',
+      ok
+        ? 'Tawarruq rates saved. New requests use them; existing ones keep their rate.'
+        : `Update failed: ${error?.message ?? (data as { error?: string } | null)?.error ?? 'unknown'}`,
+      ok ? 'success' : 'error',
+    ),
+  );
+}

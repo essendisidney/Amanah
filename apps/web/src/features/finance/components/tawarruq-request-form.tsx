@@ -10,11 +10,11 @@ import {
   type FinanceActionState,
 } from '@/features/finance/actions';
 import {
-  TAWARRUQ_DEFAULT_PROFIT_BPS,
   TAWARRUQ_DEFAULT_TENOR,
-  TAWARRUQ_PROFIT_RATES_BPS,
   TAWARRUQ_TENORS,
   quoteTawarruq,
+  tawarruqRateFor,
+  type TawarruqRates,
 } from '@/features/finance/lib/tawarruq-quote';
 
 export type TawarruqQualification = {
@@ -53,14 +53,20 @@ export function TawarruqGuaranteeButtons({ guaranteeId }: { guaranteeId: string 
 export function TawarruqRequestForm({
   qualification,
   guarantors,
+  rates,
 }: {
   qualification: TawarruqQualification;
   guarantors: TawarruqGuarantor[];
+  /** Jameiyah's profit rate for each term; the applicant does not choose it. */
+  rates: TawarruqRates;
 }) {
   const router = useRouter();
   const [cash, setCash] = useState('');
-  const [profitBps, setProfitBps] = useState(String(TAWARRUQ_DEFAULT_PROFIT_BPS));
-  const [tenor, setTenor] = useState(String(TAWARRUQ_DEFAULT_TENOR));
+  const tenors = TAWARRUQ_TENORS.filter((months) => tawarruqRateFor(rates, months) !== null);
+  const [tenor, setTenor] = useState(
+    String(tenors.includes(TAWARRUQ_DEFAULT_TENOR) ? TAWARRUQ_DEFAULT_TENOR : (tenors[0] ?? '')),
+  );
+  const profitBps = tawarruqRateFor(rates, Number(tenor));
   const [wakalah, setWakalah] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -71,11 +77,13 @@ export function TawarruqRequestForm({
   const aboveRoom = Number.isFinite(amountValue) && amountValue > qualification.room;
   const quote = useMemo(
     () =>
-      quoteTawarruq({
-        cashAmount: Number(cash),
-        profitRateBps: Number(profitBps),
-        tenorMonths: Number(tenor),
-      }),
+      profitBps === null
+        ? null
+        : quoteTawarruq({
+            cashAmount: Number(cash),
+            profitRateBps: profitBps,
+            tenorMonths: Number(tenor),
+          }),
     [cash, profitBps, tenor],
   );
 
@@ -137,25 +145,6 @@ export function TawarruqRequestForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="profitRateBps">Jameiyah profit</Label>
-          <select
-            id="profitRateBps"
-            name="profitRateBps"
-            value={profitBps}
-            onChange={(event) => setProfitBps(event.target.value)}
-            className="flex h-11 w-full border border-input bg-background px-3 text-sm"
-          >
-            {TAWARRUQ_PROFIT_RATES_BPS.map((bps) => (
-              <option key={bps} value={bps}>
-                {bps / 100}% once
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Added once to the cash, for the whole facility. Not per year, per month, or per day.
-          </p>
-        </div>
-        <div className="space-y-2">
           <Label htmlFor="tenorMonths">Months</Label>
           <select
             id="tenorMonths"
@@ -164,12 +153,23 @@ export function TawarruqRequestForm({
             onChange={(event) => setTenor(event.target.value)}
             className="flex h-11 w-full border border-input bg-background px-3 text-sm"
           >
-            {TAWARRUQ_TENORS.map((months) => (
+            {tenors.map((months) => (
               <option key={months} value={months}>
                 {months}
               </option>
             ))}
           </select>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Jameiyah profit</p>
+          <p className="flex h-11 items-center text-sm font-semibold">
+            {profitBps === null ? 'Not available' : `${profitBps / 100}% once`}
+          </p>
+          {profitBps !== null ? <input type="hidden" name="profitRateBps" value={profitBps} /> : null}
+          <p className="text-xs text-muted-foreground">
+            Set by Jameiyah for the term you choose. Added once to the cash, for the whole
+            facility. Not per year, per month, or per day.
+          </p>
         </div>
       </div>
 

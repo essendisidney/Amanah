@@ -7,7 +7,10 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { isAdminRole } from '@jamiya/auth';
 import { confirmFinanceDualApprovalAction } from '@/features/admin/actions/finance-approval-actions';
-import { updateRefundDualApprovalAction } from '@/features/admin/actions/finance-settings-actions';
+import {
+  updateRefundDualApprovalAction,
+  updateTawarruqRatesAction,
+} from '@/features/admin/actions/finance-settings-actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
 export const metadata: Metadata = { title: 'Admin · Finance approvals' };
@@ -31,7 +34,7 @@ export default async function AdminFinanceApprovalsPage() {
   const canEditPolicy = isAdminRole(role);
   const supabase = await createClient();
 
-  const [{ data }, { data: settingRow }] = await Promise.all([
+  const [{ data }, { data: settingRow }, { data: ratesRow }] = await Promise.all([
     supabase
       .from('dual_approval_requests')
       .select(
@@ -46,7 +49,12 @@ export default async function AdminFinanceApprovalsPage() {
       .select('value')
       .eq('key', 'dual_approval_refunds')
       .maybeSingle(),
+    supabase.from('platform_settings').select('value').eq('key', 'tawarruq_profit_bps').maybeSingle(),
   ]);
+  const tawarruqRates = ((ratesRow as { value?: Record<string, number> } | null)?.value ?? {}) as Record<
+    string,
+    number
+  >;
 
   const rows = (data ?? []) as unknown as DualRow[];
   const setting = (settingRow?.value ?? { enabled: true, threshold: 10000 }) as {
@@ -116,7 +124,44 @@ export default async function AdminFinanceApprovalsPage() {
           </Button>
         </div>
       </form>
-      ) : (
+      ) : null}
+
+      {canEditPolicy ? (
+        <form
+          action={updateTawarruqRatesAction}
+          className="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-5"
+        >
+          <div className="sm:col-span-5">
+            <p className="text-sm font-semibold">Tawarruq profit rates</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Jameiyah&apos;s profit for each term, added once to the cash. Applicants see the
+              rate for the term they pick and cannot change it. Existing financing keeps its rate.
+            </p>
+          </div>
+          {['3', '6', '12', '24'].map((term) => (
+            <label key={term} className="block text-sm">
+              <span className="font-medium">{term} months (%)</span>
+              <input
+                name={`rate_${term}`}
+                type="number"
+                min="0.01"
+                max="50"
+                step="0.01"
+                required
+                defaultValue={tawarruqRates[term] ? tawarruqRates[term] / 100 : 10}
+                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              />
+            </label>
+          ))}
+          <div className="flex items-end">
+            <Button type="submit" className="min-h-11 w-full sm:w-auto">
+              Save rates
+            </Button>
+          </div>
+        </form>
+      ) : null}
+
+      {canEditPolicy ? null : (
         <p className="rounded-xl border border-dashed border-border px-4 py-3 text-sm text-muted-foreground">
           Refund dual-approval: {enabled ? 'on' : 'off'} · threshold{' '}
           {formatCurrency(threshold, 'KES')} (platform admin can edit)

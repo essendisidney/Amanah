@@ -10,6 +10,8 @@ import {
   TawarruqRequestForm,
 } from '@/features/finance/components/tawarruq-request-form';
 import { getDictionary } from '@/i18n/get-dictionary';
+import { callRpc } from '@/lib/supabase/rpc';
+import type { TawarruqRates } from '@/features/finance/lib/tawarruq-quote';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +44,7 @@ export default async function TawarruqPage() {
   const { dict } = await getDictionary();
   const labels = dict.finance;
 
-  const [{ data }, { data: qualRaw }, { data: memberships }, { data: guaranteeRows }] =
+  const [{ data }, { data: qualRaw }, { data: memberships }, { data: guaranteeRows }, { data: ratesRaw }] =
     await Promise.all([
       supabase
         .from('tawarruq_applications')
@@ -58,7 +60,9 @@ export default async function TawarruqPage() {
         .select('id, status, application:tawarruq_applications(amount, currency, purpose, status)')
         .eq('guarantor_user_id', user.id)
         .eq('status', 'pending'),
+      callRpc('get_tawarruq_rates', {}),
     ]);
+  const rates = ((ratesRaw as { rates?: TawarruqRates } | null)?.rates ?? {}) as TawarruqRates;
 
   const applications = (data ?? []) as unknown as Application[];
   const qual = qualRaw as {
@@ -149,6 +153,7 @@ export default async function TawarruqPage() {
           overdue: Boolean(qual?.overdue),
         }}
         guarantors={guarantors}
+        rates={rates}
       />
 
       <section className="space-y-4">
