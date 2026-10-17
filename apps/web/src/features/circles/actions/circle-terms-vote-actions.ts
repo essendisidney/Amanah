@@ -23,6 +23,7 @@ const NUMBER_FIELDS: Array<[string, string]> = [
   ['missedContributionPenalty', 'missed_contribution_penalty'],
   ['lateLoanPenaltyFixed', 'late_loan_penalty_fixed'],
   ['lateLoanPenaltyPct', 'late_loan_penalty_pct'],
+  ['qardFeeAmount', 'qard_fee_amount'],
 ];
 
 /** Officers propose new fees or penalties; members vote (propose_circle_terms_change). */

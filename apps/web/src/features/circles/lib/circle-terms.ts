@@ -11,6 +11,8 @@ export type CircleTerms = {
   missed_contribution_penalty: number | string;
   late_loan_penalty_fixed: number | string;
   late_loan_penalty_pct: number | string;
+  /** Flat facilitation fee per Qard loan; absent from terms accepted before it existed. */
+  qard_fee_amount?: number | string;
   auto_fine_enabled: boolean;
   payout_compliance_mode: string | null;
 };
@@ -85,6 +87,14 @@ export function describeCircleTerms(
     lines.push({ label: 'Late loan repayment penalty', value: parts.join(' + ') });
   }
 
+  const loanFee = num(terms.qard_fee_amount);
+  if (loanFee > 0) {
+    lines.push({
+      label: 'Loan facilitation fee',
+      value: `${money(loanFee)}, once per interest-free loan, when the loan is approved`,
+    });
+  }
+
   if (lines.length > 0 && terms.payout_compliance_mode === 'deduct') {
     lines.push({
       label: 'At payout',
@@ -136,6 +146,11 @@ export function diffCircleTerms(
       'Late loan penalty',
       `${money(num(before.late_loan_penalty_fixed))} + ${num(before.late_loan_penalty_pct)}%`,
       `${money(num(after.late_loan_penalty_fixed))} + ${num(after.late_loan_penalty_pct)}%`,
+    ],
+    [
+      'Loan facilitation fee',
+      money(num(before.qard_fee_amount)),
+      money(num(after.qard_fee_amount)),
     ],
     [
       'Automatic fines',

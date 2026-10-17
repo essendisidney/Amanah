@@ -58,6 +58,9 @@ const COPY = {
     signer: 'Full name as signature',
     acceptAgreement: 'Accept agreement',
     agreementSigned: 'Agreement signed',
+    readTerms: 'Read the full loan terms',
+    termsNote: 'By asking you accept the',
+    termsLink: 'Qard Hassan loan terms',
     by: 'by',
     repayNote: 'This comes from your Money balance. Add money with M-Pesa first if it is short.',
     repay: 'Repay',
@@ -105,6 +108,9 @@ const COPY = {
     signer: 'Jina kamili kama sahihi',
     acceptAgreement: 'Kubali makubaliano',
     agreementSigned: 'Makubaliano yamesainiwa',
+    readTerms: 'Soma masharti kamili ya mkopo',
+    termsNote: 'Kwa kuomba unakubali',
+    termsLink: 'masharti ya mkopo wa Qard Hassan',
     by: 'na',
     repayNote: 'Hii inatoka kwenye salio lako la Pesa. Ongeza pesa kwa M-Pesa kwanza kama haitoshi.',
     repay: 'Lipa',
@@ -400,6 +406,16 @@ export default async function QardPage({ searchParams }: Props) {
             <Label htmlFor="purpose">{t.purpose}</Label>
             <Textarea id="purpose" name="purpose" minLength={5} required />
           </div>
+          <p className="text-xs text-muted-foreground">
+            {t.termsNote}{' '}
+            <Link
+              href={'/finance/qard/terms' as Route}
+              className="font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              {t.termsLink}
+            </Link>
+            .
+          </p>
           <Button type="submit" className="min-h-11">
             {t.send}
           </Button>
@@ -423,6 +439,12 @@ export default async function QardPage({ searchParams }: Props) {
                     {formatCurrency(Number(loan.amount), loan.currency)} · {t.requested}
                     {loan.agreement_accepted_at ? t.signed : t.awaiting}
                   </p>
+                  <Link
+                    href={`/finance/qard/terms?jamiyaId=${loan.jamiya_id}` as Route}
+                    className="text-xs font-semibold text-primary underline-offset-4 hover:underline"
+                  >
+                    {t.readTerms}
+                  </Link>
                 </div>
                 <div className="flex gap-2">
                   <form action={decideQardFormAction}>
@@ -485,7 +507,13 @@ export default async function QardPage({ searchParams }: Props) {
                     >
                       <input type="hidden" name="loanId" value={loan.id} />
                       <p className="text-xs text-muted-foreground">
-                        {t.agreement}
+                        {t.agreement}{' '}
+                        <Link
+                          href={`/finance/qard/terms?jamiyaId=${loan.jamiya_id}` as Route}
+                          className="font-semibold text-primary underline-offset-4 hover:underline"
+                        >
+                          {t.readTerms}
+                        </Link>
                       </p>
                       <Input
                         name="signerName"
