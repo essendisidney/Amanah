@@ -138,13 +138,16 @@ export default async function CircleCommunityPage({ params }: Props) {
         <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
           {j.name}
         </h1>
-        <p className="mt-2 text-muted-foreground">Chat, meetings, and grace requests.</p>
+        <p className="mt-2 text-muted-foreground">Chat, meetings, minutes and grace requests.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
           </Button>
           <Button asChild variant="outline" size="sm" className="min-h-11">
             <Link href={`/circles/${slug}/elections` as Route}>Elections</Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="min-h-11">
+            <Link href={`/circles/${slug}/records` as Route}>Minutes &amp; resolutions</Link>
           </Button>
         </div>
       </div>
