@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Manrope, Space_Grotesk } from 'next/font/google';
+import localFont from 'next/font/local';
 import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
 import { InstallPrompt } from '@/components/install-prompt';
 import { BootSplashMarkup } from '@/components/app-loader';
@@ -10,17 +10,20 @@ import { getDictionary } from '@/i18n/get-dictionary';
 import './globals.css';
 import '@/components/app-loader.css';
 
-const manrope = Manrope({
-  subsets: ['latin'],
+// Fonts are served from the repo (latin subset, variable weight) so builds never depend on
+// reaching Google Fonts. Both are SIL Open Font License; see fonts/LICENSE.md.
+const manrope = localFont({
+  src: './fonts/manrope-latin.woff2',
   variable: '--font-sans',
+  weight: '200 800',
   display: 'swap',
 });
 
 /** Display face for marketing headlines (home page). */
-const grotesk = Space_Grotesk({
-  subsets: ['latin'],
+const grotesk = localFont({
+  src: './fonts/space-grotesk-latin.woff2',
   variable: '--font-grotesk',
-  weight: ['500', '600', '700'],
+  weight: '300 700',
   display: 'swap',
 });
 
