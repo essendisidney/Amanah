@@ -29,7 +29,8 @@ export function redirectWithCircleNotice(
 
 export function mapMoneyError(code: string | undefined | null): string {
   const messages: Record<string, string> = {
-    INSUFFICIENT_FUNDS: 'Not enough wallet balance. Top up your wallet, then try again.',
+    INSUFFICIENT_FUNDS:
+      'Not enough wallet balance. Money set aside for a pending withdrawal cannot be spent. Top up your wallet, then try again.',
     WALLET_NOT_FOUND: 'Open Wallet once to create a KES balance, then retry.',
     MEMBER_LIMIT: 'This circle has more members than the selected plan allows.',
     PLAN_NOT_FOUND: 'That plan is not available.',
