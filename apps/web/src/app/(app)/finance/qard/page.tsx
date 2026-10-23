@@ -59,8 +59,9 @@ const COPY = {
     acceptAgreement: 'Accept agreement',
     agreementSigned: 'Agreement signed',
     readTerms: 'Read the full loan terms',
-    termsNote: 'By asking you accept the',
-    termsLink: 'Qard Hassan loan terms',
+    termsNote:
+      'By submitting this request, you acknowledge that you have read, understood and agree to be bound by the',
+    termsLink: 'Qard Hassan Loan Terms',
     by: 'by',
     repayNote: 'This comes from your Money balance. Add money with M-Pesa first if it is short.',
     repay: 'Repay',
@@ -109,8 +110,9 @@ const COPY = {
     acceptAgreement: 'Kubali makubaliano',
     agreementSigned: 'Makubaliano yamesainiwa',
     readTerms: 'Soma masharti kamili ya mkopo',
-    termsNote: 'Kwa kuomba unakubali',
-    termsLink: 'masharti ya mkopo wa Qard Hassan',
+    termsNote:
+      'Kwa kutuma ombi hili, unakiri kwamba umesoma, umeelewa na unakubali kufungwa na',
+    termsLink: 'Masharti ya Mkopo wa Qard Hassan',
     by: 'na',
     repayNote: 'Hii inatoka kwenye salio lako la Pesa. Ongeza pesa kwa M-Pesa kwanza kama haitoshi.',
     repay: 'Lipa',
