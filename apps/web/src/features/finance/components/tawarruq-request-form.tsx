@@ -68,6 +68,8 @@ export function TawarruqRequestForm({
   );
   const profitBps = tawarruqRateFor(rates, Number(tenor));
   const [wakalah, setWakalah] = useState(false);
+  // The member agrees to buy the commodity for a stated amount; changing the amount clears it.
+  const [purchase, setPurchase] = useState(false);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
@@ -97,6 +99,7 @@ export function TawarruqRequestForm({
     if (state.success) {
       setCash('');
       setWakalah(false);
+      setPurchase(false);
       router.refresh();
     }
   }
@@ -138,7 +141,10 @@ export function TawarruqRequestForm({
           inputMode="numeric"
           required
           value={cash}
-          onChange={(event) => setCash(event.target.value)}
+          onChange={(event) => {
+            setCash(event.target.value);
+            setPurchase(false);
+          }}
           className="min-h-11"
         />
       </div>
@@ -251,6 +257,28 @@ export function TawarruqRequestForm({
       <label className="flex min-h-11 items-start gap-3 text-sm">
         <input
           type="checkbox"
+          name="purchaseAmount"
+          value={quote ? String(quote.cashAmount) : ''}
+          checked={purchase && Boolean(quote)}
+          onChange={(event) => setPurchase(event.target.checked)}
+          disabled={!quote}
+          className="mt-1 h-4 w-4"
+          required
+        />
+        <span>
+          I agree to purchase efloat worth{' '}
+          {quote ? (
+            <strong>{formatCurrency(quote.cashAmount, 'KES')}</strong>
+          ) : (
+            'the amount I enter above'
+          )}
+          .
+        </span>
+      </label>
+
+      <label className="flex min-h-11 items-start gap-3 text-sm">
+        <input
+          type="checkbox"
           name="wakalah"
           value="1"
           checked={wakalah}
@@ -271,7 +299,7 @@ export function TawarruqRequestForm({
       <Button
         type="submit"
         className="min-h-11"
-        disabled={pending || !quote || !wakalah || aboveRoom || qualification.overdue || !qualification.phoneOk}
+        disabled={pending || !quote || !purchase || !wakalah || aboveRoom || qualification.overdue || !qualification.phoneOk}
       >
         {pending ? 'Submitting…' : 'Submit request'}
       </Button>
