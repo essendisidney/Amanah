@@ -115,6 +115,10 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
   const tenorMonths = Number(formData.get('tenorMonths'));
   const wakalah = String(formData.get('wakalah') ?? '') === '1';
   const guarantorUserId = String(formData.get('guarantorUserId') ?? '').trim();
+  // The member ticked "I agree to purchase efloat worth KES …" for this exact amount.
+  if (Number(formData.get('purchaseAmount')) !== amount) {
+    return { success: false, message: 'Tick that you agree to purchase efloat for this amount.' };
+  }
   if (!Number.isFinite(amount) || purpose.length < 5 || !wakalah) {
     return {
       success: false,
