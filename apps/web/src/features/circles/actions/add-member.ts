@@ -325,7 +325,7 @@ export async function addOneCircleMember(args: {
     return {
       success: true,
       mode: 'added',
-      message: `Member added. Invite link could not be created (${claim.error}). Send a new invite from Pending invitations so they can sign in.`,
+      message: 'Member added, but their invite link could not be created. Send a new invite from Pending invitations so they can sign in.',
     };
   }
 
