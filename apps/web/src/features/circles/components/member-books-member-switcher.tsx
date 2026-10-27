@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Label } from '@jamiya/ui';
+import { Label, NativeSelect } from '@jamiya/ui';
 import { booksHref } from '@/features/circles/lib/member-books-view';
 
 type MemberOption = {
@@ -26,10 +26,10 @@ export function MemberBooksMemberSwitcher({ slug, members, currentMemberId }: Pr
     <div className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
       <div className="min-w-[12rem] flex-1 space-y-1">
         <Label htmlFor="switchMember">Switch member</Label>
-        <select
+        <NativeSelect
           id="switchMember"
           value={currentMemberId}
-          className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+          className="min-h-11"
           onChange={(e) => {
             const id = e.target.value;
             if (id) router.push(booksHref(slug, 'member', id) as Route);
@@ -42,7 +42,7 @@ export function MemberBooksMemberSwitcher({ slug, members, currentMemberId }: Pr
                 {m.label}
               </option>
             ))}
-        </select>
+        </NativeSelect>
       </div>
       <Link
         href={booksHref(slug, 'home') as Route}

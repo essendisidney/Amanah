@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { submitCampaignAction, type CharityActionState } from '../actions';
 import { prepareKycUploadFile } from '@/features/profile/lib/prepare-kyc-file';
@@ -97,11 +97,10 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
       </div>
       <div className="space-y-1">
         <Label htmlFor="category">Category</Label>
-        <select
+        <NativeSelect
           id="category"
           name="category"
           required
-          className="h-10 w-full border border-input bg-background px-3"
           defaultValue="medical"
         >
           {CATEGORIES.map((c) => (
@@ -109,7 +108,7 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
               {c.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
       <div className="space-y-1">
         <Label htmlFor="story">Story (min 40 characters)</Label>
@@ -195,10 +194,9 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
           </div>
         ) : null}
         {kycMode === 'pick' && kycDocs.length ? (
-          <select
+          <NativeSelect
             name="kycDocUrl"
             required
-            className="h-10 w-full border border-input bg-background px-3 text-sm"
             defaultValue={kycDocs[0]?.storage_path}
           >
             {kycDocs.map((d) => (
@@ -207,7 +205,7 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
                 {d.file_name ? ` · ${d.file_name}` : ''} · {d.status}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         ) : (
           <div className="space-y-2">
             <Label htmlFor="kycDocument" className="text-sm font-normal">

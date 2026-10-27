@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatDate } from '@jamiya/shared';
-import { Button, Input } from '@jamiya/ui';
+import { Button, Input, NativeSelect } from '@jamiya/ui';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { revokeInvitationAction, resendPendingInvitationsAction } from '../actions/invitation-actions';
 import {
@@ -139,17 +139,17 @@ export function MembersList({
                     <input type="hidden" name="slug" value={slug} />
                     <label className="text-xs text-muted-foreground">
                       Role
-                      <select
+                      <NativeSelect
                         name="role"
                         defaultValue={member.role}
-                        className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                        className="inline-flex w-auto ml-2 h-9"
                       >
                         {OFFICER_ROLES.map((role) => (
                           <option key={role} value={role}>
                             {role}
                           </option>
                         ))}
-                      </select>
+                      </NativeSelect>
                     </label>
                     <Button type="submit" size="sm" variant="outline">
                       Update role
@@ -163,18 +163,18 @@ export function MembersList({
                       <input type="hidden" name="slug" value={slug} />
                       <label className="text-xs text-muted-foreground">
                         Payout slot
-                        <select
+                        <NativeSelect
                           name="payoutPosition"
                           defaultValue={member.payoutPosition ?? openSlots[0]}
                           required
-                          className="ml-2 h-9 rounded-md border border-input bg-background px-2 text-sm"
+                          className="inline-flex w-auto ml-2 h-9"
                         >
                           {openSlots.map((pos) => (
                             <option key={pos} value={pos}>
                               #{pos}
                             </option>
                           ))}
-                        </select>
+                        </NativeSelect>
                       </label>
                       <Button type="submit" size="sm" variant="outline">
                         {member.payoutPosition ? 'Change slot' : 'Assign slot'}

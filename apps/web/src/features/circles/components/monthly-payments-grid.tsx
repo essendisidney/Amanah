@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { saveMonthlyPaymentsGridAction } from '@/features/circles/actions/books-actions';
 import { booksHref } from '@/features/circles/lib/member-books-view';
 
@@ -280,18 +280,18 @@ export function MonthlyPaymentsGrid({
       {/* Mobile: one member at a time */}
       <div className="space-y-3 md:hidden">
         <Label htmlFor="tbMobileMember">Member</Label>
-        <select
+        <NativeSelect
           id="tbMobileMember"
           value={mobileMemberId}
           onChange={(e) => setMobileMemberId(e.target.value)}
-          className="block h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+          className="h-12 text-base"
         >
           {members.map((m) => (
             <option key={m.id} value={m.id}>
               {m.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
         <div className="rounded-xl border border-accent/25 bg-accent/5 px-3 py-3">
           <Label htmlFor={`tbMobileShare-${mobileMemberId}`}>Share buy-in</Label>
           <Input

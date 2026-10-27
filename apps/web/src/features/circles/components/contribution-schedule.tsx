@@ -1,5 +1,5 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { CalendarClock } from 'lucide-react';
 import { setCircleScheduleAction } from '../actions/ledger-actions';
 
@@ -109,16 +109,16 @@ export function ScheduleForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="sched-every">How often</Label>
-          <select
+          <NativeSelect
             id="sched-every"
             name="everyDays"
             defaultValue={String(freq)}
-            className="block h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            className="h-11"
           >
             <option value="7">Every week</option>
             <option value="14">Every 2 weeks</option>
             <option value="30">Every month</option>
-          </select>
+          </NativeSelect>
         </div>
         <div className="flex flex-wrap items-center gap-3 sm:col-span-3">
           <Button type="submit" className="min-h-11">

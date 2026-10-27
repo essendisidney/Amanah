@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@jamiya/ui';
+import { Button, NativeSelect } from '@jamiya/ui';
 import {
   deleteJamiyaAction,
   resetCircleDataAction,
@@ -39,11 +39,11 @@ export function AdminCircleActions({
       <div className="flex flex-wrap items-center gap-2">
         <form action={setJamiyaStatusAction} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="jamiyaId" value={jamiyaId} />
-          <select
+          <NativeSelect
             name="status"
             defaultValue={normalizedStatus}
             key={normalizedStatus}
-            className="h-11 border border-input bg-background px-2 text-sm"
+            className="inline-flex w-auto h-11"
             aria-label={`Status for ${name}`}
           >
             {selectStatuses.map((value) => (
@@ -51,7 +51,7 @@ export function AdminCircleActions({
                 {value === 'paused' ? 'paused / suspended' : value}
               </option>
             ))}
-          </select>
+          </NativeSelect>
           <Button type="submit" variant="outline" className="min-h-11">
             Update
           </Button>

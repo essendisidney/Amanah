@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Alert, AlertDescription, Button, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Label, NativeSelect } from '@jamiya/ui';
 import { registerKycDocumentAction } from '../actions/profile-actions';
 import { prepareKycUploadFile } from '../lib/prepare-kyc-file';
 import { initialProfileActionState, type ProfileActionState } from '../lib/state';
@@ -102,11 +102,10 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="documentType">{labels.documentType}</Label>
-          <select
+          <NativeSelect
             id="documentType"
             name="documentType"
             required
-            className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
             defaultValue="national_id"
           >
             {documentTypes.map((item) => (
@@ -114,7 +113,7 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
                 {item.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="space-y-2">
           <Label htmlFor="file">{labels.fileHint}</Label>

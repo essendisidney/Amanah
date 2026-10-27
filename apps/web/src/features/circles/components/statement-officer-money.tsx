@@ -1,4 +1,4 @@
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { formatCurrency } from '@jamiya/shared';
 import { levyFineAction } from '@/features/circles/actions/treasury-actions';
 import { recordMemberLoanEventAction } from '@/features/circles/actions/loan-actions';
@@ -64,11 +64,10 @@ export function StatementOfficerMoney({
             <>
               <div className="space-y-1">
                 <Label htmlFor="stmt-fine-cat">Fine category</Label>
-                <select
+                <NativeSelect
                   id="stmt-fine-cat"
                   name="fineCategoryId"
                   required
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                   defaultValue={fineCategories[0]?.id ?? ''}
                 >
                   {fineCategories.map((f) => (
@@ -76,7 +75,7 @@ export function StatementOfficerMoney({
                       {f.name} ({formatCurrency(Number(f.default_amount), f.currency || currency)})
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="stmt-fine-amount">Override amount (optional)</Label>

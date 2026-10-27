@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   assessPenaltiesAction,
   broadcastAnnouncementAction,
@@ -248,17 +248,16 @@ export function CircleOpsPanel({
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="payoutComplianceMode">Payout compliance mode</Label>
-              <select
+              <NativeSelect
                 id="payoutComplianceMode"
                 name="payoutComplianceMode"
                 defaultValue={settings.payoutComplianceMode}
-                className="h-10 w-full border border-input bg-background px-3"
               >
                 <option value="block">Block if member has arrears</option>
                 <option value="approve">Officer may approve despite arrears</option>
                 <option value="deduct">Deduct arrears/penalties from payout</option>
                 <option value="allow">Allow payout regardless</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="flex flex-wrap gap-2 sm:col-span-2">
               <Button type="submit" className="min-h-11">
@@ -290,18 +289,17 @@ export function CircleOpsPanel({
             <input type="hidden" name="currency" value={currency} />
             <div className="space-y-1">
               <Label htmlFor="entryType">Type</Label>
-              <select
+              <NativeSelect
                 id="entryType"
                 name="entryType"
                 required
-                className="h-10 w-full border border-input bg-background px-3"
               >
                 {ENTRY_TYPES.map((t) => (
                   <option key={t} value={t}>
                     {t.replaceAll('_', ' ')}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="amount">Amount</Label>
@@ -313,10 +311,9 @@ export function CircleOpsPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="memberId">Member (optional)</Label>
-              <select
+              <NativeSelect
                 id="memberId"
                 name="memberId"
-                className="h-10 w-full border border-input bg-background px-3"
                 defaultValue=""
               >
                 <option value="">Circle-level</option>
@@ -326,7 +323,7 @@ export function CircleOpsPanel({
                     {m.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="notes">Notes</Label>
@@ -494,10 +491,9 @@ export function CircleOpsPanel({
             <input type="hidden" name="currency" value={currency} />
             <div className="space-y-1">
               <Label htmlFor="category">Category</Label>
-              <select
+              <NativeSelect
                 id="category"
                 name="category"
-                className="h-10 w-full border border-input bg-background px-3"
                 defaultValue="hajj"
               >
                 {POCKET_CATEGORIES.map((c) => (
@@ -505,7 +501,7 @@ export function CircleOpsPanel({
                     {c.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="label">Label (optional)</Label>
@@ -524,17 +520,16 @@ export function CircleOpsPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="durationMonths">Goal period (Hajj / Umra / Udhiyah / custom)</Label>
-              <select
+              <NativeSelect
                 id="durationMonths"
                 name="durationMonths"
-                className="h-10 w-full border border-input bg-background px-3"
                 defaultValue="12"
               >
                 <option value="1">1 month</option>
                 <option value="3">3 months</option>
                 <option value="6">6 months</option>
                 <option value="12">12 months</option>
-              </select>
+              </NativeSelect>
             </div>
             <Button type="submit" className="min-h-11 w-full sm:w-fit sm:col-span-2">
               Create pocket

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { useMemo, useState } from 'react';
 import { formatCurrency } from '@jamiya/shared';
-import { Input, Label } from '@jamiya/ui';
+import { Input, Label, NativeSelect } from '@jamiya/ui';
 import { booksHref } from '@/features/circles/lib/member-books-view';
 import type { HomeMember } from '@/features/circles/components/member-books-home';
 
@@ -73,17 +73,17 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
         </div>
         <div className="space-y-1">
           <Label htmlFor="memberSort">Sort</Label>
-          <select
+          <NativeSelect
             id="memberSort"
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="flex min-h-11 w-full min-w-[12rem] rounded-md border border-input bg-background px-3 text-sm sm:w-auto"
+            className="min-h-11 min-w-[12rem] sm:w-auto"
           >
             <option value="name-asc">Name A → Z</option>
             <option value="name-desc">Name Z → A</option>
             <option value="missing-first">Missing payments first</option>
             <option value="savings-desc">Most savings</option>
-          </select>
+          </NativeSelect>
         </div>
       </div>
 

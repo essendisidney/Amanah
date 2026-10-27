@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { Route } from 'next';
 import { availablePayoutSlots, describePayoutSlot, formatCurrency } from '@jamiya/shared';
-import { Alert, AlertDescription, Button, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Label, NativeSelect } from '@jamiya/ui';
 import {
   acceptInvitationAction,
   declineInvitationAction,
@@ -79,13 +79,13 @@ export function InvitationDecisionButtons({
             Early slots get cash sooner (facilitation fee if enabled). Later slots save longer
             and may earn a rebate — not interest.
           </p>
-          <select
+          <NativeSelect
             id="payoutSlot"
             value={slot === '' ? '' : String(slot)}
             onChange={(e) =>
               setSlot(e.target.value ? Number(e.target.value) : '')
             }
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11"
           >
             <option value="">Auto-assign next open slot</option>
             {openSlots.map((pos) => {
@@ -108,7 +108,7 @@ export function InvitationDecisionButtons({
                 </option>
               );
             })}
-          </select>
+          </NativeSelect>
         </div>
       ) : null}
 

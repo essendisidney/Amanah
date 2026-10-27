@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { saveMgrMonthlyPaymentsAction } from '@/features/circles/actions/ledger-actions';
 import { VoidLedgerButton } from '@/features/circles/components/void-ledger-button';
 
@@ -372,18 +372,18 @@ export function MerryGoRoundPaymentsGrid({
           {/* Mobile: one member at a time — easier thumb entry */}
           <div className="space-y-3 md:hidden">
             <Label htmlFor="mgrMobileMember">Member</Label>
-            <select
+            <NativeSelect
               id="mgrMobileMember"
               value={mobileMemberId}
               onChange={(e) => setMobileMemberId(e.target.value)}
-              className="block h-12 w-full rounded-md border border-input bg-background px-3 text-base"
+              className="h-12 text-base"
             >
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             <ul className="space-y-2">
               {months.map((col) => {
                 const key = cellKey(mobileMemberId, col.cycleNumber);

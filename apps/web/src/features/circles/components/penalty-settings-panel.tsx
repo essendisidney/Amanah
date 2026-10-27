@@ -1,4 +1,4 @@
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import {
   assessPenaltiesAction,
   updatePenaltySettingsAction,
@@ -97,17 +97,16 @@ export function PenaltySettingsPanel({
         </div>
         <div className="space-y-1 sm:col-span-2">
           <Label htmlFor="payoutComplianceMode">Payout compliance mode</Label>
-          <select
+          <NativeSelect
             id="payoutComplianceMode"
             name="payoutComplianceMode"
             defaultValue={settings.payoutComplianceMode}
-            className="h-10 w-full border border-input bg-background px-3"
           >
             <option value="block">Block if member has arrears</option>
             <option value="approve">Officer may approve despite arrears</option>
             <option value="deduct">Deduct arrears/penalties from payout</option>
             <option value="allow">Allow payout regardless</option>
-          </select>
+          </NativeSelect>
         </div>
         <div className="flex flex-wrap gap-2 sm:col-span-2">
           <Button type="submit" className="min-h-11">

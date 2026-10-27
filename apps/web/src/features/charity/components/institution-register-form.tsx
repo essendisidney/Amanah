@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { registerInstitutionAction } from '@/features/charity/actions';
 import { createClient } from '@/lib/supabase/client';
 import { friendlyError } from '@/lib/friendly-error';
@@ -78,16 +78,15 @@ export function InstitutionRegisterForm() {
       </div>
       <div className="space-y-1">
         <Label htmlFor="type">Type</Label>
-        <select
+        <NativeSelect
           id="type"
           name="type"
-          className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           defaultValue="mosque"
         >
           <option value="mosque">Mosque</option>
           <option value="madrasa">Madrasa</option>
           <option value="orphanage">Orphanage</option>
-        </select>
+        </NativeSelect>
       </div>
       <div className="space-y-1">
         <Label htmlFor="contactPerson">Contact person</Label>

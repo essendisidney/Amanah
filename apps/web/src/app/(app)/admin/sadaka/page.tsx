@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import {
@@ -165,14 +165,14 @@ export default async function AdminSadakaPage() {
                     <input type="hidden" name="approve" value="1" />
                     <label className="text-xs text-muted-foreground">
                       Sharia endorse
-                      <select
+                      <NativeSelect
                         name="shariaEndorsed"
                         defaultValue="false"
-                        className="ml-2 h-11 border border-input bg-background px-2"
+                        className="inline-flex w-auto ml-2 h-11"
                       >
                         <option value="false">No</option>
                         <option value="true">Yes</option>
-                      </select>
+                      </NativeSelect>
                     </label>
                     <Button type="submit" className="min-h-11 w-full sm:w-auto">
                       Approve
@@ -366,15 +366,15 @@ export default async function AdminSadakaPage() {
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`mode-${row.id}`}>Fee mode</Label>
-                      <select
+                      <NativeSelect
                         id={`mode-${row.id}`}
                         name="feeMode"
                         defaultValue={row.fee_mode}
-                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
+                        className="h-11"
                       >
                         <option value="donation_addon">donation_addon</option>
                         <option value="donation_deduct">donation_deduct</option>
-                      </select>
+                      </NativeSelect>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`bps-${row.id}`}>Fee (bps)</Label>
@@ -393,11 +393,11 @@ export default async function AdminSadakaPage() {
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`status-${row.id}`}>Status</Label>
-                      <select
+                      <NativeSelect
                         id={`status-${row.id}`}
                         name="status"
                         defaultValue={row.status}
-                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
+                        className="h-11"
                       >
                         <option value="draft">draft</option>
                         <option value="pending_review">pending_review</option>
@@ -409,19 +409,19 @@ export default async function AdminSadakaPage() {
                         <option value="rejected">rejected</option>
                         <option value="completed">completed</option>
                         <option value="cancelled">cancelled</option>
-                      </select>
+                      </NativeSelect>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`endorsed-${row.id}`}>Sharia board</Label>
-                      <select
+                      <NativeSelect
                         id={`endorsed-${row.id}`}
                         name="shariaBoardEndorsed"
                         defaultValue={row.sharia_board_endorsed ? 'true' : 'false'}
-                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
+                        className="h-11"
                       >
                         <option value="false">Pending</option>
                         <option value="true">Endorsed</option>
-                      </select>
+                      </NativeSelect>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`ref-${row.id}`}>Decision reference</Label>

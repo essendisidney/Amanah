@@ -3,7 +3,7 @@ import { AppPage } from '@/components/app-page';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { redirect } from 'next/navigation';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
@@ -269,11 +269,11 @@ export default async function CircleCommunityPage({ params }: Props) {
             <input type="hidden" name="jamiyaId" value={j.id} />
             <div className="space-y-2">
               <Label htmlFor="contributionId">Your due contribution</Label>
-              <select
+              <NativeSelect
                 id="contributionId"
                 name="contributionId"
                 required
-                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="h-11"
               >
                 <option value="">Select…</option>
                 {dueRows.map((c) => (
@@ -281,7 +281,7 @@ export default async function CircleCommunityPage({ params }: Props) {
                     Cycle {c.cycle_number} · due {c.due_date}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="days">Days requested</Label>

@@ -2,6 +2,7 @@ export { cn } from './lib/utils';
 export { Button, buttonVariants } from './components/button';
 export { Badge, badgeVariants } from './components/badge';
 export { Input } from './components/input';
+export { NativeSelect } from './components/native-select';
 export { Label } from './components/label';
 export {
   Card,

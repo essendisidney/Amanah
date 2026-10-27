@@ -4,7 +4,7 @@ import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { updateUserRoleAction } from '@/features/admin/actions/admin-actions';
 import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
-import { Button } from '@jamiya/ui';
+import { Button, NativeSelect } from '@jamiya/ui';
 
 export const metadata: Metadata = { title: 'Admin · Users' };
 export const dynamic = 'force-dynamic';
@@ -59,16 +59,16 @@ export default async function AdminUsersPage() {
               {canEditRoles ? (
                 <form action={updateUserRoleAction} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="userId" value={user.id} />
-                  <select
+                  <NativeSelect
                     name="role"
                     defaultValue={user.platform_role}
-                    className="min-h-11 rounded-md border border-border/70 bg-background px-3 text-sm"
+                    className="inline-flex w-auto min-h-11"
                   >
                     <option value="member">member</option>
                     <option value="compliance_officer">compliance_officer</option>
                     <option value="platform_admin">platform_admin</option>
                     <option value="super_admin">super_admin</option>
-                  </select>
+                  </NativeSelect>
                   <Button type="submit" variant="outline" className="min-h-11">
                     Update
                   </Button>

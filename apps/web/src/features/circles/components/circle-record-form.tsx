@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
 import { saveCircleRecordAction } from '../actions/record-actions';
 import { friendlyError } from '@/lib/friendly-error';
@@ -80,15 +80,15 @@ export function CircleRecordForm({
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1">
           <Label htmlFor="kind">Type</Label>
-          <select
+          <NativeSelect
             id="kind"
             name="kind"
             defaultValue="minutes"
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11"
           >
             <option value="minutes">Meeting minutes</option>
             <option value="resolution">Resolution</option>
-          </select>
+          </NativeSelect>
         </div>
         <div className="space-y-1">
           <Label htmlFor="recordDate">Date</Label>
@@ -101,11 +101,11 @@ export function CircleRecordForm({
         {meetings.length > 0 ? (
           <div className="space-y-1 sm:col-span-2">
             <Label htmlFor="meetingId">Meeting (optional)</Label>
-            <select
+            <NativeSelect
               id="meetingId"
               name="meetingId"
               defaultValue=""
-              className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11"
             >
               <option value="">Not linked to a meeting</option>
               {meetings.map((m) => (
@@ -113,7 +113,7 @@ export function CircleRecordForm({
                   {m.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
         ) : null}
       </div>

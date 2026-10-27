@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
@@ -249,11 +249,10 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
             <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="memberId">Member</Label>
-              <select
+              <NativeSelect
                 id="memberId"
                 name="memberId"
                 required
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -264,7 +263,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                     {labelFor(m.id)}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="shares">Shares</Label>
@@ -280,10 +279,9 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
             </div>
             <div className="space-y-1">
               <Label htmlFor="bankAccountId">Deposit to account (optional)</Label>
-              <select
+              <NativeSelect
                 id="bankAccountId"
                 name="bankAccountId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="">— book only —</option>
@@ -292,7 +290,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                     {a.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="notes">Notes</Label>
@@ -473,11 +471,11 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                       <input type="hidden" name="dividendId" value={String(d.id)} />
                       <div className="space-y-1">
                         <Label htmlFor={`payAcct-${String(d.id)}`}>Pay from account</Label>
-                        <select
+                        <NativeSelect
                           id={`payAcct-${String(d.id)}`}
                           name="bankAccountId"
                           required
-                          className="h-11 min-w-[12rem] rounded-md border border-input bg-background px-3 text-sm"
+                          className="inline-flex w-auto h-11 min-w-[12rem]"
                           defaultValue={bankAccounts[0]?.id ?? ''}
                         >
                           {bankAccounts.map((a) => (
@@ -485,7 +483,7 @@ export default async function CircleSharesPage({ params, searchParams }: Props) 
                               {a.name}
                             </option>
                           ))}
-                        </select>
+                        </NativeSelect>
                       </div>
                       <Button type="submit" size="sm" className="min-h-11">
                         Pay to Money

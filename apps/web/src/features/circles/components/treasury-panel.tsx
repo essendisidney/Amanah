@@ -1,7 +1,7 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   matchBankAlertsAction,
   setBankAlertStatusAction,
@@ -261,17 +261,16 @@ export function TreasuryPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="acctKind">Type</Label>
-              <select
+              <NativeSelect
                 id="acctKind"
                 name="accountKind"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue="bank"
               >
                 <option value="bank">Bank</option>
                 <option value="mpesa">M-Pesa</option>
                 <option value="petty_cash">Petty cash</option>
                 <option value="other">Other</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="acctNumber">Account / till (optional)</Label>
@@ -308,16 +307,16 @@ export function TreasuryPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="destKind">Type</Label>
-              <select
+              <NativeSelect
                 id="destKind"
                 name="kind"
-                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="min-h-11"
                 defaultValue="paybill"
               >
                 <option value="paybill">Paybill</option>
                 <option value="till">Till</option>
                 <option value="bank">Bank</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="destShortcode">Paybill / Till number</Label>
@@ -357,11 +356,11 @@ export function TreasuryPanel({
               <input type="hidden" name="currency" value={currency} />
               <div className="space-y-1 sm:col-span-2">
                 <Label htmlFor="payDest">Pay to</Label>
-                <select
+                <NativeSelect
                   id="payDest"
                   name="destinationId"
                   required
-                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  className="min-h-11"
                 >
                   {payoutDestinations.map((d) => (
                     <option key={d.id} value={d.id}>
@@ -369,14 +368,14 @@ export function TreasuryPanel({
                       {d.shortcode ? ` · ${d.shortcode}` : ''}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="paySource">From account</Label>
-                <select
+                <NativeSelect
                   id="paySource"
                   name="sourceAccountId"
-                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  className="min-h-11"
                   defaultValue={accounts[0]?.id ?? ''}
                 >
                   <option value="">—</option>
@@ -385,14 +384,14 @@ export function TreasuryPanel({
                       {a.name} ({formatCurrency(a.balance, a.currency)})
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="payCat">Expense category</Label>
-                <select
+                <NativeSelect
                   id="payCat"
                   name="categoryId"
-                  className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  className="min-h-11"
                 >
                   <option value="">—</option>
                   {expenseCats.map((c) => (
@@ -400,7 +399,7 @@ export function TreasuryPanel({
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="payAmt">Amount ({currency})</Label>
@@ -458,11 +457,10 @@ export function TreasuryPanel({
             <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1">
               <Label htmlFor="entryType">Type</Label>
-              <select
+              <NativeSelect
                 id="entryType"
                 name="entryType"
                 required
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue="bank_deposit"
               >
                 <option value="bank_deposit">Deposit</option>
@@ -472,7 +470,7 @@ export function TreasuryPanel({
                 <option value="bank_transfer">Transfer between accounts</option>
                 <option value="investment">Investment funding</option>
                 <option value="opening_balance">Opening balance</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="amount">Amount ({currency})</Label>
@@ -490,10 +488,9 @@ export function TreasuryPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="bankAccountId">Account</Label>
-              <select
+              <NativeSelect
                 id="bankAccountId"
                 name="bankAccountId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue={accounts[0]?.id ?? ''}
               >
                 <option value="">Select…</option>
@@ -502,14 +499,13 @@ export function TreasuryPanel({
                     {a.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="counterpartyAccountId">To account (transfers)</Label>
-              <select
+              <NativeSelect
                 id="counterpartyAccountId"
                 name="counterpartyAccountId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="">—</option>
@@ -518,14 +514,13 @@ export function TreasuryPanel({
                     {a.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="categoryId">Category</Label>
-              <select
+              <NativeSelect
                 id="categoryId"
                 name="categoryId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="">—</option>
@@ -534,14 +529,13 @@ export function TreasuryPanel({
                     {c.kind}: {c.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="investmentId">Investment (optional)</Label>
-              <select
+              <NativeSelect
                 id="investmentId"
                 name="investmentId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="">—</option>
@@ -550,14 +544,13 @@ export function TreasuryPanel({
                     {inv.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="memberId">Member (optional)</Label>
-              <select
+              <NativeSelect
                 id="memberId"
                 name="memberId"
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="">—</option>
@@ -567,7 +560,7 @@ export function TreasuryPanel({
                     {m.memberCode ? ` (${m.memberCode})` : ''}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="notes">Notes</Label>
@@ -611,11 +604,10 @@ export function TreasuryPanel({
             <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1">
               <Label htmlFor="fineMember">Member</Label>
-              <select
+              <NativeSelect
                 id="fineMember"
                 name="memberId"
                 required
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -627,15 +619,14 @@ export function TreasuryPanel({
                     {m.memberCode ? ` (${m.memberCode})` : ''}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="fineCategoryId">Fine category</Label>
-              <select
+              <NativeSelect
                 id="fineCategoryId"
                 name="fineCategoryId"
                 required
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue={fineCategories[0]?.id ?? ''}
               >
                 {fineCategories.map((f) => (
@@ -643,7 +634,7 @@ export function TreasuryPanel({
                     {f.name} ({formatCurrency(f.defaultAmount, f.currency)})
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="fineAmount">Override amount (optional)</Label>
@@ -727,15 +718,15 @@ export function TreasuryPanel({
                       className="min-h-11"
                       aria-label="Current value"
                     />
-                    <select
+                    <NativeSelect
                       name="status"
                       defaultValue={inv.status}
-                      className="min-h-11 rounded-md border border-input bg-background px-2 text-sm"
+                      className="inline-flex w-auto min-h-11"
                     >
                       <option value="planned">Planned</option>
                       <option value="active">Active</option>
                       <option value="closed">Closed</option>
-                    </select>
+                    </NativeSelect>
                     <Button type="submit" variant="outline" className="min-h-11">
                       Update
                     </Button>
@@ -778,10 +769,10 @@ export function TreasuryPanel({
             </div>
             <div className="space-y-1">
               <Label htmlFor="invAccount">From account</Label>
-              <select
+              <NativeSelect
                 id="invAccount"
                 name="bankAccountId"
-                className="min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="min-h-11"
                 defaultValue={accounts[0]?.id ?? ''}
               >
                 <option value="">—</option>
@@ -790,7 +781,7 @@ export function TreasuryPanel({
                     {a.name} ({formatCurrency(a.balance, a.currency)})
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="startedOn">Started</Label>
@@ -835,15 +826,15 @@ export function TreasuryPanel({
             <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1">
               <Label htmlFor="catKind">Kind</Label>
-              <select
+              <NativeSelect
                 id="catKind"
                 name="kind"
-                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                className="inline-flex w-auto"
                 defaultValue="expense"
               >
                 <option value="income">Income</option>
                 <option value="expense">Expense</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="min-w-[12rem] flex-1 space-y-1">
               <Label htmlFor="catName">Name</Label>

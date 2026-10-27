@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState } from 'react';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   openDisputeAction,
   type DisputeActionState,
@@ -24,10 +24,9 @@ export function OpenDisputeForm({
       <input type="hidden" name="slug" value={slug} />
       <div className="space-y-2">
         <Label htmlFor="type">Type</Label>
-        <select
+        <NativeSelect
           id="type"
           name="type"
-          className="flex h-10 w-full rounded-md border border-border bg-background px-3 text-sm"
           defaultValue="other"
         >
           <option value="missed_contribution">Missed contribution</option>
@@ -35,7 +34,7 @@ export function OpenDisputeForm({
           <option value="incorrect_amount">Incorrect amount</option>
           <option value="membership">Membership</option>
           <option value="other">Other</option>
-        </select>
+        </NativeSelect>
       </div>
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
