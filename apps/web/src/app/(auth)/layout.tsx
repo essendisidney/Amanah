@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { SiteHeaderBand } from '@/components/site-chrome';
 
 export const metadata: Metadata = {
-  title: 'Account',
+  title: { default: 'Account · Jameiyah', template: '%s · Jameiyah' },
 };
 
 export default function AuthLayout({ children }: { children: ReactNode }) {

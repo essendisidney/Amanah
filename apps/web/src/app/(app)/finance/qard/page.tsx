@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
@@ -13,6 +13,8 @@ import {
 } from '@/features/finance/actions';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
 import { getDictionary } from '@/i18n/get-dictionary';
+
+export const metadata: Metadata = { title: 'Member loan' };
 
 const money = (n: number) => formatCurrency(n, 'KES');
 

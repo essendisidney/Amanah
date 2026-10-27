@@ -3,6 +3,8 @@ import { AuthCard, RegisterForm } from '@/features/auth';
 
 export const metadata: Metadata = {
   title: 'Create account',
+  description: 'Create a free Jameiyah account to save with your circle, without interest.',
+  alternates: { canonical: '/register' },
 };
 
 type SearchParams = Promise<{ next?: string }>;

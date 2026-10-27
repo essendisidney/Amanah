@@ -3,7 +3,8 @@ import type { Route } from 'next';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react';
-import { APP_NAME, APP_DESCRIPTION } from '@jamiya/shared';
+import { APP_NAME } from '@jamiya/shared';
+import { SITE_DESCRIPTION } from '@/lib/site';
 import { PublicSiteHeader } from '@/components/public-site-header';
 import { SiteFooter } from '@/components/site-chrome';
 import { PhoneAdvert } from '@/features/landing/phone-advert';
@@ -12,11 +13,10 @@ import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: `${APP_NAME} — Save together, without interest`,
-  description:
-    'Jameiyah is community finance for Kenyan circles: merry-go-round, table banking, and savings, with statements officers and members can both see. No riba.',
+  description: SITE_DESCRIPTION,
   openGraph: {
     title: `${APP_NAME} — Save together, without interest`,
-    description: APP_DESCRIPTION,
+    description: SITE_DESCRIPTION,
     siteName: APP_NAME,
     type: 'website',
   },

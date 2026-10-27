@@ -1,8 +1,15 @@
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { ChevronRight } from 'lucide-react';
 import { formatCurrency } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
+
+export const metadata: Metadata = {
+  title: 'Sadaka',
+  description:
+    'Give Sadaka to verified causes in Kenya: mosques, madrasas, orphanages and families in need, with every shilling shown.',
+  alternates: { canonical: '/sadaka' },
+};
 
 export const dynamic = 'force-dynamic';
 

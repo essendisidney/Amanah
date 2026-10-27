@@ -3,6 +3,7 @@ import { AuthCard, ForgotPasswordForm } from '@/features/auth';
 
 export const metadata: Metadata = {
   title: 'Forgot password',
+  description: 'Reset your Jameiyah password by email.',
 };
 
 export default function ForgotPasswordPage() {

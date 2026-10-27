@@ -4,6 +4,7 @@ import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'Phone sign in',
+  description: 'Sign in to Jameiyah with a one-time SMS code. No password needed.',
 };
 
 type SearchParams = Promise<{ next?: string }>;

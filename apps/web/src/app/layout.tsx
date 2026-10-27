@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
-import { APP_DESCRIPTION, APP_NAME } from '@jamiya/shared';
+import { APP_NAME } from '@jamiya/shared';
+import { SITE_DESCRIPTION, SITE_URL } from '@/lib/site';
 import { InstallPrompt } from '@/components/install-prompt';
 import { BootSplashMarkup } from '@/components/app-loader';
 import { BootSplash } from '@/components/boot-splash';
@@ -32,9 +33,19 @@ export const metadata: Metadata = {
     default: APP_NAME,
     template: `%s · ${APP_NAME}`,
   },
-  description: APP_DESCRIPTION,
+  description: SITE_DESCRIPTION,
   applicationName: APP_NAME,
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  metadataBase: new URL(SITE_URL),
+  // No og:title/og:description here: a site-wide one would override every page's own title and
+  // description in link previews. The image comes from opengraph-image.tsx.
+  openGraph: {
+    siteName: APP_NAME,
+    type: 'website',
+    locale: 'en_KE',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,

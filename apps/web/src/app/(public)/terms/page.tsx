@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { LegalPage } from '@/components/legal-page';
 
 export const metadata: Metadata = {
-  title: 'Terms of use · Jameiyah',
+  title: 'Terms of use',
+  alternates: { canonical: '/terms' },
   description: 'The terms for using Jameiyah, the community finance app by Jameiyah Limited.',
 };
 

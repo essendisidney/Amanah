@@ -11,7 +11,7 @@ import {
 import { AdminSectionHeader } from '@/features/admin/components/admin-section-header';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 
-export const metadata: Metadata = { title: 'Support tickets' };
+export const metadata: Metadata = { title: 'Admin · Support tickets' };
 export const dynamic = 'force-dynamic';
 
 type TicketRow = {

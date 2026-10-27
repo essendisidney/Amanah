@@ -77,9 +77,9 @@ export function FeesOwedView({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Fees owed
-          </h2>
+          </h1>
           <p className="text-muted-foreground mt-1 max-w-2xl text-sm">
             Circle fees a member&apos;s wallet could not cover when their contribution was paid.
             They are taken automatically from the next M-Pesa deposit and before any withdrawal.

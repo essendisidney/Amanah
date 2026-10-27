@@ -10,7 +10,12 @@ import {
 import { InstitutionRegisterForm } from '@/features/charity/components/institution-register-form';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = { title: 'Adopt a mosque / madrasa / orphanage' };
+export const metadata: Metadata = {
+  title: 'Adopt a mosque, madrasa or orphanage',
+  description:
+    'Give monthly to a verified mosque, madrasa or orphanage in Kenya and see where every shilling goes.',
+  alternates: { canonical: '/sadaka/adopt' },
+};
 export const dynamic = 'force-dynamic';
 
 type Profile = {

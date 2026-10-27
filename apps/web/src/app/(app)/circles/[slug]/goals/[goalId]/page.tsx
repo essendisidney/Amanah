@@ -13,6 +13,7 @@ import {
 } from '@/features/finance/components/circle-goal-member-board';
 import { getAuthUser } from '@/lib/supabase/auth';
 import { callRpc } from '@/lib/supabase/rpc';
+import { friendlyError } from '@/lib/friendly-error';
 
 export const metadata: Metadata = { title: 'Circle goal' };
 export const dynamic = 'force-dynamic';
@@ -32,7 +33,7 @@ export default async function CircleGoalDetailPage({ params, searchParams }: Pro
   if (error) {
     return (
       <AppPage width="medium">
-        <p className="text-sm text-destructive">{error.message}</p>
+        <p className="text-sm text-destructive">{friendlyError(error.message)}</p>
         <Button asChild variant="outline" className="rounded-full">
           <Link href={`/circles/${slug}` as Route}>Back to circle</Link>
         </Button>

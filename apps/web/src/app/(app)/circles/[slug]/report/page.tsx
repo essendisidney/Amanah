@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { PrintReportButton } from '@/features/circles/components/print-report-button';
 import { isRotatingKind } from '@/features/circles/lib/circle-mode';
+
+export const metadata: Metadata = { title: 'Circle report' };
 
 export const dynamic = 'force-dynamic';
 

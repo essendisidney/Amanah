@@ -83,10 +83,10 @@ export function DashboardView({
     <div className="grid items-start gap-6 md:grid-cols-[minmax(0,1fr)_minmax(260px,300px)] md:gap-8">
       <div className="space-y-5">
         <header className="space-y-1">
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-sm text-muted-foreground">
             {greeting},{' '}
             <span className="font-semibold text-foreground">{firstName}</span>
-          </p>
+          </h1>
           {(needsPhone || needsProfile) && (
             <Link
               href={
