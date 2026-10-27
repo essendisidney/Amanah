@@ -171,8 +171,8 @@ function PinDots({ length }: { length: number }) {
       {[0, 1, 2, 3].map((i) => (
         <span
           key={i}
-          className={`h-3.5 w-3.5 rounded-full border-2 border-[#d8a038] transition-colors ${
-            i < length ? 'bg-[#d8a038]' : 'bg-transparent'
+          className={`h-3.5 w-3.5 rounded-full border-2 border-brand-gold transition-colors ${
+            i < length ? 'bg-brand-gold' : 'bg-transparent'
           }`}
         />
       ))}
@@ -191,7 +191,7 @@ function PinPad({
 }) {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
   const cls =
-    'flex h-16 w-16 items-center justify-center rounded-full text-2xl font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d8a038]';
+    'flex h-16 w-16 items-center justify-center rounded-full text-2xl font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold';
   return (
     <div className="mx-auto grid w-fit grid-cols-3 gap-4">
       {keys.map((k) => (
@@ -338,15 +338,15 @@ export function AppLockGate({
       role="dialog"
       aria-modal="true"
       aria-label={t.locked}
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-[#03201b] px-6 text-white"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-8 bg-brand-night px-6 text-white"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(216,160,56,0.18)_0%,_transparent_60%)]" aria-hidden />
       <div className="relative flex flex-col items-center gap-3 text-center">
         <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-          <Lock className="h-6 w-6 text-[#d8a038]" />
+          <Lock className="h-6 w-6 text-brand-gold" />
         </span>
         <p className="font-[family-name:var(--font-grotesk)] text-2xl font-semibold tracking-tight">{t.enterPin}</p>
-        <p className="min-h-5 text-sm text-[#f3c77a]" aria-live="polite">
+        <p className="min-h-5 text-sm text-brand-gold-pale" aria-live="polite">
           {error}
         </p>
         <PinDots length={pin.length} />
@@ -362,7 +362,7 @@ export function AppLockGate({
                 onClick={() => void tryDevice()}
                 aria-label={t.useDevice}
                 title={t.useDevice}
-                className="flex h-16 w-16 items-center justify-center rounded-full text-[#d8a038] hover:bg-white/10"
+                className="flex h-16 w-16 items-center justify-center rounded-full text-brand-gold hover:bg-white/10"
               >
                 <Fingerprint className="h-7 w-7" />
               </button>
@@ -498,9 +498,9 @@ export function AppLockSettings({
       </div>
 
       {step !== 'idle' ? (
-        <div className="space-y-4 rounded-2xl bg-[#03201b] px-4 py-6 text-white">
+        <div className="space-y-4 rounded-2xl bg-brand-night px-4 py-6 text-white">
           <p className="text-center text-sm font-medium">{step === 'choose' ? t.choosePin : t.confirmPin}</p>
-          <p className="min-h-5 text-center text-sm text-[#f3c77a]" aria-live="polite">
+          <p className="min-h-5 text-center text-sm text-brand-gold-pale" aria-live="polite">
             {error}
           </p>
           <PinDots length={pin.length} />
@@ -613,8 +613,8 @@ export function AppLockPrompt({ locale }: { locale: string }) {
     >
       <div className="max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-background px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-6 shadow-2xl sm:max-w-md sm:rounded-3xl sm:pb-6">
         <div className="mb-4 flex items-start gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#03201b]">
-            <Lock className="h-5 w-5 text-[#d8a038]" />
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-night">
+            <Lock className="h-5 w-5 text-brand-gold" />
           </span>
           <div>
             <h2 id="lock-prompt-title" className="text-lg font-semibold tracking-tight text-foreground">
@@ -777,15 +777,15 @@ export function MoneyStepUp({
           role="dialog"
           aria-modal="true"
           aria-label={t.title}
-          className="fixed inset-0 z-[95] flex flex-col items-center justify-center gap-7 bg-[#03201b]/95 px-6 text-white backdrop-blur-sm"
+          className="fixed inset-0 z-[95] flex flex-col items-center justify-center gap-7 bg-brand-night/95 px-6 text-white backdrop-blur-sm"
         >
           <div className="relative flex flex-col items-center gap-3 text-center">
             <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
-              <Lock className="h-6 w-6 text-[#d8a038]" />
+              <Lock className="h-6 w-6 text-brand-gold" />
             </span>
             <p className="font-[family-name:var(--font-grotesk)] text-2xl font-semibold tracking-tight">{t.title}</p>
             <p className="text-sm text-white/70">{t.body}</p>
-            <p className="min-h-5 text-sm text-[#f3c77a]" aria-live="polite">
+            <p className="min-h-5 text-sm text-brand-gold-pale" aria-live="polite">
               {error}
             </p>
             <PinDots length={pin.length} />
@@ -800,7 +800,7 @@ export function MoneyStepUp({
                   onClick={() => void tryDevice()}
                   aria-label={t.useDevice}
                   title={t.useDevice}
-                  className="flex h-16 w-16 items-center justify-center rounded-full text-[#d8a038] hover:bg-white/10"
+                  className="flex h-16 w-16 items-center justify-center rounded-full text-brand-gold hover:bg-white/10"
                 >
                   <Fingerprint className="h-7 w-7" />
                 </button>

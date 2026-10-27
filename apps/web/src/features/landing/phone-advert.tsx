@@ -94,15 +94,15 @@ export function PhoneAdvert({
           }}
         >
           {/* Side buttons */}
-          <span aria-hidden className="absolute -left-[3px] top-[96px] h-7 w-[3px] rounded-l bg-[#6f7b78]" />
-          <span aria-hidden className="absolute -left-[3px] top-[138px] h-12 w-[3px] rounded-l bg-[#6f7b78]" />
-          <span aria-hidden className="absolute -left-[3px] top-[196px] h-12 w-[3px] rounded-l bg-[#6f7b78]" />
-          <span aria-hidden className="absolute -right-[3px] top-[150px] h-16 w-[3px] rounded-r bg-[#6f7b78]" />
+          <span aria-hidden className="absolute -left-[3px] top-[96px] h-7 w-[3px] rounded-l bg-phone-button" />
+          <span aria-hidden className="absolute -left-[3px] top-[138px] h-12 w-[3px] rounded-l bg-phone-button" />
+          <span aria-hidden className="absolute -left-[3px] top-[196px] h-12 w-[3px] rounded-l bg-phone-button" />
+          <span aria-hidden className="absolute -right-[3px] top-[150px] h-16 w-[3px] rounded-r bg-phone-button" />
 
           {/* Bezel */}
-          <div className="rounded-[2.95rem] bg-[#050807] p-[9px]">
+          <div className="rounded-[2.95rem] bg-phone-frame p-[9px]">
             {/* Screen */}
-            <div className="relative h-[572px] overflow-hidden rounded-[2.4rem] bg-[#f6f7f5]">
+            <div className="relative h-[572px] overflow-hidden rounded-[2.4rem] bg-phone-screen">
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 z-30"
@@ -110,17 +110,17 @@ export function PhoneAdvert({
               />
 
               {/* Status bar + Dynamic Island */}
-              <div className="relative z-20 flex h-[34px] items-center justify-between px-6 text-[11px] font-semibold text-[#0b1f1b]">
+              <div className="relative z-20 flex h-[34px] items-center justify-between px-6 text-[11px] font-semibold text-brand-ink">
                 <span>9:41</span>
                 <span className="absolute left-1/2 top-2 h-[22px] w-[86px] -translate-x-1/2 rounded-full bg-black" />
                 <span className="flex items-center gap-1" aria-hidden>
                   <span className="flex items-end gap-[2px]">
                     {[4, 6, 8, 10].map((h) => (
-                      <span key={h} className="w-[2.5px] rounded-sm bg-[#0b1f1b]" style={{ height: h }} />
+                      <span key={h} className="w-[2.5px] rounded-sm bg-brand-ink" style={{ height: h }} />
                     ))}
                   </span>
-                  <span className="ml-1 h-[10px] w-[20px] rounded-[3px] border border-[#0b1f1b] p-[1px]">
-                    <span className="block h-full w-4/5 rounded-[1px] bg-[#0b1f1b]" />
+                  <span className="ml-1 h-[10px] w-[20px] rounded-[3px] border border-brand-ink p-[1px]">
+                    <span className="block h-full w-4/5 rounded-[1px] bg-brand-ink" />
                   </span>
                 </span>
               </div>
@@ -139,7 +139,7 @@ export function PhoneAdvert({
                   </span>
                 </span>
                 <span className="relative">
-                  <Bell className="h-[18px] w-[18px] text-[#34443f]" aria-hidden />
+                  <Bell className="h-[18px] w-[18px] text-phone-icon" aria-hidden />
                   <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full" style={{ background: GOLD }} />
                 </span>
               </div>
@@ -154,7 +154,7 @@ export function PhoneAdvert({
                   <p className="text-[18px] font-bold leading-tight" style={{ color: GREEN }}>
                     {mock.circle}
                   </p>
-                  <p className="truncate text-[10.5px] text-[#5b6b66]">{mock.place}</p>
+                  <p className="truncate text-[10.5px] text-phone-text">{mock.place}</p>
                   <div
                     className="mt-3 flex items-center gap-2.5 rounded-2xl p-3 text-white"
                     style={{ background: `linear-gradient(145deg, ${GREEN}, #00564a)` }}
@@ -206,7 +206,7 @@ export function PhoneAdvert({
                         ) : (
                           <Initial name={s.name} tone={i} />
                         )}
-                        <span className="text-[12.5px] font-semibold text-[#0f1f1b]">{s.name}</span>
+                        <span className="text-[12.5px] font-semibold text-phone-ink">{s.name}</span>
                         {s.you ? (
                           <span className="rounded-full px-1.5 text-[9px] font-bold uppercase" style={{ background: '#e3efe9', color: GREEN }}>
                             {mock.you}
@@ -225,18 +225,18 @@ export function PhoneAdvert({
                   <p className="text-[18px] font-bold" style={{ color: GREEN }}>
                     {ad.pay.title}
                   </p>
-                  <p className="text-[11px] text-[#5b6b66]">{mock.circle}</p>
-                  <div className="mt-4 rounded-2xl border border-[#004038]/10 bg-white p-4 text-center">
-                    <p className="text-[11px] uppercase tracking-[0.14em] text-[#6b7a75]">{ad.pay.due}</p>
+                  <p className="text-[11px] text-phone-text">{mock.circle}</p>
+                  <div className="mt-4 rounded-2xl border border-brand-green/10 bg-white p-4 text-center">
+                    <p className="text-[11px] uppercase tracking-[0.14em] text-brand-ink-muted">{ad.pay.due}</p>
                     <p className="mt-1 text-[34px] font-extrabold leading-none" style={{ color: GREEN }}>
                       Ksh 5,000
                     </p>
                   </div>
-                  <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-[#004038]/10 bg-white px-3 py-2.5">
+                  <div className="mt-3 flex items-center gap-2.5 rounded-xl border border-brand-green/10 bg-white px-3 py-2.5">
                     <span className="rounded-[4px] px-1 text-[9px] font-extrabold text-white" style={{ background: '#1f8a3a' }}>
                       M-PESA
                     </span>
-                    <span className="text-[12px] font-medium text-[#0f1f1b]">{ad.pay.method}</span>
+                    <span className="text-[12px] font-medium text-phone-ink">{ad.pay.method}</span>
                     <Check className="ml-auto h-4 w-4" style={{ color: '#1f8a3a' }} aria-hidden />
                   </div>
                   <div className="mt-4 flex h-11 items-center justify-center rounded-xl text-[14px] font-bold" style={{ background: GOLD, color: '#2a1d05' }}>
@@ -249,8 +249,8 @@ export function PhoneAdvert({
                       <p className="text-[13px] font-extrabold" style={{ color: '#1f8a3a' }}>
                         M-PESA
                       </p>
-                      <p className="mt-1.5 text-[12px] leading-snug text-[#1a1a1a]">{ad.pay.stkBody}</p>
-                      <div className="mt-3 flex h-9 items-center gap-2 border-b-2 border-[#1f8a3a] px-1 text-[18px] tracking-[0.3em] text-[#1a1a1a]">
+                      <p className="mt-1.5 text-[12px] leading-snug text-phone-sms">{ad.pay.stkBody}</p>
+                      <div className="mt-3 flex h-9 items-center gap-2 border-b-2 border-phone-success px-1 text-[18px] tracking-[0.3em] text-phone-sms">
                         ••••
                       </div>
                       <div className="mt-3 flex justify-end gap-5 text-[12px] font-bold" style={{ color: '#1f8a3a' }}>
@@ -265,8 +265,8 @@ export function PhoneAdvert({
                     <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white" style={{ background: '#1f8a3a' }}>
                       <Check className="h-6 w-6" strokeWidth={3} aria-hidden />
                     </span>
-                    <p className="mt-3 text-[15px] font-bold text-[#0f1f1b]">{ad.pay.ok}</p>
-                    <p className="mt-0.5 text-[11.5px] text-[#5b6b66]">{ad.pay.okBody}</p>
+                    <p className="mt-3 text-[15px] font-bold text-phone-ink">{ad.pay.ok}</p>
+                    <p className="mt-0.5 text-[11.5px] text-phone-text">{ad.pay.okBody}</p>
                   </div>
                 </Scene>
 
@@ -288,16 +288,16 @@ export function PhoneAdvert({
                       <span className="pb-1.5 text-[12px] font-semibold text-white/80">{ad.loan.rateLabel}</span>
                     </div>
                   </div>
-                  <div className="mt-3 space-y-1.5 rounded-xl border border-[#004038]/10 bg-white px-3 py-2.5 text-[12px]">
+                  <div className="mt-3 space-y-1.5 rounded-xl border border-brand-green/10 bg-white px-3 py-2.5 text-[12px]">
                     <p className="flex justify-between">
-                      <span className="text-[#5b6b66]">{ad.loan.term}</span>
+                      <span className="text-phone-text">{ad.loan.term}</span>
                     </p>
-                    <p className="font-semibold text-[#0f1f1b]">{ad.loan.monthly}</p>
+                    <p className="font-semibold text-phone-ink">{ad.loan.monthly}</p>
                   </div>
                   <div className="mt-3 flex h-11 items-center justify-center rounded-xl text-[14px] font-bold text-white" style={{ background: GREEN }}>
                     {ad.loan.button}
                   </div>
-                  <p className="mt-2 text-center text-[10.5px] text-[#6b7a75]">{ad.loan.note}</p>
+                  <p className="mt-2 text-center text-[10.5px] text-brand-ink-muted">{ad.loan.note}</p>
                 </Scene>
 
                 {/* 4 · Sadaka */}
@@ -305,7 +305,7 @@ export function PhoneAdvert({
                   <p className="text-[18px] font-bold" style={{ color: GREEN }}>
                     Sadaka
                   </p>
-                  <div className="mt-3 overflow-hidden rounded-2xl border border-[#004038]/10 bg-white">
+                  <div className="mt-3 overflow-hidden rounded-2xl border border-brand-green/10 bg-white">
                     <div
                       className="flex h-[108px] items-end p-3"
                       style={{ background: 'linear-gradient(160deg,#1a6b5c 0%,#004038 55%,#8a6414 130%)' }}
@@ -315,23 +315,23 @@ export function PhoneAdvert({
                       </span>
                     </div>
                     <div className="p-3">
-                      <p className="text-[14px] font-bold text-[#0f1f1b]">{ad.sadaka.campaign}</p>
-                      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-[#e8eeec]">
+                      <p className="text-[14px] font-bold text-phone-ink">{ad.sadaka.campaign}</p>
+                      <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-phone-track">
                         <div className="jm-ad-bar h-full rounded-full" style={{ background: GOLD, width: '72%', ...delay(3) }} />
                       </div>
                       <p className="mt-2 text-[12px]">
                         <span className="font-bold" style={{ color: GREEN }}>
                           Ksh 216,400
                         </span>{' '}
-                        <span className="text-[#5b6b66]">{ad.sadaka.of}</span>
+                        <span className="text-phone-text">{ad.sadaka.of}</span>
                       </p>
-                      <p className="mt-0.5 text-[10.5px] text-[#6b7a75]">{ad.sadaka.donors}</p>
+                      <p className="mt-0.5 text-[10.5px] text-brand-ink-muted">{ad.sadaka.donors}</p>
                     </div>
                   </div>
                   <div className="mt-3 flex h-11 items-center justify-center rounded-xl text-[14px] font-bold" style={{ background: GOLD, color: '#2a1d05' }}>
                     {ad.sadaka.button}
                   </div>
-                  <p className="mt-2 flex items-center justify-center gap-1 text-[10.5px] text-[#6b7a75]">
+                  <p className="mt-2 flex items-center justify-center gap-1 text-[10.5px] text-brand-ink-muted">
                     <Check className="h-3 w-3" style={{ color: '#1f8a3a' }} aria-hidden />
                     {ad.sadaka.receipt}
                   </p>
@@ -342,15 +342,15 @@ export function PhoneAdvert({
                   <p className="text-[18px] font-bold" style={{ color: GREEN }}>
                     {ad.statement.title}
                   </p>
-                  <p className="text-[11px] text-[#5b6b66]">{mock.circle} · 2026</p>
-                  <ul className="mt-3 divide-y divide-[#004038]/8 rounded-2xl border border-[#004038]/10 bg-white">
+                  <p className="text-[11px] text-phone-text">{mock.circle} · 2026</p>
+                  <ul className="mt-3 divide-y divide-brand-green/8 rounded-2xl border border-brand-green/10 bg-white">
                     {ad.statement.rows.map((row, i) => (
                       <li key={row} className="flex items-center gap-2 px-3 py-2.5 text-[12px]">
                         <span className="flex h-5 w-5 items-center justify-center rounded-full text-white" style={{ background: '#1f8a3a' }}>
                           <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
                         </span>
-                        <span className="text-[#0f1f1b]">{row}</span>
-                        <span className="ml-auto font-semibold text-[#0f1f1b]">{i === 3 ? 'Ksh 2,500' : 'Ksh 5,000'}</span>
+                        <span className="text-phone-ink">{row}</span>
+                        <span className="ml-auto font-semibold text-phone-ink">{i === 3 ? 'Ksh 2,500' : 'Ksh 5,000'}</span>
                       </li>
                     ))}
                   </ul>
@@ -367,7 +367,7 @@ export function PhoneAdvert({
 
               {/* Tab bar */}
               <div className="absolute inset-x-0 bottom-0 z-20 border-t border-black/5 bg-white/95 pb-4 pt-2">
-                <div className="grid grid-cols-5 text-center text-[9px] font-medium text-[#6b7a75]">
+                <div className="grid grid-cols-5 text-center text-[9px] font-medium text-brand-ink-muted">
                   {[Home, Users, Wallet, Activity, CircleUserRound].map((Icon, i) => (
                     <span key={i} className="flex flex-col items-center gap-0.5" style={i === 1 ? { color: GREEN, fontWeight: 700 } : undefined}>
                       <Icon className="h-[17px] w-[17px]" aria-hidden />
@@ -389,7 +389,7 @@ export function PhoneAdvert({
             <p className="text-[15px] font-bold" style={{ color: onDark ? '#f3f7f5' : GREEN }}>
               {c.title}
             </p>
-            <p className={`mt-0.5 text-[12.5px] ${onDark ? 'text-white/60' : 'text-[#5a6f66]'}`}>{c.body}</p>
+            <p className={`mt-0.5 text-[12.5px] ${onDark ? 'text-white/60' : 'text-phone-caption'}`}>{c.body}</p>
           </div>
         ))}
       </figcaption>

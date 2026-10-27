@@ -138,7 +138,7 @@ export default async function AdminSettlementsPage({ searchParams }: Props) {
       </div>
 
       {missing.length > 0 ? (
-        <section className="overflow-hidden rounded-xl border border-amber-500/30 bg-card">
+        <section className="overflow-hidden rounded-xl border border-warning-border/30 bg-card">
           <div className="border-b border-border px-4 py-3 text-sm font-semibold">
             Completed intents missing settlement ({missing.length})
           </div>

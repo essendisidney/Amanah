@@ -83,7 +83,7 @@ export function BulkPhoneInviteForm({
                 <span
                   className={
                     row.success
-                      ? 'text-xs font-medium text-emerald-700 dark:text-emerald-400'
+                      ? 'text-xs font-medium text-success-text'
                       : 'text-xs font-medium text-destructive'
                   }
                 >
