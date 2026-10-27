@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
+import { canSeeOpsDetails } from '@/lib/ops-access';
 
-/** Liveness + build identity for mobile / uptime monitors. */
-export async function GET() {
+/** Liveness + build identity for mobile / uptime monitors. Key details for operators only. */
+export async function GET(request: Request) {
   const hasServiceRole = Boolean((process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim());
   const hasTaifa = Boolean((process.env.TAIFA_API_KEY ?? '').trim());
   const hasSupabaseUrl = Boolean(
@@ -9,12 +10,16 @@ export async function GET() {
   );
   const hasAnon = Boolean((process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '').trim());
 
-  return NextResponse.json({
+  const base = {
     ok: true,
     service: 'jameiyah-web',
-    phase: 6,
     timestamp: new Date().toISOString(),
     version: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? 'dev',
+  };
+  if (!(await canSeeOpsDetails(request))) return NextResponse.json(base);
+
+  return NextResponse.json({
+    ...base,
     otp: {
       supabase_url: hasSupabaseUrl,
       anon_key: hasAnon,
