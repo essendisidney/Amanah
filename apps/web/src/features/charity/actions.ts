@@ -109,7 +109,7 @@ async function initiateAndSettleCharityPayment(input: {
       return {
         success: false,
         message: stk.error
-          ? `M-Pesa failed: ${friendlyError(stk.error)}`
+          ? `The M-Pesa request did not start. ${friendlyError(stk.error)}`
           : 'Could not start M-Pesa prompt.',
         intentId: created.intent_id,
       };

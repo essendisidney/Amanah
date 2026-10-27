@@ -4,7 +4,7 @@
  * ("duplicate key value violates…") never reach the screen.
  */
 const INTERNAL =
-  /violates|duplicate key|relation "|column "|function .*does not exist|syntax error|permission denied|JWT|PGRST|null value|invalid input syntax|deadlock|statement timeout|fetch failed|Failed to fetch|ECONNREFUSED|ETIMEDOUT|row-level security|Could not find the function|schema cache|The resource already exists|Payload too large|exceeded the maximum allowed size/i;
+  /violates|duplicate key|relation "|column "|function .*does not exist|syntax error|permission denied|JWT|PGRST|null value|invalid input syntax|deadlock|statement timeout|fetch failed|Failed to fetch|ECONNREFUSED|ETIMEDOUT|row-level security|Could not find the function|schema cache|The resource already exists|Payload too large|exceeded the maximum allowed size|\bHTTP [45]\d\d\b/i;
 
 export function friendlyError(message: string | null | undefined): string {
   const text = (message ?? '').trim();

@@ -34,6 +34,10 @@ describe('friendlyError', () => {
     }
   });
 
+  it('hides payment provider status lines', () => {
+    assert.doesNotMatch(friendlyError('Paystack initialize HTTP 400'), /Paystack|HTTP/);
+  });
+
   it('never returns an empty message', () => {
     assert.equal(friendlyError(''), 'That did not go through. Please try again.');
     assert.equal(friendlyError(null), 'That did not go through. Please try again.');
