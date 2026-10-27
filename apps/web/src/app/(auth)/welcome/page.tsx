@@ -6,6 +6,7 @@ import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
   title: 'Welcome',
+  description: 'Welcome to Jameiyah: save together, see every shilling, stay riba-free.',
 };
 
 const COPY = {

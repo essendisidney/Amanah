@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { createClient } from '@/lib/supabase/server';
@@ -12,6 +12,8 @@ import {
 import { getDictionary } from '@/i18n/get-dictionary';
 import { callRpc } from '@/lib/supabase/rpc';
 import type { TawarruqRates } from '@/features/finance/lib/tawarruq-quote';
+
+export const metadata: Metadata = { title: 'Tawarruq' };
 
 export const dynamic = 'force-dynamic';
 

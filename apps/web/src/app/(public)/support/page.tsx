@@ -8,7 +8,9 @@ import { tipFormAction } from '@/features/charity/actions';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: 'Support Jameiyah',
+  title: { absolute: 'Support Jameiyah' },
+  description: 'Help keep Jameiyah free for small circles with a one-off or monthly contribution.',
+  alternates: { canonical: '/support' },
 };
 
 export const dynamic = 'force-dynamic';

@@ -76,9 +76,9 @@ export default async function AdminFinanceIntegrityPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Ledger integrity
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Compare live wallet SoT to journal projection (account 2000). Use Backfill to
             post missing journals and mirror settlement sidecars — idempotent.

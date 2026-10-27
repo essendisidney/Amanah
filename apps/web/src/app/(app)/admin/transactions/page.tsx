@@ -33,9 +33,9 @@ export default async function AdminTransactionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
           Transaction monitoring
-        </h2>
+        </h1>
         <ExportTransactionsButton />
       </div>
       {rows.length === 0 ? (

@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { LegalPage } from '@/components/legal-page';
 
 export const metadata: Metadata = {
-  title: 'Privacy policy · Jameiyah',
+  title: 'Privacy policy',
+  alternates: { canonical: '/privacy' },
   description: 'How Jameiyah Limited collects, uses and protects your personal data.',
 };
 

@@ -89,9 +89,9 @@ export default async function AdminJournalPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Journal ledger
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Append-only projection. Posts are never edited — reverse with a new balanced
             entry. Live wallet SoT remains until cutover.

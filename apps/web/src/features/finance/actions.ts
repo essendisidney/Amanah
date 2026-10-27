@@ -7,6 +7,7 @@ import {
   mapMoneyError,
   redirectWithCircleNotice,
 } from '@/features/circles/lib/circle-notice';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type FinanceActionState = { success: boolean; message: string };
 
@@ -49,7 +50,7 @@ export async function requestQardAction(formData: FormData): Promise<FinanceActi
     p_installments: installments,
     p_guarantor_user_ids: guarantorUserIds.length ? guarantorUserIds : null,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string; cap?: number } | null;
   if (result && result.ok === false && result.error === 'ABOVE_CAP') {
     const cap = Number(result.cap ?? 0);
@@ -82,7 +83,7 @@ export async function repayQardAction(formData: FormData): Promise<FinanceAction
     return { success: false, message: 'Enter a valid repayment amount.' };
   }
   const { data, error } = await callRpc('repay_qard', { p_loan_id: loanId, p_amount: amount });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not record repayment.');
   if (state.success) {
     state.message = 'Repayment recorded.';
@@ -136,7 +137,7 @@ export async function submitTawarruqAction(formData: FormData): Promise<FinanceA
     p_wakalah: wakalah,
     p_guarantor_user_id: guarantorUserId || null,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string; room?: number } | null;
   if (result && result.ok === false && result.error === 'ABOVE_ROOM') {
     const room = Number(result.room ?? 0);
@@ -170,7 +171,7 @@ export async function respondTawarruqGuaranteeAction(
     p_guarantee_id: guaranteeId,
     p_accept: accept,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not respond to the guarantee.');
   if (state.success) {
     state.message = accept ? 'You accepted the guarantee.' : 'You declined the guarantee.';
@@ -211,7 +212,7 @@ export async function createGoalAction(formData: FormData): Promise<FinanceActio
     target_date: targetDate.toISOString().slice(0, 10),
     ...(jamiyaId ? { jamiya_id: jamiyaId } : {}),
   } as never);
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   revalidatePath('/finance/goals');
   if (jamiyaId) {
     const { data: j } = await supabase.from('jamiyas').select('slug').eq('id', jamiyaId).maybeSingle();
@@ -232,7 +233,7 @@ export async function updateGoalAction(formData: FormData): Promise<FinanceActio
     .from('savings_goals')
     .update({ saved_amount: saved } as never)
     .eq('id', goalId);
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   revalidatePath('/finance/goals');
   return { success: true, message: 'Goal updated.' };
 }
@@ -253,7 +254,7 @@ export async function ensureWelfareFundAction(formData: FormData): Promise<Finan
     p_jamiya_id: jamiyaId,
     p_contribution_amount: Number.isFinite(contributionAmount) ? contributionAmount : 0,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not create welfare fund.');
   if (state.success) {
     state.message = 'Welfare fund ready.';
@@ -273,7 +274,7 @@ export async function contributeWelfareAction(formData: FormData): Promise<Finan
     p_jamiya_id: jamiyaId,
     p_amount: amount,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not contribute to welfare.');
   if (state.success) {
     state.message = 'Welfare contribution recorded.';
@@ -298,7 +299,7 @@ export async function fileWelfareClaimAction(formData: FormData): Promise<Financ
     p_amount: amount,
     p_reason: reason,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not file claim.');
   if (state.success) {
     state.message = 'Claim submitted for review.';
@@ -317,7 +318,7 @@ export async function decideWelfareClaimAction(formData: FormData): Promise<Fina
     p_approve: approve,
     p_notes: notes || null,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not decide claim.');
   if (state.success) {
     state.message = approve ? 'Claim paid to member wallet.' : 'Claim rejected.';
@@ -335,7 +336,7 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
     p_loan_id: loanId,
     p_approve: approve,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const raw = data as {
     ok?: boolean;
     error?: string;
@@ -381,7 +382,7 @@ export async function respondQardGuaranteeAction(
     p_accept: accept,
     p_notes: notes || null,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not respond to guarantee request.');
   if (state.success) {
     state.message = accept ? 'You are now a guarantor on this loan.' : 'Guarantee declined.';
@@ -401,7 +402,7 @@ export async function markQardDefaultedAction(
   const loanId = String(formData.get('loanId') ?? '');
   if (!loanId) return { success: false, message: 'Missing loan.' };
   const { data, error } = await callRpc('mark_qard_defaulted', { p_loan_id: loanId });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not mark loan defaulted.');
   if (state.success) {
     state.message = 'Loan marked defaulted; accepted guarantors were notified.';
@@ -432,7 +433,7 @@ export async function acceptQardAgreementAction(
     p_loan_id: loanId,
     p_signer_name: signerName,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not accept agreement.');
   if (state.success) {
     state.message = 'Facility agreement accepted.';
@@ -453,7 +454,7 @@ export async function applyReferralAction(
   const code = String(formData.get('referralCode') ?? '').trim();
   if (code.length < 4) return { success: false, message: 'Enter a valid referral code.' };
   const { data, error } = await callRpc('apply_referral', { p_code: code });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'Could not apply referral.');
   if (state.success) {
     state.message = 'Referral applied. It qualifies after your first paid contribution.';
@@ -476,7 +477,7 @@ export async function applyReferralFormAction(formData: FormData): Promise<void>
 
 export async function syncPhoneFromAuthAction(): Promise<FinanceActionState> {
   const { data, error } = await callRpc('sync_phone_from_auth', {});
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const state = rpcState(data, 'No verified phone on your auth account.');
   if (state.success) {
     state.message = 'Phone synced from your verified sign-in.';

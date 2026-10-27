@@ -6,7 +6,7 @@ import { formatCurrency } from '@jamiya/shared';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = { title: 'My Sadaka campaigns' };
+export const metadata: Metadata = { title: 'My Sadaka campaigns', robots: { index: false } };
 export const dynamic = 'force-dynamic';
 
 type Campaign = {

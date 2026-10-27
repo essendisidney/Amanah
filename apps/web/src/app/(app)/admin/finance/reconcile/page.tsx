@@ -99,9 +99,9 @@ export default async function AdminFinanceReconcilePage({ searchParams }: Props)
             </Link>{' '}
             · Reconcile
           </p>
-          <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">
             Reconciliation queue
-          </h2>
+          </h1>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Investigate mismatches. Do not edit balances here. Mark matched only after PSP
             and journal agree.

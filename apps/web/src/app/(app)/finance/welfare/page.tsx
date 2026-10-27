@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button, Input, Label, Textarea } from '@jamiya/ui';
@@ -10,6 +11,8 @@ import {
 } from '@/features/finance/actions';
 import { StatusBadge } from '@/features/dashboard/components/dashboard-stats';
 import { EmptyState } from '@/features/dashboard/components/empty-state';
+
+export const metadata: Metadata = { title: 'Welfare fund' };
 
 export const dynamic = 'force-dynamic';
 

@@ -87,9 +87,9 @@ export default async function AdminSettlementsPage({ searchParams }: Props) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Settlements
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             PSP cash mirror (`settlements` + `provider_transactions`). Distinct from intent
             status and reconcile status — backfill closes gaps after completes.

@@ -7,6 +7,7 @@ import { getActivePlatformPlans } from '@/lib/platform-plans';
 
 export const metadata: Metadata = {
   title: 'Pricing',
+  alternates: { canonical: '/pricing' },
   description: 'Clear group plans for Jameiyah circles — Free, Starter, and Pro.',
 };
 

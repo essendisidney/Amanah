@@ -7,6 +7,8 @@ import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
 
 export const metadata: Metadata = {
   title: 'Sign in',
+  description: 'Sign in to Jameiyah with your phone, email or Google to see your circles, wallet and savings.',
+  alternates: { canonical: '/login' },
 };
 
 type SearchParams = Promise<{ next?: string; error?: string; method?: string; reason?: string }>;

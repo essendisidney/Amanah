@@ -5,7 +5,10 @@ import { ChevronRight } from 'lucide-react';
 import { getDictionary } from '@/i18n/get-dictionary';
 
 export const metadata: Metadata = {
-  title: 'Shariah on Jameiyah',
+  title: { absolute: 'Shariah on Jameiyah' },
+  description:
+    'What Jameiyah allows and avoids so circles stay free of riba: no interest between members, interest-free Qard, and fees shown before you pay.',
+  alternates: { canonical: '/shariah' },
 };
 
 export default async function ShariahPage() {

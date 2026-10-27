@@ -187,9 +187,9 @@ export default async function AdminPaymentIntentCasePage({ params }: Props) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Case file
           </p>
-          <h2 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">
             {kind.replaceAll('_', ' ')} · {intent.provider}
-          </h2>
+          </h1>
           <p className="mt-1 font-mono text-xs text-muted-foreground">{intent.id}</p>
         </div>
         <div className="flex flex-wrap gap-2">

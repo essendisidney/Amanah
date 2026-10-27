@@ -344,12 +344,9 @@ export function PayoutSchedule({
     );
   }
 
+  // Without live M-Pesa payouts the send is a test, and the officer should know it.
   const phoneSettleLabel =
-    paymentProvider === 'mpesa'
-      ? 'Settle → M-Pesa'
-      : paymentProvider === 'paystack'
-        ? 'Settle → phone (demo)'
-        : 'Settle → M-Pesa (sim)';
+    paymentProvider === 'mpesa' ? 'Pay out to M-Pesa' : 'Pay out to phone (test mode)';
 
   return (
     <ul className="divide-y divide-border rounded-xl border border-border bg-card">

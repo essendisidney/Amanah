@@ -68,9 +68,9 @@ export default async function AdminFinanceApprovalsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Finance approvals
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Maker–checker queue. Large refunds (≥ platform threshold) need a second admin
             before they execute.

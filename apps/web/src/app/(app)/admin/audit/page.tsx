@@ -77,9 +77,9 @@ export default async function AdminAuditPage() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             {dict.admin.auditTitle}
-          </h2>
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Who did what across circles, KYC, invites, and wallet actions.
           </p>

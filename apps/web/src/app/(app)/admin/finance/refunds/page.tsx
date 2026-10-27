@@ -152,9 +152,9 @@ export default async function AdminRefundsPage({ searchParams }: Props) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">
             Refunds
-          </h2>
+          </h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Find a payment first, review eligibility, then queue a refund. Completion posts a
             reversing journal. Large refunds may require dual approval.

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { friendlyError } from '@/lib/friendly-error';
 
 /** Flash a notice on a circle page after a server action. */
 export function redirectWithCircleNotice(
@@ -8,7 +9,8 @@ export function redirectWithCircleNotice(
   pathSuffix = '',
 ): never {
   const params = new URLSearchParams({
-    notice: message,
+    // Actions often pass a raw database message here; members see words, not internals.
+    notice: type === 'error' ? friendlyError(message) : message,
     noticeType: type,
   });
   let path = `/circles/${slug}`;
@@ -65,5 +67,5 @@ export function mapMoneyError(code: string | undefined | null): string {
   if (code.toLowerCase().includes('insufficient')) {
     return messages.INSUFFICIENT_FUNDS ?? code;
   }
-  return code;
+  return friendlyError(code);
 }

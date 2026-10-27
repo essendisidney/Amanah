@@ -6,7 +6,10 @@ import { Button } from '@jamiya/ui';
 import { CreateCampaignForm } from '@/features/charity/components/create-campaign-form';
 import { createClient } from '@/lib/supabase/server';
 
-export const metadata: Metadata = { title: 'Start a Sadaka campaign' };
+export const metadata: Metadata = {
+  title: 'Start a Sadaka campaign',
+  description: 'Raise Sadaka for a verified cause, with every shilling given and paid out shown publicly.',
+};
 export const dynamic = 'force-dynamic';
 
 type KycDoc = {

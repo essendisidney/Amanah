@@ -7,6 +7,9 @@ import { ZakatCalculator } from './zakat-calculator';
 
 export const metadata: Metadata = {
   title: 'Zakat calculator',
+  description:
+    'Work out the Zakat due on your savings, gold, business stock and debts in Kenya shillings, then give it to a verified cause.',
+  alternates: { canonical: '/zakat' },
 };
 
 export default async function ZakatPage() {

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Route } from 'next';
+import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { DonateForm } from '@/features/charity/components/donate-form';
@@ -41,6 +41,30 @@ type Disbursement = {
   paid_at: string | null;
   status: string;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('charity_campaigns')
+    .select('title, summary, cover_image_url, status')
+    .eq('slug', slug)
+    .maybeSingle();
+  const c = data as { title: string; summary: string; cover_image_url: string | null; status: string } | null;
+  if (!c || !['live', 'funded', 'disbursed', 'closed'].includes(c.status)) {
+    return { title: 'Sadaka campaign', robots: { index: false } };
+  }
+  return {
+    title: c.title,
+    description: c.summary,
+    alternates: { canonical: `/sadaka/${slug}` },
+    openGraph: {
+      title: c.title,
+      description: c.summary,
+      ...(c.cover_image_url ? { images: [{ url: c.cover_image_url, alt: c.title }] } : {}),
+    },
+  };
+}
 
 export default async function CampaignPage({ params, searchParams }: Props) {
   const { slug } = await params;
@@ -114,7 +138,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={campaign.cover_image_url}
-          alt=""
+          alt={`Cover photo for ${campaign.title}`}
           className="mt-6 aspect-[16/9] w-full rounded-xl object-cover"
         />
       ) : null}
@@ -157,12 +181,12 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             Photos
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {(campaign.public_media_urls ?? []).map((url) => (
+            {(campaign.public_media_urls ?? []).map((url, index) => (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 key={url}
                 src={url}
-                alt=""
+                alt={`${campaign.title}: photo ${index + 1}`}
                 className="aspect-[4/3] w-full rounded-lg object-cover"
               />
             ))}

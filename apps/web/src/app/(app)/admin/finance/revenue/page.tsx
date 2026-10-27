@@ -94,7 +94,7 @@ export default async function AdminRevenuePage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Revenue</h2>
+          <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold">Revenue</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
             Income booked in the journal (accounts 2100–2150): circle plans, contribution fees,
             join and early-slot fees, Sadaka platform fees and financing fees. {formatDate(from)} –{' '}
