@@ -8,7 +8,7 @@ Kenya payment build order put **ops** first. Code phases 1–9 can sit local unt
 |-------|--------|----------|
 | Domains live | **Green** | `jameiyah.com`, `www`, `jameiyah.co.ke`, `www` verified on Vercel project **jameiyah**; HTTP 200 |
 | `NEXT_PUBLIC_APP_URL` | **Green** | Set on Vercel (preview plain `https://jameiyah.com`; production present) |
-| Taifa SMS key | **Green** | `GET /api/v1/health` → `otp.taifa_key: true`; `TAIFA_API_KEY` / `TAIFA_SENDER_ID` on production |
+| Taifa SMS key | **Green** | `GET /api/v1/health` with `Authorization: Bearer $CRON_SECRET` → `otp.taifa_key: true`; `TAIFA_API_KEY` / `TAIFA_SENDER_ID` on production |
 | Supabase project | **Green** | `vzpnixfqkvovbniaoudx` `ACTIVE_HEALTHY` |
 | Prod app revision | **Behind** | Health `version: 7b27418` — Kenya payment phases 1–9 are **local uncommitted** |
 | Orchestrator health | **Missing on prod** | `GET /api/v1/payments/orchestrator-health` → 404 until ship |

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { canSeeOpsDetails } from '@/lib/ops-access';
 import { bankHealth } from '@/lib/payments/bank';
 import { paymentProvider } from '@/lib/payments/provider';
 import {
@@ -7,7 +8,7 @@ import {
 } from '@/lib/production-cutover';
 
 /** Ops probe: bank Edge readiness + Vercel payment flags. */
-export async function GET() {
+export async function GET(request: Request) {
   const health = await bankHealth();
   const payment_provider = paymentProvider();
   const bankRequired = payment_provider === 'bank';
@@ -32,8 +33,14 @@ export async function GET() {
   };
 
   if (bankRequired && (health.error === 'UNAUTHORIZED' || health.error === 'Missing Supabase env' || !health.ok)) {
-    return NextResponse.json(body, { status: 503 });
+    return respond(request, body, 503);
   }
 
-  return NextResponse.json(body, { status: 200 });
+  return respond(request, body, 200);
+}
+
+/** Everyone sees whether it is up; which keys and providers are set is for operators only. */
+async function respond(request: Request, body: { ok?: boolean; service: string; timestamp: string }, status: number) {
+  if (await canSeeOpsDetails(request)) return NextResponse.json(body, { status });
+  return NextResponse.json({ ok: Boolean(body.ok), service: body.service, timestamp: body.timestamp }, { status });
 }

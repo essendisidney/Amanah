@@ -5,10 +5,14 @@ Fallback: https://jameiyah.com
 
 ## Automated pings
 
+The health endpoints answer everyone with `ok`, `service` and `timestamp` only. Which keys and
+providers are configured is returned to a signed-in platform admin, or with the `CRON_SECRET`:
+
 ```bash
 curl -sS https://jameiyah.com/api/v1/health
-curl -sS https://jameiyah.com/api/v1/payments/mpesa-health
-curl -sS https://jameiyah.com/api/v1/payments/orchestrator-health
+curl -sS -H "Authorization: Bearer $CRON_SECRET" https://jameiyah.com/api/v1/health
+curl -sS -H "Authorization: Bearer $CRON_SECRET" https://jameiyah.com/api/v1/payments/mpesa-health
+curl -sS -H "Authorization: Bearer $CRON_SECRET" https://jameiyah.com/api/v1/payments/orchestrator-health
 curl -sS -o /dev/null -w "%{http_code}" https://jameiyah.com/
 curl -sS -o /dev/null -w "%{http_code}" https://jameiyah.co.ke/
 curl -sS -o /dev/null -w "%{http_code}" https://jameiyah.com/sadaka

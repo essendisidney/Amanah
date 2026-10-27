@@ -46,7 +46,7 @@ npx supabase functions deploy payments-bank --project-ref vzpnixfqkvovbniaoudx
 npx supabase functions deploy notify-dispatch --project-ref vzpnixfqkvovbniaoudx
 ```
 
-Health: `GET /api/v1/payments/mpesa-health`  
+Health: `GET /api/v1/payments/mpesa-health` (provider details need a platform admin session or `Authorization: Bearer $CRON_SECRET`)  
 Orchestrator: `GET /api/v1/payments/orchestrator-health` (after Kenya payment code is deployed)  
 Edge deploy steps: [DEPLOY_PAYMENTS_MPESA.md](./DEPLOY_PAYMENTS_MPESA.md)
 
