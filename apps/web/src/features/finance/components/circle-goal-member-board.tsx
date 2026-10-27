@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { recordGoalContributionAction } from '@/features/finance/actions/goal-contribution-actions';
 
@@ -87,11 +87,11 @@ export function CircleGoalMemberBoard({
             <input type="hidden" name="slug" value={slug} />
             <div className="space-y-1 sm:col-span-2">
               <Label htmlFor="memberId">Member</Label>
-              <select
+              <NativeSelect
                 id="memberId"
                 name="memberId"
                 required
-                className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="min-h-11"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -103,7 +103,7 @@ export function CircleGoalMemberBoard({
                     {m.member_code ? ` (${m.member_code})` : ''}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-1">
               <Label htmlFor="amount">Amount</Label>

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { upsertMemberNextOfKinAction } from '../actions/next-of-kin-actions';
 
 export type NextOfKinMemberOption = {
@@ -77,12 +77,12 @@ export function NextOfKinForm({
 
       <div className="space-y-2">
         <Label htmlFor="nokMember">Member</Label>
-        <select
+        <NativeSelect
           id="nokMember"
           name="memberId"
           value={memberId}
           onChange={(e) => setMemberId(e.target.value)}
-          className="block h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+          className="h-11"
           required
         >
           {members.map((m) => (
@@ -91,7 +91,7 @@ export function NextOfKinForm({
               {byMember.has(m.id) ? ' · has next of kin' : ''}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       <div className="space-y-2">
@@ -122,19 +122,19 @@ export function NextOfKinForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="nokRelationship">Relationship</Label>
-          <select
+          <NativeSelect
             id="nokRelationship"
             name="relationship"
             key={`rel-${memberId}-${current?.relationship ?? ''}`}
             defaultValue={current?.relationship ?? 'other'}
-            className="block h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11"
           >
             {RELATIONSHIPS.map((r) => (
               <option key={r.value} value={r.value}>
                 {r.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
       </div>
 

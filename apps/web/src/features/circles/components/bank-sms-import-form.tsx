@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, Button, Label, Textarea } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { bulkImportBankSmsAction } from '../actions/shares-actions';
 import { splitAndParseBankSms } from '../lib/split-bank-sms';
 
@@ -63,11 +63,11 @@ export function BankSmsImportForm({
       ) : null}
       <div className="space-y-1">
         <Label htmlFor="bankAccountPick">Link to account (optional)</Label>
-        <select
+        <NativeSelect
           id="bankAccountPick"
           value={bankAccountId}
           onChange={(e) => setBankAccountId(e.target.value)}
-          className="h-10 w-full max-w-md rounded-md border border-input bg-background px-3 text-sm"
+          className="max-w-md"
         >
           <option value="">—</option>
           {accounts.map((a) => (
@@ -75,7 +75,7 @@ export function BankSmsImportForm({
               {a.name}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
       <div className="space-y-1">
         <Label htmlFor="smsPaste">SMS paste</Label>

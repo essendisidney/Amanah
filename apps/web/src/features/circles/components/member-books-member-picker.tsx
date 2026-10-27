@@ -2,7 +2,7 @@
 
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
-import { Label } from '@jamiya/ui';
+import { Label, NativeSelect } from '@jamiya/ui';
 import { booksHref } from '@/features/circles/lib/member-books-view';
 
 type MemberOption = {
@@ -23,10 +23,10 @@ export function MemberBooksMemberPicker({ slug, members }: Props) {
   return (
     <div className="space-y-1">
       <Label htmlFor="pickMember">Or pick one member</Label>
-      <select
+      <NativeSelect
         id="pickMember"
         defaultValue=""
-        className="flex min-h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+        className="min-h-11"
         onChange={(e) => {
           const id = e.target.value;
           if (!id) return;
@@ -41,7 +41,7 @@ export function MemberBooksMemberPicker({ slug, members }: Props) {
               {m.label}
             </option>
           ))}
-      </select>
+      </NativeSelect>
     </div>
   );
 }

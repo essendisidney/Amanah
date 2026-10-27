@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
   contributeWelfareFormAction,
@@ -133,12 +133,11 @@ export default async function WelfarePage({ searchParams }: Props) {
           <form action={ensureWelfareFundFormAction} className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="ensureJamiya">Circle</Label>
-              <select
+              <NativeSelect
                 id="ensureJamiya"
                 name="jamiyaId"
                 required
                 defaultValue={defaultAdminJamiyaId}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {adminCircles.map((m) => (
                   <option key={m.jamiya_id} value={m.jamiya_id}>
@@ -146,7 +145,7 @@ export default async function WelfarePage({ searchParams }: Props) {
                     {fundByJamiya.has(m.jamiya_id) ? ' (exists)' : ''}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="contributionAmount">Suggested contribution (KES)</Label>
@@ -173,19 +172,18 @@ export default async function WelfarePage({ searchParams }: Props) {
           <form action={contributeWelfareFormAction} data-step-up="large" className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="contribJamiya">Circle</Label>
-              <select
+              <NativeSelect
                 id="contribJamiya"
                 name="jamiyaId"
                 required
                 defaultValue={defaultFundJamiyaId}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {fundCircles.map((m) => (
                   <option key={m.jamiya_id} value={m.jamiya_id}>
                     {m.jamiya?.name ?? m.jamiya_id}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
@@ -208,33 +206,31 @@ export default async function WelfarePage({ searchParams }: Props) {
           <form action={fileWelfareClaimFormAction} className="space-y-3">
             <div className="space-y-2">
               <Label htmlFor="claimJamiya">Circle</Label>
-              <select
+              <NativeSelect
                 id="claimJamiya"
                 name="jamiyaId"
                 required
                 defaultValue={defaultFundJamiyaId}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
               >
                 {fundCircles.map((m) => (
                   <option key={m.jamiya_id} value={m.jamiya_id}>
                     {m.jamiya?.name ?? m.jamiya_id}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="claimType">Type</Label>
-              <select
+              <NativeSelect
                 id="claimType"
                 name="claimType"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue="medical"
               >
                 <option value="medical">Medical</option>
                 <option value="funeral">Funeral</option>
                 <option value="accident">Accident</option>
                 <option value="other">Other</option>
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="claimAmount">Amount</Label>

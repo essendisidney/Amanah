@@ -3,7 +3,7 @@
 import { useActionState, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   respondTawarruqGuaranteeAction,
   submitTawarruqAction,
@@ -152,19 +152,19 @@ export function TawarruqRequestForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="tenorMonths">Months</Label>
-          <select
+          <NativeSelect
             id="tenorMonths"
             name="tenorMonths"
             value={tenor}
             onChange={(event) => setTenor(event.target.value)}
-            className="flex h-11 w-full border border-input bg-background px-3 text-sm"
+            className="h-11"
           >
             {tenors.map((months) => (
               <option key={months} value={months}>
                 {months}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="space-y-2">
           <p className="text-sm font-medium">Jameiyah profit</p>
@@ -220,11 +220,11 @@ export function TawarruqRequestForm({
       {needsGuarantor ? (
         <div className="space-y-2">
           <Label htmlFor="guarantorUserId">Guarantor</Label>
-          <select
+          <NativeSelect
             id="guarantorUserId"
             name="guarantorUserId"
             required
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11"
             defaultValue=""
           >
             <option value="" disabled>
@@ -235,7 +235,7 @@ export function TawarruqRequestForm({
                 {person.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
           <p className="text-xs text-muted-foreground">
             Above KES 20,000 one guarantor must accept. Above KES 100,000 two Jameiyah admins must
             also approve. Above KES 5,000 an approved identity check is required.

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import {
@@ -139,11 +139,11 @@ export default async function AdminTawarruqPage({
                     <input type="hidden" name="applicationId" value={row.id} />
                     <div className="space-y-1">
                       <Label htmlFor={`status-${row.id}`}>Status</Label>
-                      <select
+                      <NativeSelect
                         id={`status-${row.id}`}
                         name="status"
                         defaultValue={row.status}
-                        className="flex h-11 w-full border border-input bg-background px-3 text-sm"
+                        className="h-11"
                       >
                         <option value="requested">requested</option>
                         <option value="submitted_to_partner">submitted_to_partner</option>
@@ -151,7 +151,7 @@ export default async function AdminTawarruqPage({
                         <option value="rejected">rejected</option>
                         <option value="disbursed">disbursed</option>
                         <option value="closed">closed</option>
-                      </select>
+                      </NativeSelect>
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor={`pref-${row.id}`}>Partner ref</Label>

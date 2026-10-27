@@ -1,5 +1,5 @@
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import {
   cancelTermsProposalAction,
   proposeTermsChangeAction,
@@ -96,17 +96,17 @@ export function TermsProposalPanel({
             ))}
             <div className="space-y-1">
               <Label htmlFor="payoutComplianceMode">At payout</Label>
-              <select
+              <NativeSelect
                 id="payoutComplianceMode"
                 name="payoutComplianceMode"
                 defaultValue={terms.payout_compliance_mode ?? 'block'}
-                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="h-11"
               >
                 <option value="block">Payout waits until dues are paid</option>
                 <option value="approve">Officers approve each payout</option>
                 <option value="deduct">Take dues and penalties from payouts</option>
                 <option value="allow">Pay out regardless of dues</option>
-              </select>
+              </NativeSelect>
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm">

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Metadata, Route } from 'next';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
   acceptQardAgreementFormAction,
@@ -376,19 +376,19 @@ export default async function QardPage({ searchParams }: Props) {
           </h2>
           <div className="space-y-2">
             <Label htmlFor="jamiyaId">{t.circle}</Label>
-            <select
+            <NativeSelect
               id="jamiyaId"
               name="jamiyaId"
               required
               defaultValue={defaultJamiyaId}
-              className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11"
             >
               {memberships.map((m) => (
                 <option key={m.jamiya_id} value={m.jamiya_id}>
                   {m.jamiya?.name ?? 'Circle'}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </div>
           <div className="space-y-2">
             <Label htmlFor="amount">{t.amount}</Label>

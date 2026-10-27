@@ -18,6 +18,7 @@ import {
   Button,
   Input,
   Label,
+  NativeSelect,
   Textarea,
 } from '@jamiya/ui';
 import { createCircleAction } from '../actions/create-circle';
@@ -479,9 +480,8 @@ export function CreateCircleForm({
 
               <div className="space-y-2">
                 <Label htmlFor="currency">Currency</Label>
-                <select
+                <NativeSelect
                   id="currency"
-                  className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   {...register('currency')}
                 >
                   {SUPPORTED_CURRENCIES.map((code) => (
@@ -489,7 +489,7 @@ export function CreateCircleForm({
                       {code}
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
                 <FieldError message={fieldError('currency')} />
               </div>
             </div>
@@ -649,15 +649,14 @@ export function CreateCircleForm({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="segment">Segment</Label>
-                <select
+                <NativeSelect
                   id="segment"
-                  className="flex h-10 w-full rounded-md border border-border bg-card px-3 py-2 text-sm"
                   {...register('segment')}
                 >
                   <option value="general">General</option>
                   <option value="womens_circle">Women&apos;s circle</option>
                   <option value="boda_stage">Boda / tuktuk stage</option>
-                </select>
+                </NativeSelect>
                 {segmentHint ? (
                   <p className="text-xs text-muted-foreground">{segmentHint}</p>
                 ) : null}

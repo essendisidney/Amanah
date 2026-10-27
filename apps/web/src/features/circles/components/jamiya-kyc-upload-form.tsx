@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
+import { Alert, AlertDescription, Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import {
   uploadJamiyaKycDocumentAction,
   type JamiyaKycActionState,
@@ -89,11 +89,11 @@ export function JamiyaKycUploadForm({
         </div>
         <div className="space-y-2">
           <Label htmlFor="documentType">Document type</Label>
-          <select
+          <NativeSelect
             id="documentType"
             name="documentType"
             required
-            className="flex h-11 w-full rounded-md border border-border bg-card px-3 py-2 text-base sm:h-10 sm:text-sm"
+            className="h-11 text-base sm:h-10 sm:text-sm"
             defaultValue="certificate_of_registration"
           >
             {DOCUMENT_TYPES.map((item) => (
@@ -101,7 +101,7 @@ export function JamiyaKycUploadForm({
                 {item.label}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
         <div className="space-y-2">
           <Label htmlFor="file">

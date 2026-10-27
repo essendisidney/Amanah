@@ -4,7 +4,7 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button, Label, Textarea } from '@jamiya/ui';
+import { Button, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { AppPage } from '@/components/app-page';
@@ -226,12 +226,12 @@ export default async function LeaveCirclePage({ params, searchParams }: Props) {
                   <Label htmlFor="transferToMemberId">
                     Who takes over your {shares} shares ({money(Number(check?.share_amount ?? 0))})?
                   </Label>
-                  <select
+                  <NativeSelect
                     id="transferToMemberId"
                     name="transferToMemberId"
                     required
                     defaultValue=""
-                    className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    className="h-11"
                   >
                     <option value="" disabled>
                       Choose a member
@@ -241,7 +241,7 @@ export default async function LeaveCirclePage({ params, searchParams }: Props) {
                         {memberName(m.id)}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                   <p className="text-xs text-muted-foreground">
                     They must agree first. Any payment for the shares is agreed between you two.
                   </p>

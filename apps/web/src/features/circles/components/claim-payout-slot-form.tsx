@@ -1,7 +1,7 @@
 'use client';
 
 import { availablePayoutSlots, describePayoutSlot, formatCurrency } from '@jamiya/shared';
-import { Button, Label } from '@jamiya/ui';
+import { Button, Label, NativeSelect } from '@jamiya/ui';
 import { claimPayoutSlotAction } from '../actions/slot-actions';
 
 export function ClaimPayoutSlotForm({
@@ -51,12 +51,12 @@ export function ClaimPayoutSlotForm({
       </div>
       <div className="space-y-1">
         <Label htmlFor="claimSlot">Available slots</Label>
-        <select
+        <NativeSelect
           id="claimSlot"
           name="payoutPosition"
           required
           defaultValue={currentPosition && open.includes(currentPosition) ? currentPosition : open[0]}
-          className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+          className="h-11"
         >
           {open.map((pos) => {
             const eco = describePayoutSlot({
@@ -76,7 +76,7 @@ export function ClaimPayoutSlotForm({
               </option>
             );
           })}
-        </select>
+        </NativeSelect>
       </div>
       <Button type="submit" size="sm" className="min-h-11">
         Save payout slot

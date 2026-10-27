@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { isComplianceRole } from '@jamiya/auth';
 import { formatCurrency, formatDate } from '@jamiya/shared';
-import { Button } from '@jamiya/ui';
+import { Button, NativeSelect } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { getUserProfile } from '@/lib/supabase/auth';
 import { callRpc } from '@/lib/supabase/rpc';
@@ -453,10 +453,10 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
         >
           <label className="w-full space-y-1 text-sm sm:w-auto">
             <span className="text-muted-foreground">View member</span>
-            <select
+            <NativeSelect
               name="memberId"
               defaultValue={memberId}
-              className="block h-11 w-full min-w-[14rem] rounded-md border border-input bg-background px-3 text-sm"
+              className="h-11 min-w-[14rem]"
             >
               {memberRows.map((m) => {
                 const p = profileMap.get(m.user_id);
@@ -467,7 +467,7 @@ export default async function MemberStatementPage({ params, searchParams }: Prop
                   </option>
                 );
               })}
-            </select>
+            </NativeSelect>
           </label>
           <Button type="submit" size="sm" variant="outline" className="min-h-11 w-full sm:w-auto">
             Open

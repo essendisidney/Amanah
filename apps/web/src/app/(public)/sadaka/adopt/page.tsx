@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { formatCurrency, KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   createAdoptionProfileFormAction,
   startSponsorshipFormAction,
@@ -154,10 +154,9 @@ export default async function AdoptPage() {
               >
                 <div className="space-y-1">
                   <Label htmlFor="institutionId">Institution</Label>
-                  <select
+                  <NativeSelect
                     id="institutionId"
                     name="institutionId"
-                    className="h-10 w-full border border-input bg-background px-3"
                     required
                   >
                     {verifiedMine.map((i) => (
@@ -165,7 +164,7 @@ export default async function AdoptPage() {
                         {i.name}
                       </option>
                     ))}
-                  </select>
+                  </NativeSelect>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="title">Need title</Label>

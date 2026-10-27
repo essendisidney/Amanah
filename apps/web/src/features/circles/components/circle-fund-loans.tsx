@@ -1,5 +1,5 @@
 import { formatCurrency } from '@jamiya/shared';
-import { Button, Input, Label, Textarea } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
 import {
   acceptQardAgreementFormAction,
   decideQardFormAction,
@@ -127,19 +127,18 @@ export function CircleFundLoans({
         {guarantorCandidates.length > 0 ? (
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="guarantorUserIds">{labels.guarantorsLabel}</Label>
-            <select
+            <NativeSelect
               id="guarantorUserIds"
               name="guarantorUserIds"
               multiple
               size={Math.min(6, Math.max(3, guarantorCandidates.length))}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               {guarantorCandidates.map((c) => (
                 <option key={c.userId} value={c.userId}>
                   {c.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             <p className="text-xs text-muted-foreground">{labels.guarantorsHint}</p>
           </div>
         ) : null}

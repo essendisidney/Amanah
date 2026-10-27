@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { createGoalFormAction } from '../actions';
 
 const PERIODS = [
@@ -122,31 +122,31 @@ export function CreateGoalForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="durationMonths">Period</Label>
-        <select
+        <NativeSelect
           id="durationMonths"
           name="durationMonths"
           required
           defaultValue="12"
-          className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-base sm:h-10 sm:text-sm"
+          className="h-11 text-base sm:h-10 sm:text-sm"
         >
           {PERIODS.map((p) => (
             <option key={p.value} value={p.value}>
               {p.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       {mode === 'circle' && circles.length > 0 ? (
         <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="jamiyaId">Which circle?</Label>
-          <select
+          <NativeSelect
             id="jamiyaId"
             name="jamiyaId"
             required
             value={jamiyaId}
             onChange={(e) => setJamiyaId(e.target.value)}
-            className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+            className="h-11"
           >
             <option value="" disabled>
               Choose a circle…
@@ -156,7 +156,7 @@ export function CreateGoalForm({
                 {c.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
           <p className="text-xs text-muted-foreground">
             After creating, open the goal on the circle page to record how much each member saved.
           </p>

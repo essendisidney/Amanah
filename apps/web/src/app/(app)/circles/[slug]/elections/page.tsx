@@ -4,7 +4,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { formatDate } from '@jamiya/shared';
-import { Button, Input, Label } from '@jamiya/ui';
+import { Button, Input, Label, NativeSelect } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import {
   castVoteAction,
@@ -150,11 +150,10 @@ export default async function CircleElectionsPage({ params }: Props) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="seatRole">Seat</Label>
-              <select
+              <NativeSelect
                 id="seatRole"
                 name="seatRole"
                 required
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
                 defaultValue="chair"
               >
                 {SEATS.map((s) => (
@@ -162,7 +161,7 @@ export default async function CircleElectionsPage({ params }: Props) {
                     {s.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="space-y-2">
               <Label htmlFor="closesAt">Closes (optional)</Label>
@@ -237,10 +236,10 @@ export default async function CircleElectionsPage({ params }: Props) {
                   <form action={nominateCandidateAction} className="flex flex-col gap-2 sm:flex-row">
                     <input type="hidden" name="electionId" value={election.id} />
                     <input type="hidden" name="slug" value={slug} />
-                    <select
+                    <NativeSelect
                       name="memberId"
                       required
-                      className="h-11 flex-1 rounded-md border border-input bg-background px-3 text-sm"
+                      className="inline-flex w-auto h-11 flex-1"
                       defaultValue=""
                     >
                       <option value="" disabled>
@@ -251,7 +250,7 @@ export default async function CircleElectionsPage({ params }: Props) {
                           {m.profiles?.full_name || m.profiles?.email || m.id.slice(0, 8)}
                         </option>
                       ))}
-                    </select>
+                    </NativeSelect>
                     <Button type="submit" className="min-h-11">
                       Nominate
                     </Button>
