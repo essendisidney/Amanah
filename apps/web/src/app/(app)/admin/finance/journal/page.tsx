@@ -229,7 +229,7 @@ export default async function AdminJournalPage({
                       {Math.abs(debitTotal - creditTotal) > 0.001 ? (
                         <span className="ml-2 text-destructive">UNBALANCED</span>
                       ) : (
-                        <span className="ml-2 text-emerald-700">balanced</span>
+                        <span className="ml-2 text-success-text">balanced</span>
                       )}
                     </td>
                     <td />
