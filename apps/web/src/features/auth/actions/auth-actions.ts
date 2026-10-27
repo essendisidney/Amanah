@@ -16,6 +16,7 @@ import {
   mapZodErrors,
   type AuthActionState,
 } from '../lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 function getSiteUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
@@ -66,7 +67,7 @@ export async function registerAction(
       success: false,
       message: exists
         ? 'An account with this email already exists. Reset your password or sign in with phone OTP.'
-        : error.message,
+        : friendlyError(error.message),
     };
   }
 
@@ -153,7 +154,7 @@ export async function forgotPasswordAction(
   if (error) {
     return {
       success: false,
-      message: error.message,
+      message: friendlyError(error.message),
     };
   }
 
@@ -189,7 +190,7 @@ export async function resetPasswordAction(
   if (error) {
     return {
       success: false,
-      message: error.message,
+      message: friendlyError(error.message),
     };
   }
 

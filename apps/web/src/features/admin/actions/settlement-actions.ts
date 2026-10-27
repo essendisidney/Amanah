@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
+import { friendlyError } from '@/lib/friendly-error';
 
 function revalidateSettlements(extra?: string) {
   revalidatePath('/admin/finance/settlements');
@@ -42,7 +43,7 @@ export async function backfillMissingSettlementsAction(formData: FormData) {
       dest,
       ok
         ? `Settlement backfill: ${posted} posted, ${failed} failed.`
-        : `Backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Backfill failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -74,7 +75,7 @@ export async function backfillOneSettlementAction(formData: FormData) {
       dest,
       ok
         ? 'Settlement mirrored.'
-        : `Mirror failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Mirror failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -110,7 +111,7 @@ export async function markSettlementStatusAction(formData: FormData) {
       dest,
       ok
         ? `Settlement marked ${status}.`
-        : `Update failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Update failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );

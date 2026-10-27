@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { Alert, AlertDescription, Button, Input, Label, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/client';
 import { saveCircleRecordAction } from '../actions/record-actions';
+import { friendlyError } from '@/lib/friendly-error';
 
 const FILE_TYPES = [
   'application/pdf',
@@ -57,7 +58,7 @@ export function CircleRecordForm({
           setError(
             uploadError.message.includes('row-level security')
               ? 'Only the secretary, chair or circle admin can attach files.'
-              : uploadError.message,
+              : friendlyError(uploadError.message),
           );
           return;
         }

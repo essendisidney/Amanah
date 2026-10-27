@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function requestRefundAction(formData: FormData) {
   await requireAdminAccess('admin');
@@ -42,7 +43,7 @@ export async function requestRefundAction(formData: FormData) {
       '/admin/finance/refunds',
       ok
         ? `Refund queued ${(data as { refund_id?: string }).refund_id ?? ''}`.trim()
-        : `Refund failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Refund failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -92,7 +93,7 @@ export async function completeRefundAction(formData: FormData) {
       '/admin/finance/refunds',
       ok
         ? 'Refund completed (journal reverse posted).'
-        : `Complete failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Complete failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -124,7 +125,7 @@ export async function cancelRefundAction(formData: FormData) {
       '/admin/finance/refunds',
       ok
         ? 'Refund cancelled.'
-        : `Cancel failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Cancel failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );

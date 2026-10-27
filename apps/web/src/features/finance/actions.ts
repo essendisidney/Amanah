@@ -516,7 +516,7 @@ export async function submitTawarruqToPartnerAction(formData: FormData): Promise
   const { redirect } = await import('next/navigation');
   const { withNoticeQuery } = await import('@/features/auth/lib/types');
   if (error) {
-    redirect(withNoticeQuery('/admin/tawarruq', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/tawarruq', friendlyError(error.message), 'error'));
   }
   const result = data as {
     ok?: boolean;

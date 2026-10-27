@@ -23,6 +23,17 @@ describe('friendlyError', () => {
     assert.doesNotMatch(friendlyError('function public.x(uuid) does not exist'), /function/);
   });
 
+  it('hides storage and PostgREST internals', () => {
+    for (const raw of [
+      'new row violates row-level security policy',
+      'Could not find the function public.x(p_id) in the schema cache',
+      'The resource already exists',
+      'The object exceeded the maximum allowed size',
+    ]) {
+      assert.match(friendlyError(raw), /^We could not complete that just now/);
+    }
+  });
+
   it('never returns an empty message', () => {
     assert.equal(friendlyError(''), 'That did not go through. Please try again.');
     assert.equal(friendlyError(null), 'That did not go through. Please try again.');

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function updateRefundDualApprovalAction(formData: FormData) {
   await requireAdminAccess('admin');
@@ -43,7 +44,7 @@ export async function updateRefundDualApprovalAction(formData: FormData) {
       '/admin/finance/approvals',
       ok
         ? `Refund dual-approval ${enabled ? 'on' : 'off'} · threshold KES ${threshold}.`
-        : `Update failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Update failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -78,7 +79,7 @@ export async function updateTawarruqRatesAction(formData: FormData) {
       '/admin/finance/approvals',
       ok
         ? 'Tawarruq rates saved. New requests use them; existing ones keep their rate.'
-        : `Update failed: ${error?.message ?? (data as { error?: string } | null)?.error ?? 'unknown'}`,
+        : `Update failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string } | null)?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );

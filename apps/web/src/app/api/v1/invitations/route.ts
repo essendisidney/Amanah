@@ -6,6 +6,7 @@ import {
   getInvitationExpiry,
   hashInvitationToken,
 } from '@/features/circles/lib/invitation-token';
+import { friendlyError } from '@/lib/friendly-error';
 
 function getSiteUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'https://jameiyah.com';
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     .limit(30);
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, invitations: data ?? [] });
@@ -176,7 +177,7 @@ export async function POST(request: Request) {
 
   if (!invitation) {
     return NextResponse.json(
-      { ok: false, error: lastError ?? 'INVITE_FAILED' },
+      { ok: false, error: lastError ? friendlyError(lastError) : 'INVITE_FAILED' },
       { status: 500 },
     );
   }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function GET(request: Request) {
   const supabase = await createApiClient(request);
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
 
   if (wErr || tErr) {
     return NextResponse.json(
-      { ok: false, error: wErr?.message ?? tErr?.message },
+      { ok: false, error: friendlyError(wErr?.message ?? tErr?.message) },
       { status: 500 },
     );
   }

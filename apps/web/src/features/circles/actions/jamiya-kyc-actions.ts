@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 const DOC_TYPES = [
   'certificate_of_registration',
@@ -57,7 +58,7 @@ export async function uploadJamiyaKycDocumentAction(
   const { error: uploadError } = await supabase.storage
     .from('kyc-documents')
     .upload(storagePath, buffer, { contentType: file.type, upsert: false });
-  if (uploadError) return { success: false, message: uploadError.message };
+  if (uploadError) return { success: false, message: friendlyError(uploadError.message) };
 
   const { error: insertError } = await supabase.from('jamiya_kyc_documents').insert({
     id: documentId,
@@ -73,7 +74,7 @@ export async function uploadJamiyaKycDocumentAction(
 
   if (insertError) {
     await supabase.storage.from('kyc-documents').remove([storagePath]);
-    return { success: false, message: insertError.message };
+    return { success: false, message: friendlyError(insertError.message) };
   }
 
   await supabase
@@ -112,14 +113,14 @@ export async function reviewJamiyaKycAction(formData: FormData): Promise<void> {
   revalidatePath('/circles');
 
   if (error) {
-    redirect(withNoticeQuery('/admin/kyc', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/kyc', friendlyError(error.message), 'error'));
   }
   const result = data as { ok?: boolean; error?: string } | null;
   if (result && result.ok === false) {
     redirect(
       withNoticeQuery(
         '/admin/kyc',
-        result.error ?? 'Could not update circle KYC document.',
+        friendlyError(result.error ?? 'Could not update circle KYC document.'),
         'error',
       ),
     );

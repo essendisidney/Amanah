@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { lookupIprs, normalizeKenyaNationalId } from '@/lib/iprs/client';
+import { friendlyError } from '@/lib/friendly-error';
 
 /** POST { nationalId, firstName, lastName, dateOfBirth? } — Kenya IPRS / NPDM lookup. */
 export async function POST(request: Request) {
@@ -98,6 +99,6 @@ export async function POST(request: Request) {
     matched: result.matched,
     outcome: result.outcome,
     provider: result.provider,
-    message: result.message,
+    message: friendlyError(result.message),
   });
 }

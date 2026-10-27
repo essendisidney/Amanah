@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { Alert, AlertDescription, Button, Input, Label } from '@jamiya/ui';
 import { registerInstitutionAction } from '@/features/charity/actions';
 import { createClient } from '@/lib/supabase/client';
+import { friendlyError } from '@/lib/friendly-error';
 
 /**
  * Institution registration with optional secure file upload to sadaka-media.
@@ -45,7 +46,7 @@ export function InstitutionRegisterForm() {
             upsert: false,
           });
         if (uploadError) {
-          setMessage(uploadError.message);
+          setMessage(friendlyError(uploadError.message));
           return;
         }
         const { data } = supabase.storage.from('sadaka-media').getPublicUrl(path);
@@ -63,7 +64,7 @@ export function InstitutionRegisterForm() {
       setMessage(result.message);
       if (result.success) form.reset();
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Could not submit.');
+      setMessage(error instanceof Error ? friendlyError(error.message) : 'Could not submit.');
     } finally {
       setPending(false);
     }

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function resolveIntentExceptionAction(formData: FormData) {
   await requireAdminAccess('admin');
@@ -42,7 +43,7 @@ export async function resolveIntentExceptionAction(formData: FormData) {
       dest,
       ok
         ? `Exception ${action} applied.`
-        : `Resolve failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Resolve failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );

@@ -7,6 +7,7 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
 import { logger } from '@/lib/observability';
 import { paymentProvider } from '@/lib/payments/provider';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type WalletActionState = {
   success: boolean;
@@ -98,7 +99,7 @@ export async function topUpWalletAction(
   } catch (err) {
     return {
       success: false,
-      message: err instanceof Error ? err.message : 'Provider misconfigured.',
+      message: err instanceof Error ? friendlyError(err.message) : 'Provider misconfigured.',
     };
   }
 
@@ -125,7 +126,7 @@ export async function topUpWalletAction(
 
   if (error) {
     logger.error('create_payment_intent failed', { message: error.message });
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const created = data as {
@@ -203,7 +204,7 @@ export async function topUpWalletAction(
   if (!collected.ok) {
     return {
       success: false,
-      message: collected.error,
+      message: friendlyError(collected.error),
       intentId: created.intent_id,
     };
   }
@@ -257,7 +258,7 @@ export async function retryPaymentIntentAction(
   });
   if (error) {
     logger.error('retry_payment_intent failed', { message: error.message });
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const created = data as {
@@ -270,7 +271,7 @@ export async function retryPaymentIntentAction(
   } | null;
 
   if (!created?.ok || !created.intent_id) {
-    return { success: false, message: created?.error ?? 'Retry failed.' };
+    return { success: false, message: friendlyError(created?.error ?? 'Retry failed.') };
   }
 
   if (
@@ -301,7 +302,7 @@ export async function retryPaymentIntentAction(
     if (!collected.ok) {
       return {
         success: false,
-        message: collected.error,
+        message: friendlyError(collected.error),
         intentId: created.intent_id,
       };
     }
@@ -405,7 +406,7 @@ export async function checkPaymentIntentAction(
     revalidateMoneyAndCircle();
 
     if (!settled.ok) {
-      return { success: false, message: settled.error ?? 'Could not verify payment yet.' };
+      return { success: false, message: friendlyError(settled.error ?? 'Could not verify payment yet.') };
     }
     if (settled.status === 'success') {
       return {
@@ -448,7 +449,7 @@ export async function checkPaymentIntentAction(
     if (!status.ok) {
       return {
         success: false,
-        message: status.error ?? 'Could not verify payment yet. Try again shortly.',
+        message: friendlyError(status.error ?? 'Could not verify payment yet. Try again shortly.'),
       };
     }
 
@@ -461,7 +462,7 @@ export async function checkPaymentIntentAction(
         p_metadata: { source: 'wallet_check_status', provider: row.provider },
       });
       if (error) {
-        return { success: false, message: error.message };
+        return { success: false, message: friendlyError(error.message) };
       }
       revalidateMoneyAndCircle();
       return {

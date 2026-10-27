@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function POST(request: Request) {
   const supabase = await createApiClient(request);
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
   });
 
   if (rpcError) {
-    return NextResponse.json({ ok: false, error: rpcError.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(rpcError.message) }, { status: 500 });
   }
 
   return NextResponse.json(data ?? { ok: true });

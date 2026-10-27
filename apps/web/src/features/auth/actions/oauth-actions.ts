@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getSafeRedirectPath } from '../lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 /** The site the person is actually on (jameiyah.com, a preview, or localhost). */
 async function getRequestOrigin(): Promise<string> {
@@ -31,7 +32,7 @@ export async function signInWithGoogleAction(formData: FormData): Promise<void> 
   });
 
   if (error || !data.url) {
-    redirect(`/login?error=${encodeURIComponent(error?.message ?? 'Google sign-in failed')}`);
+    redirect(`/login?error=${encodeURIComponent(error ? friendlyError(error.message) : 'Google sign-in failed')}`);
   }
 
   redirect(data.url);

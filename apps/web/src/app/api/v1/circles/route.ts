@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createCircleSchema, sanitizePlainText, slugify } from '@jamiya/shared';
 import { createApiClient } from '@/lib/supabase/api';
+import { friendlyError } from '@/lib/friendly-error';
 
 async function allocateUniqueSlug(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
   }
 
   return NextResponse.json({ ok: true, memberships: data ?? [] });
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: error instanceof Error ? error.message : 'SLUG_FAILED',
+        error: error instanceof Error ? friendlyError(error.message) : 'SLUG_FAILED',
       },
       { status: 500 },
     );
@@ -145,7 +146,7 @@ export async function POST(request: Request) {
 
   if (error || !jamiya) {
     return NextResponse.json(
-      { ok: false, error: error?.message ?? 'CREATE_FAILED' },
+      { ok: false, error: error ? friendlyError(error.message) : 'CREATE_FAILED' },
       { status: 500 },
     );
   }

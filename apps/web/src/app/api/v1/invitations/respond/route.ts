@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
 import { invitationRpcArgs } from '@/features/circles/lib/invitation-token';
+import { friendlyError } from '@/lib/friendly-error';
 
 /** Accept or decline an invitation by raw invite token or short invite code. */
 export async function POST(request: Request) {
@@ -33,7 +34,7 @@ export async function POST(request: Request) {
   const { data, error } = await supabase.rpc(rpc, invitationRpcArgs(credential));
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
   }
 
   const result = data as { ok?: boolean; error?: string; slug?: string } | null;
