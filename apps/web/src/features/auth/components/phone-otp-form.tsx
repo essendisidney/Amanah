@@ -9,6 +9,7 @@ import type { Dictionary } from '@/i18n/dictionaries';
 import { t } from '@/i18n/dictionaries';
 import { getSafeRedirectPath, buildPostAuthPath } from '../lib/types';
 import { AuthFormMessage } from './auth-form-message';
+import { friendlyError } from '@/lib/friendly-error';
 
 type Step = 'request' | 'verify';
 type PhoneLabels = Dictionary['phoneAuth'];
@@ -148,7 +149,7 @@ export function PhoneOtpForm({
       setToken('');
       const msg =
         err instanceof Error && err.message.trim()
-          ? err.message.trim()
+          ? friendlyError(err.message)
           : labels.networkError;
       setError(msg);
       return false;
@@ -167,14 +168,14 @@ export function PhoneOtpForm({
           refresh_token: json.refresh_token,
         });
         if (sessionError) {
-          setError(sessionError.message || 'Signed in, but session failed. Try again.');
+          setError(friendlyError(sessionError.message || 'Signed in, but session failed. Try again.'));
           lastVerifiedToken.current = null;
           return false;
         }
       } catch (sessionErr) {
         const msg =
           sessionErr instanceof Error && sessionErr.message
-            ? sessionErr.message
+            ? friendlyError(sessionErr.message)
             : 'Signed in, but session failed. Try again.';
         setError(msg);
         lastVerifiedToken.current = null;

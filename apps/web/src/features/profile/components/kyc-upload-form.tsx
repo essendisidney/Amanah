@@ -7,6 +7,7 @@ import { prepareKycUploadFile } from '../lib/prepare-kyc-file';
 import { initialProfileActionState, type ProfileActionState } from '../lib/state';
 import { createClient } from '@/lib/supabase/client';
 import type { Dictionary } from '@/i18n/dictionaries';
+import { friendlyError } from '@/lib/friendly-error';
 
 export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
   const [state, setState] = useState<ProfileActionState>(initialProfileActionState);
@@ -57,7 +58,7 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
         });
 
       if (uploadError) {
-        setState({ success: false, message: uploadError.message });
+        setState({ success: false, message: friendlyError(uploadError.message) });
         return;
       }
 
@@ -82,7 +83,7 @@ export function KycUploadForm({ labels }: { labels: Dictionary['profile'] }) {
         success: false,
         message:
           error instanceof Error
-            ? error.message
+            ? friendlyError(error.message)
             : 'Could not upload that ID. Try a smaller JPEG photo.',
       });
     } finally {

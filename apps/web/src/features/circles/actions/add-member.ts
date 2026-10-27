@@ -15,6 +15,7 @@ import { mapZodFieldErrors, type ActionState, type BulkAddResultRow, type BulkAd
 import { getSiteUrl } from '@/lib/site-url';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { BULK_PHONE_MAX_ROWS, parseBulkPhoneLines } from '../lib/parse-bulk-phones';
+import { friendlyError } from '@/lib/friendly-error';
 
 async function createClaimInvitation(args: {
   supabase: Awaited<ReturnType<typeof createClient>>;
@@ -85,7 +86,7 @@ async function createClaimInvitation(args: {
       inviteCode = generateInviteCode(8);
       continue;
     }
-    return { error: error?.message ?? 'Failed to create claim invitation.' };
+    return { error: error ? friendlyError(error.message) : 'Failed to create claim invitation.' };
   }
 
   return { error: 'Failed to create claim invitation.' };
@@ -155,7 +156,7 @@ export async function addOneCircleMember(args: {
   );
 
   if (existingErr) {
-    return { success: false, message: existingErr.message };
+    return { success: false, message: friendlyError(existingErr.message) };
   }
 
   const existing = existingData as {
@@ -252,7 +253,7 @@ export async function addOneCircleMember(args: {
     return {
       success: false,
       message:
-        provisionError ??
+        (provisionError && friendlyError(provisionError)) ??
         'Could not create a Jameiyah account. For phone-only members, enable Phone auth in Supabase.',
     };
   }
@@ -300,7 +301,7 @@ export async function addOneCircleMember(args: {
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const result = data as { ok?: boolean; error?: string } | null;

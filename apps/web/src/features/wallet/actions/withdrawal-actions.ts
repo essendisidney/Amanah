@@ -7,6 +7,7 @@ import { callRpc } from '@/lib/supabase/rpc';
 import { logger } from '@/lib/observability';
 import { paymentProvider } from '@/lib/payments/provider';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type WithdrawalActionState = {
   success: boolean;
@@ -87,7 +88,7 @@ export async function requestWithdrawalAction(
 
   if (error) {
     logger.error('request_withdrawal failed', { message: error.message });
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const result = data as {
@@ -156,7 +157,7 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
   revalidatePath('/wallet');
 
   if (error) {
-    redirect(withNoticeQuery('/admin/withdrawals', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/withdrawals', friendlyError(error.message), 'error'));
   }
 
   const result = data as {
@@ -226,7 +227,7 @@ export async function processWithdrawalAction(formData: FormData): Promise<void>
     revalidatePath('/wallet');
 
     if (!sent.ok) {
-      redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+      redirect(withNoticeQuery('/admin/withdrawals', friendlyError(sent.error), 'error'));
     }
     redirect(
       withNoticeQuery(
@@ -258,7 +259,7 @@ export async function confirmDualApprovalAction(formData: FormData): Promise<voi
   revalidatePath('/wallet');
 
   if (error) {
-    redirect(withNoticeQuery('/admin/withdrawals', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/withdrawals', friendlyError(error.message), 'error'));
   }
   const result = data as {
     ok?: boolean;
@@ -309,7 +310,7 @@ export async function confirmDualApprovalAction(formData: FormData): Promise<voi
       revalidatePath('/admin/withdrawals');
       revalidatePath('/wallet');
       if (!sent.ok) {
-        redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+        redirect(withNoticeQuery('/admin/withdrawals', friendlyError(sent.error), 'error'));
       }
       redirect(
         withNoticeQuery(
@@ -366,7 +367,7 @@ export async function processPayoutCashoutAction(formData: FormData): Promise<vo
     revalidatePath('/admin/withdrawals');
     revalidatePath('/wallet');
     if (!sent.ok) {
-      redirect(withNoticeQuery('/admin/withdrawals', sent.error, 'error'));
+      redirect(withNoticeQuery('/admin/withdrawals', friendlyError(sent.error), 'error'));
     }
     redirect(
       withNoticeQuery(

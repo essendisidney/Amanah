@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type DisputeActionState = {
   success: boolean;
@@ -50,7 +51,7 @@ export async function openDisputeAction(
   } as never);
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   await supabase.from('audit_logs').insert({

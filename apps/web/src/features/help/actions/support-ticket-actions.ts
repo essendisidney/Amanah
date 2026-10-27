@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { ADMIN_SUPPORT_PATH } from '@/features/admin/lib/admin-support-access';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type SupportTicketState = {
   success: boolean;
@@ -43,7 +44,7 @@ export async function submitSupportTicketAction(
   if (error) {
     return {
       success: false,
-      message: error.message || 'Could not submit your request. Try again.',
+      message: friendlyError(error.message || 'Could not submit your request. Try again.'),
     };
   }
 

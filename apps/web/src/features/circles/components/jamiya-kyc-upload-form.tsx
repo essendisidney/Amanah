@@ -7,6 +7,7 @@ import {
   type JamiyaKycActionState,
 } from '../actions/jamiya-kyc-actions';
 import { prepareKycUploadFile } from '@/features/profile/lib/prepare-kyc-file';
+import { friendlyError } from '@/lib/friendly-error';
 
 const DOCUMENT_TYPES = [
   { value: 'certificate_of_registration', label: 'Certificate of registration' },
@@ -57,7 +58,7 @@ export function JamiyaKycUploadForm({
         success: false,
         message:
           error instanceof Error
-            ? error.message
+            ? friendlyError(error.message)
             : 'Could not upload that file. Try a smaller JPEG or PDF.',
       });
     } finally {

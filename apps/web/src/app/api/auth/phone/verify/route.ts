@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { isValidKeMobile, normalizePhone254 } from '@jamiya/shared';
 import { createClient as createCookieClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
+import { friendlyError } from '@/lib/friendly-error';
 
 export const runtime = 'nodejs';
 
@@ -10,12 +11,12 @@ function internalEmail(normalized254: string) {
 }
 
 function errorMessage(value: unknown, fallback: string): string {
-  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'string' && value.trim()) return friendlyError(value.trim());
   if (value && typeof value === 'object') {
     const o = value as Record<string, unknown>;
     for (const key of ['error_description', 'message', 'msg', 'error']) {
       const v = o[key];
-      if (typeof v === 'string' && v.trim()) return v.trim();
+      if (typeof v === 'string' && v.trim()) return friendlyError(v.trim());
     }
   }
   return fallback;
@@ -463,7 +464,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: detail && detail.length < 180
-          ? detail
+          ? friendlyError(detail)
           : 'Something went wrong. Please try again.',
       },
       { status: 500 },

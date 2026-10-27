@@ -13,6 +13,7 @@ import {
   mapCreateCircleZodErrors,
   type CreateCircleActionState,
 } from '../lib/create-circle-state';
+import { friendlyError } from '@/lib/friendly-error';
 
 function formDataToPayload(formData: FormData): Record<string, unknown> {
   return {
@@ -75,7 +76,7 @@ export async function createCircleAction(
     return {
       success: false,
       message:
-        error instanceof Error ? error.message : 'Could not allocate a unique URL slug.',
+        error instanceof Error ? friendlyError(error.message) : 'Could not allocate a unique URL slug.',
     };
   }
 
@@ -121,7 +122,7 @@ export async function createCircleAction(
   if (insertError || !createdRow) {
     return {
       success: false,
-      message: insertError?.message ?? 'Failed to create circle. Please try again.',
+      message: insertError ? friendlyError(insertError.message) : 'Failed to create circle. Please try again.',
     };
   }
 

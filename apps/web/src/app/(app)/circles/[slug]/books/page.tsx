@@ -19,6 +19,7 @@ import { CircleBooksGlance } from '@/features/circles/components/circle-books-gl
 import { resolveBooksView } from '@/features/circles/lib/member-books-view';
 import { callRpc } from '@/lib/supabase/rpc';
 import { AppPage } from '@/components/app-page';
+import { friendlyError } from '@/lib/friendly-error';
 
 export const metadata: Metadata = { title: 'Member payments' };
 export const dynamic = 'force-dynamic';
@@ -414,7 +415,7 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
 
       {membersError ? (
         <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-          Could not load members: {membersError.message}. Refresh the page or contact support if this
+          Could not load members: {friendlyError(membersError.message)}. Refresh the page or contact support if this
           continues.
         </p>
       ) : null}

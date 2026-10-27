@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
 import { createClient } from '@/lib/supabase/server';
 import { paymentProvider } from '@/lib/payments/provider';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type CharityActionState = {
   success: boolean;
@@ -53,7 +54,7 @@ async function initiateAndSettleCharityPayment(input: {
         message: 'Sign in to complete a paid donation.',
       };
     }
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const created = data as { ok?: boolean; error?: string; intent_id?: string } | null;
@@ -76,14 +77,14 @@ async function initiateAndSettleCharityPayment(input: {
         p_metadata: { source: 'simulated', kind: input.kind },
       },
     );
-    if (completeError) return { success: false, message: completeError.message };
+    if (completeError) return { success: false, message: friendlyError(completeError.message) };
     const completed = completeData as {
       ok?: boolean;
       error?: string;
       receipt_code?: string;
     } | null;
     if (!completed?.ok) {
-      return { success: false, message: completed?.error ?? 'Payment completion failed.' };
+      return { success: false, message: friendlyError(completed?.error ?? 'Payment completion failed.') };
     }
     return {
       success: true,
@@ -108,7 +109,7 @@ async function initiateAndSettleCharityPayment(input: {
       return {
         success: false,
         message: stk.error
-          ? `M-Pesa failed: ${stk.error}`
+          ? `M-Pesa failed: ${friendlyError(stk.error)}`
           : 'Could not start M-Pesa prompt.',
         intentId: created.intent_id,
       };
@@ -195,10 +196,10 @@ export async function donateAction(formData: FormData): Promise<CharityActionSta
       p_donor_email: String(formData.get('donorEmail') ?? '').trim() || null,
       p_is_anonymous: formData.get('anonymous') === 'on',
     });
-    if (error) return { success: false, message: error.message };
+    if (error) return { success: false, message: friendlyError(error.message) };
     const result = data as { ok?: boolean; error?: string; receipt_code?: string } | null;
     if (!result?.ok) {
-      return { success: false, message: result?.error ?? 'Could not record donation.' };
+      return { success: false, message: friendlyError(result?.error ?? 'Could not record donation.') };
     }
     revalidatePath('/sadaka');
     if (slug) revalidatePath(`/sadaka/${slug}`);
@@ -237,10 +238,10 @@ export async function tipAction(formData: FormData): Promise<CharityActionState>
       p_amount: amount,
       p_phone: phone || null,
     });
-    if (error) return { success: false, message: error.message };
+    if (error) return { success: false, message: friendlyError(error.message) };
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
-      return { success: false, message: result?.error ?? 'Could not record tip.' };
+      return { success: false, message: friendlyError(result?.error ?? 'Could not record tip.') };
     }
     return { success: true, message: 'Tip recorded. Thank you for supporting Jameiyah.' };
   }
@@ -359,7 +360,7 @@ export async function submitCampaignAction(
     p_cover_image_url: coverUrl,
     p_public_media_urls: galleryUrls,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string; slug?: string } | null;
   if (!result?.ok) {
     const messages: Record<string, string> = {
@@ -372,7 +373,7 @@ export async function submitCampaignAction(
     };
     return {
       success: false,
-      message: messages[result?.error ?? ''] ?? result?.error ?? 'Could not submit campaign.',
+      message: messages[result?.error ?? ''] ?? friendlyError(result?.error ?? 'Could not submit campaign.'),
     };
   }
   revalidatePath('/sadaka');
@@ -399,10 +400,10 @@ export async function registerInstitutionAction(
     p_registration_doc_url: String(formData.get('registrationDocUrl') ?? '').trim(),
     p_contact_phone: String(formData.get('contactPhone') ?? '').trim() || null,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Could not register institution.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Could not register institution.') };
   }
   revalidatePath('/sadaka/adopt');
   revalidatePath('/admin/sadaka');
@@ -422,10 +423,10 @@ export async function createAdoptionProfileAction(
     p_description: String(formData.get('description') ?? '').trim(),
     p_suggested_monthly_amount: Number(formData.get('monthlyAmount')),
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string; slug?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Could not create adoption profile.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Could not create adoption profile.') };
   }
   revalidatePath('/sadaka/adopt');
   return { success: true, message: 'Adoption profile published.' };
@@ -444,7 +445,7 @@ export async function startSponsorshipAction(
     p_monthly_amount: Number(formData.get('monthlyAmount')),
     p_phone: phone,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as {
     ok?: boolean;
     error?: string;
@@ -455,7 +456,7 @@ export async function startSponsorshipAction(
     phone?: string;
   } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Could not start sponsorship.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Could not start sponsorship.') };
   }
 
   if (result.needs_stk && result.intent_id && result.phone) {
@@ -469,7 +470,7 @@ export async function startSponsorshipAction(
     if (!stk.ok) {
       return {
         success: false,
-        message: stk.error ?? 'Sponsorship created but M-Pesa STK failed.',
+        message: friendlyError(stk.error ?? 'Sponsorship created but M-Pesa STK failed.'),
       };
     }
     revalidatePath('/sadaka/adopt');

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
+import { friendlyError } from '@/lib/friendly-error';
 
 const OFFICER_ROLES = new Set(['circle_admin', 'chair', 'treasurer', 'secretary']);
 
@@ -33,7 +34,7 @@ export async function GET(
     .maybeSingle();
 
   if (mErr) {
-    return NextResponse.json({ ok: false, error: mErr.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(mErr.message) }, { status: 500 });
   }
   if (!membership || !OFFICER_ROLES.has((membership as Membership).role)) {
     return NextResponse.json({ ok: false, error: 'FORBIDDEN' }, { status: 403 });
@@ -141,7 +142,7 @@ export async function POST(
       p_member_id: body.memberId,
       p_role: body.role,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json({ ok: false, error: result?.error ?? 'ROLE_FAILED' }, { status: 400 });
@@ -155,7 +156,7 @@ export async function POST(
       p_approve: body.approve !== false,
       p_notes: body.notes ?? null,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json({ ok: false, error: result?.error ?? 'VOUCH_FAILED' }, { status: 400 });
@@ -168,7 +169,7 @@ export async function POST(
       p_request_id: body.requestId,
       p_approve: body.approve !== false,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json({ ok: false, error: result?.error ?? 'GRACE_FAILED' }, { status: 400 });

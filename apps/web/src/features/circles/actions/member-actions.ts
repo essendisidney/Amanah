@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function setMemberRoleAction(formData: FormData): Promise<void> {
   const memberId = String(formData.get('memberId') ?? '');
@@ -169,7 +170,7 @@ export async function removeMemberAction(formData: FormData): Promise<void> {
         redirect(
           withNoticeQuery(
             `/circles/${slug}`,
-            adminError.message || 'Could not remove member.',
+            friendlyError(adminError.message || 'Could not remove member.'),
             'error',
           ),
         );
@@ -197,7 +198,7 @@ export async function removeMemberAction(formData: FormData): Promise<void> {
     redirect(
       withNoticeQuery(
         `/circles/${slug}`,
-        error instanceof Error ? error.message : 'Could not remove member.',
+        error instanceof Error ? friendlyError(error.message) : 'Could not remove member.',
         'error',
       ),
     );
@@ -276,7 +277,7 @@ export async function correctMemberContactAction(formData: FormData): Promise<vo
     const { error } = await admin.from('profiles').update(patch as never).eq('id', member.user_id);
     if (error) {
       redirect(
-        withNoticeQuery(`/circles/${slug}`, error.message || 'Could not update contact.', 'error'),
+        withNoticeQuery(`/circles/${slug}`, friendlyError(error.message || 'Could not update contact.'), 'error'),
       );
     }
 
@@ -296,7 +297,7 @@ export async function correctMemberContactAction(formData: FormData): Promise<vo
     redirect(
       withNoticeQuery(
         `/circles/${slug}`,
-        error instanceof Error ? error.message : 'Could not update contact.',
+        error instanceof Error ? friendlyError(error.message) : 'Could not update contact.',
         'error',
       ),
     );

@@ -16,6 +16,7 @@ import { mapZodFieldErrors, type ActionState } from '../lib/action-state';
 import { getSiteUrl } from '@/lib/site-url';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
 import { acceptAndChargeCircleTerms } from './circle-terms-actions';
+import { friendlyError } from '@/lib/friendly-error';
 
 async function findInviteeUserId(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -208,7 +209,7 @@ export async function createInvitationAction(
   if (!invite) {
     return {
       success: false,
-      message: lastError ?? 'Failed to create invitation.',
+      message: lastError ? friendlyError(lastError) : 'Failed to create invitation.',
     };
   }
 
@@ -348,7 +349,7 @@ export async function acceptInvitationAction(
   const { data, error } = await callRpc('accept_invitation', args);
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const result = data as unknown as {
@@ -414,7 +415,7 @@ export async function declineInvitationAction(token: string): Promise<ActionStat
   );
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   const result = data as unknown as { ok?: boolean; error?: string };

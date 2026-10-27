@@ -7,6 +7,7 @@ import { BOOKS_MEMBER_STATUSES } from '../lib/books-members';
 import { booksHref } from '../lib/member-books-view';
 import { redirectWithCircleNotice } from '../lib/circle-notice';
 import type { GridSaveResult } from '../lib/action-state';
+import { friendlyError } from '@/lib/friendly-error';
 
 function booksPath(memberId: string, view: 'member' | 'grid' | 'import' | 'home' = 'member') {
   // Absolute path under the circle — redirectWithCircleNotice only appends suffixes.
@@ -28,7 +29,7 @@ async function importRows(
     p_jamiya_id: jamiyaId,
     p_rows: rows,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: friendlyError(error.message) };
   const result = data as { ok?: boolean; imported?: number; error?: string } | null;
   return result ? { ...result, ok: result.ok ?? false } : { ok: false, error: 'Import failed.' };
 }
@@ -552,7 +553,7 @@ export async function importTbSheetAction(formData: FormData): Promise<GridSaveR
     if (!result.ok) {
       return {
         success: false,
-        message: result.error ?? 'Sheet import failed while saving book rows.',
+        message: friendlyError(result.error ?? 'Sheet import failed while saving book rows.'),
       };
     }
     imported = result.imported ?? bookRows.length;
@@ -803,13 +804,13 @@ export async function saveMonthlyPaymentsGridAction(
       p_rows: safeShares,
     });
     if (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: friendlyError(error.message) };
     }
     const result = data as { ok?: boolean; error?: string; updated?: number } | null;
     if (!result?.ok) {
       return {
         success: false,
-        message: result?.error ?? 'Could not save share capital.',
+        message: friendlyError(result?.error ?? 'Could not save share capital.'),
       };
     }
     shareUpdated = result.updated ?? safeShares.length;
@@ -821,13 +822,13 @@ export async function saveMonthlyPaymentsGridAction(
       p_rows: safeMonths,
     });
     if (error) {
-      return { success: false, message: error.message };
+      return { success: false, message: friendlyError(error.message) };
     }
     const result = data as { ok?: boolean; error?: string; updated?: number } | null;
     if (!result?.ok) {
       return {
         success: false,
-        message: result?.error ?? 'Could not save monthly payments.',
+        message: friendlyError(result?.error ?? 'Could not save monthly payments.'),
       };
     }
     monthUpdated = result.updated ?? safeMonths.length;

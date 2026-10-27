@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createApiClient } from '@/lib/supabase/api';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function GET(request: Request) {
   const supabase = await createApiClient(request);
@@ -24,7 +25,7 @@ export async function GET(request: Request) {
 
   if (fErr || cErr) {
     return NextResponse.json(
-      { ok: false, error: fErr?.message ?? cErr?.message },
+      { ok: false, error: friendlyError(fErr?.message ?? cErr?.message) },
       { status: 500 },
     );
   }
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       p_jamiya_id: body.jamiyaId,
       p_contribution_amount: body.amount ?? 0,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     return NextResponse.json({ ok: true, result: data });
   }
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
       p_jamiya_id: body.jamiyaId,
       p_amount: body.amount,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json(
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
       p_amount: body.amount,
       p_reason: body.reason ?? 'Mobile claim',
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json({ ok: false, error: result?.error ?? 'CLAIM_FAILED' }, { status: 400 });
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
       p_claim_id: body.claimId,
       p_approve: body.approve !== false,
     });
-    if (error) return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    if (error) return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
     const result = data as { ok?: boolean; error?: string } | null;
     if (!result?.ok) {
       return NextResponse.json(

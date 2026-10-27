@@ -8,6 +8,7 @@ import { withNoticeQuery } from '@/features/auth/lib/types';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
 import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function reprocessWebhookAction(formData: FormData) {
   await requireAdminAccess('admin');
@@ -57,7 +58,7 @@ export async function reprocessWebhookAction(formData: FormData) {
       dest,
       ok
         ? `Webhook reprocessed (${(data as { action?: string }).action ?? 'ok'}).`
-        : `Reprocess failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Reprocess failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );

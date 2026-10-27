@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { callRpc } from '@/lib/supabase/rpc';
 import { withNoticeQuery } from '@/features/auth/lib/types';
 import { requireAdminAccess } from '../lib/require-admin';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function updateUserRoleAction(formData: FormData): Promise<void> {
   const { userId: actorId } = await requireAdminAccess('admin');
@@ -60,14 +61,14 @@ export async function reviewKycDocumentAction(formData: FormData): Promise<void>
   revalidatePath('/notifications');
 
   if (error) {
-    redirect(withNoticeQuery('/admin/kyc', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/kyc', friendlyError(error.message), 'error'));
   }
   const result = data as { ok?: boolean; error?: string } | null;
   if (result && result.ok === false) {
     redirect(
       withNoticeQuery(
         '/admin/kyc',
-        result.error ?? 'Could not update KYC document.',
+        friendlyError(result.error ?? 'Could not update KYC document.'),
         'error',
       ),
     );
@@ -106,7 +107,11 @@ function safeNotice(message: string, max = 180): string {
 }
 
 function circlesNotice(message: string, type: 'success' | 'error' | 'info' = 'success') {
-  return withNoticeQuery('/admin/circles', safeNotice(message), type);
+  return withNoticeQuery(
+    '/admin/circles',
+    safeNotice(type === 'error' ? friendlyError(message) : message),
+    type,
+  );
 }
 
 async function setJamiyaStatusViaServiceRole(

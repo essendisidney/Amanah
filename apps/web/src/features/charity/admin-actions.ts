@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
+import { friendlyError } from '@/lib/friendly-error';
 
 export type CharityAdminState = { success: boolean; message: string };
 
@@ -33,7 +34,7 @@ export async function setCampaignFeePolicyAction(
     p_status: status,
   });
 
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
     const code = result?.error ?? 'Update failed.';
@@ -73,10 +74,10 @@ export async function reviewCampaignAction(formData: FormData): Promise<CharityA
     p_rejection_reason: reason,
     p_sharia_endorsed: endorsed,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Review failed.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Review failed.') };
   }
   revalidatePath('/admin/sadaka');
   revalidatePath('/sadaka');
@@ -102,10 +103,10 @@ export async function disburseCampaignAction(formData: FormData): Promise<Charit
     p_amount: amount,
     p_notes: notes,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string; net?: number } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Disbursement failed.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Disbursement failed.') };
   }
   revalidatePath('/admin/sadaka');
   revalidatePath('/sadaka');
@@ -130,10 +131,10 @@ export async function verifyInstitutionAction(formData: FormData): Promise<Chari
     p_approve: approve,
     p_rejection_reason: reason,
   });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Verification failed.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Verification failed.') };
   }
   revalidatePath('/admin/sadaka');
   revalidatePath('/sadaka/adopt');

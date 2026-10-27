@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function confirmFinanceDualApprovalAction(formData: FormData) {
   await requireAdminAccess('compliance');
@@ -29,7 +30,7 @@ export async function confirmFinanceDualApprovalAction(formData: FormData) {
   revalidatePath('/wallet');
 
   if (error) {
-    redirect(withNoticeQuery('/admin/finance/approvals', error.message, 'error'));
+    redirect(withNoticeQuery('/admin/finance/approvals', friendlyError(error.message), 'error'));
   }
 
   const result = data as {

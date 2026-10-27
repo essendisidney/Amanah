@@ -9,6 +9,7 @@ import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { submitCampaignAction, type CharityActionState } from '../actions';
 import { prepareKycUploadFile } from '@/features/profile/lib/prepare-kyc-file';
 import { createClient } from '@/lib/supabase/client';
+import { friendlyError } from '@/lib/friendly-error';
 
 const CATEGORIES = [
   { value: 'medical', label: 'Medical' },
@@ -64,7 +65,7 @@ export function CreateCampaignForm({ kycDocs = [] }: { kycDocs?: KycDoc[] }) {
       setKycStatus({
         busy: false,
         ok: false,
-        message: err instanceof Error ? err.message : 'Could not upload that file. Try a JPEG photo or a PDF.',
+        message: err instanceof Error ? friendlyError(err.message) : 'Could not upload that file. Try a JPEG photo or a PDF.',
       });
     }
   }

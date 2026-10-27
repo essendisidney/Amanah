@@ -5,11 +5,12 @@ import { redirect } from 'next/navigation';
 import { callRpc } from '@/lib/supabase/rpc';
 import { requireAdminAccess } from '@/features/admin/lib/require-admin';
 import { withNoticeQuery } from '@/features/auth/lib/types';
+import { friendlyError } from '@/lib/friendly-error';
 
 const PAGE = '/admin/finance/fees-owed';
 
 function rpcError(error: { message: string } | null, data: unknown): string | null {
-  if (error) return error.message;
+  if (error) return friendlyError(error.message);
   const result = data as { ok?: boolean; error?: string } | null;
   return result?.ok ? null : (result?.error ?? 'unknown');
 }

@@ -7,6 +7,7 @@ import {
   getInvitationExpiry,
   hashInvitationToken,
 } from '@/features/circles/lib/invitation-token';
+import { friendlyError } from '@/lib/friendly-error';
 
 function getSiteUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? 'https://jameiyah.com';
@@ -53,7 +54,7 @@ export async function POST(
   );
 
   if (existingErr) {
-    return NextResponse.json({ ok: false, error: existingErr.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(existingErr.message) }, { status: 500 });
   }
 
   const existing = existingData as { ok?: boolean; error?: string; fee_warning?: boolean } | null;
@@ -122,7 +123,7 @@ export async function POST(
 
   if (!newUserId) {
     return NextResponse.json(
-      { ok: false, error: provisionError ?? 'PROVISION_FAILED' },
+      { ok: false, error: provisionError ? friendlyError(provisionError) : 'PROVISION_FAILED' },
       { status: 500 },
     );
   }
@@ -155,7 +156,7 @@ export async function POST(
   });
 
   if (error) {
-    return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: friendlyError(error.message) }, { status: 500 });
   }
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
@@ -187,7 +188,7 @@ export async function POST(
       mode: 'invited',
       inviteUrl: null,
       inviteCode: null,
-      warning: invErr?.message ?? 'CLAIM_INVITE_FAILED',
+      warning: invErr ? friendlyError(invErr.message) : 'CLAIM_INVITE_FAILED',
     });
   }
 

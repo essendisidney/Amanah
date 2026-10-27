@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { getSafeRedirectPath } from '@/features/auth/lib/types';
 import { mapProfileZodErrors, type ProfileActionState } from '../lib/state';
+import { friendlyError } from '@/lib/friendly-error';
 
 export async function updateProfileAction(
   _prev: ProfileActionState,
@@ -71,7 +72,7 @@ export async function updateProfileAction(
     .eq('id', user.id);
 
   if (error) {
-    return { success: false, message: error.message };
+    return { success: false, message: friendlyError(error.message) };
   }
 
   await supabase.from('audit_logs').insert({
@@ -110,10 +111,10 @@ export async function linkMpesaPhoneAction(
 
   const { callRpc } = await import('@/lib/supabase/rpc');
   const { data, error } = await callRpc('link_mpesa_phone', { p_phone: normalized });
-  if (error) return { success: false, message: error.message };
+  if (error) return { success: false, message: friendlyError(error.message) };
   const result = data as { ok?: boolean; error?: string } | null;
   if (!result?.ok) {
-    return { success: false, message: result?.error ?? 'Could not link M-Pesa phone.' };
+    return { success: false, message: friendlyError(result?.error ?? 'Could not link M-Pesa phone.') };
   }
 
   revalidatePath('/profile');
@@ -175,7 +176,7 @@ export async function registerKycDocumentAction(
     } as never);
 
     if (insertError) {
-      return { success: false, message: insertError.message };
+      return { success: false, message: friendlyError(insertError.message) };
     }
 
     await supabase
@@ -222,7 +223,7 @@ export async function registerKycDocumentAction(
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'Could not save that ID document.',
+      message: error instanceof Error ? friendlyError(error.message) : 'Could not save that ID document.',
     };
   }
 }
@@ -326,7 +327,7 @@ export async function verifyIprsAction(
     .eq('id', user.id);
 
   if (profileError) {
-    return { success: false, message: profileError.message };
+    return { success: false, message: friendlyError(profileError.message) };
   }
 
   await service.from('audit_logs').insert({
@@ -347,12 +348,12 @@ export async function verifyIprsAction(
 
   return {
     success: result.matched,
-    message: result.message,
+    message: friendlyError(result.message),
   };
   } catch (error) {
     return {
       success: false,
-      message: error instanceof Error ? error.message : 'IPRS lookup failed. Try again.',
+      message: error instanceof Error ? friendlyError(error.message) : 'IPRS lookup failed. Try again.',
     };
   }
 }

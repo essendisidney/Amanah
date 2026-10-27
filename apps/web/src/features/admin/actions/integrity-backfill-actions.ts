@@ -8,6 +8,7 @@ import { withNoticeQuery } from '@/features/auth/lib/types';
 import { createServiceRoleClient } from '@/lib/supabase/service';
 import { mirrorSettlementAfterComplete } from '@/lib/finance/settlements';
 import { financeReturnPath } from '@/features/admin/lib/finance-return-path';
+import { friendlyError } from '@/lib/friendly-error';
 
 function revalidateIntegrity(intentId?: string) {
   revalidatePath('/admin/finance/integrity');
@@ -49,7 +50,7 @@ export async function backfillIntentJournalAction(formData: FormData) {
       dest,
       ok
         ? `Journal ${(data as { action?: string }).action ?? 'posted'} for intent.`
-        : `Backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Backfill failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -95,7 +96,7 @@ export async function backfillMissingJournalsAction(formData: FormData) {
       '/admin/finance/integrity',
       ok
         ? `Backfill done: ${posted} posted, ${skipped} already present, ${failed} failed.`
-        : `Batch backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Batch backfill failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
@@ -131,7 +132,7 @@ export async function backfillMissingWithdrawalJournalsAction(formData: FormData
       dest,
       ok
         ? `Withdrawal journals: ${posted} posted, ${skipped} present, ${failed} failed.`
-        : `Withdrawal backfill failed: ${error?.message ?? (data as { error?: string })?.error ?? 'unknown'}`,
+        : `Withdrawal backfill failed: ${(error && friendlyError(error.message)) ?? (data as { error?: string })?.error ?? 'unknown'}`,
       ok ? 'success' : 'error',
     ),
   );
