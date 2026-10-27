@@ -359,7 +359,7 @@ export default async function AdminSadakaPage() {
                       <p className="font-medium">{dict.admin.shariaBoardPanel}</p>
                       <p className="mt-1 text-muted-foreground">{dict.admin.shariaBoardHint}</p>
                       {!row.sharia_board_endorsed ? (
-                        <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+                        <p className="mt-1 text-xs text-warning-text">
                           {dict.admin.decisionRefRequired}
                         </p>
                       ) : null}

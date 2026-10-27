@@ -220,7 +220,7 @@ export function AppShell({
                 strokeWidth={1.9}
               />
               {liveUnread > 0 ? (
-                <span className="absolute -right-0.5 -top-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#d8a038] px-1 text-[10px] font-bold leading-none text-[#1f1606] ring-2 ring-[#03201b]">
+                <span className="absolute -right-0.5 -top-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-brand-gold px-1 text-[10px] font-bold leading-none text-brand-gold-ink ring-2 ring-brand-night">
                   {liveUnread > 9 ? '9+' : liveUnread}
                 </span>
               ) : null}

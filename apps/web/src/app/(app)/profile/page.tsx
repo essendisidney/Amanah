@@ -333,7 +333,7 @@ export default async function ProfilePage({ searchParams }: Props) {
               iprsStatus={profile?.iprs_status ?? 'not_checked'}
             />
             {verification.state === 'simulated' ? (
-              <p className="mt-3 text-xs text-amber-800 dark:text-amber-300">
+              <p className="mt-3 text-xs text-warning-text-strong">
                 Demo IPRS does not approve live KYC. Upload documents below for real review.
               </p>
             ) : null}

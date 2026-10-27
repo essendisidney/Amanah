@@ -25,23 +25,23 @@ export const metadata: Metadata = {
   },
 };
 
-/* Palette: deep green #004038, night #03201b, gold #D8A038, paper #f5f3ee. */
+/* Palette (brand-* tokens, packages/ui/src/globals.css): green #004038, night #03201b, gold #D8A038, paper #f5f3ee. */
 const DISPLAY = 'font-[family-name:var(--font-grotesk)]';
 const GOLD_BTN =
-  'inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#D8A038] px-7 text-[15px] font-semibold text-[#1f1606] shadow-[0_12px_30px_-12px_rgba(216,160,56,0.8)] transition hover:bg-[#e6b451] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D8A038] focus-visible:ring-offset-2 focus-visible:ring-offset-[#03201b]';
+  'inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand-gold px-7 text-[15px] font-semibold text-brand-gold-ink shadow-[0_12px_30px_-12px_rgba(216,160,56,0.8)] transition hover:bg-brand-gold-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-night';
 const GHOST_DARK_BTN =
   'inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-white/25 px-7 text-[15px] font-semibold text-white transition hover:border-white/50 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60';
 const INK_BTN =
-  'inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-[#0b1f1b]/20 px-7 text-[15px] font-semibold text-[#0b1f1b] transition hover:border-[#0b1f1b]/50 hover:bg-[#0b1f1b]/5';
+  'inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-brand-ink/20 px-7 text-[15px] font-semibold text-brand-ink transition hover:border-brand-ink/50 hover:bg-brand-ink/5';
 
 function Eyebrow({ children, onDark = false }: { children: ReactNode; onDark?: boolean }) {
   return (
     <p
       className={`flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.28em] ${
-        onDark ? 'text-[#D8A038]' : 'text-[#9a6c12]'
+        onDark ? 'text-brand-gold' : 'text-brand-gold-deep'
       }`}
     >
-      <span className={`h-px w-8 ${onDark ? 'bg-[#D8A038]/70' : 'bg-[#9a6c12]/60'}`} aria-hidden />
+      <span className={`h-px w-8 ${onDark ? 'bg-brand-gold/70' : 'bg-brand-gold-deep/60'}`} aria-hidden />
       {children}
     </p>
   );
@@ -58,7 +58,7 @@ function SplitHeadline({ text }: { text: string }) {
           {p}
         </span>
       ))}
-      <span className="block text-[#D8A038]">{last}</span>
+      <span className="block text-brand-gold">{last}</span>
     </>
   );
 }
@@ -68,9 +68,9 @@ export default async function LandingPage() {
   const c = landingCopy(locale);
 
   return (
-    <div className="jameiyah-light relative min-h-dvh overflow-x-hidden bg-[#f5f3ee] text-[#0b1f1b]">
+    <div className="jameiyah-light relative min-h-dvh overflow-x-hidden bg-brand-paper text-brand-ink">
       {/* ─────────────────────────── HERO (night) ─────────────────────────── */}
-      <section className="jameiyah-on-dark relative overflow-hidden bg-[#03201b] text-white">
+      <section className="jameiyah-on-dark relative overflow-hidden bg-brand-night text-white">
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div
             className="absolute inset-0 opacity-[0.55]"
@@ -82,9 +82,9 @@ export default async function LandingPage() {
               WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 60% 30%, #000 30%, transparent 75%)',
             }}
           />
-          <div className="absolute -right-40 -top-40 h-[560px] w-[560px] rounded-full bg-[#D8A038]/20 blur-[120px]" />
-          <div className="absolute -left-40 top-1/3 h-[520px] w-[520px] rounded-full bg-[#00705f]/30 blur-[120px]" />
-          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#03201b] to-transparent" />
+          <div className="absolute -right-40 -top-40 h-[560px] w-[560px] rounded-full bg-brand-gold/20 blur-[120px]" />
+          <div className="absolute -left-40 top-1/3 h-[520px] w-[520px] rounded-full bg-brand-green-glow/30 blur-[120px]" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-brand-night to-transparent" />
         </div>
 
         <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pt-4 sm:px-6 sm:pt-6">
@@ -107,7 +107,7 @@ export default async function LandingPage() {
         <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 px-4 pb-16 pt-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-10 lg:pb-24 lg:pt-16">
           <div className="max-w-2xl">
             <p className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold tracking-[0.02em] text-white/85 backdrop-blur sm:rounded-full sm:text-[13px]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#D8A038] shadow-[0_0_12px_#D8A038]" aria-hidden />
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-gold shadow-[0_0_12px_#D8A038]" aria-hidden />
               {dict.brand.tagline}
             </p>
             <h1
@@ -128,7 +128,7 @@ export default async function LandingPage() {
             </div>
             <p className="mt-4 text-sm text-white/55">
               {c.newHere}{' '}
-              <Link href="/welcome" className="-my-2.5 inline-block py-2.5 font-semibold text-[#D8A038] hover:underline">
+              <Link href="/welcome" className="-my-2.5 inline-block py-2.5 font-semibold text-brand-gold hover:underline">
                 {dict.landing.startWithPhone}
               </Link>
               <span className="mx-2 text-white/25">·</span>
@@ -141,7 +141,7 @@ export default async function LandingPage() {
             <ul className="mt-9 flex max-w-lg flex-wrap gap-2 text-[13px] text-white/80">
               {c.chips.map((item) => (
                 <li key={item} className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5">
-                  <Check className="h-3.5 w-3.5 text-[#D8A038]" strokeWidth={3} aria-hidden />
+                  <Check className="h-3.5 w-3.5 text-brand-gold" strokeWidth={3} aria-hidden />
                   {item}
                 </li>
               ))}
@@ -172,12 +172,12 @@ export default async function LandingPage() {
       </section>
 
       {/* ─────────────────────────── MARQUEE (gold) ─────────────────────────── */}
-      <div className="relative z-10 overflow-hidden bg-[#D8A038] py-4 text-[#1f1606]" aria-hidden>
+      <div className="relative z-10 overflow-hidden bg-brand-gold py-4 text-brand-gold-ink" aria-hidden>
         <div className="jm-marquee flex w-max items-center gap-8 whitespace-nowrap">
           {[...c.marquee, ...c.marquee].map((word, i) => (
             <span key={`${word}-${i}`} className={`${DISPLAY} flex items-center gap-8 text-[15px] font-bold uppercase tracking-[0.14em]`}>
               {word}
-              <span className="text-[#1f1606]/40">✦</span>
+              <span className="text-brand-gold-ink/40">✦</span>
             </span>
           ))}
         </div>
@@ -191,7 +191,7 @@ export default async function LandingPage() {
               <Eyebrow>{c.circlesEyebrow}</Eyebrow>
               <h2 className={`${DISPLAY} mt-5 text-4xl font-bold leading-[1.02] tracking-[-0.03em] sm:text-5xl`}>{c.circlesTitle}</h2>
             </div>
-            <p className="max-w-md text-[16px] leading-relaxed text-[#4d5f59] md:justify-self-end">{c.circlesLead}</p>
+            <p className="max-w-md text-[16px] leading-relaxed text-brand-ink-soft md:justify-self-end">{c.circlesLead}</p>
           </div>
 
           <ul className="mt-14 grid gap-4 md:grid-cols-6">
@@ -203,25 +203,25 @@ export default async function LandingPage() {
                   key={item.title}
                   className={`group relative flex min-h-[240px] flex-col justify-between overflow-hidden rounded-[28px] p-7 transition ${
                     featured
-                      ? 'bg-[#004038] text-white md:col-span-4'
+                      ? 'bg-brand-green text-white md:col-span-4'
                       : giving
-                        ? 'bg-gradient-to-br from-[#f3e2b8] to-[#e9cf8e] text-[#1f1606] md:col-span-4'
-                        : 'border border-[#0b1f1b]/8 bg-white md:col-span-2'
+                        ? 'bg-gradient-to-br from-brand-sand to-brand-sand-deep text-brand-gold-ink md:col-span-4'
+                        : 'border border-brand-ink/8 bg-white md:col-span-2'
                   }`}
                 >
                   {featured ? (
-                    <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full border-[28px] border-[#D8A038]/25" />
+                    <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full border-[28px] border-brand-gold/25" />
                   ) : null}
-                  <p className={`${DISPLAY} relative text-sm font-semibold ${featured ? 'text-[#D8A038]' : 'text-[#9a6c12]'}`}>
+                  <p className={`${DISPLAY} relative text-sm font-semibold ${featured ? 'text-brand-gold' : 'text-brand-gold-deep'}`}>
                     0{i + 1}
                   </p>
                   <div className="relative mt-10">
                     <h3 className={`${DISPLAY} text-2xl font-bold tracking-tight sm:text-[28px]`}>{item.title}</h3>
-                    <p className={`mt-2 max-w-md text-[15px] leading-relaxed ${featured ? 'text-white/70' : giving ? 'text-[#3d2c0a]' : 'text-[#4d5f59]'}`}>
+                    <p className={`mt-2 max-w-md text-[15px] leading-relaxed ${featured ? 'text-white/70' : giving ? 'text-brand-gold-ink-soft' : 'text-brand-ink-soft'}`}>
                       {item.body}
                     </p>
                     {giving ? (
-                      <Link href="/sadaka" className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-[#1f1606] hover:underline">
+                      <Link href="/sadaka" className="mt-4 inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-brand-gold-ink hover:underline">
                         {c.openGiving.replace(' →', '')}
                         <ArrowUpRight className="h-4 w-4" aria-hidden />
                       </Link>
@@ -235,16 +235,16 @@ export default async function LandingPage() {
       </section>
 
       {/* ─────────────────────────── WHO (white) ─────────────────────────── */}
-      <section className="relative z-10 border-y border-[#0b1f1b]/8 bg-white">
+      <section className="relative z-10 border-y border-brand-ink/8 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <Eyebrow>{c.whoEyebrow}</Eyebrow>
           <h2 className={`${DISPLAY} mt-5 max-w-2xl text-4xl font-bold leading-[1.02] tracking-[-0.03em] sm:text-5xl`}>{c.whoTitle}</h2>
           <div className="mt-14 grid gap-10 md:grid-cols-3">
             {c.who.map((item, i) => (
-              <div key={item.title} className="border-t-2 border-[#0b1f1b] pt-6">
-                <p className={`${DISPLAY} text-5xl font-bold tracking-tight text-[#004038]/15`}>0{i + 1}</p>
+              <div key={item.title} className="border-t-2 border-brand-ink pt-6">
+                <p className={`${DISPLAY} text-5xl font-bold tracking-tight text-brand-green/15`}>0{i + 1}</p>
                 <h3 className={`${DISPLAY} mt-3 text-xl font-bold tracking-tight`}>{item.title}</h3>
-                <p className="mt-2 text-[15px] leading-relaxed text-[#4d5f59]">{item.body}</p>
+                <p className="mt-2 text-[15px] leading-relaxed text-brand-ink-soft">{item.body}</p>
               </div>
             ))}
           </div>
@@ -252,8 +252,8 @@ export default async function LandingPage() {
       </section>
 
       {/* ─────────────────────────── HOW (night) ─────────────────────────── */}
-      <section id="how" className="relative z-10 scroll-mt-24 overflow-hidden bg-[#03201b] text-white">
-        <div aria-hidden className="absolute -left-32 bottom-0 h-[420px] w-[420px] rounded-full bg-[#00705f]/25 blur-[110px]" />
+      <section id="how" className="relative z-10 scroll-mt-24 overflow-hidden bg-brand-night text-white">
+        <div aria-hidden className="absolute -left-32 bottom-0 h-[420px] w-[420px] rounded-full bg-brand-green-glow/25 blur-[110px]" />
         <div className="relative mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-6 md:grid-cols-2 md:items-end">
             <div>
@@ -265,7 +265,7 @@ export default async function LandingPage() {
           <ol className="mt-14 grid gap-4 md:grid-cols-3">
             {c.steps.map((item, i) => (
               <li key={item.title} className="relative rounded-[24px] border border-white/10 bg-white/[0.03] p-7 backdrop-blur">
-                <span className={`${DISPLAY} flex h-11 w-11 items-center justify-center rounded-full bg-[#D8A038] text-[15px] font-bold text-[#1f1606]`}>
+                <span className={`${DISPLAY} flex h-11 w-11 items-center justify-center rounded-full bg-brand-gold text-[15px] font-bold text-brand-gold-ink`}>
                   {i + 1}
                 </span>
                 <h3 className={`${DISPLAY} mt-8 text-xl font-bold tracking-tight`}>{item.title}</h3>
@@ -277,36 +277,36 @@ export default async function LandingPage() {
       </section>
 
       {/* ─────────────────────────── SHARIAH (paper) ─────────────────────────── */}
-      <section id="shariah" className="relative z-10 scroll-mt-24 bg-[#efe9dc]">
+      <section id="shariah" className="relative z-10 scroll-mt-24 bg-brand-paper-deep">
         <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr]">
             <div>
               <Eyebrow>{dict.landing.shariaEyebrow}</Eyebrow>
-              <h2 className={`${DISPLAY} mt-5 text-4xl font-bold leading-[1.02] tracking-[-0.03em] text-[#004038] sm:text-5xl`}>
+              <h2 className={`${DISPLAY} mt-5 text-4xl font-bold leading-[1.02] tracking-[-0.03em] text-brand-green sm:text-5xl`}>
                 {dict.landing.shariaTitle}
               </h2>
-              <p className="mt-5 max-w-lg text-[16px] leading-relaxed text-[#4d5f59]">{dict.landing.shariaLead}</p>
-              <p className="mt-8 max-w-lg text-xs leading-relaxed text-[#6b7a75]">
+              <p className="mt-5 max-w-lg text-[16px] leading-relaxed text-brand-ink-soft">{dict.landing.shariaLead}</p>
+              <p className="mt-8 max-w-lg text-xs leading-relaxed text-brand-ink-muted">
                 {dict.landing.shariaDisclaimer}{' '}
-                <Link href={'/shariah' as Route} className="-my-2.5 inline-block py-2.5 font-semibold text-[#004038] underline underline-offset-2">
+                <Link href={'/shariah' as Route} className="-my-2.5 inline-block py-2.5 font-semibold text-brand-green underline underline-offset-2">
                   {c.shariahLink}
                 </Link>
                 {c.shariahTail}
               </p>
             </div>
-            <div className="divide-y divide-[#0b1f1b]/10 border-y border-[#0b1f1b]/10">
+            <div className="divide-y divide-brand-ink/10 border-y border-brand-ink/10">
               {[
                 { title: dict.landing.shariaNoRibaTitle, body: dict.landing.shariaNoRibaBody },
                 { title: dict.landing.shariaMutualTitle, body: dict.landing.shariaMutualBody },
                 { title: dict.landing.shariaGivingTitle, body: dict.landing.shariaGivingBody },
               ].map((item) => (
                 <div key={item.title} className="flex gap-4 py-6">
-                  <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#004038] text-[#D8A038]">
+                  <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-green text-brand-gold">
                     <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
                   </span>
                   <div>
                     <h3 className={`${DISPLAY} text-lg font-bold tracking-tight`}>{item.title}</h3>
-                    <p className="mt-1 text-[15px] leading-relaxed text-[#4d5f59]">{item.body}</p>
+                    <p className="mt-1 text-[15px] leading-relaxed text-brand-ink-soft">{item.body}</p>
                   </div>
                 </div>
               ))}
@@ -326,11 +326,11 @@ export default async function LandingPage() {
               <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
-          <dl className="divide-y divide-[#0b1f1b]/10 border-y border-[#0b1f1b]/10">
+          <dl className="divide-y divide-brand-ink/10 border-y border-brand-ink/10">
             {c.trust.map((item) => (
               <div key={item.q} className="py-7">
                 <dt className={`${DISPLAY} text-xl font-bold tracking-tight`}>{item.q}</dt>
-                <dd className="mt-2 text-[15px] leading-relaxed text-[#4d5f59]">{item.a}</dd>
+                <dd className="mt-2 text-[15px] leading-relaxed text-brand-ink-soft">{item.a}</dd>
               </div>
             ))}
           </dl>
@@ -340,9 +340,9 @@ export default async function LandingPage() {
       {/* ─────────────────────────── CTA ─────────────────────────── */}
       <section className="relative z-10 bg-white pb-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="jameiyah-on-dark relative overflow-hidden rounded-[32px] bg-[#03201b] px-7 py-14 text-white sm:px-14 sm:py-16">
-            <div aria-hidden className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[#D8A038]/25 blur-[90px]" />
-            <div aria-hidden className="absolute -bottom-10 right-10 h-40 w-40 rounded-full border-[22px] border-[#D8A038]/20" />
+          <div className="jameiyah-on-dark relative overflow-hidden rounded-[32px] bg-brand-night px-7 py-14 text-white sm:px-14 sm:py-16">
+            <div aria-hidden className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-brand-gold/25 blur-[90px]" />
+            <div aria-hidden className="absolute -bottom-10 right-10 h-40 w-40 rounded-full border-[22px] border-brand-gold/20" />
             <div className="relative max-w-xl">
               <Eyebrow onDark>{c.ctaEyebrow}</Eyebrow>
               <h2 className={`${DISPLAY} mt-5 text-4xl font-bold leading-[1.02] tracking-[-0.03em] sm:text-5xl`}>{c.readyTitle}</h2>

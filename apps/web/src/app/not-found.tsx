@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="jameiyah-light jameiyah-premium text-foreground flex min-h-dvh flex-col bg-[#f5f3ee]">
+    <div className="jameiyah-light jameiyah-premium text-foreground flex min-h-dvh flex-col bg-brand-paper">
       <SiteHeaderBand />
       <main className="mx-auto flex w-full max-w-xl flex-1 flex-col justify-center px-4 py-16 sm:px-6">
         <p className="text-primary text-sm font-semibold uppercase tracking-[0.16em]">404</p>

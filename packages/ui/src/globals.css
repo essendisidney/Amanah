@@ -41,6 +41,12 @@
   --color-warning: var(--warning);
   --color-info: var(--info);
 
+  /* Status text/borders on plain surfaces (match Tailwind amber/emerald exactly) */
+  --color-success-text: var(--success-text);
+  --color-warning-text: var(--warning-text);
+  --color-warning-text-strong: var(--warning-text-strong);
+  --color-warning-border: var(--warning-border);
+
   --color-blue: var(--blue);
   --color-blue-muted: var(--blue-muted);
   --color-purple: var(--purple);
@@ -61,6 +67,42 @@
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.25rem;
+}
+
+/*
+  Marketing / lock-screen palette (landing page, site chrome, auth shell, app lock).
+  Literal values so opacity modifiers (bg-brand-gold/10) behave like the old bg-[#d8a038]/10.
+*/
+@theme {
+  --color-brand-green: #004038;
+  --color-brand-green-glow: #00705f;
+  --color-brand-night: #03201b;
+  --color-brand-night-deep: #021814;
+  --color-brand-gold: #d8a038;
+  --color-brand-gold-light: #e6b451;
+  --color-brand-gold-pale: #f3c77a;
+  --color-brand-gold-deep: #9a6c12;
+  --color-brand-gold-ink: #1f1606;
+  --color-brand-gold-ink-soft: #3d2c0a;
+  --color-brand-sand: #f3e2b8;
+  --color-brand-sand-deep: #e9cf8e;
+  --color-brand-paper: #f5f3ee;
+  --color-brand-paper-deep: #efe9dc;
+  --color-brand-ink: #0b1f1b;
+  --color-brand-ink-soft: #4d5f59;
+  --color-brand-ink-muted: #6b7a75;
+
+  /* Landing phone mock-up (features/landing/phone-advert.tsx) */
+  --color-phone-frame: #050807;
+  --color-phone-button: #6f7b78;
+  --color-phone-screen: #f6f7f5;
+  --color-phone-ink: #0f1f1b;
+  --color-phone-text: #5b6b66;
+  --color-phone-icon: #34443f;
+  --color-phone-track: #e8eeec;
+  --color-phone-sms: #1a1a1a;
+  --color-phone-success: #1f8a3a;
+  --color-phone-caption: #5a6f66;
 }
 
 :root,
@@ -123,6 +165,11 @@
   --success: #0d5c45;
   --warning: #c5a044;
   --info: #5b8def;
+
+  --success-text: oklch(50.8% 0.118 165.612); /* emerald-700 */
+  --warning-text: oklch(55.5% 0.163 48.998); /* amber-700 */
+  --warning-text-strong: oklch(47.3% 0.137 46.201); /* amber-800 */
+  --warning-border: oklch(76.9% 0.188 70.08); /* amber-500 */
 
   /* Deep emerald anchors */
   --forest: #0b4a3c;
@@ -210,6 +257,10 @@
   --success: #38c98a;
   --warning: #f0b429;
   --info: #7ea7ff;
+
+  --success-text: oklch(76.5% 0.177 163.223); /* emerald-400 */
+  --warning-text: oklch(82.8% 0.189 84.429); /* amber-400 */
+  --warning-text-strong: oklch(87.9% 0.169 91.605); /* amber-300 */
 
   --forest: #062a1f;
   --forest-mid: #0b4a3c;

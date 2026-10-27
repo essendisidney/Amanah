@@ -107,7 +107,7 @@ export function MemberBooksMemberList({ slug, currency, members }: Props) {
                     <span className="jm-amount">{formatCurrency(m.loanOut, currency)}</span>
                   </span>
                   {isIncomplete(m) ? (
-                    <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                    <span className="text-xs font-medium text-warning-text">
                       Needs data
                     </span>
                   ) : null}

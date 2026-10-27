@@ -11,9 +11,9 @@ export async function SiteHeaderBand() {
   const { locale, dict } = await getDictionary();
   const c = landingCopy(locale);
   return (
-    <div className="jameiyah-on-dark relative z-30 overflow-hidden bg-[#03201b] text-white">
-      <div aria-hidden className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full bg-[#D8A038]/15 blur-[90px]" />
-      <div aria-hidden className="pointer-events-none absolute -left-24 -bottom-32 h-64 w-64 rounded-full bg-[#00705f]/25 blur-[90px]" />
+    <div className="jameiyah-on-dark relative z-30 overflow-hidden bg-brand-night text-white">
+      <div aria-hidden className="pointer-events-none absolute -right-24 -top-28 h-64 w-64 rounded-full bg-brand-gold/15 blur-[90px]" />
+      <div aria-hidden className="pointer-events-none absolute -left-24 -bottom-32 h-64 w-64 rounded-full bg-brand-green-glow/25 blur-[90px]" />
       <div className="relative mx-auto w-full max-w-6xl px-4 py-4 sm:px-6">
         <PublicSiteHeader
           locale={locale}
@@ -40,7 +40,7 @@ export async function SiteFooter() {
   const c = landingCopy(locale);
   const link = 'inline-flex min-h-11 items-center hover:text-white';
   return (
-    <footer className="jameiyah-on-dark relative z-10 bg-[#021814] text-white/70">
+    <footer className="jameiyah-on-dark relative z-10 bg-brand-night-deep text-white/70">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="font-[family-name:var(--font-grotesk)] text-2xl font-bold tracking-tight text-white">{APP_NAME}</p>
