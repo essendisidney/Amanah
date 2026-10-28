@@ -261,6 +261,10 @@ Deno.serve(async (req: Request) => {
     if (msg.includes("TAIFA_API_KEY")) {
       return json({ error: "SMS service is not configured. Contact support." }, 503);
     }
+    // The web app retries from Vercel (another network) when it sees "unreachable".
+    if (msg.startsWith("Taifa unreachable")) {
+      return json({ error: "SMS provider unreachable from Edge" }, 503);
+    }
     if (msg.startsWith("Taifa ")) {
       return json({ error: "SMS provider rejected the message. Try again shortly." }, 502);
     }
