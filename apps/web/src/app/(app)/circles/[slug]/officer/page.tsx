@@ -21,6 +21,11 @@ import { Input, Label } from '@jamiya/ui';
 import { getDictionary } from '@/i18n/get-dictionary';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { isRotatingKind } from '@/features/circles/lib/circle-mode';
+import {
+  BILLING_PERIODS,
+  PERIOD_LABEL,
+  isBillingPeriod,
+} from '@/features/circles/lib/plan-price';
 
 export const metadata: Metadata = { title: 'Officer console' };
 export const dynamic = 'force-dynamic';
@@ -174,7 +179,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     { data: dualPending },
     { data: planPack },
     { data: glancePack },
-    { data: plans },
+    { data: quotesPack },
     { data: dualSettings },
     { data: pendingLoans },
     { data: pendingGuarantees },
@@ -223,11 +228,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .limit(30),
       callRpc('get_circle_plan', { p_jamiya_id: jamiya.id }),
       callRpc('circle_books_glance', { p_jamiya_id: jamiya.id }),
-      db
-        .from('platform_plans')
-        .select('id, name, price_kes, max_members')
-        .eq('active', true)
-        .order('sort_order', { ascending: true }),
+      callRpc('circle_plan_quotes', { p_jamiya_id: jamiya.id }),
       db
         .from('jamiyas')
         .select('dual_approval_enabled, dual_approval_threshold')
@@ -317,6 +318,10 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     plan_id?: string;
     status?: string;
     renews_at?: string | null;
+    billing_period?: string | null;
+    price_kes?: number | string | null;
+    trial_ends_at?: string | null;
+    auto_renew?: boolean;
     plan?: {
       name?: string;
       price_kes?: number;
@@ -324,12 +329,24 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
       exports_included?: boolean;
     };
   } | null;
-  const planRows = (plans ?? []) as Array<{
-    id: string;
-    name: string;
-    price_kes: number | string;
-    max_members: number;
-  }>;
+  const quotes = quotesPack as {
+    ok?: boolean;
+    members?: number;
+    trial_available?: boolean;
+    trial_days?: number;
+    plans?: Array<{
+      id: string;
+      name: string;
+      max_members: number;
+      fits: boolean;
+      monthly: number;
+      quarterly: number;
+      annual: number;
+      annual_list: number;
+      annual_discount_pct: number;
+    }>;
+  } | null;
+  const planRows = quotes?.plans ?? [];
   const dualRows = dualRowsEarly;  const loanRows = (pendingLoans ?? []) as Array<{
     id: string;
     amount: number | string;
@@ -474,23 +491,32 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
             <span className="font-medium text-foreground">
               {planInfo?.plan?.name ?? 'Free'}
             </span>
-            {planInfo?.status && planInfo.status !== 'active'
-              ? ` · ${planInfo.status.replaceAll('_', ' ')}`
+            {planInfo?.status === 'trial' && planInfo.trial_ends_at
+              ? ` · free trial until ${formatDate(planInfo.trial_ends_at)}`
+              : planInfo?.status && planInfo.status !== 'active'
+                ? ` · ${planInfo.status.replaceAll('_', ' ')}`
+                : ''}
+            {planInfo?.status !== 'trial' && planInfo?.renews_at && Number(planInfo.price_kes ?? 0) > 0
+              ? ` · ${formatCurrency(Number(planInfo.price_kes), 'KES')} ${
+                  PERIOD_LABEL[isBillingPeriod(planInfo.billing_period) ? planInfo.billing_period : 'monthly'].per
+                } · ${planInfo.auto_renew ? 'renews' : 'ends'} ${formatDate(planInfo.renews_at)}`
               : ''}
-            {planInfo?.renews_at
-              ? ` · renews ${formatDate(planInfo.renews_at)}`
-              : ''}
-            . Starter and Pro charge the officer wallet in KES for 30 days (auto-renews if
-            balance allows). See{' '}
+            . {quotes?.members ?? 0} members. Plans are paid from your Jameiyah wallet; see{' '}
             <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
               pricing
             </Link>
             .
           </p>
+          {planInfo?.status === 'trial' ? (
+            <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              Nothing is charged when the trial ends unless you pay below or turn auto-pay on in You →
+              My choices. Otherwise the circle moves to Free and keeps all its records.
+            </p>
+          ) : null}
           {planInfo?.status === 'past_due' ? (
             <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3">
               <p className="text-xs text-destructive">
-                Plan is past due. Top up Money, then tap the plan button again to reactivate.
+                The plan could not be paid. It stays on for 7 days; top up Money, then pay below.
               </p>
               <Button asChild size="sm" className="min-h-11">
                 <Link
@@ -503,25 +529,76 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               </Button>
             </div>
           ) : null}
-          <div className="flex flex-wrap gap-2">
-            {planRows.map((plan) => (
-              <form key={plan.id} action={setCirclePlanAction}>
-                <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <input type="hidden" name="planId" value={plan.id} />
-                <Button
-                  type="submit"
-                  variant={planInfo?.plan_id === plan.id ? 'default' : 'outline'}
-                  className="min-h-11"
-                >
-                  {plan.name}
-                  {Number(plan.price_kes) > 0
-                    ? ` · ${formatCurrency(Number(plan.price_kes), 'KES')}`
-                    : ''}
-                </Button>
-              </form>
-            ))}
-          </div>
+          <ul className="divide-y divide-border/70">
+            {planRows.map((plan) => {
+              const current = planInfo?.plan_id === plan.id;
+              const paid = Number(plan.monthly) > 0;
+              return (
+                <li key={plan.id} className="space-y-2 py-3">
+                  <p className="text-sm">
+                    <span className="font-medium">{plan.name}</span>
+                    <span className="text-muted-foreground">
+                      {' '}
+                      · up to {plan.max_members >= 100000 ? 'any number of' : plan.max_members} members
+                      {current ? ' · current' : ''}
+                    </span>
+                  </p>
+                  {!plan.fits ? (
+                    <p className="text-xs text-muted-foreground">Too small for this circle.</p>
+                  ) : !paid ? (
+                    current ? null : (
+                      <form action={setCirclePlanAction}>
+                        <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+                        <input type="hidden" name="slug" value={slug} />
+                        <input type="hidden" name="planId" value={plan.id} />
+                        <Button type="submit" size="sm" variant="outline" className="min-h-11">
+                          Move to Free
+                        </Button>
+                      </form>
+                    )
+                  ) : (
+                    <form action={setCirclePlanAction} className="flex flex-wrap gap-2">
+                      <input type="hidden" name="jamiyaId" value={jamiyaRow.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <input type="hidden" name="planId" value={plan.id} />
+                      {BILLING_PERIODS.map((period) => (
+                        <Button
+                          key={period}
+                          type="submit"
+                          name="period"
+                          value={period}
+                          size="sm"
+                          variant={
+                            current && planInfo?.billing_period === period && planInfo.status === 'active'
+                              ? 'default'
+                              : 'outline'
+                          }
+                          className="min-h-11"
+                        >
+                          {formatCurrency(Number(plan[period]), 'KES')} {PERIOD_LABEL[period].per}
+                          {period === 'annual' && Number(plan.annual_discount_pct) > 0
+                            ? ` (${plan.annual_discount_pct}% off)`
+                            : ''}
+                        </Button>
+                      ))}
+                      {quotes?.trial_available ? (
+                        <Button
+                          type="submit"
+                          name="trial"
+                          value="1"
+                          size="sm"
+                          variant="ghost"
+                          className="min-h-11"
+                        >
+                          Try free for {quotes.trial_days ?? 14} days
+                        </Button>
+                      ) : null}
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
 
         <div className="space-y-3 rounded-xl border border-border bg-card p-5">

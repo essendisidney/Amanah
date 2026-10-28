@@ -48,8 +48,8 @@ SELECT pg_temp.rpc('a0000000-0000-0000-0000-000000000041', format(
 -- ---------------------------------------------------------------------------
 -- Tawarruq: Jameiyah sets the rate
 -- ---------------------------------------------------------------------------
-SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000041', 'SELECT public.get_tawarruq_rates()')->'rates'->>'12',
-  '1000', 'every term starts at Jameiyah''s 10%');
+SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000041', 'SELECT public.get_tawarruq_rates()')->'rates',
+  '{"3": 350, "6": 650, "12": 1200, "24": 2200}'::jsonb, 'each term starts at Jameiyah''s published rate');
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000041',
   $$SELECT public.set_tawarruq_rates('{"12": 500}'::jsonb)$$)->>'error', 'FORBIDDEN', 'a member cannot set the rate');
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000043',
@@ -57,15 +57,15 @@ SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000043',
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000043',
   $$SELECT public.set_tawarruq_rates('{"12": 0}'::jsonb)$$)->>'error', 'INVALID', 'a rate must be above zero');
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000043',
-  $$SELECT public.set_tawarruq_rates('{"3": 500, "6": 800, "12": 1200, "24": 2000}'::jsonb)$$)->>'ok',
+  $$SELECT public.set_tawarruq_rates('{"3": 500, "6": 800, "12": 1300, "24": 2000}'::jsonb)$$)->>'ok',
   'true', 'an admin sets a rate for each term');
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000041', 'SELECT public.get_tawarruq_rates()')->'rates'->>'12',
-  '1200', 'the form sees the new 12-month rate');
+  '1300', 'the form sees the new 12-month rate');
 SELECT is(pg_temp.rpc('a0000000-0000-0000-0000-000000000041',
   $$SELECT public.submit_jameiyah_tawarruq(10000, 'School fees', NULL, 500, 12, true)$$)->>'error',
   'RATE_CHANGED', 'an applicant cannot pick a lower rate');
 SELECT ok(pg_temp.rpc('a0000000-0000-0000-0000-000000000041',
-  $$SELECT public.submit_jameiyah_tawarruq(10000, 'School fees', NULL, 1200, 12, true)$$)->>'error'
+  $$SELECT public.submit_jameiyah_tawarruq(10000, 'School fees', NULL, 1300, 12, true)$$)->>'error'
     NOT IN ('RATE_CHANGED', 'INVALID'), 'the published rate is accepted');
 SELECT ok(pg_temp.rpc('a0000000-0000-0000-0000-000000000041',
   $$SELECT public.submit_jameiyah_tawarruq(10000, 'School fees', NULL, NULL, 12, true)$$)->>'error'

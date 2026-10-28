@@ -36,6 +36,7 @@ export type MyChoices = {
     plan_id: string;
     plan_name: string;
     price_kes: number | string;
+    billing_period?: string | null;
     status: string;
     renews_at: string | null;
     auto_renew: boolean;
