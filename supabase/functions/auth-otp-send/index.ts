@@ -40,40 +40,67 @@ function isPriority(phone254: string): boolean {
   return PRIORITY.has(phone254) || extra.includes(phone254);
 }
 
-async function sendSmsTaifa(mobile: string, message: string): Promise<void> {
-  const apiKey = env("TAIFA_API_KEY").replace(/^["']|["']$/g, "");
-  const senderName = (env("TAIFA_SENDER_ID") || "SIDNET").replace(/^["']|["']$/g, "");
-  if (!apiKey) throw new Error("TAIFA_API_KEY is not configured on Edge");
+/**
+ * Taifa Mobile SMS. The old api.taifamobile.co.ke/sms/sendsms endpoint went away in October 2026,
+ * so this follows Taifa's client library (github.com/taifaMobile/sms): `{ message, recepients }`
+ * is AES-128-CBC encrypted with the API key (first 16 bytes, zero-padded) and the library's fixed
+ * IV, hex-encoded, and posted with the key to /clientapi/sms/. Success is status "00".
+ * Same code as apps/web/src/lib/sms.ts (tested there against PHP's openssl_encrypt).
+ */
+const TAIFA_SMS_URL = "https://sms.taifamobile.co.ke/clientapi/sms/";
+const TAIFA_IV = "w4^dgd$%^62:)dgs";
+const TAIFA_STATUS: Record<string, string> = {
+  "01": "message failed",
+  "97": "not enough SMS credit",
+  "98": "SMS service not found",
+  "99": "missing details",
+};
 
-  const res = await fetch("https://api.taifamobile.co.ke/sms/sendsms", {
+async function taifaEncrypt(plaintext: string, apiKey: string): Promise<string> {
+  const enc = new TextEncoder();
+  const keyBytes = new Uint8Array(16);
+  keyBytes.set(enc.encode(apiKey).slice(0, 16));
+  const key = await crypto.subtle.importKey("raw", keyBytes, "AES-CBC", false, ["encrypt"]);
+  const sealed = await crypto.subtle.encrypt(
+    { name: "AES-CBC", iv: enc.encode(TAIFA_IV) },
+    key,
+    enc.encode(plaintext),
+  );
+  return Array.from(new Uint8Array(sealed), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function postTaifa(mobile: string, message: string, apiKey: string): Promise<void> {
+  const serviceName = env("TAIFA_SERVICE_NAME").trim().replace(/^["']|["']$/g, "") || null;
+  const res = await fetch(TAIFA_SMS_URL, {
     method: "POST",
-    headers: {
-      "api-key": apiKey,
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      mobile,
-      response_type: "json",
-      sender_name: senderName,
-      service_id: 0,
-      message,
+      message: await taifaEncrypt(JSON.stringify({ message, recepients: mobile }), apiKey),
+      key: apiKey,
+      service_name: serviceName,
     }),
   });
 
   const text = await res.text();
-  let row: unknown;
+  let row: { status?: string | number; statusDescription?: string } | undefined;
   try {
     const parsed = JSON.parse(text) as unknown;
-    row = Array.isArray(parsed) ? parsed[0] : parsed;
+    row = (Array.isArray(parsed) ? parsed[0] : parsed) as typeof row;
   } catch {
-    throw new Error(`Bad response from Taifa: ${text.slice(0, 200)}`);
+    throw new Error(`Bad response from Taifa (HTTP ${res.status}): ${text.slice(0, 120)}`);
   }
 
-  const r = row as { status_code?: string | number; status_desc?: string };
-  if (String(r?.status_code ?? "") === "1000") return;
+  const status = String(row?.status ?? "").padStart(2, "0");
+  if (status === "00") return;
   throw new Error(
-    `Taifa ${r?.status_code ?? "?"}: ${r?.status_desc ?? text.slice(0, 200)}`,
+    `Taifa ${status}: ${row?.statusDescription ?? TAIFA_STATUS[status] ?? text.slice(0, 120)}`,
   );
+}
+
+async function sendSmsTaifa(mobile: string, message: string): Promise<void> {
+  const apiKey = env("TAIFA_API_KEY").replace(/^["']|["']$/g, "");
+  if (!apiKey) throw new Error("TAIFA_API_KEY is not configured on Edge");
+  await postTaifa(mobile, message, apiKey);
 }
 
 function json(body: unknown, status = 200): Response {
