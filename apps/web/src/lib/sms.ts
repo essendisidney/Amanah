@@ -1,42 +1,34 @@
 import { normalizePhone254 } from '@jamiya/shared';
 
 /**
- * Taifa Mobile SMS. The old `api.taifamobile.co.ke/sms/sendsms` endpoint went away in October
- * 2026 (404 / sign-in page), so this follows Taifa's client library (github.com/taifaMobile/sms):
- * the JSON `{ message, recepients }` is AES-128-CBC encrypted with the API key and the library's
- * fixed IV, hex-encoded, and posted with the key to /clientapi/sms/. Success is status "00".
- * The same code runs in the auth-otp-send and notify-dispatch Edge functions; keep them in step.
+ * Taifa Mobile SMS, API v2 (vas.taifamobile.co.ke → API & developers). The v1 path
+ * api.taifamobile.co.ke/sms/sendsms with an `api-key` header started answering 404 in October
+ * 2026. v2: POST /v2/sms/sendsms, key in the `h_api_key` header, JSON body
+ * { mobile, sender_name, message, response_type }. Always HTTP 200; the body is
+ * [{ status_code, status_desc, message_id, … }] and "1000" means accepted.
+ * The same request is made by the auth-otp-send and notify-dispatch Edge functions.
  */
-export const TAIFA_SMS_URL = 'https://sms.taifamobile.co.ke/clientapi/sms/';
-const TAIFA_IV = 'w4^dgd$%^62:)dgs';
-
-const TAIFA_STATUS: Record<string, string> = {
-  '01': 'message failed',
-  '97': 'not enough SMS credit',
-  '98': 'SMS service not found',
-  '99': 'missing details',
-};
-
-/** Same bytes as PHP openssl_encrypt(…, 'aes-128-cbc', $apiKey, OPENSSL_RAW_DATA, $iv): the key is
- *  its first 16 bytes, zero-padded when shorter; PKCS#7 padding; lowercase hex out. */
-export async function taifaEncrypt(plaintext: string, apiKey: string): Promise<string> {
-  const enc = new TextEncoder();
-  const keyBytes = new Uint8Array(16);
-  keyBytes.set(enc.encode(apiKey).slice(0, 16));
-  const key = await crypto.subtle.importKey('raw', keyBytes, 'AES-CBC', false, ['encrypt']);
-  const sealed = await crypto.subtle.encrypt(
-    { name: 'AES-CBC', iv: enc.encode(TAIFA_IV) },
-    key,
-    enc.encode(plaintext),
-  );
-  return Array.from(new Uint8Array(sealed), (b) => b.toString(16).padStart(2, '0')).join('');
-}
+export const TAIFA_SMS_URL = 'https://api.taifamobile.co.ke/v2/sms/sendsms';
 
 function clean(value: string | undefined): string {
   return (value ?? '').trim().replace(/^["']|["']$/g, '');
 }
 
-/** Send an SMS. Mobile is 2547XXXXXXXX (no +). Throws `Taifa <status>: …` when Taifa refuses. */
+/** Reads Taifa's reply; returns null when accepted, else the reason. */
+export function taifaRejection(text: string): string | null {
+  let row: { status_code?: string | number; status_desc?: string } | undefined;
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    row = (Array.isArray(parsed) ? parsed[0] : parsed) as typeof row;
+  } catch {
+    return `Bad response from Taifa: ${text.slice(0, 120)}`;
+  }
+  const code = String(row?.status_code ?? '');
+  if (code === '1000') return null;
+  return `Taifa ${code || '?'}: ${row?.status_desc ?? text.slice(0, 120)}`;
+}
+
+/** Send an SMS. Mobile is 2547XXXXXXXX. Throws `Taifa <code>: …` when Taifa refuses. */
 export async function sendSMS(phone: string, message: string): Promise<void> {
   const apiKey = clean(process.env.TAIFA_API_KEY);
   if (!apiKey) {
@@ -48,18 +40,18 @@ export async function sendSMS(phone: string, message: string): Promise<void> {
     throw new Error(`Invalid Kenya mobile: ${phone}`);
   }
 
-  const serviceName = clean(process.env.TAIFA_SERVICE_NAME) || null;
   let res: Response;
   try {
     res = await fetch(TAIFA_SMS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { h_api_key: apiKey, 'Content-Type': 'application/json' },
       // Fail clearly instead of hanging until the platform kills the request.
       signal: AbortSignal.timeout(20_000),
       body: JSON.stringify({
-        message: await taifaEncrypt(JSON.stringify({ message, recepients: mobile }), apiKey),
-        key: apiKey,
-        service_name: serviceName,
+        mobile,
+        sender_name: clean(process.env.TAIFA_SENDER_ID) || 'SIDNET',
+        message,
+        response_type: 'json',
       }),
     });
   } catch (e) {
@@ -67,18 +59,6 @@ export async function sendSMS(phone: string, message: string): Promise<void> {
     throw new Error(`Taifa unreachable: ${why}`);
   }
 
-  const text = await res.text();
-  let row: { status?: string | number; statusDescription?: string } | undefined;
-  try {
-    const parsed = JSON.parse(text) as unknown;
-    row = (Array.isArray(parsed) ? parsed[0] : parsed) as typeof row;
-  } catch {
-    throw new Error(`Bad response from Taifa (HTTP ${res.status}): ${text.slice(0, 120)}`);
-  }
-
-  const status = String(row?.status ?? '').padStart(2, '0');
-  if (status === '00') return;
-  throw new Error(
-    `Taifa ${status}: ${row?.statusDescription ?? TAIFA_STATUS[status] ?? text.slice(0, 120)}`,
-  );
+  const rejection = taifaRejection(await res.text());
+  if (rejection) throw new Error(rejection);
 }
