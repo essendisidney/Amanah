@@ -53,7 +53,13 @@ async function sendViaEdge(phone: string): Promise<OtpSendResult | null> {
   return { ...json, success: true, via: 'edge' };
 }
 
-async function sendViaVercel(normalized: string, priority: boolean): Promise<OtpSendResult> {
+/** `retryAfterEdge`: Edge already stored a code but could not reach the SMS provider, so the
+ *  resend cooldown would wrongly block this retry. Hourly and daily caps still apply. */
+async function sendViaVercel(
+  normalized: string,
+  priority: boolean,
+  retryAfterEdge = false,
+): Promise<OtpSendResult> {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()) {
     return {
       success: false,
@@ -72,7 +78,7 @@ async function sendViaVercel(normalized: string, priority: boolean): Promise<Otp
       .limit(1)
       .maybeSingle();
 
-    if (recent?.created_at) {
+    if (recent?.created_at && !retryAfterEdge) {
       const ageMs = Date.now() - new Date(recent.created_at).getTime();
       const waitSec = Math.ceil((RESEND_COOLDOWN_SEC * 1000 - ageMs) / 1000);
       if (waitSec > 0) {
@@ -212,6 +218,7 @@ export async function POST(request: NextRequest) {
       // Fall through to Vercel only when Edge is unavailable / misconfigured.
       const edgeDown =
         edge.error === 'Failed to send code' ||
+        edge.error.includes('unreachable') ||
         edge.error.includes('misconfigured') ||
         edge.error.includes('not configured');
       if (!edgeDown) {
@@ -222,7 +229,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const local = await sendViaVercel(normalized, priority);
+    const local = await sendViaVercel(
+      normalized,
+      priority,
+      Boolean(edge?.error?.includes('unreachable')),
+    );
     if (!local.success) {
       const status =
         local.retry_after && local.retry_after > 0
