@@ -88,15 +88,23 @@ async function taifaEncrypt(plaintext: string, apiKey: string): Promise<string> 
 
 async function postTaifa(mobile: string, message: string, apiKey: string): Promise<void> {
   const serviceName = env("TAIFA_SERVICE_NAME").trim().replace(/^["']|["']$/g, "") || null;
-  const res = await fetch(TAIFA_SMS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      message: await taifaEncrypt(JSON.stringify({ message, recepients: mobile }), apiKey),
-      key: apiKey,
-      service_name: serviceName,
-    }),
-  });
+  let res: Response;
+  try {
+    res = await fetch(TAIFA_SMS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // Fail clearly instead of hanging until the platform kills the request.
+      signal: AbortSignal.timeout(20_000),
+      body: JSON.stringify({
+        message: await taifaEncrypt(JSON.stringify({ message, recepients: mobile }), apiKey),
+        key: apiKey,
+        service_name: serviceName,
+      }),
+    });
+  } catch (e) {
+    const why = e instanceof Error && e.name === "TimeoutError" ? "no answer in 20s" : String(e);
+    throw new Error(`Taifa unreachable: ${why}`);
+  }
 
   const text = await res.text();
   let row: { status?: string | number; statusDescription?: string } | undefined;
