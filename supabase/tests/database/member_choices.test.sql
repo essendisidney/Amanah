@@ -183,7 +183,7 @@ SELECT is(pg_temp.service('SELECT public.process_circle_subscription_renewals()'
 SELECT is((SELECT status FROM public.circle_subscriptions WHERE jamiya_id = 'b0000000-0000-0000-0000-000000000002'),
   'cancelled', 'and is cancelled');
 SELECT is((SELECT balance FROM public.wallets WHERE user_id = 'a0000000-0000-0000-0000-000000000020' AND currency = 'KES'),
-  4000::numeric, 'without charging the officer again');
+  4550::numeric, 'without charging the officer again');
 
 -- ---------------------------------------------------------------------------
 -- My choices

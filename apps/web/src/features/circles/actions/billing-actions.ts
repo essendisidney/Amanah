@@ -2,18 +2,34 @@
 
 import { revalidatePath } from 'next/cache';
 import { callRpc } from '@/lib/supabase/rpc';
+import { formatCurrency, formatDate } from '@jamiya/shared';
 import { mapMoneyError, redirectWithCircleNotice } from '@/features/circles/lib/circle-notice';
+import {
+  PERIOD_LABEL,
+  isBillingPeriod,
+  type BillingPeriod,
+} from '@/features/circles/lib/plan-price';
 
 export async function setCirclePlanAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');
   const planId = String(formData.get('planId') ?? '');
   const slug = String(formData.get('slug') ?? '');
+  const rawPeriod = formData.get('period');
+  const period: BillingPeriod = isBillingPeriod(rawPeriod) ? rawPeriod : 'monthly';
+  const trial = String(formData.get('trial') ?? '') === '1';
   if (!jamiyaId || !planId) return;
 
-  const { data, error } = await callRpc('set_circle_plan', {
-    p_jamiya_id: jamiyaId,
-    p_plan_id: planId,
-  });
+  const { data, error } = trial
+    ? await callRpc('start_circle_plan_trial', {
+        p_jamiya_id: jamiyaId,
+        p_plan_id: planId,
+        p_period: period,
+      })
+    : await callRpc('set_circle_plan', {
+        p_jamiya_id: jamiyaId,
+        p_plan_id: planId,
+        p_period: period,
+      });
 
   if (slug) {
     revalidatePath(`/circles/${slug}`);
@@ -30,31 +46,38 @@ export async function setCirclePlanAction(formData: FormData): Promise<void> {
     ok?: boolean;
     error?: string;
     already_active?: boolean;
-    price_kes?: number;
+    scheduled?: boolean;
+    ends_at?: string;
+    charged?: number;
+    credit?: number;
+    trial_ends_at?: string;
+    price_after_trial?: number;
   } | null;
   if (!result?.ok) {
     const code = result?.error ?? 'Could not update plan.';
-    if (code === 'MEMBER_LIMIT') {
-      redirectWithCircleNotice(
-        slug,
-        'This circle has more members than the plan allows. Reduce seats or pick Pro.',
-        'error',
-        '/officer',
-      );
-    }
-    redirectWithCircleNotice(slug, mapMoneyError(code), 'error', '/officer');
+    const message =
+      code === 'MEMBER_LIMIT'
+        ? 'This circle has more members than that plan allows. Pick a bigger plan.'
+        : code === 'TRIAL_USED'
+          ? 'This circle has already had its free trial. Choose a period to pay for the plan.'
+          : mapMoneyError(code);
+    redirectWithCircleNotice(slug, message, 'error', '/officer');
   }
-  const charged = Number(result?.price_kes ?? 0) > 0;
-  redirectWithCircleNotice(
-    slug,
-    result?.already_active
-      ? 'That plan is already active.'
-      : charged
-        ? 'Plan paid from your wallet and activated for 30 days.'
-        : 'Plan updated.',
-    'success',
-    '/officer',
-  );
+
+  let message = 'Plan updated.';
+  if (result?.already_active) {
+    message = 'That plan is already active.';
+  } else if (trial && result?.trial_ends_at) {
+    message = `Free trial started until ${formatDate(result.trial_ends_at)}. Nothing is charged unless you choose to pay.`;
+  } else if (result?.scheduled && result.ends_at) {
+    message = `The paid plan stays on until ${formatDate(result.ends_at)}, then the circle moves to Free.`;
+  } else if (Number(result?.charged ?? 0) > 0) {
+    const credit = Number(result?.credit ?? 0);
+    message = `Paid ${formatCurrency(Number(result?.charged), 'KES')} from your wallet for ${
+      PERIOD_LABEL[period].length
+    }${credit > 0 ? `, after ${formatCurrency(credit, 'KES')} credit for the unused part of your last plan` : ''}.`;
+  }
+  redirectWithCircleNotice(slug, message, 'success', '/officer');
 }
 
 export async function setCircleDualApprovalAction(formData: FormData): Promise<void> {

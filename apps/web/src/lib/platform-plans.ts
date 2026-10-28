@@ -11,6 +11,12 @@ export type PlatformPlan = {
   whatsapp_enabled: boolean;
   dual_approval_included: boolean;
   exports_included: boolean;
+  price_quarterly_kes: number | string | null;
+  price_annual_kes: number | string | null;
+  min_members: number;
+  included_members: number | null;
+  per_member_kes: number | string | null;
+  price_cap_kes: number | string | null;
 };
 
 /** Cookie-free anon client — safe for ISR/public pages (no cookies()). */
@@ -31,7 +37,7 @@ export const getActivePlatformPlans = unstable_cache(
     const { data } = await supabase
       .from('platform_plans')
       .select(
-        'id, name, description, price_kes, max_members, sms_credits_month, whatsapp_enabled, dual_approval_included, exports_included',
+        'id, name, description, price_kes, max_members, sms_credits_month, whatsapp_enabled, dual_approval_included, exports_included, price_quarterly_kes, price_annual_kes, min_members, included_members, per_member_kes, price_cap_kes',
       )
       .eq('active', true)
       .order('sort_order', { ascending: true });

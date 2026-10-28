@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { PERIOD_LABEL, isBillingPeriod } from '@/features/circles/lib/plan-price';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { useRouter } from 'next/navigation';
@@ -182,8 +183,9 @@ export function MyChoicesPanel({ choices }: { choices: MyChoices }) {
           <div>
             <h2 className="text-lg font-semibold">Circle plans you manage</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              A paid plan renews every 30 days from the wallet of the circle’s lead officer. Turn
-              auto-renew off and it ends on its renewal date instead.
+              A paid plan renews at the end of its month, quarter or year from the wallet of the
+              circle’s lead officer. Turn auto-renew off and it ends on its renewal date instead. A
+              free trial is only charged when it ends if auto-renew is on.
             </p>
           </div>
           <ul className="divide-y divide-border/70">
@@ -191,12 +193,15 @@ export function MyChoicesPanel({ choices }: { choices: MyChoices }) {
               <li key={p.jamiya_id} className="flex flex-wrap items-center justify-between gap-2 py-3">
                 <div className="min-w-0">
                   <p className="font-medium">
-                    {p.name}: {p.plan_name} ({formatCurrency(Number(p.price_kes), 'KES')})
+                    {p.name}: {p.plan_name} ({formatCurrency(Number(p.price_kes), 'KES')}{' '}
+                    {PERIOD_LABEL[isBillingPeriod(p.billing_period) ? p.billing_period : 'monthly'].per})
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {p.status === 'cancelled'
                       ? 'Ended'
-                      : p.renews_at
+                      : p.status === 'trial' && p.renews_at
+                        ? `Free trial until ${formatDate(p.renews_at)}${p.auto_renew ? ', then paid' : ', then Free'}`
+                        : p.renews_at
                         ? `${p.auto_renew ? 'Renews' : 'Ends'} on ${formatDate(p.renews_at)}`
                         : p.status.replaceAll('_', ' ')}
                   </p>
