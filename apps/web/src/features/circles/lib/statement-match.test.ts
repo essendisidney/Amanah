@@ -71,3 +71,44 @@ describe('matchMember', () => {
     assert.deepEqual(matchMember(line!, members), { memberId: null, how: null });
   });
 });
+
+describe('DIB statement copied from the PDF', () => {
+  // Same layout as a real DIB "Statement of Account", with made-up people and numbers.
+  const dib = [
+    'Transaction Ref Transaction Type and Description Value Date Debits Credits Balance',
+    ' 01/10/2026 Balance Brought Forward 01/10/2026 0.00 0.00 6.58',
+    ' 01/10/2026 001MPSI262740012',
+    'Mobile To Account Transfer  ',
+    'UJ1L080G7M/254712345678/Fatuma ',
+    'Yusuf/001517100104602      ',
+    '01/10/2026 0.00 2,000.00 2,006.58',
+    ' 01/10/2026 001MPSO262740515',
+    'Account To Mobile Transfer  MPESA',
+    '254721437888     ',
+    '01/10/2026 500.00 0.00 1,506.58',
+    ' 12/10/2026 001MPSI262850526',
+    'Mobile To Account Transfer  ',
+    'UJALE9VMER/0733000222/ZENA ',
+    'RASHID/001517100104602',
+    '10/10/2026 0.00 1,000.00 2,506.58',
+  ].join('\n');
+
+  it('reads each payment in, skipping payments out and the opening balance', () => {
+    const lines = parseStatement(dib);
+    assert.deepEqual(
+      lines.map((l) => [l.date, l.amount, l.reference, l.phone]),
+      [
+        ['2026-10-01', 2000, '001MPSI262740012', '254712345678'],
+        ['2026-10-10', 1000, '001MPSI262850526', '254733000222'],
+      ],
+    );
+  });
+
+  it('matches the payers to members', () => {
+    const lines = parseStatement(dib);
+    assert.deepEqual(
+      lines.map((l) => matchMember(l, members).memberId),
+      ['fatuma', 'zena'],
+    );
+  });
+});
