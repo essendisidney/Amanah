@@ -10,7 +10,8 @@ const MAX_ROWS = 100;
 
 /**
  * Parse pasted phone lists.
- * Accepts one per line, or Name + phone separated by comma / tab / pipe.
+ * Accepts one per line, Name + phone separated by comma / pipe, or rows copied from Excel
+ * (tab-separated, any column order, header rows skipped).
  * Also accepts comma-separated phones on a single line (no names).
  */
 export function parseBulkPhoneLines(text: string): BulkPhoneRow[] {
@@ -23,7 +24,20 @@ export function parseBulkPhoneLines(text: string): BulkPhoneRow[] {
   for (const line of lines) {
     if (rows.length >= MAX_ROWS) break;
 
-    // Name, phone | Name\tphone | Name | phone
+    // A row copied from Excel: tab-separated cells such as "1 | Asha Rashid | 0721… | Treasurer".
+    if (line.includes('\t')) {
+      const cells = line.split('\t').map((c) => c.trim()).filter(Boolean);
+      const phoneCell = cells.find((c) => toE164Kenya(c));
+      if (!phoneCell) {
+        // Header rows ("No. | Name | Phone") and blank sheet rows carry no number: skip them.
+        continue;
+      }
+      const nameCell = cells.find((c) => c !== phoneCell && /[A-Za-z]{2}/.test(c));
+      rows.push({ raw: line, phone: toE164Kenya(phoneCell), fullName: nameCell ?? null });
+      continue;
+    }
+
+    // Name, phone | Name | phone
     const named = line.match(/^(.+?)[,|\t]\s*(.+)$/);
     if (named) {
       const left = named[1]!.trim();

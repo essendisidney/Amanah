@@ -36,9 +36,10 @@ export function BulkPhoneInviteForm({
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Paste many Kenya mobiles at once — one per line, or{' '}
-        <span className="font-medium text-foreground">Name, 07…</span>. Existing Jameiyah
-        users join immediately; new numbers get an account and invite code.
+        Paste many Kenya mobiles at once — one per line,{' '}
+        <span className="font-medium text-foreground">Name, 07…</span>, or rows copied straight
+        from an Excel member list (name and phone columns; the header row is skipped). Existing
+        Jameiyah users join immediately; new numbers get an account and invite code.
       </p>
 
       {state.message ? (
