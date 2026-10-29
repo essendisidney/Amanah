@@ -34,6 +34,22 @@ type Receipt = {
   created_at: string;
 };
 
+type Payout = {
+  id: string;
+  reference: string;
+  paid_on: string | null;
+  amount: number | string;
+  kind: string;
+  member_id: string | null;
+};
+
+const KIND_NAME: Record<string, string> = {
+  payout: 'Payout',
+  withdrawal: 'Withdrawal',
+  loan: 'Loan',
+  expense: 'Expense',
+};
+
 export default async function BankPaymentsPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const notices = (await searchParams) ?? {};
@@ -64,7 +80,7 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
     redirect(`/circles/${slug}`);
   }
 
-  const [{ data: memberRows }, { data: dues }, { data: receipts }] = await Promise.all([
+  const [{ data: memberRows }, { data: dues }, { data: receipts }, { data: payouts }] = await Promise.all([
     supabase
       .from('members')
       .select('id, user_id')
@@ -81,6 +97,12 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
       .eq('jamiya_id', j.id)
       .order('created_at', { ascending: false })
       .limit(500),
+    db
+      .from('circle_statement_payouts')
+      .select('id, reference, paid_on, amount, kind, member_id')
+      .eq('jamiya_id', j.id)
+      .order('created_at', { ascending: false })
+      .limit(100),
   ]);
 
   const memberList = (memberRows ?? []) as Array<{ id: string; user_id: string }>;
@@ -127,7 +149,8 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           For circles that keep their own bank account or paybill. Members pay the way they always do;
-          you paste the statement here and Jameiyah marks who has paid.
+          you paste the statement here and Jameiyah marks who has paid, and records payouts, loans and
+          expenses in Books.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button asChild variant="outline" size="sm" className="min-h-11">
@@ -213,8 +236,26 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
         </section>
       ) : null}
 
+      {((payouts ?? []) as Payout[]).length > 0 ? (
+        <section className="space-y-2">
+          <h2 className="font-semibold">Money out recorded from statements</h2>
+          <ul className="divide-y divide-border/70 rounded-xl border border-border text-sm">
+            {((payouts ?? []) as Payout[]).map((r) => (
+              <li key={r.id} className="flex flex-wrap justify-between gap-2 px-4 py-2">
+                <span>
+                  {KIND_NAME[r.kind] ?? r.kind}
+                  {r.member_id ? ` · ${nameById.get(r.member_id) ?? 'Member'}` : ''} · {r.reference}
+                  {r.paid_on ? ` · ${formatDate(r.paid_on)}` : ''}
+                </span>
+                <span className="font-medium">{formatCurrency(Number(r.amount), 'KES')}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <section className="space-y-2">
-        <h2 className="font-semibold">Recorded from statements</h2>
+        <h2 className="font-semibold">Money in recorded from statements</h2>
         {receiptRows.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nothing recorded from a statement yet.</p>
         ) : (

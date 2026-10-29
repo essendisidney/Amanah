@@ -4,10 +4,16 @@ import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Input, Label, NativeSelect, Textarea } from '@jamiya/ui';
-import { recordStatementPaymentsAction } from '../actions/statement-actions';
+import {
+  recordStatementPaymentsAction,
+  recordStatementPayoutsAction,
+  type PayoutKind,
+  type RecordStatementResult,
+} from '../actions/statement-actions';
 import {
   matchMember,
   parseStatement,
+  type StatementDirection,
   type StatementLine,
   type StatementMember,
 } from '../lib/statement-match';
@@ -17,11 +23,21 @@ type Row = StatementLine & {
   how: 'phone' | 'phone_tail' | 'name' | null;
   include: boolean;
   amountText: string;
+  /** Money out only: what the payment was. */
+  kind: PayoutKind;
   /** Circle this payment was already recorded in, if any. */
   already: string | null;
 };
 
 export type RecordedRef = { reference: string; circle: string; here: boolean };
+
+const KIND_LABEL: Record<PayoutKind, string> = {
+  payout: 'Payout to member',
+  withdrawal: 'Savings withdrawal',
+  loan: 'Loan to member',
+  expense: 'Expense / bank charge',
+};
+const MEMBER_KINDS: PayoutKind[] = ['payout', 'withdrawal', 'loan'];
 
 const HOW_LABEL: Record<NonNullable<Row['how']>, string> = {
   phone: 'phone',
@@ -46,6 +62,8 @@ export function StatementMatchForm({
 }) {
   const router = useRouter();
   const [paste, setPaste] = useState('');
+  const [direction, setDirection] = useState<StatementDirection>('in');
+  const [memberKind, setMemberKind] = useState<PayoutKind>('payout');
   const [rows, setRows] = useState<Row[]>([]);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<{ ok: boolean; message: string } | null>(null);
@@ -68,7 +86,7 @@ export function StatementMatchForm({
       const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
       const { text } = await extractText(pdf, { mergePages: true });
       setPaste(text);
-      read(text);
+      read(text, direction);
     } catch {
       setNotice({
         ok: false,
@@ -79,8 +97,8 @@ export function StatementMatchForm({
     }
   }
 
-  function read(source = paste) {
-    const lines = parseStatement(source);
+  function read(source = paste, dir = direction) {
+    const lines = parseStatement(source, dir);
     setRows(
       lines.map((line) => {
         const match = matchMember(line, members);
@@ -89,8 +107,10 @@ export function StatementMatchForm({
           ...line,
           memberId: match.memberId ?? '',
           how: match.how,
+          // Money out to someone who is not a member is left for the officer to say what it was.
           include: Boolean(match.memberId) && !already,
           amountText: String(line.amount ?? ''),
+          kind: match.memberId ? memberKind : 'expense',
           already,
         };
       }),
@@ -99,15 +119,14 @@ export function StatementMatchForm({
       lines.length === 0
         ? {
             ok: false,
-            message:
-              'No money-in lines found. Copy the rows of the statement, including the header row if it has one.',
+            message: `No money-${dir} lines found. Copy the rows of the statement, including the header row if it has one.`,
           }
         : {
             ok: true,
-            message: `Found ${lines.length} payment${lines.length === 1 ? '' : 's'} in, totalling ${formatCurrency(
+            message: `Found ${lines.length} payment${lines.length === 1 ? '' : 's'} ${dir}, totalling ${formatCurrency(
               lines.reduce((sum, l) => sum + (l.amount ?? 0), 0),
               'KES',
-            )}. Check this against the statement's "Total Credits" before recording.`,
+            )}. Check this against the statement's "${dir === 'in' ? 'Total Credits' : 'Total Debits'}" before recording.`,
           },
     );
   }
@@ -116,24 +135,60 @@ export function StatementMatchForm({
     setRows((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
   }
 
-  const chosen = rows.filter((r) => r.include && r.memberId && Number(r.amountText) > 0);
+  function switchDirection(dir: StatementDirection) {
+    setDirection(dir);
+    setRows([]);
+    setNotice(null);
+    if (paste.trim()) read(paste, dir);
+  }
+
+  /** Set every money-out line that has a member to one kind (most chamas pay out one way). */
+  function setAllMemberKinds(kind: PayoutKind) {
+    setMemberKind(kind);
+    setRows((prev) => prev.map((r) => (r.memberId && !r.already ? { ...r, kind } : r)));
+  }
+
+  const chosen = rows.filter(
+    (r) =>
+      r.include &&
+      Number(r.amountText) > 0 &&
+      (direction === 'out' && r.kind === 'expense' ? true : Boolean(r.memberId)),
+  );
   const total = chosen.reduce((s, r) => s + Number(r.amountText), 0);
 
   function record() {
     startTransition(async () => {
-      const payload = chosen.map((r) => ({
-        reference: r.reference,
-        paid_on: r.date,
-        amount: Number(r.amountText),
-        member_id: r.memberId,
-        details: r.details.slice(0, 500),
-      }));
+      const send = (part: Row[]): Promise<RecordStatementResult> =>
+        direction === 'in'
+          ? recordStatementPaymentsAction(
+              jamiyaId,
+              slug,
+              part.map((r) => ({
+                reference: r.reference,
+                paid_on: r.date,
+                amount: Number(r.amountText),
+                member_id: r.memberId,
+                details: r.details.slice(0, 500),
+              })),
+            )
+          : recordStatementPayoutsAction(
+              jamiyaId,
+              slug,
+              part.map((r) => ({
+                reference: r.reference,
+                paid_on: r.date,
+                amount: Number(r.amountText),
+                kind: r.kind,
+                member_id: r.memberId || null,
+                details: r.details.slice(0, 500),
+              })),
+            );
       // The database takes up to 500 lines a call; long SACCO statements go in parts.
       let recordedCount = 0;
       let duplicates = 0;
       let unallocated = 0;
-      for (let i = 0; i < payload.length; i += 400) {
-        const result = await recordStatementPaymentsAction(jamiyaId, slug, payload.slice(i, i + 400));
+      for (let i = 0; i < chosen.length; i += 400) {
+        const result = await send(chosen.slice(i, i + 400));
         if (!result.ok) {
           setNotice({
             ok: false,
@@ -149,7 +204,9 @@ export function StatementMatchForm({
         duplicates += result.duplicates ?? 0;
         unallocated += result.unallocated ?? 0;
       }
-      const parts = [`Recorded ${recordedCount} payment${recordedCount === 1 ? '' : 's'}.`];
+      const parts = [
+        `Recorded ${recordedCount} payment${recordedCount === 1 ? '' : 's'} ${direction}${direction === 'out' ? ' in Books' : ''}.`,
+      ];
       if (duplicates > 0) parts.push(`${duplicates} already recorded and skipped.`);
       if (unallocated > 0) {
         parts.push(
@@ -171,10 +228,33 @@ export function StatementMatchForm({
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Choose the bank statement PDF, or copy the statement rows (from Excel or the PDF) and paste
-          them below. Each payment in is matched to a member by phone number or name; check the matches,
+          them below. Each payment is matched to a member by phone number or name; check the matches,
           then record them. A payment is only ever counted once, even across circles that share the
           same bank account.
         </p>
+      </div>
+
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Which payments to read">
+        <Button
+          type="button"
+          size="sm"
+          className="min-h-11"
+          variant={direction === 'in' ? 'default' : 'outline'}
+          aria-pressed={direction === 'in'}
+          onClick={() => switchDirection('in')}
+        >
+          Money in (contributions)
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          className="min-h-11"
+          variant={direction === 'out' ? 'default' : 'outline'}
+          aria-pressed={direction === 'out'}
+          onClick={() => switchDirection('out')}
+        >
+          Money out (payouts, loans, expenses)
+        </Button>
       </div>
 
       {notice ? (
@@ -219,10 +299,28 @@ export function StatementMatchForm({
 
       {rows.length > 0 ? (
         <div className="space-y-3">
+          {direction === 'out' ? (
+            <div className="max-w-xs space-y-1">
+              <Label htmlFor="memberKind" className="text-xs">
+                Set every payment to a member as
+              </Label>
+              <NativeSelect
+                id="memberKind"
+                value={memberKind}
+                onChange={(e) => setAllMemberKinds(e.target.value as PayoutKind)}
+              >
+                {MEMBER_KINDS.map((k) => (
+                  <option key={k} value={k}>
+                    {KIND_LABEL[k]}
+                  </option>
+                ))}
+              </NativeSelect>
+            </div>
+          ) : null}
           <p className="text-sm text-muted-foreground">
-            {rows.length} payment{rows.length === 1 ? '' : 's'} in ·{' '}
+            {rows.length} payment{rows.length === 1 ? '' : 's'} {direction} ·{' '}
             {rows.filter((r) => r.memberId).length} matched ·{' '}
-            {rows.filter((r) => !r.memberId).length} need a member ·{' '}
+            {rows.filter((r) => !r.memberId).length} {direction === 'in' ? 'need a member' : 'not to a member'} ·{' '}
             {rows.filter((r) => r.already).length} already recorded
           </p>
           <ul className="divide-y divide-border/70 rounded-lg border border-border">
@@ -248,6 +346,27 @@ export function StatementMatchForm({
                 </div>
                 {!r.already ? (
                   <div className="flex flex-wrap items-end gap-3 pl-8">
+                    {direction === 'out' ? (
+                      <div className="min-w-[11rem] space-y-1">
+                        <Label htmlFor={`k-${i}`} className="text-xs">
+                          What was it
+                        </Label>
+                        <NativeSelect
+                          id={`k-${i}`}
+                          value={r.kind}
+                          onChange={(e) => {
+                            const kind = e.target.value as PayoutKind;
+                            update(i, { kind, include: kind === 'expense' || Boolean(r.memberId) });
+                          }}
+                        >
+                          {(Object.keys(KIND_LABEL) as PayoutKind[]).map((k) => (
+                            <option key={k} value={k}>
+                              {KIND_LABEL[k]}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </div>
+                    ) : null}
                     <div className="min-w-[12rem] flex-1 space-y-1">
                       <Label htmlFor={`m-${i}`} className="text-xs">
                         Member
@@ -256,14 +375,22 @@ export function StatementMatchForm({
                         id={`m-${i}`}
                         value={r.memberId}
                         onChange={(e) =>
-                          update(i, { memberId: e.target.value, include: Boolean(e.target.value), how: null })
+                          update(i, {
+                            memberId: e.target.value,
+                            include: Boolean(e.target.value) || (direction === 'out' && r.kind === 'expense'),
+                            how: null,
+                            // Picking a member for money out usually means it was paid to them.
+                            ...(direction === 'out' && e.target.value && r.kind === 'expense'
+                              ? { kind: memberKind }
+                              : {}),
+                          })
                         }
                       >
-                        <option value="">Choose a member…</option>
+                        <option value="">{direction === 'out' ? 'No member' : 'Choose a member…'}</option>
                         {sortedMembers.map((m) => (
                           <option key={m.id} value={m.id}>
                             {m.name}
-                            {owed[m.id] ? ` (owes ${formatCurrency(owed[m.id]!, 'KES')})` : ''}
+                            {direction === 'in' && owed[m.id] ? ` (owes ${formatCurrency(owed[m.id]!, 'KES')})` : ''}
                           </option>
                         ))}
                       </NativeSelect>
@@ -287,7 +414,7 @@ export function StatementMatchForm({
           <Button type="button" className="min-h-11" onClick={record} disabled={pending || chosen.length === 0}>
             {pending
               ? 'Recording…'
-              : `Record ${chosen.length} payment${chosen.length === 1 ? '' : 's'} · ${formatCurrency(total, 'KES')}`}
+              : `Record ${chosen.length} payment${chosen.length === 1 ? '' : 's'} ${direction} · ${formatCurrency(total, 'KES')}`}
           </Button>
         </div>
       ) : null}

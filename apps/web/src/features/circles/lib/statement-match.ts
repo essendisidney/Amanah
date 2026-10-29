@@ -5,14 +5,18 @@
  * statement. A header row, when present, says which column is the date, the details, the money in
  * and the reference. Without one, each line is read on its own: the M-Pesa receipt code, a phone
  * number (full or masked like 0712***678), the date and the amount.
+ *
+ * The same reader gives money out (payouts, withdrawals, loans, charges) with direction 'out'.
  */
+
+export type StatementDirection = 'in' | 'out';
 
 export type StatementLine = {
   /** The line as pasted, for the officer to check. */
   raw: string;
   /** ISO date (YYYY-MM-DD) when one was found. */
   date: string | null;
-  /** Money in, in shillings. */
+  /** Money in (or out, when reading money out), in shillings. */
   amount: number | null;
   /** M-Pesa / bank reference; falls back to a fingerprint of the line so it is never recorded twice. */
   reference: string;
@@ -105,7 +109,7 @@ function fingerprint(text: string): string {
   return `LINE-${h.toString(36).toUpperCase()}`;
 }
 
-type Columns = { date?: number; details?: number; amountIn?: number; reference?: number };
+type Columns = { date?: number; details?: number; amountIn?: number; amountOut?: number; reference?: number };
 
 function headerColumns(cells: string[]): Columns | null {
   const cols: Columns = {};
@@ -113,10 +117,12 @@ function headerColumns(cells: string[]): Columns | null {
     const c = cell.toLowerCase();
     if (cols.date === undefined && /(^|\s)(date|completion time|value date|posting date|trans(action)? date)/.test(c)) cols.date = i;
     else if (cols.reference === undefined && /(receipt|reference|ref\.?|transaction id|cheque)/.test(c)) cols.reference = i;
+    else if (cols.amountOut === undefined && /(withdrawn|paid out|debit|withdrawal|money out|dr\b)/.test(c)) cols.amountOut = i;
     else if (cols.amountIn === undefined && /(paid in|credit|deposit|money in|cr\b|amount)/.test(c)) cols.amountIn = i;
     else if (cols.details === undefined && /(details|narration|narrative|description|particulars|remarks)/.test(c)) cols.details = i;
   });
-  return cols.amountIn !== undefined && (cols.details !== undefined || cols.date !== undefined) ? cols : null;
+  const hasAmount = cols.amountIn !== undefined || cols.amountOut !== undefined;
+  return hasAmount && (cols.details !== undefined || cols.date !== undefined) ? cols : null;
 }
 
 const MONEY2 = String.raw`-?[\d,]+\.\d{2}`;
@@ -130,17 +136,17 @@ const BANK_ROW_WITH_VALUE_DATE = new RegExp(
 );
 const BANK_ROW = new RegExp(String.raw`(${DMY})\s+(.*?)\s+(${MONEY2})\s+(${MONEY2})\s+(${MONEY2})(?=\s|$)`, 'g');
 
-function parseBankRows(text: string): StatementLine[] | null {
+function parseBankRows(text: string, direction: StatementDirection): StatementLine[] | null {
   const stream = text.replace(/\s+/g, ' ').trim();
   const withValue = [...stream.matchAll(BANK_ROW_WITH_VALUE_DATE)];
   const rows = withValue.length >= 2
-    ? withValue.map((m) => ({ raw: m[0], body: m[2]!, date: m[3]!, credit: m[5]! }))
-    : [...stream.matchAll(BANK_ROW)].map((m) => ({ raw: m[0], body: m[2]!, date: m[1]!, credit: m[4]! }));
+    ? withValue.map((m) => ({ raw: m[0], body: m[2]!, date: m[3]!, debit: m[4]!, credit: m[5]! }))
+    : [...stream.matchAll(BANK_ROW)].map((m) => ({ raw: m[0], body: m[2]!, date: m[1]!, debit: m[3]!, credit: m[4]! }));
   if (rows.length < 2) return null;
 
   const out: StatementLine[] = [];
   for (const r of rows) {
-    const amount = parseMoney(r.credit);
+    const amount = parseMoney(direction === 'in' ? r.credit : r.debit);
     if (amount === null || amount <= 0) continue;
     const bankRef = r.body.match(/^\S*\d\S*/)?.[0] ?? null;
     const code = r.body.match(MPESA_CODE)?.[1] ?? null;
@@ -158,11 +164,14 @@ function parseBankRows(text: string): StatementLine[] | null {
   return out;
 }
 
-/** Money-in lines of a pasted statement. Lines with no money in (withdrawals, balances, headers) are left out. */
-export function parseStatement(text: string): StatementLine[] {
+/**
+ * Money-in lines of a pasted statement (or money-out lines with direction 'out'). Lines with
+ * nothing in that direction (the other direction, balances, headers) are left out.
+ */
+export function parseStatement(text: string, direction: StatementDirection = 'in'): StatementLine[] {
   // A spreadsheet copy (tab-separated) is read by its header; a PDF copy is read row by row.
   if (!text.includes('\t')) {
-    const bank = parseBankRows(text);
+    const bank = parseBankRows(text, direction);
     if (bank) return bank;
   }
   const lines = text.replace(/\r\n/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean);
@@ -183,7 +192,10 @@ export function parseStatement(text: string): StatementLine[] {
     let reference: string | null = null;
 
     if (cols) {
-      amount = cols.amountIn !== undefined ? parseMoney(cells[cols.amountIn] ?? '') : null;
+      const col = direction === 'in' ? cols.amountIn : cols.amountOut;
+      amount = col !== undefined ? parseMoney(cells[col] ?? '') : null;
+      // M-Pesa shows withdrawals as negative numbers.
+      if (amount !== null && direction === 'out') amount = Math.abs(amount);
       date = cols.date !== undefined ? parseDate(cells[cols.date] ?? '') : null;
       details = cols.details !== undefined ? (cells[cols.details] ?? '') : line;
       const ref = cols.reference !== undefined ? (cells[cols.reference] ?? '').trim() : '';
@@ -191,13 +203,19 @@ export function parseStatement(text: string): StatementLine[] {
     } else {
       // No header: drop phones, codes and dates, then take the amount after KES or the last number.
       const rest = line
-        .replace(/(?:\+?254|\b0)[17][\d\s*-]{8,14}\d/g, ' ')
+        .replace(/(?:\+?254|\b0)[17](?:[\s-]?[\d*]){6,10}(?![\d*])/g, ' ')
         .replace(new RegExp(MPESA_CODE.source, 'g'), ' ')
         .replace(/\b\d{4}-\d{2}-\d{2}(?:[ T]\d{2}:\d{2}(?::\d{2})?)?/g, ' ')
         .replace(/\b\d{1,2}[/.-](?:\d{1,2}|[A-Za-z]{3,9})[/.-]\d{2,4}\b/g, ' ')
         .replace(/\b\d{1,2}:\d{2}(?::\d{2})?\b/g, ' ');
       const kes = rest.match(/(?:KES|KSH|Kshs|Ksh)\.?\s*([\d,]+(?:\.\d{1,2})?)/i);
-      if (kes) {
+      const negative = rest.match(/(?<![\w.])-(\d[\d,]*(?:\.\d{1,2})?)/);
+      if (direction === 'out') {
+        // Without a header only a negative amount says the money went out.
+        amount = negative ? parseMoney(negative[1]!) : null;
+      } else if (negative && !kes) {
+        amount = null;
+      } else if (kes) {
         amount = parseMoney(kes[1]!);
       } else {
         const numbers = (rest.match(/\d[\d,]*(?:\.\d{1,2})?/g) ?? [])

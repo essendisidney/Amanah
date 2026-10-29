@@ -46,6 +46,29 @@ describe('parseStatement', () => {
     assert.equal(line!.phone, '254733000222');
   });
 
+  it('reads money out from the same statements', () => {
+    const mpesa = parseStatement(
+      [
+        'Receipt No.\tCompletion Time\tDetails\tTransaction Status\tPaid In\tWithdrawn\tBalance',
+        'SKB1XY2Z3A\t2026-11-02 09:14:00\tFunds received from 0712345678 - FATUMA YUSUF\tCompleted\t2,000.00\t\t12,000.00',
+        'SKB1XY2Z3B\t2026-11-02 10:00:00\tCustomer Transfer to 0733000222 - ZENA RASHID\tCompleted\t\t-500.00\t11,500.00',
+      ].join('\n'),
+      'out',
+    );
+    assert.deepEqual(
+      mpesa.map((l) => [l.reference, l.amount, l.phone]),
+      [['SKB1XY2Z3B', 500, '254733000222']],
+    );
+    const csv = parseStatement(
+      ['Date,Narration,Debit,Credit,Balance', '04/11/2026,"LEDGER FEE","50.00","","13,450.00"'].join('\n'),
+      'out',
+    );
+    assert.equal(csv[0]!.amount, 50);
+    const loose = parseStatement('5-Nov-2026 SKD7EF8GH9 sent to Zena Rashid 0733 000 222 -1,000.00', 'out');
+    assert.equal(loose[0]!.amount, 1000);
+    assert.equal(parseStatement('5-Nov-2026 SKD7EF8GH9 sent to Zena -1,000.00').length, 0);
+  });
+
   it('gives a line without a code a stable reference so it is never recorded twice', () => {
     const a = parseStatement('02/11/2026\tCash deposit Asha\t700');
     const b = parseStatement('02/11/2026\tCash deposit Asha\t700');
@@ -102,6 +125,15 @@ describe('DIB statement copied from the PDF', () => {
         ['2026-10-10', 1000, '001MPSI262850526', '254733000222'],
       ],
     );
+  });
+
+  it('reads each payment out with the payee phone', () => {
+    const lines = parseStatement(dib, 'out');
+    assert.deepEqual(
+      lines.map((l) => [l.date, l.amount, l.reference, l.phone]),
+      [['2026-10-01', 500, '001MPSO262740515', '254721437888']],
+    );
+    assert.equal(matchMember(lines[0]!, members).memberId, 'asha');
   });
 
   it('matches the payers to members', () => {
