@@ -71,6 +71,66 @@ export async function recordStatementPaymentsAction(
   return { ok: true, message: parts.join(' '), recorded, duplicates, unallocated };
 }
 
+export type PayoutKind = 'payout' | 'withdrawal' | 'loan' | 'expense';
+
+export type StatementPayoutInput = {
+  reference: string;
+  paid_on: string | null;
+  amount: number;
+  kind: PayoutKind;
+  member_id: string | null;
+  details: string;
+};
+
+/** Record the money-out lines the officer confirmed into Books (and loans into the loan book). */
+export async function recordStatementPayoutsAction(
+  jamiyaId: string,
+  slug: string,
+  rows: StatementPayoutInput[],
+): Promise<RecordStatementResult> {
+  if (!jamiyaId || rows.length === 0) {
+    return { ok: false, message: 'Tick at least one payment out.' };
+  }
+  const { data, error } = await callRpc('record_statement_payouts', {
+    p_jamiya_id: jamiyaId,
+    p_rows: rows,
+  });
+  if (error) return { ok: false, message: friendlyError(error.message) };
+  const result = data as {
+    ok?: boolean;
+    error?: string;
+    recorded?: number;
+    duplicates?: number;
+    results?: Array<{ status: string }>;
+  } | null;
+  if (!result?.ok) {
+    return {
+      ok: false,
+      message:
+        result?.error === 'FORBIDDEN'
+          ? 'Only circle officers can record bank payments.'
+          : 'Could not record these payments. Check the amounts and try again.',
+    };
+  }
+
+  revalidatePath(`/circles/${slug}`);
+  revalidatePath(`/circles/${slug}/bank-payments`);
+  revalidatePath(`/circles/${slug}/books`);
+  revalidatePath(`/circles/${slug}/officer`);
+
+  const recorded = Number(result.recorded ?? 0);
+  const duplicates = Number(result.duplicates ?? 0);
+  const invalid = (result.results ?? []).filter((r) => r.status === 'invalid' || r.status === 'not_a_member').length;
+  const parts = [`Recorded ${recorded} payment${recorded === 1 ? '' : 's'} out in Books.`];
+  if (duplicates > 0) {
+    parts.push(`${duplicates} ${duplicates === 1 ? 'was' : 'were'} already recorded and skipped.`);
+  }
+  if (invalid > 0) {
+    parts.push(`${invalid} could not be recorded; payouts, withdrawals and loans need a member.`);
+  }
+  return { ok: true, message: parts.join(' '), recorded, duplicates };
+}
+
 /** Save the paybill, account, bank and note members see under "How to pay". */
 export async function setCirclePaymentDetailsAction(formData: FormData): Promise<void> {
   const jamiyaId = String(formData.get('jamiyaId') ?? '');

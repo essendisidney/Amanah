@@ -4,7 +4,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
 
-SELECT plan(19);
+SELECT plan(29);
 
 CREATE FUNCTION pg_temp.rpc(p_uid UUID, p_sql TEXT)
 RETURNS JSONB LANGUAGE plpgsql AS $$
@@ -142,6 +142,57 @@ SELECT is(
     $$SELECT public.record_statement_payments('b0000000-0000-0000-0000-000000000055',
       '[{"reference":"SKZ9NEW001","amount":500,"member_id":"c0000000-0000-0000-0000-000000000055"}]')$$)->>'recorded',
   '1', 'new payments in the second circle are recorded as usual');
+
+-- ---------------------------------------------------------------------------
+-- Money out
+-- ---------------------------------------------------------------------------
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000052',
+    $$SELECT public.record_statement_payouts('b0000000-0000-0000-0000-000000000051',
+      '[{"reference":"001MPSO1","amount":5000,"kind":"payout","member_id":"c0000000-0000-0000-0000-000000000052"}]')$$)->>'error',
+  'FORBIDDEN', 'a member cannot record money out');
+
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payouts('b0000000-0000-0000-0000-000000000051', '[
+      {"reference":"001mpso1","paid_on":"2026-10-01","amount":5000,"kind":"payout","member_id":"c0000000-0000-0000-0000-000000000052","details":"MPESA 254721437888"},
+      {"reference":"001MPSO2","paid_on":"2026-10-02","amount":300,"kind":"withdrawal","member_id":"c0000000-0000-0000-0000-000000000053"},
+      {"reference":"001MPSO3","paid_on":"2026-10-03","amount":2000,"kind":"loan","member_id":"c0000000-0000-0000-0000-000000000053"},
+      {"reference":"001CHG4","paid_on":"2026-10-04","amount":55,"kind":"expense"}]')$$)->>'recorded',
+  '4', 'the officer records a payout, a withdrawal, a loan and a bank charge');
+SELECT is((SELECT entry_type || ':' || amount::int || ':' || effective_date FROM public.book_entries
+           WHERE metadata->>'reference' = '001MPSO1'),
+  'payout:5000:2026-10-01', 'the payout is in Books on the bank date');
+SELECT is((SELECT count(*) FROM public.book_entries
+           WHERE jamiya_id = 'b0000000-0000-0000-0000-000000000051'
+             AND member_id = 'c0000000-0000-0000-0000-000000000053' AND entry_type = 'withdrawal' AND amount = 300),
+  1::bigint, 'the withdrawal is in Books against the member');
+SELECT is((SELECT principal_outstanding::numeric FROM public.member_loan_facilities
+           WHERE jamiya_id = 'b0000000-0000-0000-0000-000000000051'
+             AND member_id = 'c0000000-0000-0000-0000-000000000053'),
+  2000::numeric, 'the loan opens the member''s loan account');
+SELECT is((SELECT member_id FROM public.book_entries WHERE metadata->>'reference' = '001CHG4' AND entry_type = 'expense'),
+  NULL, 'an expense needs no member');
+
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payouts('b0000000-0000-0000-0000-000000000055',
+      '[{"reference":"001MPSO1","amount":5000,"kind":"payout","member_id":"c0000000-0000-0000-0000-000000000055"}]')$$)->>'duplicates',
+  '1', 'money out already recorded is not recorded again, even in a circle sharing the account');
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payouts('b0000000-0000-0000-0000-000000000051',
+      '[{"reference":"001MPSO9","amount":100,"kind":"payout"}]')$$)->'results'->0->>'status',
+  'invalid', 'a payout needs a member');
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payouts('b0000000-0000-0000-0000-000000000051',
+      '[{"reference":"001MPSO8","amount":100,"kind":"gift","member_id":"c0000000-0000-0000-0000-000000000052"}]')$$)->'results'->0->>'status',
+  'invalid', 'only the four kinds');
+SELECT ok(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.circle_statement_refs('b0000000-0000-0000-0000-000000000051')$$)->'refs' @> '[{"reference":"001CHG4"}]',
+  'money out shows as already recorded on the matching page');
 
 SELECT * FROM finish();
 ROLLBACK;
