@@ -7,6 +7,7 @@ import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { fetchAllRows, fetchByIdChunks } from '@/lib/supabase/fetch-all';
+import { PayJameiyahCard, type JameiyahPayment } from '@/features/circles/components/pay-jameiyah-card';
 import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
@@ -184,6 +185,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
     { data: dualSettings },
     { data: pendingLoans },
     { data: pendingGuarantees },
+    { data: payPack },
   ] =
     await Promise.all([
       supabase
@@ -251,7 +253,11 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .eq('jamiya_id', jamiya.id)
         .eq('status', 'pending')
         .limit(40),
+      callRpc('jameiyah_payment_details', { p_jamiya_id: jamiya.id }),
     ]);
+  const payJameiyah = (payPack as { ok?: boolean } | null)?.ok
+    ? ({ ...(payPack as JameiyahPayment), held: Number((payPack as { held?: number }).held ?? 0) })
+    : null;
 
   const glance =
     glancePack && typeof glancePack === 'object' && (glancePack as { ok?: boolean }).ok
@@ -526,7 +532,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
                   PERIOD_LABEL[isBillingPeriod(planInfo.billing_period) ? planInfo.billing_period : 'monthly'].per
                 } · ${planInfo.auto_renew ? 'renews' : 'ends'} ${formatDate(planInfo.renews_at)}`
               : ''}
-            . {quotes?.members ?? 0} members. Plans are paid from your Jameiyah wallet; see{' '}
+            . {quotes?.members ?? 0} members. Pay by M-Pesa or bank transfer as shown below, or tap a price to pay from your Jameiyah wallet; see{' '}
             <Link href={'/pricing' as Route} className="underline-offset-4 hover:underline">
               pricing
             </Link>
@@ -541,7 +547,8 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
           {planInfo?.status === 'past_due' ? (
             <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3">
               <p className="text-xs text-destructive">
-                The plan could not be paid. It stays on for 7 days; top up Money, then pay below.
+                The plan could not be paid. It stays on for 7 days; pay by M-Pesa or bank as shown below, or
+                top up Money and pay from your wallet.
               </p>
               <Button asChild size="sm" className="min-h-11">
                 <Link
@@ -554,6 +561,7 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
               </Button>
             </div>
           ) : null}
+          {payJameiyah ? <PayJameiyahCard pay={payJameiyah} /> : null}
           <ul className="divide-y divide-border/70">
             {planRows.map((plan) => {
               const current = planInfo?.plan_id === plan.id;
