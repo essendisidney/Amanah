@@ -8,7 +8,8 @@ import { Button, Input, Label, Textarea } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
 import { AppPage } from '@/components/app-page';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
-import { StatementMatchForm } from '@/features/circles/components/statement-match-form';
+import { StatementMatchForm, type RecordedRef } from '@/features/circles/components/statement-match-form';
+import { callRpc } from '@/lib/supabase/rpc';
 import { setCirclePaymentDetailsAction } from '@/features/circles/actions/statement-actions';
 import type { PaymentDetails } from '@/features/circles/components/how-to-pay-card';
 
@@ -111,6 +112,9 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
   }
 
   const receiptRows = (receipts ?? []) as Receipt[];
+  // References recorded here or in another circle paid into the same bank account.
+  const { data: refsPack } = await callRpc('circle_statement_refs', { p_jamiya_id: j.id });
+  const recordedRefs = ((refsPack as { refs?: RecordedRef[] } | null)?.refs ?? []) as RecordedRef[];
   const leftover = receiptRows.filter((r) => Number(r.unallocated) > 0);
   const details = j.payment_details ?? {};
 
@@ -184,7 +188,7 @@ export default async function BankPaymentsPage({ params, searchParams }: Props) 
           slug={slug}
           members={members}
           owed={owed}
-          recordedRefs={receiptRows.map((r) => r.reference)}
+          recordedRefs={recordedRefs}
         />
       )}
 

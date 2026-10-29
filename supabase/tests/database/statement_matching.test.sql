@@ -4,7 +4,7 @@ BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
 
-SELECT plan(16);
+SELECT plan(19);
 
 CREATE FUNCTION pg_temp.rpc(p_uid UUID, p_sql TEXT)
 RETURNS JSONB LANGUAGE plpgsql AS $$
@@ -113,6 +113,35 @@ SELECT is(
   (pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
     $$SELECT public.set_circle_payment_details('b0000000-0000-0000-0000-000000000051', '', '', '', '')$$)->'payment_details'),
   'null'::jsonb, 'clearing every field removes them');
+
+-- ---------------------------------------------------------------------------
+-- Two circles sharing one bank account
+-- ---------------------------------------------------------------------------
+INSERT INTO public.jamiyas (id, name, slug, created_by, contribution_amount, max_members)
+VALUES ('b0000000-0000-0000-0000-000000000055', 'Bank Chama Two', 'bank-chama-two',
+        'a0000000-0000-0000-0000-000000000051', 1000, 20);
+INSERT INTO public.members (id, jamiya_id, user_id, role, status, payout_position)
+VALUES ('c0000000-0000-0000-0000-000000000055', 'b0000000-0000-0000-0000-000000000055',
+        'a0000000-0000-0000-0000-000000000052', 'member', 'active', 2);
+SELECT pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+  $$SELECT public.set_circle_payment_details('b0000000-0000-0000-0000-000000000051', '342342', '001517100104602', 'DIB Bank', NULL)$$);
+SELECT pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+  $$SELECT public.set_circle_payment_details('b0000000-0000-0000-0000-000000000055', '342342', '001517100104602', 'DIB Bank', NULL)$$);
+
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payments('b0000000-0000-0000-0000-000000000055',
+      '[{"reference":"SKB1XY2Z3A","amount":1500,"member_id":"c0000000-0000-0000-0000-000000000055"}]')$$)->>'duplicates',
+  '1', 'a payment already recorded in a circle sharing the account is not recorded again');
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.circle_statement_refs('b0000000-0000-0000-0000-000000000055')$$)->'refs'->0->>'circle',
+  'Bank Chama', 'the matching page can say which circle has it');
+SELECT is(
+  pg_temp.rpc('a0000000-0000-0000-0000-000000000051',
+    $$SELECT public.record_statement_payments('b0000000-0000-0000-0000-000000000055',
+      '[{"reference":"SKZ9NEW001","amount":500,"member_id":"c0000000-0000-0000-0000-000000000055"}]')$$)->>'recorded',
+  '1', 'new payments in the second circle are recorded as usual');
 
 SELECT * FROM finish();
 ROLLBACK;

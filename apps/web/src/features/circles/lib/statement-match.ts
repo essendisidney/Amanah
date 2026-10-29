@@ -35,7 +35,8 @@ export type StatementMatch = {
   how: 'phone' | 'phone_tail' | 'name' | null;
 };
 
-const MPESA_CODE = /\b([A-Z]{2,3}[0-9][A-Z0-9]{6,8})\b/;
+// M-Pesa receipt codes: 10 capitals and digits with at least one of each (SKB1XY2Z3A, UJALE9VMER).
+const MPESA_CODE = /\b((?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]{10})\b/;
 const MONTHS: Record<string, string> = {
   JAN: '01', FEB: '02', MAR: '03', APR: '04', MAY: '05', JUN: '06',
   JUL: '07', AUG: '08', SEP: '09', OCT: '10', NOV: '11', DEC: '12',
@@ -118,8 +119,52 @@ function headerColumns(cells: string[]): Columns | null {
   return cols.amountIn !== undefined && (cols.details !== undefined || cols.date !== undefined) ? cols : null;
 }
 
+const MONEY2 = String.raw`-?[\d,]+\.\d{2}`;
+const DMY = String.raw`\d{1,2}\/\d{1,2}\/\d{4}`;
+// Bank statements copied from a PDF (DIB and most Kenyan banks): each row is
+//   date · reference · description (often wrapped over several lines) · [value date] · debit · credit · balance.
+// Read as one stream so wrapped descriptions stay with their row.
+const BANK_ROW_WITH_VALUE_DATE = new RegExp(
+  String.raw`(${DMY})\s+(.*?)\s+(${DMY})\s+(${MONEY2})\s+(${MONEY2})\s+(${MONEY2})(?=\s|$)`,
+  'g',
+);
+const BANK_ROW = new RegExp(String.raw`(${DMY})\s+(.*?)\s+(${MONEY2})\s+(${MONEY2})\s+(${MONEY2})(?=\s|$)`, 'g');
+
+function parseBankRows(text: string): StatementLine[] | null {
+  const stream = text.replace(/\s+/g, ' ').trim();
+  const withValue = [...stream.matchAll(BANK_ROW_WITH_VALUE_DATE)];
+  const rows = withValue.length >= 2
+    ? withValue.map((m) => ({ raw: m[0], body: m[2]!, date: m[3]!, credit: m[5]! }))
+    : [...stream.matchAll(BANK_ROW)].map((m) => ({ raw: m[0], body: m[2]!, date: m[1]!, credit: m[4]! }));
+  if (rows.length < 2) return null;
+
+  const out: StatementLine[] = [];
+  for (const r of rows) {
+    const amount = parseMoney(r.credit);
+    if (amount === null || amount <= 0) continue;
+    const bankRef = r.body.match(/^\S*\d\S*/)?.[0] ?? null;
+    const code = r.body.match(MPESA_CODE)?.[1] ?? null;
+    out.push({
+      raw: r.raw,
+      date: parseDate(r.date),
+      amount,
+      // The bank's own reference is the same however the statement is copied, so it comes first.
+      reference: (bankRef ?? code ?? fingerprint(r.raw)).toUpperCase(),
+      phone: findPhone(r.body),
+      phoneTail: findPhoneTail(r.body),
+      details: r.body,
+    });
+  }
+  return out;
+}
+
 /** Money-in lines of a pasted statement. Lines with no money in (withdrawals, balances, headers) are left out. */
 export function parseStatement(text: string): StatementLine[] {
+  // A spreadsheet copy (tab-separated) is read by its header; a PDF copy is read row by row.
+  if (!text.includes('\t')) {
+    const bank = parseBankRows(text);
+    if (bank) return bank;
+  }
   const lines = text.replace(/\r\n/g, '\n').split('\n').map((l) => l.trim()).filter(Boolean);
   let cols: Columns | null = null;
   const out: StatementLine[] = [];

@@ -17,8 +17,11 @@ type Row = StatementLine & {
   how: 'phone' | 'phone_tail' | 'name' | null;
   include: boolean;
   amountText: string;
-  already: boolean;
+  /** Circle this payment was already recorded in, if any. */
+  already: string | null;
 };
+
+export type RecordedRef = { reference: string; circle: string; here: boolean };
 
 const HOW_LABEL: Record<NonNullable<Row['how']>, string> = {
   phone: 'phone',
@@ -38,26 +41,50 @@ export function StatementMatchForm({
   members: StatementMember[];
   /** What each member still owes on open contributions, by member id. */
   owed: Record<string, number>;
-  /** References already recorded for this circle. */
-  recordedRefs: string[];
+  /** References already recorded in this circle or a circle sharing its bank account. */
+  recordedRefs: RecordedRef[];
 }) {
   const router = useRouter();
   const [paste, setPaste] = useState('');
   const [rows, setRows] = useState<Row[]>([]);
   const [pending, startTransition] = useTransition();
   const [notice, setNotice] = useState<{ ok: boolean; message: string } | null>(null);
-  const recorded = useMemo(() => new Set(recordedRefs), [recordedRefs]);
+  const recorded = useMemo(
+    () => new Map(recordedRefs.map((r) => [r.reference, r.here ? 'this circle' : r.circle])),
+    [recordedRefs],
+  );
+  const [reading, setReading] = useState(false);
   const sortedMembers = useMemo(
     () => [...members].sort((a, b) => a.name.localeCompare(b.name)),
     [members],
   );
 
-  function read() {
-    const lines = parseStatement(paste);
+  /** Read a bank statement PDF in the browser; the file itself is never uploaded. */
+  async function readPdf(file: File) {
+    setReading(true);
+    setNotice(null);
+    try {
+      const { extractText, getDocumentProxy } = await import('unpdf');
+      const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
+      const { text } = await extractText(pdf, { mergePages: true });
+      setPaste(text);
+      read(text);
+    } catch {
+      setNotice({
+        ok: false,
+        message: 'Could not read that PDF. If it is password-protected, open it and copy the rows instead.',
+      });
+    } finally {
+      setReading(false);
+    }
+  }
+
+  function read(source = paste) {
+    const lines = parseStatement(source);
     setRows(
       lines.map((line) => {
         const match = matchMember(line, members);
-        const already = recorded.has(line.reference);
+        const already = recorded.get(line.reference) ?? null;
         return {
           ...line,
           memberId: match.memberId ?? '',
@@ -75,7 +102,13 @@ export function StatementMatchForm({
             message:
               'No money-in lines found. Copy the rows of the statement, including the header row if it has one.',
           }
-        : null,
+        : {
+            ok: true,
+            message: `Found ${lines.length} payment${lines.length === 1 ? '' : 's'} in, totalling ${formatCurrency(
+              lines.reduce((sum, l) => sum + (l.amount ?? 0), 0),
+              'KES',
+            )}. Check this against the statement's "Total Credits" before recording.`,
+          },
     );
   }
 
@@ -137,9 +170,10 @@ export function StatementMatchForm({
           Match a bank or M-Pesa statement
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Open the statement in Excel (or the PDF), select the rows for the month including the header
-          row, copy and paste them here. Each payment in is matched to a member by phone number or name;
-          check the matches, then record them. A payment pasted twice is only counted once.
+          Choose the bank statement PDF, or copy the statement rows (from Excel or the PDF) and paste
+          them below. Each payment in is matched to a member by phone number or name; check the matches,
+          then record them. A payment is only ever counted once, even across circles that share the
+          same bank account.
         </p>
       </div>
 
@@ -150,7 +184,25 @@ export function StatementMatchForm({
       ) : null}
 
       <div className="space-y-1">
-        <Label htmlFor="statementPaste">Statement rows</Label>
+        <Label htmlFor="statementPdf">Statement PDF</Label>
+        <Input
+          id="statementPdf"
+          type="file"
+          accept="application/pdf"
+          disabled={reading}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void readPdf(file);
+            e.target.value = '';
+          }}
+        />
+        <p className="text-xs text-muted-foreground">
+          {reading ? 'Reading the PDF…' : 'Read on this device; the statement itself is not uploaded.'}
+        </p>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="statementPaste">Or paste statement rows</Label>
         <Textarea
           id="statementPaste"
           rows={7}
@@ -161,7 +213,7 @@ export function StatementMatchForm({
 02/11/2026\tMPESA C2B 2547******888 ASHA RASHID SKB1XY2Z3A\t\t2,000.00\t14,000.00`}
         />
       </div>
-      <Button type="button" variant="outline" className="min-h-11" onClick={read} disabled={!paste.trim()}>
+      <Button type="button" variant="outline" className="min-h-11" onClick={() => read()} disabled={!paste.trim()}>
         Read statement
       </Button>
 
@@ -182,14 +234,14 @@ export function StatementMatchForm({
                     className="mt-1 h-5 w-5"
                     aria-label={`Record ${r.reference}`}
                     checked={r.include}
-                    disabled={r.already}
+                    disabled={Boolean(r.already)}
                     onChange={(e) => update(i, { include: e.target.checked })}
                   />
                   <div className="min-w-0 flex-1">
                     <p className="break-words font-mono text-xs text-muted-foreground">{r.raw}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {r.date ?? 'No date'} · Ref {r.reference}
-                      {r.already ? ' · Already recorded' : ''}
+                      {r.already ? ` · Already recorded in ${r.already}` : ''}
                       {r.how ? ` · Matched by ${HOW_LABEL[r.how]}` : ''}
                     </p>
                   </div>
