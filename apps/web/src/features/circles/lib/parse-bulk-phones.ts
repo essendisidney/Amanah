@@ -6,7 +6,7 @@ export type BulkPhoneRow = {
   fullName: string | null;
 };
 
-const MAX_ROWS = 100;
+const MAX_ROWS = 1000;
 
 /**
  * Parse pasted phone lists.

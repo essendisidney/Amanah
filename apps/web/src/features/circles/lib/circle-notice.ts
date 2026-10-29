@@ -50,6 +50,9 @@ export function mapMoneyError(code: string | undefined | null): string {
     AGREEMENT_REQUIRED: 'Borrower must accept the facility agreement first.',
     GUARANTEES_PENDING: 'Wait until nominated guarantors accept or decline.',
     GUARANTEE_REQUIRED: 'At least one accepted guarantor is required for this request.',
+    GUARANTORS_REQUIRED: "This circle's loan rules need more accepted guarantors for this loan.",
+    GUARANTEE_COVER_SHORT:
+      "The guarantors' free deposits do not cover what this loan is above the borrower's own deposits. Ask for another guarantor.",
     ABOVE_CAP: 'That amount is above what you qualify for in this circle.',
     ABOVE_ROOM: 'That amount is above what your records qualify you for.',
     ABOVE_COMPANY_LIMIT: 'Jameiyah cannot take on more financing right now.',

@@ -341,6 +341,9 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
     ok?: boolean;
     error?: string;
     pending_dual_approval?: boolean;
+    required?: number;
+    needed?: number;
+    covered?: number;
   } | null;
   if (raw?.pending_dual_approval) {
     revalidatePath('/finance/qard');
@@ -359,6 +362,10 @@ export async function decideQardAction(formData: FormData): Promise<FinanceActio
       state.message = 'Wait until nominated guarantors accept or decline.';
     } else if (code === 'GUARANTEE_REQUIRED') {
       state.message = 'At least one accepted guarantor is required for this request.';
+    } else if (code === 'GUARANTORS_REQUIRED') {
+      state.message = `This circle's loan rules need ${raw?.required ?? 'more'} accepted guarantor${raw?.required === 1 ? '' : 's'} for every loan.`;
+    } else if (code === 'GUARANTEE_COVER_SHORT') {
+      state.message = `The guarantors' free deposits (KES ${Number(raw?.covered ?? 0).toLocaleString('en-KE')}) do not cover the KES ${Number(raw?.needed ?? 0).toLocaleString('en-KE')} this loan is above the borrower's own deposits. Ask for another guarantor.`;
     }
   }
   if (state.success) {

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { notFound, redirect } from 'next/navigation';
 import { Button } from '@jamiya/ui';
+import { fetchAllRows, fetchAllRowsWithError, fetchByIdChunks } from '@/lib/supabase/fetch-all';
 import { createClient } from '@/lib/supabase/server';
 import { CircleNoticeBanner } from '@/features/circles/components/circle-notice-banner';
 import { TbSheetImportForm } from '@/features/circles/components/tb-sheet-import-form';
@@ -103,45 +104,58 @@ export default async function MemberBooksPage({ params, searchParams }: Props) {
     redirect(myMember ? `/circles/${slug}/statement` : `/circles/${slug}`);
   }
 
-  const { data: membersData, error: membersError } = await supabase
-    .from('members')
-    .select('id, user_id, role, status, member_code, joined_at')
-    .eq('jamiya_id', jamiya.id)
-    .in('status', [...BOOKS_MEMBER_STATUSES])
-    .order('joined_at', { ascending: true });
-
-  const members = ((membersError ? [] : membersData) ?? []) as MemberRow[];
+  const { rows: members, error: membersError } = await fetchAllRowsWithError<MemberRow>((from, to) =>
+    supabase
+      .from('members')
+      .select('id, user_id, role, status, member_code, joined_at')
+      .eq('jamiya_id', jamiya.id)
+      .in('status', [...BOOKS_MEMBER_STATUSES])
+      .order('joined_at', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to),
+  );
   const userIds = members.map((m) => m.user_id);
   const memberIds = members.map((m) => m.id);
 
   const [{ data: profileRows }, { data: bookRows }, { data: lotRows }, { data: loanRows }] =
     await Promise.all([
       userIds.length
-        ? supabase.from('profiles').select('id, full_name, email, phone').in('id', userIds)
+        ? fetchByIdChunks(userIds, (ids) =>
+            supabase.from('profiles').select('id, full_name, email, phone').in('id', ids),
+          ).then((data) => ({ data }))
         : Promise.resolve({ data: [] }),
       memberIds.length
-        ? supabase
-            .from('book_entries')
-            .select('id, member_id, entry_type, amount, effective_date, notes')
-            .eq('jamiya_id', jamiya.id)
-            .in('member_id', memberIds)
-            .order('effective_date', { ascending: false })
-            .limit(800)
+        ? fetchAllRows((from, to) =>
+            supabase
+              .from('book_entries')
+              .select('id, member_id, entry_type, amount, effective_date, notes')
+              .eq('jamiya_id', jamiya.id)
+              .not('member_id', 'is', null)
+              .order('effective_date', { ascending: false })
+              .order('id', { ascending: true })
+              .range(from, to),
+          ).then((data) => ({ data }))
         : Promise.resolve({ data: [] }),
       memberIds.length
-        ? supabase
-            .from('circle_share_lots')
-            .select('id, member_id, shares, amount, notes, purchased_on')
-            .eq('jamiya_id', jamiya.id)
-            .in('member_id', memberIds)
-            .order('purchased_on', { ascending: false })
+        ? fetchAllRows((from, to) =>
+            supabase
+              .from('circle_share_lots')
+              .select('id, member_id, shares, amount, notes, purchased_on')
+              .eq('jamiya_id', jamiya.id)
+              .order('purchased_on', { ascending: false })
+              .order('id', { ascending: true })
+              .range(from, to),
+          ).then((data) => ({ data }))
         : Promise.resolve({ data: [] }),
       userIds.length
-        ? supabase
-            .from('qard_loans')
-            .select('id, borrower_id, amount, amount_repaid, status, purpose')
-            .eq('jamiya_id', jamiya.id)
-            .in('borrower_id', userIds)
+        ? fetchAllRows((from, to) =>
+            supabase
+              .from('qard_loans')
+              .select('id, borrower_id, amount, amount_repaid, status, purpose')
+              .eq('jamiya_id', jamiya.id)
+              .order('id', { ascending: true })
+              .range(from, to),
+          ).then((data) => ({ data }))
         : Promise.resolve({ data: [] }),
     ]);
 

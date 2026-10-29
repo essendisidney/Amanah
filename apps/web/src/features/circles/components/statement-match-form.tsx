@@ -88,23 +88,45 @@ export function StatementMatchForm({
 
   function record() {
     startTransition(async () => {
-      const result = await recordStatementPaymentsAction(
-        jamiyaId,
-        slug,
-        chosen.map((r) => ({
-          reference: r.reference,
-          paid_on: r.date,
-          amount: Number(r.amountText),
-          member_id: r.memberId,
-          details: r.details.slice(0, 500),
-        })),
-      );
-      setNotice({ ok: result.ok, message: result.message });
-      if (result.ok) {
-        setRows([]);
-        setPaste('');
-        router.refresh();
+      const payload = chosen.map((r) => ({
+        reference: r.reference,
+        paid_on: r.date,
+        amount: Number(r.amountText),
+        member_id: r.memberId,
+        details: r.details.slice(0, 500),
+      }));
+      // The database takes up to 500 lines a call; long SACCO statements go in parts.
+      let recordedCount = 0;
+      let duplicates = 0;
+      let unallocated = 0;
+      for (let i = 0; i < payload.length; i += 400) {
+        const result = await recordStatementPaymentsAction(jamiyaId, slug, payload.slice(i, i + 400));
+        if (!result.ok) {
+          setNotice({
+            ok: false,
+            message:
+              recordedCount > 0
+                ? `Recorded ${recordedCount} before an error: ${result.message} Read the statement again to see what is left.`
+                : result.message,
+          });
+          router.refresh();
+          return;
+        }
+        recordedCount += result.recorded ?? 0;
+        duplicates += result.duplicates ?? 0;
+        unallocated += result.unallocated ?? 0;
       }
+      const parts = [`Recorded ${recordedCount} payment${recordedCount === 1 ? '' : 's'}.`];
+      if (duplicates > 0) parts.push(`${duplicates} already recorded and skipped.`);
+      if (unallocated > 0) {
+        parts.push(
+          `${formatCurrency(unallocated, 'KES')} was more than those members owed; it is listed below for you to record in Books.`,
+        );
+      }
+      setNotice({ ok: true, message: parts.join(' ') });
+      setRows([]);
+      setPaste('');
+      router.refresh();
     });
   }
 

@@ -6,6 +6,7 @@ import { notFound, redirect } from 'next/navigation';
 import { formatCurrency, formatDate } from '@jamiya/shared';
 import { Button } from '@jamiya/ui';
 import { createClient } from '@/lib/supabase/server';
+import { fetchAllRows, fetchByIdChunks } from '@/lib/supabase/fetch-all';
 import { callRpc } from '@/lib/supabase/rpc';
 import { revalidatePath } from 'next/cache';
 import { OfficerOverviewStrip } from '@/features/circles/components/officer-overview';
@@ -206,12 +207,15 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         .in('status', ['scheduled', 'processing'])
         .order('scheduled_date', { ascending: true })
         .limit(5),
-      supabase
-        .from('members')
-        .select('id, role, status, user_id, member_code')
-        .eq('jamiya_id', jamiya.id)
-        .order('created_at', { ascending: true })
-        .limit(80),
+      fetchAllRows((from, to) =>
+        supabase
+          .from('members')
+          .select('id, role, status, user_id, member_code')
+          .eq('jamiya_id', jamiya.id)
+          .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
+          .range(from, to),
+      ).then((data) => ({ data })),
       supabase
         .from('collection_cases')
         .select('id, status, severity, amount_due, currency, days_overdue, user_id')
@@ -284,9 +288,9 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
       ...caseRowsEarly.map((r) => r.user_id).filter((id): id is string => Boolean(id)),
     ]),
   ];
-  const { data: profiles } = userIds.length
-    ? await supabase.from('profiles').select('id, full_name, email').in('id', userIds)
-    : { data: [] };
+  const profiles = await fetchByIdChunks(userIds, (ids) =>
+    supabase.from('profiles').select('id, full_name, email').in('id', ids),
+  );
   const profileMap = new Map(
     ((profiles ?? []) as Array<{ id: string; full_name: string | null; email: string | null }>).map(
       (p) => [p.id, p],
@@ -483,15 +487,23 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
 
       <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-5">
         <div>
-          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">Bank payments</h2>
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">Money &amp; members</h2>
           <p className="text-sm text-muted-foreground">
-            Members pay into the circle&apos;s own paybill or bank account? Paste the statement and mark
-            who has paid in one go, and show members how to pay.
+            Match the bank or M-Pesa statement to members, see every member&apos;s shares, deposits and
+            loans, and set the circle&apos;s loan rules.
           </p>
         </div>
-        <Button asChild variant="outline" className="min-h-11">
-          <Link href={`/circles/${slug}/bank-payments` as Route}>Match a statement</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={`/circles/${slug}/bank-payments` as Route}>Match a statement</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={`/circles/${slug}/register` as Route}>Member register</Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href={`/circles/${slug}/loan-book` as Route}>Loan book</Link>
+          </Button>
+        </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-2">

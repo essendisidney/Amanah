@@ -1,14 +1,22 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { KE_PHONE_PLACEHOLDER } from '@jamiya/shared';
 import { Alert, AlertDescription, Button, Label, Textarea } from '@jamiya/ui';
-import {
-  bulkAddMembersByPhoneAction,
-} from '../actions/add-member';
-import { initialBulkAddState } from '../lib/action-state';
+import { addMembersBatchAction } from '../actions/add-member';
+import type { BulkAddResultRow } from '../lib/action-state';
+import { BULK_PHONE_MAX_ROWS, parseBulkPhoneLines } from '../lib/parse-bulk-phones';
 import { InviteSharePanel } from './invite-share-panel';
+
+const BATCH = 25;
+
+type FormState = {
+  success: boolean;
+  message?: string;
+  results?: BulkAddResultRow[];
+  fieldErrors?: { phones?: string[] };
+};
 
 export function BulkPhoneInviteForm({
   jamiyaId,
@@ -18,16 +26,61 @@ export function BulkPhoneInviteForm({
   circleName?: string;
 }) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(
-    bulkAddMembersByPhoneAction,
-    initialBulkAddState,
-  );
+  const [text, setText] = useState('');
+  const [state, setState] = useState<FormState>({ success: false });
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (state.success) {
-      router.refresh();
+  function addAll(e: React.FormEvent) {
+    e.preventDefault();
+    const rows = parseBulkPhoneLines(text);
+    if (rows.length === 0) {
+      setState({
+        success: false,
+        message: 'Paste at least one Kenya mobile number.',
+        fieldErrors: { phones: ['Paste phone numbers (one per line).'] },
+      });
+      return;
     }
-  }, [state.success, state.message, router]);
+    startTransition(async () => {
+      const results: BulkAddResultRow[] = rows
+        .filter((r) => !r.phone)
+        .map((r) => ({
+          phone: r.raw,
+          fullName: r.fullName,
+          success: false,
+          message: 'Invalid Kenya mobile (use 07… or +254…).',
+        }));
+      const valid = rows.filter((r): r is typeof r & { phone: string } => Boolean(r.phone));
+      setProgress({ done: 0, total: valid.length });
+      for (let i = 0; i < valid.length; i += BATCH) {
+        const batch = valid.slice(i, i + BATCH).map((r) => ({ phone: r.phone, fullName: r.fullName }));
+        try {
+          results.push(...(await addMembersBatchAction(jamiyaId, batch)));
+        } catch {
+          results.push(
+            ...batch.map((r) => ({ ...r, success: false, message: 'Could not reach the server. Try these again.' })),
+          );
+        }
+        setProgress({ done: Math.min(i + BATCH, valid.length), total: valid.length });
+      }
+      setProgress(null);
+      const ok = results.filter((r) => r.success).length;
+      const failed = results.length - ok;
+      setState({
+        success: ok > 0,
+        message:
+          failed === 0
+            ? `Added ${ok} member${ok === 1 ? '' : 's'}.`
+            : `Added ${ok}, ${failed} failed. Check the list below.`,
+        results,
+      });
+      if (ok > 0) {
+        setText('');
+        router.refresh();
+      }
+    });
+  }
 
   const shareable = (state.results ?? []).filter(
     (r) => r.success && r.inviteUrl && r.inviteCode,
@@ -48,14 +101,15 @@ export function BulkPhoneInviteForm({
         </Alert>
       ) : null}
 
-      <form action={formAction} className="space-y-4">
-        <input type="hidden" name="jamiyaId" value={jamiyaId} />
+      <form onSubmit={addAll} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="bulkPhones">Phone list</Label>
           <Textarea
             id="bulkPhones"
             name="phones"
             rows={6}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
             placeholder={`Amina, ${KE_PHONE_PLACEHOLDER}\n0712345678\n+254712345679`}
             className="min-h-[140px] font-mono text-sm"
             required
@@ -64,11 +118,15 @@ export function BulkPhoneInviteForm({
             <p className="text-sm text-destructive">{state.fieldErrors.phones[0]}</p>
           ) : null}
           <p className="text-[11px] text-muted-foreground">
-            Up to 100 numbers. Duplicates in the paste are skipped.
+            Up to {BULK_PHONE_MAX_ROWS.toLocaleString('en-KE')} numbers. Duplicates in the paste are skipped.
           </p>
         </div>
         <Button type="submit" disabled={pending} className="min-h-11">
-          {pending ? 'Adding…' : 'Add all'}
+          {pending
+            ? progress
+              ? `Adding… ${progress.done} of ${progress.total}`
+              : 'Adding…'
+            : 'Add all'}
         </Button>
       </form>
 
