@@ -474,3 +474,47 @@ export async function bulkAddMembersByPhoneAction(
     results,
   };
 }
+
+/** Most contacts one batch call adds; the form sends a long list in batches of this size. */
+const BATCH_SIZE = 25;
+const BATCH_CONCURRENCY = 5;
+
+/**
+ * Add one batch of already-parsed contacts. The bulk form calls this repeatedly so a list of
+ * hundreds of members (a SACCO) never runs into the server's time limit.
+ */
+export async function addMembersBatchAction(
+  jamiyaId: string,
+  rows: Array<{ phone: string; fullName: string | null }>,
+): Promise<BulkAddResultRow[]> {
+  if (!jamiyaId || rows.length === 0) return [];
+  const batch = rows.slice(0, BATCH_SIZE);
+  const results: BulkAddResultRow[] = new Array(batch.length);
+
+  let next = 0;
+  async function worker() {
+    while (next < batch.length) {
+      const i = next++;
+      const row = batch[i]!;
+      const outcome = await addOneCircleMember({ jamiyaId, phone: row.phone, fullName: row.fullName });
+      results[i] = {
+        phone: row.phone,
+        fullName: row.fullName,
+        success: outcome.success,
+        message: outcome.message,
+        inviteUrl: outcome.inviteUrl,
+        inviteCode: outcome.inviteCode,
+      };
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(BATCH_CONCURRENCY, batch.length) }, worker));
+
+  const { data: jamiya } = await (await createClient())
+    .from('jamiyas')
+    .select('slug')
+    .eq('id', jamiyaId)
+    .maybeSingle();
+  const slug = (jamiya as { slug: string } | null)?.slug;
+  if (slug) revalidatePath(`/circles/${slug}`);
+  return results;
+}
