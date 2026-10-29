@@ -481,6 +481,19 @@ export default async function OfficerConsolePage({ params, searchParams }: Props
         />
       ) : null}
 
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-5">
+        <div>
+          <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">Bank payments</h2>
+          <p className="text-sm text-muted-foreground">
+            Members pay into the circle&apos;s own paybill or bank account? Paste the statement and mark
+            who has paid in one go, and show members how to pay.
+          </p>
+        </div>
+        <Button asChild variant="outline" className="min-h-11">
+          <Link href={`/circles/${slug}/bank-payments` as Route}>Match a statement</Link>
+        </Button>
+      </section>
+
       <section className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-3 rounded-xl border border-border bg-card p-5">
           <h2 className="font-[family-name:var(--font-display)] text-xl font-semibold">

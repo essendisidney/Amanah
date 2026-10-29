@@ -49,6 +49,7 @@ import { CircleDetailHero } from '@/features/circles/components/circle-detail-he
 import { CircleActionHub, type CircleHubGroup } from '@/features/circles/components/circle-action-hub';
 import { MemberCircleLinks } from '@/features/circles/components/member-circle-links';
 import { PayIntoCircleForm } from '@/features/circles/components/pay-into-circle-form';
+import { HowToPayCard, type PaymentDetails } from '@/features/circles/components/how-to-pay-card';
 import { OfficerDeskEntry } from '@/features/circles/components/officer-desk-entry';
 import { ScheduleForm, ScheduleSummary } from '@/features/circles/components/contribution-schedule';
 import { CircleSection } from '@/features/circles/components/circle-section';
@@ -139,10 +140,11 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
 
   const { data: pricingRow } = await supabase
     .from('jamiyas')
-    .select('slot_pricing_enabled, early_slot_fee_pct, late_slot_rebate_pct')
+    .select('slot_pricing_enabled, early_slot_fee_pct, late_slot_rebate_pct, payment_details')
     .eq('id', jamiya.id)
     .maybeSingle();
   const pricing = pricingRow as {
+    payment_details?: PaymentDetails | null;
     slot_pricing_enabled?: boolean | null;
     early_slot_fee_pct?: number | string | null;
     late_slot_rebate_pct?: number | string | null;
@@ -1221,6 +1223,8 @@ export default async function CircleDetailsPage({ params, searchParams }: Props)
           defaultPhone={payDefaultPhone}
         />
       ) : null}
+
+      <HowToPayCard details={pricing?.payment_details} />
 
       {myOpenDues.length > 0 ? (
         <div id="pay-due" className="space-y-3">
